@@ -1,124 +1,107 @@
-# Turborepo starter
+# 🔬 Nucleus
 
-This is a community-maintained example. If you experience a problem, please submit a pull request with a fix. GitHub Issues will be closed.
+> A specialized operational system designed for **CFD traders** 📈
 
-## Using this example
+Nucleus is a comprehensive platform that helps traders of all levels structure their knowledge, manage statistics, and organize their daily trading activities.
 
-Run the following command:
+This project was developed as a diploma thesis, and this repository contains the full source code for the platform. ✨
 
-```bash
-npx create-turbo@latest -e with-nestjs
-```
+## 🎯 The Problem
 
-## What's inside?
+Traders often struggle with fragmented data and a lack of centralized, specialized tools. Existing solutions like Notion require extensive manual setup, and trading journals often focus solely on trade logging, neglecting detailed statistics, knowledge management, and process analysis.
 
-This Turborepo includes the following packages & apps:
+**Nucleus aims to solve this** by providing an integrated, out-of-the-box solution that combines knowledge management, trade journaling, and powerful analytics with AI-driven insights. 🚀
 
-### Apps and Packages
+## ⚡ Core Features
+
+- **📊 Structured Environment:** Instead of a blank canvas, Nucleus provides a ready-made workspace optimized for trading scenarios, including a Trading Journal, Daily Routine, Notes, and Mistake tracking.
+- **🎨 Specialized UX:** The user interface is designed specifically for traders, minimizing setup time and guiding the user directly to analytics.
+- **💰 Financial Interpretations:** Built-in understanding of trading concepts like P/L, Risk/Reward, session efficiency, etc.
+- **🔧 No-Code Customization:** Users can extend their workspaces, add new databases, and adapt the structure to their own trading style without writing any code.
+- **🤖 AI-Powered Insights:** An integrated AI module helps identify patterns, explain strategy mistakes, and generate recommendations for risk management and performance improvement.
+
+## 👥 Target Audience
+
+1. **👶 Beginner CFD Traders:** Who want to structure their trading journal without complex setups.
+2. **📈 Traders with 1-3 years of experience:** Who need advanced analytics, automation, and AI assistance to improve stability and risk management.
+3. **🏆 Experienced Traders & Mentors:** Who manage multiple strategies or teach others and need a unified platform to review results, patterns, and mistakes.
+
+## 🛠️ Tech Stack
+
+The project is a monorepo built with Turborepo and uses the following technologies:
+
+- **Frontend:** [Next.js](https://nextjs.org/) with [TypeScript](https://www.typescriptlang.org/) and [React Query](https://tanstack.com/query/latest)
+- **Backend:** [NestJS](https://nestjs.com/) with [TypeScript](https://www.typescriptlang.org/)
+- **Database ORM:** [Prisma](https://www.prisma.io/)
+- **Database:** [PostgreSQL](https://www.postgresql.org/)
+- **AI Integration:** [OpenAI API](https://openai.com/docs) 🤖
+- **Deployment:** [Vercel](https://vercel.com/) (Frontend) & [Google Cloud Run](https://cloud.google.com/run) (Backend)
+
+## 📂 Monorepo Structure
 
 ```shell
 .
 ├── apps
-│   ├── api                       # NestJS app (https://nestjs.com).
-│   └── web                       # Next.js app (https://nextjs.org).
+│   ├── api                       # 🔌 NestJS API
+│   └── web                       # 🌐 Next.js web application
 └── packages
-    ├── @repo/api                 # Shared `NestJS` resources.
-    ├── @repo/eslint-config       # `eslint` configurations (includes `prettier`)
-    ├── @repo/jest-config         # `jest` configurations
-    ├── @repo/typescript-config   # `tsconfig.json`s used throughout the monorepo
-    └── @repo/ui                  # Shareable stub React component library.
+    ├── @repo/api                 # Shared NestJS resources
+    ├── @repo/database            # 🗄️ Prisma schema, client, and seed scripts
+    ├── @repo/eslint-config       # ✅ ESLint configurations
+    ├── @repo/jest-config         # 🧪 Jest configurations
+    ├── @repo/typescript-config   # 📘 Shared tsconfig.json files
+    └── @repo/ui                  # 🎨 Shared React components
 ```
 
-Each package and application are mostly written in [TypeScript](https://www.typescriptlang.org/).
+## 🚀 Getting Started
 
-### Utilities
+### 📋 Prerequisites
 
-This `Turborepo` has some additional tools already set for you:
+- [Node.js](https://nodejs.org/en/) (v18 or later recommended)
+- [pnpm](https://pnpm.io/installation)
+- [Docker](https://www.docker.com/get-started) (for running a local PostgreSQL database)
 
-- [TypeScript](https://www.typescriptlang.org/) for static type-safety
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-- [Jest](https://prettier.io) & [Playwright](https://playwright.dev/) for testing
+### 🔧 Installation and Development
 
-### Commands
+1. **Clone the repository:**
 
-This `Turborepo` already configured useful commands for all your apps and packages.
+   ```bash
+   git clone <repository-url>
+   cd nucleus-project
+   ```
 
-#### Build
+2. **Install dependencies:**
 
-```bash
-# Will build all the app & packages with the supported `build` script.
-pnpm run build
+   ```bash
+   pnpm install
+   ```
 
-# ℹ️ If you plan to only build apps individually,
-# Please make sure you've built the packages first.
-```
+3. **Set up environment variables:**
+   Create a `.env` file in the root of the `apps/api` and `apps/web` directories. You can use the provided `.env.example` files as a template.
 
-#### Develop
+4. **Start the database:**
 
-```bash
-# Will run the development server for all the app & packages with the supported `dev` script.
-pnpm run dev
-```
+   ```bash
+   docker-compose up -d
+   ```
 
-#### test
+5. **Run database migrations:**
 
-```bash
-# Will launch a test suites for all the app & packages with the supported `test` script.
-pnpm run test
+   ```bash
+   pnpm db:push
+   ```
 
-# You can launch e2e testes with `test:e2e`
-pnpm run test:e2e
+6. **Run the development servers:**
+   ```bash
+   pnpm dev
+   ```
 
-# See `@repo/jest-config` to customize the behavior.
-```
+## 📜 Available Commands
 
-#### Lint
+This monorepo is configured with the following commands:
 
-```bash
-# Will lint all the app & packages with the supported `lint` script.
-# See `@repo/eslint-config` to customize the behavior.
-pnpm run lint
-```
-
-#### Format
-
-```bash
-# Will format all the supported `.ts,.js,json,.tsx,.jsx` files.
-# See `@repo/eslint-config/prettier-base.js` to customize the behavior.
-pnpm format
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```bash
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```bash
-npx turbo link
-```
-
-## Useful Links
-
-This example take some inspiration the [with-nextjs](https://github.com/vercel/turborepo/tree/main/examples/with-nextjs) `Turbo` example and [01-cats-app](https://github.com/nestjs/nest/tree/master/sample/01-cats-app) `NestJs` sample.
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- `pnpm build` - 🔨 Build all apps and packages.
+- `pnpm dev` - 🏃 Run all apps in development mode.
+- `pnpm test` - 🧪 Run tests for all apps and packages.
+- `pnpm lint` - ✅ Lint all apps and packages.
+- `pnpm format` - 💅 Format all supported files.
