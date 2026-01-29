@@ -5,21 +5,38 @@
   "description": "",
   "author": "",
   "license": "UNLICENSED",
+  "prisma": {
+    "schema": "packages/database/prisma/schema.prisma",
+    "seed": "tsx packages/database/src/seed.ts"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:migrate:dev": "turbo run db:migrate:dev",
+    "db:migrate:deploy": "turbo run db:migrate:deploy",
+    "db:push": "turbo run db:push",
+    "db:seed": "turbo run db:seed",
+    "db:generate": "turbo run db:generate",
+    "db:reset": "docker-compose down -v && docker-compose up -d && turbo db:migrate:dev"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "dotenv-cli": "^11.0.0",
     "prettier": "^3.2.5",
+    "prisma": "latest",
+    "tsx": "4.19.1",
     "turbo": "^2.8.0"
   },
-  "packageManager": "pnpm@8.15.5",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "latest"
+  },
+  "packageManager": "pnpm@9.15.1",
   "engines": {
     "node": ">=18"
   }
