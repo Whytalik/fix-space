@@ -11,21 +11,57 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
+packages/database/.env
+apps/web/.env
 
 # Testing
+coverage
 .nyc_output
 blob-report/
-coverage
 test-results/
 playwright/.cache/
 playwright-report/
 
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Turbo
 .turbo
 
 # Vercel
 .vercel
+
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode-test
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+.cache/
 
 # Build Outputs
 .next/
