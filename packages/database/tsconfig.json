@@ -1,5 +1,12 @@
 {
-  "extends": "@repo/typescript-config/base.json",
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "tsup.config.ts"],
-  "exclude": ["node_modules"]
+  "extends": "@nucleus/typescript-config/base.json",
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "tsup.config.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
 }
