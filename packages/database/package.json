@@ -1,23 +1,27 @@
 {
-  "name": "@repo/database",
+  "name": "@nucleus/database",
   "version": "1.0.0",
+  "main": "./dist/client.js",
+  "types": "./dist/client.d.ts",
   "exports": {
-    ".": "./src/client.ts"
+    ".": {
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    }
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "db:migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",
     "db:migrate:dev": "dotenv -e ../../.env -- prisma migrate dev",
     "db:push": "dotenv -e ../../.env -- prisma db push",
     "db:seed": "dotenv -e ../../.env -- tsx src/seed.ts",
-    "dev": "tsup src/* --watch",
-    "format": "prisma format",
     "db:generate": "dotenv -e ../../.env -- prisma generate",
+    "format": "prisma format",
     "lint": "eslint . --max-warnings 0",
-    "prebuild": "pnpm run db:generate",
-    "predev": "pnpm run db:generate",
     "studio": "dotenv -e ../../.env -- prisma studio"
   },
   "dependencies": {
+    "@nestjs/common": "^11.1.11",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "latest",
     "@prisma/client-runtime-utils": "7.2.0",
@@ -25,8 +29,8 @@
     "pg": "^8.16.3"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@nucleus/eslint-config": "workspace:*",
+    "@nucleus/typescript-config": "workspace:*",
     "@types/pg": "^8.16.0",
     "eslint": "^8.57.0",
     "prisma": "latest",
