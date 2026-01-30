@@ -78,7 +78,8 @@ model Space {
   databases Database[]
   sections  Section[]
 
-  @@index([ownerId])
+  @@unique([ownerId, name])
+  @@index([name])
 }
 
 model Section {
