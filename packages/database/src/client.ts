@@ -1,3 +1,10 @@
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({
+  path: path.resolve(process.cwd(), '../../.env'),
+});
+
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg'; // Import the Pool
 import { PrismaClient } from '../generated/client';
