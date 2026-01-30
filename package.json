@@ -24,8 +24,8 @@
     "db:reset": "docker-compose down -v && docker-compose up -d && turbo db:migrate:dev"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@nucleus/eslint-config": "workspace:*",
+    "@nucleus/typescript-config": "workspace:*",
     "dotenv-cli": "^11.0.0",
     "prettier": "^3.2.5",
     "prisma": "latest",

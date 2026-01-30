@@ -1,6 +1,12 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "globalDependencies": ["**/.env.*local"],
+  "globalEnv": [
+    "DATABASE_URL",
+    "SYSTEM_EMAIL",
+    "SYSTEM_PASSWORD",
+    "JWT_SECRET"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
@@ -20,9 +26,6 @@
       "cache": false
     },
     "db:push": {
-      "cache": false
-    },
-    "db:seed": {
       "cache": false
     },
     "db:generate": {

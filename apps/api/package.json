@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "@nucleus/api",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -16,10 +16,16 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.1.11",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.11",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.11",
-    "@repo/api": "workspace:*",
-    "@repo/database": "workspace:^",
+    "@nucleus/database": "workspace:^",
+    "@nucleus/domain": "workspace:*",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
   },
@@ -28,9 +34,9 @@
     "@nestjs/cli": "^11.0.14",
     "@nestjs/schematics": "^11.0.9",
     "@nestjs/testing": "^11.1.11",
-    "@repo/eslint-config": "workspace:*",
-    "@repo/jest-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
+    "@nucleus/eslint-config": "workspace:*",
+    "@nucleus/jest-config": "workspace:*",
+    "@nucleus/typescript-config": "workspace:*",
     "@types/express": "^4.17.25",
     "@types/node": "^22.19.3",
     "@types/supertest": "^6.0.3",
