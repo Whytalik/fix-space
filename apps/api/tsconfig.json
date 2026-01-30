@@ -1,7 +1,9 @@
 {
-  "extends": "@repo/typescript-config/nestjs.json",
+  "extends": "@nucleus/typescript-config/nestjs.json",
   "compilerOptions": {
     "baseUrl": "./",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   }
 }
