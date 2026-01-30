@@ -10,9 +10,215 @@ generator client {
   output   = "../generated/client"
 }
 
+// ==============================
+// Enums
+// ==============================
+
+enum PropertyType {
+  TEXT
+  NUMBER
+  DATE
+  SELECT
+  MULTI_SELECT
+  RELATION
+  FORMULA
+  ROLLUP
+}
+
+enum ViewType {
+  TABLE
+  BOARD
+  LIST
+  CALENDAR
+  TIMELINE
+}
+
+enum AutomationTrigger {
+  ON_RECORD_CREATE
+  ON_RECORD_UPDATE
+  ON_RECORD_DELETE
+  ON_PROPERTY_CHANGE
+  ON_SCHEDULE
+}
+
+enum AIInsightType {
+  RECORD_ANALYSIS
+  DB_SUMMARY
+  PERFORMANCE_REVIEW
+  IDEA_GENERATION
+  RISK_REPORT
+}
+
+// ==============================
+// Core models
+// ==============================
+
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
+  id             String   @id @default(uuid())
+  email          String   @unique
+  username       String   @unique
+  passwordHash   String
+  createdAt      DateTime @default(now())
+  settingsConfig Json?
+  isSystem       Boolean  @default(false)
+
+  spaces Space[]
+
+  @@index([isSystem])
+}
+
+model Space {
+  id        String   @id @default(uuid())
+  ownerId   String
+  name      String
+  createdAt DateTime @default(now())
+  config    Json?
+
+  owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  databases Database[]
+  sections  Section[]
+
+  @@index([ownerId])
+}
+
+model Section {
+  id        String   @id @default(uuid())
+  spaceId   String
+  name      String
+  position  Int      @default(0)
+  icon      String?
+  color     String?
+  config    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  space     Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  databases Database[]
+
+  @@index([spaceId])
+}
+
+model Database {
+  id        String   @id @default(uuid())
+  spaceId   String
+  name      String
+  title     String
+  icon      String?
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  config    Json?
+
+  space       Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  properties  Property[]
+  records     Record[]
+  views       View[]
+  automations Automation[]
+  section     Section?     @relation(fields: [sectionId], references: [id])
+  sectionId   String?
+
+  @@index([spaceId])
+}
+
+model Property {
+  id         String       @id @default(uuid())
+  databaseId String
+  name       String
+  type       PropertyType
+  position   Int
+  isRequired Boolean      @default(false)
+  isPrimary  Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  config     Json?
+
+  database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  values   PropertyValue[]
+
+  @@index([databaseId])
+}
+
+model Record {
+  id         String    @id @default(uuid())
+  databaseId String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  status     String?
+  archivedAt DateTime?
+  config     Json?
+
+  database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  values   PropertyValue[]
+  content  RecordContent?
+
+  @@index([databaseId])
+}
+
+model PropertyValue {
+  id         String  @id @default(uuid())
+  recordId   String
+  propertyId String
+  value      Json?
+  computed   Boolean @default(false)
+
+  record   Record   @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([recordId, propertyId])
+  @@index([recordId])
+  @@index([propertyId])
+}
+
+model RecordContent {
+  id           String   @id @default(uuid())
+  recordId     String   @unique
+  blocks       Json?
+  lastEditedAt DateTime @default(now())
+  config       Json?
+
+  record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+}
+
+model View {
+  id         String   @id @default(uuid())
+  databaseId String
+  name       String
+  type       ViewType
+  config     Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+
+  @@index([databaseId])
+}
+
+model Automation {
+  id         String            @id @default(uuid())
+  databaseId String
+  name       String
+  trigger    AutomationTrigger
+  condition  Json?
+  action     Json?
+  active     Boolean           @default(true)
+  config     Json?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+
+  @@index([databaseId])
+}
+
+model AIInsight {
+  id        String        @id @default(uuid())
+  scopeType String
+  scopeId   String
+  type      AIInsightType
+  input     Json?
+  output    Json?
+  createdAt DateTime      @default(now())
+  config    Json?
+
+  @@index([scopeType, scopeId])
 }
