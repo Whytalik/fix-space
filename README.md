@@ -45,12 +45,12 @@ The project is a monorepo built with Turborepo and uses the following technologi
 │   ├── api                       # 🔌 NestJS API
 │   └── web                       # 🌐 Next.js web application
 └── packages
-    ├── @repo/api                 # Shared NestJS resources
-    ├── @repo/database            # 🗄️ Prisma schema, client, and seed scripts
-    ├── @repo/eslint-config       # ✅ ESLint configurations
-    ├── @repo/jest-config         # 🧪 Jest configurations
-    ├── @repo/typescript-config   # 📘 Shared tsconfig.json files
-    └── @repo/ui                  # 🎨 Shared React components
+    ├── @nucleus/domain                 # Shared NestJS resources
+    ├── @nucleus/database            # 🗄️ Prisma schema, client, and seed scripts
+    ├── @nucleus/eslint-config       # ✅ ESLint configurations
+    ├── @nucleus/jest-config         # 🧪 Jest configurations
+    ├── @nucleus/typescript-config   # 📘 Shared tsconfig.json files
+    └── @nucleus/ui                  # 🎨 Shared React components
 ```
 
 ## 🚀 Getting Started
