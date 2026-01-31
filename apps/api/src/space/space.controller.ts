@@ -36,12 +36,12 @@ export class SpaceController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string) {
     return this.spaceService.findOne(id);
   }
 
   @Patch(':id')
-  async update(
+  update(
     @Param('id') id: string,
     @Body() updateSpaceDto: UpdateSpaceDto,
   ) {
@@ -49,7 +49,7 @@ export class SpaceController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  remove(@Param('id') id: string) {
     return this.spaceService.remove(id);
   }
 }
