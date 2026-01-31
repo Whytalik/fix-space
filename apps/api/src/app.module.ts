@@ -11,6 +11,7 @@ import { JwtModule } from './jwt/jwt.module';
 import { SectionModule } from './section/section.module';
 import { SpaceModule } from './space/space.module';
 import { UserModule } from './user/user.module';
+import { PropertyModule } from './property/property.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserModule } from './user/user.module';
     SpaceModule,
     SectionModule,
     DatabaseModule,
+    PropertyModule,
   ],
   controllers: [AppController],
   providers: [
