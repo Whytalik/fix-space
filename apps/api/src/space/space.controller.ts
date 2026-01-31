@@ -8,31 +8,26 @@ import {
   Post,
 } from '@nestjs/common';
 import { CreateSpaceDto, UpdateSpaceDto } from '@nucleus/domain';
-import { SystemUserProvider } from '../user/system-user.provider';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { SpaceService } from './space.service';
 
 @Controller('space')
 export class SpaceController {
-  constructor(
-    private readonly spaceService: SpaceService,
-    private readonly systemUserProvider: SystemUserProvider,
-  ) {}
+  constructor(private readonly spaceService: SpaceService) {}
 
   @Post()
-  async create(@Body() createSpaceDto: CreateSpaceDto) {
-    const systemUser = await this.systemUserProvider.get();
-
-    return this.spaceService.create({
+  async create(
+    @CurrentUser('userId') userId: string,
+    @Body() createSpaceDto: CreateSpaceDto,
+  ) {
+    return this.spaceService.create(userId, {
       ...createSpaceDto,
-      ownerId: systemUser.id,
     });
   }
 
   @Get()
-  async findAll() {
-    const systemUser = await this.systemUserProvider.get();
-
-    return this.spaceService.findAll(systemUser.id);
+  async findAll(@CurrentUser('userId') userId: string) {
+    return this.spaceService.findAll(userId);
   }
 
   @Get(':id')
@@ -41,10 +36,7 @@ export class SpaceController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateSpaceDto: UpdateSpaceDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateSpaceDto: UpdateSpaceDto) {
     return this.spaceService.update(id, updateSpaceDto);
   }
 

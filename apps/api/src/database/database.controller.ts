@@ -10,7 +10,7 @@ import {
 import { CreateDatabaseDto, UpdateDatabaseDto } from '@nucleus/domain';
 import { DatabaseService } from './database.service';
 
-@Controller('database')
+@Controller('space/:spaceId/database')
 export class DatabaseController {
   constructor(private readonly databaseService: DatabaseService) {}
 
