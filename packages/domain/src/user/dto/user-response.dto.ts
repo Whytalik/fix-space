@@ -1,14 +1,23 @@
+import { Exclude, Expose } from 'class-transformer';
+
+@Exclude()
 export class UserResponseDto {
+  @Expose()
   id: string;
 
+  @Expose()
   email: string;
 
-  username:string;
+  @Expose()
+  username: string;
 
+  @Expose()
   createdAt: Date;
 
-  settingsConfig?: Record<string, any>;
+  @Expose()
+  settingsConfig?: Record<string, unknown>;
 
+  @Expose()
   isSystem: boolean;
 
   constructor(partial: Partial<UserResponseDto>) {
