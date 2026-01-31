@@ -1,12 +1,23 @@
-import { Body, Controller, Delete, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { prisma } from '@nucleus/database';
-import { UpdateUserDto } from '@nucleus/domain';
+import { RegisterUserDto, UpdateUserDto } from '@nucleus/domain';
+import { RegisterUserService } from '../auth/register-user.usecase';
+import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UserService } from './user.service';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly registerUserService: RegisterUserService,
+  ) {}
+
+  @Public()
+  @Post()
+  register(@Body() registerUserDto: RegisterUserDto) {
+    return this.registerUserService.register(registerUserDto);
+  }
 
   @Get()
   findAll() {
