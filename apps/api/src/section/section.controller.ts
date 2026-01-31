@@ -1,4 +1,12 @@
-import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CreateSectionDto, UpdateSectionDto } from '@nucleus/domain';
 import { SectionService } from './section.service';
 
@@ -7,30 +15,33 @@ export class SectionController {
   constructor(private readonly sectionService: SectionService) {}
 
   @Post()
-  async create(
+  create(
     @Param('spaceId') spaceId: string,
-    createSectionDto: CreateSectionDto,
+    @Body() createSectionDto: CreateSectionDto,
   ) {
-    return await this.sectionService.create(spaceId, createSectionDto);
+    return this.sectionService.create(spaceId, createSectionDto);
   }
 
   @Get()
-  async findAll(@Param('spaceId') spaceId: string) {
-    return await this.sectionService.findAll(spaceId);
+  findAll(@Param('spaceId') spaceId: string) {
+    return this.sectionService.findAll(spaceId);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.sectionService.findOne(id);
+  findOne(@Param('id') id: string) {
+    return this.sectionService.findOne(id);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, updateSectionDto: UpdateSectionDto) {
-    return await this.sectionService.update(id, updateSectionDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateSectionDto: UpdateSectionDto,
+  ) {
+    return this.sectionService.update(id, updateSectionDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return await this.sectionService.remove(id);
+  remove(@Param('id') id: string) {
+    return this.sectionService.remove(id);
   }
 }
