@@ -7,7 +7,6 @@ export class User {
   passwordHash: string;
   createdAt: Date;
   settingsConfig?: Record<string, unknown>;
-  isSystem: boolean;
 
   spaces?: Space[];
 

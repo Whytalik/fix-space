@@ -17,9 +17,6 @@ export class UserResponseDto {
   @Expose()
   settingsConfig?: Record<string, unknown>;
 
-  @Expose()
-  isSystem: boolean;
-
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);
   }
