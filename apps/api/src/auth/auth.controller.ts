@@ -22,4 +22,9 @@ export class AuthController {
   login(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
   }
+
+  @Post('logout')
+  logout() {
+    return { message: 'Logged out successfully' };
+  }
 }
