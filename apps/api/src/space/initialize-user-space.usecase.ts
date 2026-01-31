@@ -17,9 +17,8 @@ export class InitializeUserSpaceUseCase {
     const config = this.configService.getConfig();
     const spaceName = this.configService.interpolateSpaceName(username);
 
-    const space = await this.createSpaceUseCase.create({
+    const space = await this.createSpaceUseCase.create(userId, {
       name: spaceName,
-      ownerId: userId,
     });
 
     const sortedSections = [...config.sections].sort(

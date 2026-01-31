@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import { CreateSectionDto, UpdateSectionDto } from '@nucleus/domain';
 
@@ -27,7 +27,7 @@ export class SectionService {
     });
 
     if (!section) {
-      throw new Error(`Section with id ${id} not found`);
+      throw new NotFoundException(`Section with id ${id} not found`);
     }
 
     return section;
@@ -39,7 +39,7 @@ export class SectionService {
     });
 
     if (!isSectionExists) {
-      throw new Error(`Section with id ${id} not found`);
+      throw new NotFoundException(`Section with id ${id} not found`);
     }
 
     return await prisma.section.update({
@@ -58,7 +58,7 @@ export class SectionService {
     });
 
     if (!isSectionExists) {
-      throw new Error(`Section with id ${id} not found`);
+      throw new NotFoundException(`Section with id ${id} not found`);
     }
 
     return await prisma.section.delete({
