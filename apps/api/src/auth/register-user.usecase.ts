@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { prisma } from '@nucleus/database';
 import { RegisterUserDto } from '@nucleus/domain';
-import { CreateSpaceUseCase } from 'src/space/create-space.usecase';
+import { InitializeUserSpaceUseCase } from 'src/space/initialize-user-space.usecase';
 import { hashPassword } from '../common/utils/password';
 
 @Injectable()
 export class RegisterUserService {
-  constructor(private readonly createSpaceUseCase: CreateSpaceUseCase) {}
+  constructor(
+    private readonly initializeUserSpaceUseCase: InitializeUserSpaceUseCase,
+  ) {}
 
   async register(registerUserDto: RegisterUserDto) {
     return prisma.$transaction(async (tx) => {
@@ -36,10 +38,10 @@ export class RegisterUserService {
         },
       });
 
-      await this.createSpaceUseCase.create({
-        name: `${registerUserDto.username}'s Space`,
-        ownerId: user.id,
-      });
+      await this.initializeUserSpaceUseCase.initialize(
+        user.id,
+        registerUserDto.username,
+      );
 
       return user;
     });
