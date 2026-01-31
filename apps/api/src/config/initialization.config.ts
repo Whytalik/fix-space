@@ -21,5 +21,11 @@ export const defaultInitializationConfig: InitializationConfig = {
     { name: 'Insight', position: 1 },
     { name: 'Settings', position: 2 },
   ],
-  databases: [],
+  databases: [
+    { name: '[DB] Trading Journal', title: 'Trading Journal' },
+    { name: '[DB] Session Routine', title: 'Session Routine' },
+    { name: '[DB] Notes', title: 'Notes' },
+    { name: '[DB] Mistakes', title: 'Mistakes' },
+    { name: '[DB] Accounts', title: 'Accounts' },
+  ],
 };
