@@ -3,6 +3,13 @@ export interface SectionDefinition {
   position: number;
 }
 
+export interface PropertyDefinition {
+  name: string;
+  type: 'TEXT' | 'NUMBER' | 'DATE';
+  position: number;
+  isRequired?: boolean;
+}
+
 export interface DatabaseDefinition {
   name: string;
   title: string;
@@ -12,6 +19,7 @@ export interface InitializationConfig {
   spaceNameTemplate: string;
   sections: SectionDefinition[];
   databases: DatabaseDefinition[];
+  defaultDatabaseProperties: PropertyDefinition[];
 }
 
 export const defaultInitializationConfig: InitializationConfig = {
@@ -27,5 +35,8 @@ export const defaultInitializationConfig: InitializationConfig = {
     { name: '[DB] Notes', title: 'Notes' },
     { name: '[DB] Mistakes', title: 'Mistakes' },
     { name: '[DB] Accounts', title: 'Accounts' },
+  ],
+  defaultDatabaseProperties: [
+    { name: 'Name', type: 'TEXT', position: 0, isRequired: true },
   ],
 };
