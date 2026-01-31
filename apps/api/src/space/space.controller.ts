@@ -11,7 +11,7 @@ import { CreateSpaceDto, UpdateSpaceDto } from '@nucleus/domain';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { SpaceService } from './space.service';
 
-@Controller('space')
+@Controller('spaces')
 export class SpaceController {
   constructor(private readonly spaceService: SpaceService) {}
 

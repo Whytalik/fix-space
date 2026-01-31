@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import { CreateDatabaseDto, UpdateDatabaseDto } from '@nucleus/domain';
+import { defaultInitializationConfig } from '../config/initialization.config';
 
 @Injectable()
 export class DatabaseService {
@@ -16,14 +17,30 @@ export class DatabaseService {
       throw new ConflictException('Database name is already taken in this space.');
     }
 
-    return await prisma.database.create({
-      data: {
-        name: createDatabaseDto.name,
-        title: createDatabaseDto.title,
-        spaceId,
-        sectionId: createDatabaseDto.sectionId,
-        config: createDatabaseDto.config as Prisma.JsonValue,
-      },
+    return await prisma.$transaction(async (tx) => {
+      const database = await tx.database.create({
+        data: {
+          name: createDatabaseDto.name,
+          title: createDatabaseDto.title,
+          spaceId,
+          sectionId: createDatabaseDto.sectionId,
+          config: createDatabaseDto.config as Prisma.JsonValue,
+        },
+      });
+
+      for (const propertyDef of defaultInitializationConfig.defaultDatabaseProperties) {
+        await tx.property.create({
+          data: {
+            name: propertyDef.name,
+            type: propertyDef.type,
+            position: propertyDef.position,
+            isRequired: propertyDef.isRequired ?? false,
+            databaseId: database.id,
+          },
+        });
+      }
+
+      return database;
     });
   }
 
