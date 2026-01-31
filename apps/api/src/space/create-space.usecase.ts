@@ -4,12 +4,12 @@ import { CreateSpaceDto } from '@nucleus/domain';
 
 @Injectable()
 export class CreateSpaceUseCase {
-  async create(createSpaceDTO: CreateSpaceDto) {
+  async create(ownerId: string, createSpaceDTO: CreateSpaceDto) {
     const isSpaceExists = await prisma.space.findUnique({
       where: {
         ownerId_name: {
+          ownerId: ownerId,
           name: createSpaceDTO.name,
-          ownerId: createSpaceDTO.ownerId,
         },
       },
     });
@@ -21,7 +21,7 @@ export class CreateSpaceUseCase {
     return prisma.space.create({
       data: {
         name: createSpaceDTO.name,
-        ownerId: createSpaceDTO.ownerId,
+        ownerId: ownerId,
       },
     });
   }
