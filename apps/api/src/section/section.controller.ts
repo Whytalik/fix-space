@@ -10,7 +10,7 @@ import {
 import { CreateSectionDto, UpdateSectionDto } from '@nucleus/domain';
 import { SectionService } from './section.service';
 
-@Controller('space/:spaceId/section')
+@Controller('spaces/:spaceId/sections')
 export class SectionController {
   constructor(private readonly sectionService: SectionService) {}
 
