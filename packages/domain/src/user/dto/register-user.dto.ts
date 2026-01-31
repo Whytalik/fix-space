@@ -1,7 +1,5 @@
 import {
-  IsBoolean,
   IsEmail,
-  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -32,8 +30,4 @@ export class RegisterUserDto {
     },
   )
   password: string;
-
-  @IsOptional()
-  @IsBoolean()
-  isSystem?: boolean;
 }

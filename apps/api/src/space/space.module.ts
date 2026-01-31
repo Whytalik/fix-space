@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { SystemUserProvider } from 'src/user/system-user.provider';
 import { InitializationConfigModule } from '../config/config.module';
 import { DatabaseModule } from '../database/database.module';
 import { SectionModule } from '../section/section.module';
@@ -11,12 +10,7 @@ import { SpaceService } from './space.service';
 @Module({
   imports: [SectionModule, DatabaseModule, InitializationConfigModule],
   controllers: [SpaceController],
-  providers: [
-    SpaceService,
-    CreateSpaceUseCase,
-    InitializeUserSpaceUseCase,
-    SystemUserProvider,
-  ],
+  providers: [SpaceService, CreateSpaceUseCase, InitializeUserSpaceUseCase],
   exports: [CreateSpaceUseCase, InitializeUserSpaceUseCase],
 })
 export class SpaceModule {}
