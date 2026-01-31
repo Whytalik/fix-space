@@ -6,6 +6,9 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from './jwt/jwt.module';
 import { UserModule } from './user/user.module';
+import { SpaceModule } from './space/space.module';
+import { SectionModule } from './section/section.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { UserModule } from './user/user.module';
     UserModule,
     AuthModule,
     JwtModule,
+    SpaceModule,
+    SectionModule,
+    DatabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
