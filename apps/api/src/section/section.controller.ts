@@ -10,7 +10,7 @@ import {
 import { CreateSectionDto, UpdateSectionDto } from '@nucleus/domain';
 import { SectionService } from './section.service';
 
-@Controller('section')
+@Controller('space/:spaceId/section')
 export class SectionController {
   constructor(private readonly sectionService: SectionService) {}
 
@@ -33,10 +33,7 @@ export class SectionController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateSectionDto: UpdateSectionDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateSectionDto: UpdateSectionDto) {
     return this.sectionService.update(id, updateSectionDto);
   }
 
