@@ -44,11 +44,8 @@ model User {
   passwordHash   String
   createdAt      DateTime @default(now())
   settingsConfig Json?
-  isSystem       Boolean  @default(false)
 
   spaces Space[]
-
-  @@index([isSystem])
 }
 
 model Space {
