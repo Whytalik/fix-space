@@ -18,35 +18,19 @@ enum PropertyType {
   TEXT
   NUMBER
   DATE
-  SELECT
-  MULTI_SELECT
-  RELATION
-  FORMULA
-  ROLLUP
 }
 
 enum ViewType {
   TABLE
-  BOARD
   LIST
-  CALENDAR
-  TIMELINE
 }
 
 enum AutomationTrigger {
   ON_RECORD_CREATE
-  ON_RECORD_UPDATE
-  ON_RECORD_DELETE
-  ON_PROPERTY_CHANGE
-  ON_SCHEDULE
 }
 
 enum AIInsightType {
   RECORD_ANALYSIS
-  DB_SUMMARY
-  PERFORMANCE_REVIEW
-  IDEA_GENERATION
-  RISK_REPORT
 }
 
 // ==============================
@@ -87,8 +71,6 @@ model Section {
   spaceId   String
   name      String
   position  Int      @default(0)
-  icon      String?
-  color     String?
   config    Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -96,6 +78,7 @@ model Section {
   space     Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   databases Database[]
 
+  @@unique([spaceId, name])
   @@index([spaceId])
 }
 
@@ -104,8 +87,6 @@ model Database {
   spaceId   String
   name      String
   title     String
-  icon      String?
-  color     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   config    Json?
@@ -118,6 +99,7 @@ model Database {
   section     Section?     @relation(fields: [sectionId], references: [id])
   sectionId   String?
 
+  @@unique([spaceId, name])
   @@index([spaceId])
 }
 
