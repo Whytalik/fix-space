@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import { CreateDatabaseDto, UpdateDatabaseDto } from '@nucleus/domain';
 
@@ -13,7 +13,7 @@ export class DatabaseService {
     });
 
     if (isDatabaseNameTaken) {
-      throw new Error('Database name is already taken in this space.');
+      throw new ConflictException('Database name is already taken in this space.');
     }
 
     return await prisma.database.create({
