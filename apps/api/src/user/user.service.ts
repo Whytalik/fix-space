@@ -9,7 +9,7 @@ export class UserService {
     hashedPassword: string,
     isSystem = false,
   ) {
-    return prisma.user.create({
+    return await prisma.user.create({
       data: {
         email,
         username,
@@ -20,19 +20,19 @@ export class UserService {
   }
 
   async findByEmail(email: string) {
-    return prisma.user.findUnique({
+    return await prisma.user.findUnique({
       where: { email },
     });
   }
 
   async findByUsername(username: string) {
-    return prisma.user.findUnique({
+    return await prisma.user.findUnique({
       where: { username },
     });
   }
 
   async findSystemUser() {
-    return prisma.user.findFirst({
+    return await prisma.user.findFirst({
       where: { isSystem: true },
     });
   }
