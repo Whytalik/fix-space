@@ -27,5 +27,5 @@ export class CreateDatabaseDto {
 
   @IsOptional()
   @IsObject()
-  config?: Record<string, unknown>;
+  config?: any;
 }
