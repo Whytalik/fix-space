@@ -1,6 +1,5 @@
 import {
   IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -24,8 +23,4 @@ export class CreateDatabaseDto {
   @IsOptional()
   @IsUUID('4', { message: 'Section ID must be a valid UUID' })
   sectionId?: string;
-
-  @IsOptional()
-  @IsObject()
-  config?: any;
 }

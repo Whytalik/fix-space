@@ -1,7 +1,6 @@
 import {
   IsInt,
   IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
   MaxLength,
@@ -20,8 +19,4 @@ export class CreateSectionDto {
   @IsInt({ message: 'Position must be an integer' })
   @Min(0, { message: 'Position must be a non-negative integer' })
   position?: number;
-
-  @IsOptional()
-  @IsObject()
-  config?: Record<string, unknown>;
 }
