@@ -7,7 +7,6 @@ export class Space {
   ownerId: string;
   name: string;
   createdAt: Date;
-  config?: Record<string, unknown>;
 
   owner?: User;
   sections?: Section[];

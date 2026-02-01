@@ -16,9 +16,6 @@ export class SectionResponseDto {
   position: number;
 
   @Expose()
-  config?: Record<string, unknown>;
-
-  @Expose()
   createdAt: Date;
 
   @Expose()

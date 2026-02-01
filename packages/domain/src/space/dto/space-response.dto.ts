@@ -17,9 +17,6 @@ export class SpaceResponseDto {
   createdAt: Date;
 
   @Expose()
-  config?: Record<string, unknown>;
-
-  @Expose()
   @Type(() => SectionResponseDto)
   sections?: SectionResponseDto[];
 
