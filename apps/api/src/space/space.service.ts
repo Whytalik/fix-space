@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, prisma } from '@nucleus/database';
+import { prisma } from '@nucleus/database';
 import { CreateSpaceDto, UpdateSpaceDto } from '@nucleus/domain';
 
 @Injectable()
@@ -9,7 +9,6 @@ export class SpaceService {
       data: {
         name: createSpaceDto.name,
         ownerId,
-        config: createSpaceDto.config as Prisma.JsonValue,
       },
     });
   }
@@ -39,7 +38,6 @@ export class SpaceService {
       where: { id },
       data: {
         name: updateSpaceDto.name,
-        config: updateSpaceDto.config as Prisma.JsonValue,
       },
     });
   }
