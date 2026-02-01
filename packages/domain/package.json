@@ -23,8 +23,9 @@
       "require": "./dist/entry.js"
     },
     "./*": {
-      "import": "./dist/*.js",
-      "require": "./dist/*.js"
+      "types": "./dist/*/index.d.ts",
+      "import": "./dist/*/index.js",
+      "require": "./dist/*/index.js"
     }
   },
   "dependencies": {

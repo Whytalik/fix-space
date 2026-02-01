@@ -27,9 +27,6 @@ export class PropertyResponseDto {
   @Expose()
   updatedAt: Date;
 
-  @Expose()
-  config?: Record<string, unknown>;
-
   constructor(partial: Partial<PropertyResponseDto>) {
     Object.assign(this, partial);
   }
