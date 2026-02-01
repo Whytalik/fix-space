@@ -3,7 +3,6 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
   MaxLength,
@@ -35,8 +34,4 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsBoolean({ message: 'isRequired must be a boolean' })
   isRequired?: boolean;
-
-  @IsOptional()
-  @IsObject()
-  config?: Record<string, unknown>;
 }
