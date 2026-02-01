@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, prisma } from '@nucleus/database';
+import { prisma } from '@nucleus/database';
 import { CreateSectionDto, UpdateSectionDto } from '@nucleus/domain';
 
 @Injectable()
@@ -9,7 +9,6 @@ export class SectionService {
       data: {
         name: createSectionDto.name,
         position: createSectionDto.position,
-        config: createSectionDto.config as Prisma.JsonValue,
         spaceId,
       },
     });
@@ -47,7 +46,6 @@ export class SectionService {
       data: {
         name: updateSectionDto.name,
         position: updateSectionDto.position,
-        config: updateSectionDto.config as Prisma.JsonValue,
       },
     });
   }
