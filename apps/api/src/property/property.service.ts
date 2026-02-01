@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, prisma } from '@nucleus/database';
+import { prisma } from '@nucleus/database';
 import { CreatePropertyDto, UpdatePropertyDto } from '@nucleus/domain';
 
 @Injectable()
@@ -28,7 +28,6 @@ export class PropertyService {
         type: createPropertyDto.type,
         position: createPropertyDto.position,
         isRequired: createPropertyDto.isRequired ?? false,
-        config: createPropertyDto.config as Prisma.JsonValue,
         databaseId,
       },
     });
@@ -88,7 +87,6 @@ export class PropertyService {
         type: updatePropertyDto.type,
         position: updatePropertyDto.position,
         isRequired: updatePropertyDto.isRequired,
-        config: updatePropertyDto.config as Prisma.JsonValue,
       },
     });
   }

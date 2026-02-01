@@ -21,9 +21,6 @@ export class DatabaseResponseDto {
   updatedAt: Date;
 
   @Expose()
-  config?: Record<string, unknown>;
-
-  @Expose()
   sectionId?: string;
 
   constructor(partial: Partial<DatabaseResponseDto>) {

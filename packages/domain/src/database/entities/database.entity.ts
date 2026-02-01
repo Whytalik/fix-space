@@ -8,7 +8,6 @@ export class Database {
   title: string;
   createdAt: Date;
   updatedAt: Date;
-  config?: Record<string, unknown>;
   sectionId?: string;
 
   space?: Space;
