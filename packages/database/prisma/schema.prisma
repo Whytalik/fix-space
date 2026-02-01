@@ -88,13 +88,16 @@ model Database {
   updatedAt DateTime @updatedAt
   config    Json?
 
-  space       Space        @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  properties  Property[]
-  records     Record[]
-  views       View[]
-  automations Automation[]
-  section     Section?     @relation(fields: [sectionId], references: [id])
-  sectionId   String?
+  space      Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  properties Property[]
+  records    Record[]
+  /**
+   * views       View[]
+   * automations Automation[]
+   * section     Section?     @relation(fields: [sectionId], references: [id])
+   */
+  sectionId  String?
+  section    Section?   @relation(fields: [sectionId], references: [id])
 
   @@unique([spaceId, name])
   @@index([spaceId])
@@ -118,12 +121,10 @@ model Property {
 }
 
 model Record {
-  id         String    @id @default(uuid())
+  id         String   @id @default(uuid())
   databaseId String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  status     String?
-  archivedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   config     Json?
 
   database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
@@ -151,53 +152,47 @@ model PropertyValue {
 model RecordContent {
   id           String   @id @default(uuid())
   recordId     String   @unique
-  blocks       Json?
   lastEditedAt DateTime @default(now())
   config       Json?
 
   record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
 }
 
-model View {
-  id         String   @id @default(uuid())
-  databaseId String
-  name       String
-  type       ViewType
-  config     Json?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
-
-  @@index([databaseId])
-}
-
-model Automation {
-  id         String            @id @default(uuid())
-  databaseId String
-  name       String
-  trigger    AutomationTrigger
-  condition  Json?
-  action     Json?
-  active     Boolean           @default(true)
-  config     Json?
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
-
-  database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
-
-  @@index([databaseId])
-}
-
-model AIInsight {
-  id        String        @id @default(uuid())
-  scopeType String
-  scopeId   String
-  type      AIInsightType
-  input     Json?
-  output    Json?
-  createdAt DateTime      @default(now())
-  config    Json?
-
-  @@index([scopeType, scopeId])
-}
+/**
+ * model View {
+ * id         String   @id @default(uuid())
+ * databaseId String
+ * name       String
+ * type       ViewType
+ * config     Json?
+ * createdAt  DateTime @default(now())
+ * updatedAt  DateTime @updatedAt
+ * database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+ * @@index([databaseId])
+ * }
+ * model Automation {
+ * id         String            @id @default(uuid())
+ * databaseId String
+ * name       String
+ * trigger    AutomationTrigger
+ * condition  Json?
+ * action     Json?
+ * active     Boolean           @default(true)
+ * config     Json?
+ * createdAt  DateTime          @default(now())
+ * updatedAt  DateTime          @updatedAt
+ * database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+ * @@index([databaseId])
+ * }
+ * model AIInsight {
+ * id        String        @id @default(uuid())
+ * scopeType String
+ * scopeId   String
+ * type      AIInsightType
+ * input     Json?
+ * output    Json?
+ * createdAt DateTime      @default(now())
+ * config    Json?
+ * @@index([scopeType, scopeId])
+ * }
+ */
