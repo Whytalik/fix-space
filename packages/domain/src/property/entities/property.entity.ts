@@ -10,7 +10,6 @@ export class Property {
   isRequired: boolean;
   createdAt: Date;
   updatedAt: Date;
-  config?: Record<string, unknown>;
 
   database?: Database;
 

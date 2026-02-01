@@ -8,10 +8,13 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { JwtAuthGuard } from './jwt/jwt-auth.guard';
 import { JwtModule } from './jwt/jwt.module';
+import { PropertyValueModule } from './property-value/property-value.module';
+import { PropertyModule } from './property/property.module';
+import { RecordContentModule } from './record-content/record-content.module';
+import { RecordModule } from './record/record.module';
 import { SectionModule } from './section/section.module';
 import { SpaceModule } from './space/space.module';
 import { UserModule } from './user/user.module';
-import { PropertyModule } from './property/property.module';
 
 @Module({
   imports: [
@@ -26,6 +29,9 @@ import { PropertyModule } from './property/property.module';
     SectionModule,
     DatabaseModule,
     PropertyModule,
+    RecordModule,
+    PropertyValueModule,
+    RecordContentModule,
   ],
   controllers: [AppController],
   providers: [
