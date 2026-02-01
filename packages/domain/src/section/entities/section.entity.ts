@@ -6,7 +6,6 @@ export class Section {
   spaceId: string;
   name: string;
   position: number;
-  config?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 
