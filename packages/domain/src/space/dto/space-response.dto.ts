@@ -14,7 +14,13 @@ export class SpaceResponseDto {
   name: string;
 
   @Expose()
+  icon?: string;
+
+  @Expose()
   createdAt: Date;
+
+  @Expose()
+  config?: Record<string, unknown>;
 
   @Expose()
   @Type(() => SectionResponseDto)

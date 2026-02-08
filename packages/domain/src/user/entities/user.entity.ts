@@ -5,8 +5,8 @@ export class User {
   email: string;
   username: string;
   passwordHash: string;
+  icon?: string;
   createdAt: Date;
-  settingsConfig?: Record<string, unknown>;
 
   spaces?: Space[];
 
