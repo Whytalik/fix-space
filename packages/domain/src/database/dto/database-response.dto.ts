@@ -15,6 +15,9 @@ export class DatabaseResponseDto {
   title: string;
 
   @Expose()
+  icon?: string;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()
@@ -22,6 +25,9 @@ export class DatabaseResponseDto {
 
   @Expose()
   sectionId?: string;
+
+  @Expose()
+  config?: Record<string, unknown>;
 
   constructor(partial: Partial<DatabaseResponseDto>) {
     Object.assign(this, partial);

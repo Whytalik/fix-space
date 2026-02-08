@@ -6,6 +6,8 @@ export class Section {
   spaceId: string;
   name: string;
   position: number;
+  icon?: string;
+  color?: string;
   createdAt: Date;
   updatedAt: Date;
 

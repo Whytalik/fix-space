@@ -1,5 +1,6 @@
 import {
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
@@ -11,4 +12,8 @@ export class CreateSpaceDto {
   @MinLength(1, { message: 'Space name must be at least 1 character' })
   @MaxLength(120, { message: 'Space name must not exceed 120 characters' })
   name: string;
+
+  @IsOptional()
+  @IsString()
+  icon?: string;
 }
