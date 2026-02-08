@@ -1,7 +1,17 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
-  "globalDependencies": ["**/.env.*local"],
-  "globalEnv": ["DATABASE_URL", "JWT_SECRET"],
+  "globalDependencies": [
+    "**/.env",
+    "**/.env.development",
+    "**/.env.production"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "PORT",
+    "CORS_ORIGIN"
+  ],
   "tasks": {
     "dev": {
       "cache": false,
