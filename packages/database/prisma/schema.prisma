@@ -22,15 +22,14 @@ enum PropertyType {
 
 enum ViewType {
   TABLE
-  LIST
 }
 
 enum AutomationTrigger {
   ON_RECORD_CREATE
 }
 
-enum AIInsightType {
-  RECORD_ANALYSIS
+enum AITaskType {
+  ANALYSIS
 }
 
 // ==============================
@@ -38,28 +37,48 @@ enum AIInsightType {
 // ==============================
 
 model User {
-  id             String   @id @default(uuid())
-  email          String   @unique
-  username       String   @unique
-  passwordHash   String
-  createdAt      DateTime @default(now())
-  settingsConfig Json?
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  icon         String?
+  createdAt    DateTime @default(now())
 
-  spaces Space[]
+  spaces       Space[]
+  userSettings UserSettings[]
+
+  @@index([email])
+}
+
+model UserSettings {
+  id       String @id @default(uuid())
+  userId   String
+  key      String
+  value    Json
+  category String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([userId])
+  @@index([category])
 }
 
 model Space {
   id        String   @id @default(uuid())
   ownerId   String
   name      String
+  icon      String?
   createdAt DateTime @default(now())
   config    Json?
 
   owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   databases Database[]
   sections  Section[]
+  //workflowCanvases WorkflowCanvas[]
 
   @@unique([ownerId, name])
+  @@index([ownerId])
   @@index([name])
 }
 
@@ -68,7 +87,8 @@ model Section {
   spaceId   String
   name      String
   position  Int      @default(0)
-  config    Json?
+  icon      String?
+  color     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -77,30 +97,33 @@ model Section {
 
   @@unique([spaceId, name])
   @@index([spaceId])
+  @@index([position])
 }
 
 model Database {
   id        String   @id @default(uuid())
   spaceId   String
+  sectionId String?
   name      String
   title     String
+  icon      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   config    Json?
 
   space      Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  section    Section?   @relation(fields: [sectionId], references: [id], onDelete: SetNull)
   properties Property[]
   records    Record[]
-  /**
-   * views       View[]
-   * automations Automation[]
-   * section     Section?     @relation(fields: [sectionId], references: [id])
-   */
-  sectionId  String?
-  section    Section?   @relation(fields: [sectionId], references: [id])
+  //importMappings   ImportMapping[]
+  //workflowCanvases WorkflowCanvas[]
+  //views       View[]
+  //automations Automation[]
+  //templates   Template[]
 
   @@unique([spaceId, name])
   @@index([spaceId])
+  @@index([sectionId])
 }
 
 model Property {
@@ -109,29 +132,40 @@ model Property {
   name       String
   type       PropertyType
   position   Int
+  icon       String?
+  color      String?
   isRequired Boolean      @default(false)
+  isPrimary  Boolean      @default(false)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   config     Json?
 
   database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   values   PropertyValue[]
+  //formula  Formula?
 
   @@index([databaseId])
+  @@index([position])
 }
 
 model Record {
   id         String   @id @default(uuid())
   databaseId String
+  templateId String?
+  name       String   @default("Untitled")
+  icon       String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   config     Json?
 
   database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  //sourceTemplate Template?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
   values   PropertyValue[]
   content  RecordContent?
 
   @@index([databaseId])
+  @@index([templateId])
+  @@index([createdAt])
 }
 
 model PropertyValue {
@@ -156,7 +190,139 @@ model RecordContent {
   config       Json?
 
   record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  //gridItems GridItem[]
 }
+
+/**
+ * model Component {
+ * id        String   @id @default(uuid())
+ * type      String
+ * config    Json
+ * createdAt DateTime @default(now())
+ * updatedAt DateTime @updatedAt
+ * gridPlacements    GridItem[]
+ * blockCompositions BlockComponent[]
+ * @@index([type])
+ * }
+ * model Block {
+ * id          String   @id @default(uuid())
+ * name        String
+ * description String?
+ * icon        String?
+ * color       String?
+ * isReusable  Boolean  @default(true)
+ * createdAt   DateTime @default(now())
+ * updatedAt   DateTime @updatedAt
+ * config      Json?
+ * components     BlockComponent[]
+ * gridPlacements GridItem[]
+ * @@index([isReusable])
+ * }
+ * model BlockComponent {
+ * id          String @id @default(uuid())
+ * blockId     String
+ * componentId String
+ * position    Int    @default(0)
+ * config      Json?
+ * block     Block     @relation(fields: [blockId], references: [id], onDelete: Cascade)
+ * component Component @relation(fields: [componentId], references: [id], onDelete: Cascade)
+ * @@unique([blockId, componentId, position])
+ * @@index([blockId])
+ * @@index([componentId])
+ * }
+ * model GridItem {
+ * id              String   @id @default(uuid())
+ * recordContentId String
+ * componentId     String?
+ * blockId         String?
+ * x               Int
+ * y               Int
+ * width           Int
+ * height          Int
+ * config          Json?
+ * createdAt       DateTime @default(now())
+ * updatedAt       DateTime @updatedAt
+ * recordContent RecordContent @relation(fields: [recordContentId], references: [id], onDelete: Cascade)
+ * component     Component?    @relation(fields: [componentId], references: [id], onDelete: Cascade)
+ * block         Block?        @relation(fields: [blockId], references: [id], onDelete: Cascade)
+ * @@index([recordContentId])
+ * @@index([componentId])
+ * @@index([blockId])
+ * }
+ * model ImportMapping {
+ * id           String   @id @default(uuid())
+ * databaseId   String
+ * name         String
+ * sourceType   String
+ * mappingRules Json
+ * createdAt    DateTime @default(now())
+ * updatedAt    DateTime @updatedAt
+ * database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+ * imports  ImportHistory[]
+ * @@index([databaseId])
+ * }
+ * model ImportHistory {
+ * id              String    @id @default(uuid())
+ * importMappingId String
+ * status          String
+ * recordsCreated  Int       @default(0)
+ * recordsFailed   Int       @default(0)
+ * errorLog        Json?
+ * sourceFileInfo  Json
+ * createdAt       DateTime  @default(now())
+ * completedAt     DateTime?
+ * importMapping ImportMapping @relation(fields: [importMappingId], references: [id], onDelete: Cascade)
+ * @@index([importMappingId])
+ * @@index([status])
+ * }
+ * model Formula {
+ * id           String   @id @default(uuid())
+ * propertyId   String   @unique
+ * name         String
+ * expression   String
+ * canvasData   Json
+ * dependencies Json
+ * createdAt    DateTime @default(now())
+ * updatedAt    DateTime @updatedAt
+ * property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+ * @@index([propertyId])
+ * }
+ * model WorkflowCanvas {
+ * id          String   @id @default(uuid())
+ * spaceId     String?
+ * databaseId  String?
+ * name        String
+ * description String?
+ * nodes       Json
+ * edges       Json
+ * variables   Json?
+ * createdAt   DateTime @default(now())
+ * updatedAt   DateTime @updatedAt
+ * space    Space?    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+ * database Database? @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+ * @@index([spaceId])
+ * @@index([databaseId])
+ * }
+ * model Template {
+ * id          String   @id @default(uuid())
+ * databaseId  String
+ * name        String
+ * description String?
+ * icon        String?
+ * color       String?
+ * isDefault   Boolean  @default(false)
+ * position    Int      @default(0)
+ * createdAt   DateTime @default(now())
+ * updatedAt   DateTime @updatedAt
+ * config      Json?
+ * database      Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+ * blocks        Block[]
+ * recordsUsedBy Record[]
+ * @@unique([databaseId, name])
+ * @@index([databaseId])
+ * @@index([position])
+ * }
+ */
 
 /**
  * model View {
@@ -164,12 +330,19 @@ model RecordContent {
  * databaseId String
  * name       String
  * type       ViewType
- * config     Json?
+ * isDefault  Boolean  @default(false)
+ * position   Int      @default(0)
  * createdAt  DateTime @default(now())
  * updatedAt  DateTime @updatedAt
+ * config     Json?
  * database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+ * @@unique([databaseId, name])
  * @@index([databaseId])
+ * @@index([position])
  * }
+ */
+
+/**
  * model Automation {
  * id         String            @id @default(uuid())
  * databaseId String
@@ -178,21 +351,44 @@ model RecordContent {
  * condition  Json?
  * action     Json?
  * active     Boolean           @default(true)
- * config     Json?
  * createdAt  DateTime          @default(now())
  * updatedAt  DateTime          @updatedAt
+ * config     Json?
  * database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
  * @@index([databaseId])
- * }
- * model AIInsight {
- * id        String        @id @default(uuid())
- * scopeType String
- * scopeId   String
- * type      AIInsightType
- * input     Json?
- * output    Json?
- * createdAt DateTime      @default(now())
- * config    Json?
- * @@index([scopeType, scopeId])
+ * @@index([active])
  * }
  */
+
+/**
+ * model AITask {
+ * id        String     @id @default(uuid())
+ * scopeType String
+ * scopeId   String
+ * type      AITaskType
+ * status    String     @default("pending")
+ * input     Json?
+ * output    Json?
+ * error     Json?
+ * createdAt DateTime   @default(now())
+ * updatedAt DateTime   @updatedAt
+ * config    Json?
+ * @@index([scopeType, scopeId])
+ * @@index([type])
+ * @@index([status])
+ * @@index([createdAt])
+ * }
+ */
+
+model SystemSettings {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  category  String
+  isPublic  Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@index([category])
+  @@index([key])
+}

@@ -34,4 +34,16 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsBoolean({ message: 'isRequired must be a boolean' })
   isRequired?: boolean;
+
+  @IsOptional()
+  @IsBoolean({ message: 'isPrimary must be a boolean' })
+  isPrimary?: boolean;
+
+  @IsOptional()
+  @IsString()
+  icon?: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
 }
