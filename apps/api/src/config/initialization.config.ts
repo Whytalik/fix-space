@@ -5,14 +5,24 @@ export interface SectionDefinition {
 
 export interface PropertyDefinition {
   name: string;
-  type: 'TEXT' | 'NUMBER' | 'DATE';
+  type: 'TEXT';
   position: number;
   isRequired?: boolean;
 }
 
+export type DatabaseType =
+  | 'trading-journal'
+  | 'daily-routine'
+  | 'notes'
+  | 'mistakes'
+  | 'accounts'
+  | 'trading-system'
+  | 'custom';
+
 export interface DatabaseDefinition {
   name: string;
   title: string;
+  type: DatabaseType;
 }
 
 export interface InitializationConfig {
@@ -30,11 +40,11 @@ export const defaultInitializationConfig: InitializationConfig = {
     { name: 'Settings', position: 2 },
   ],
   databases: [
-    { name: '[DB] Trading Journal', title: 'Trading Journal' },
-    { name: '[DB] Session Routine', title: 'Session Routine' },
-    { name: '[DB] Notes', title: 'Notes' },
-    { name: '[DB] Mistakes', title: 'Mistakes' },
-    { name: '[DB] Accounts', title: 'Accounts' },
+    { name: '[DB] Trading Journal', title: 'Trading Journal', type: 'trading-journal' },
+    { name: '[DB] Session Routine', title: 'Session Routine', type: 'daily-routine' },
+    { name: '[DB] Notes', title: 'Notes', type: 'notes' },
+    { name: '[DB] Mistakes', title: 'Mistakes', type: 'mistakes' },
+    { name: '[DB] Accounts', title: 'Accounts', type: 'accounts' },
   ],
   defaultDatabaseProperties: [
     { name: 'Name', type: 'TEXT', position: 0, isRequired: true },
