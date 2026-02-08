@@ -11,10 +11,19 @@ export class RecordResponseDto {
   databaseId: string;
 
   @Expose()
+  name: string;
+
+  @Expose()
+  icon?: string;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()
   updatedAt: Date;
+
+  @Expose()
+  config?: Record<string, unknown>;
 
   @Expose()
   @Type(() => PropertyValueResponseDto)
