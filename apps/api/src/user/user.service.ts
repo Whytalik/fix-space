@@ -6,27 +6,12 @@ import { hashPassword } from '../common/utils/password';
 @Injectable()
 export class UserService {
   async findAll() {
-    return prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        createdAt: true,
-        settingsConfig: true,
-      },
-    });
+    return prisma.user.findMany();
   }
 
   async findById(id: string) {
     const user = await prisma.user.findUnique({
       where: { id },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        createdAt: true,
-        settingsConfig: true,
-      },
     });
 
     if (!user) {
@@ -55,30 +40,16 @@ export class UserService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    const data: Record<string, unknown> = {};
+    const { password, ...restDto } = updateUserDto;
 
-    if (updateUserDto.username) {
-      data.username = updateUserDto.username;
-    }
-
-    if (updateUserDto.password) {
-      data.passwordHash = await hashPassword(updateUserDto.password);
-    }
-
-    if (updateUserDto.settingsConfig !== undefined) {
-      data.settingsConfig = updateUserDto.settingsConfig;
-    }
+    const data = {
+      ...restDto,
+      ...(password && { passwordHash: await hashPassword(password) }),
+    };
 
     return prisma.user.update({
       where: { id },
       data,
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        createdAt: true,
-        settingsConfig: true,
-      },
     });
   }
 

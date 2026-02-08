@@ -1,5 +1,5 @@
 import { Property } from '../../property/entities/property.entity';
-import { Record } from '../../record/entities/record.entity';
+import { DatabaseRecord } from '../../record/entities/record.entity';
 
 export class PropertyValue {
   id: string;
@@ -8,7 +8,7 @@ export class PropertyValue {
   value?: unknown;
   computed: boolean;
 
-  record?: Record;
+  record?: DatabaseRecord;
   property?: Property;
 
   constructor(partial: Partial<PropertyValue>) {

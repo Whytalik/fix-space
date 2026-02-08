@@ -5,6 +5,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { validate } from './config/env.validation';
 import { DatabaseModule } from './database/database.module';
 import { JwtAuthGuard } from './jwt/jwt-auth.guard';
 import { JwtModule } from './jwt/jwt.module';
@@ -20,7 +21,11 @@ import { UserModule } from './user/user.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '../../.env',
+      envFilePath: [
+        `../../.env.${process.env.NODE_ENV || 'development'}`,
+        '../../.env',
+      ],
+      validate,
     }),
     UserModule,
     AuthModule,

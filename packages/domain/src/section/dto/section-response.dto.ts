@@ -16,6 +16,12 @@ export class SectionResponseDto {
   position: number;
 
   @Expose()
+  icon?: string;
+
+  @Expose()
+  color?: string;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()

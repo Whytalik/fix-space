@@ -19,13 +19,25 @@ export class PropertyResponseDto {
   position: number;
 
   @Expose()
+  icon?: string;
+
+  @Expose()
+  color?: string;
+
+  @Expose()
   isRequired: boolean;
+
+  @Expose()
+  isPrimary: boolean;
 
   @Expose()
   createdAt: Date;
 
   @Expose()
   updatedAt: Date;
+
+  @Expose()
+  config?: Record<string, unknown>;
 
   constructor(partial: Partial<PropertyResponseDto>) {
     Object.assign(this, partial);

@@ -4,9 +4,9 @@ import { JwtModule } from '../jwt/jwt.module';
 import { SectionModule } from '../section/section.module';
 import { SpaceModule } from '../space/space.module';
 import { UserModule } from '../user/user.module';
-import { SessionsController } from './sessions.controller';
 import { AuthService } from './auth.service';
 import { RegisterUserService } from './register-user.usecase';
+import { SessionsController } from './sessions.controller';
 
 @Module({
   imports: [
