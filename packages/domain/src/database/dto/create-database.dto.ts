@@ -1,4 +1,5 @@
 import {
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -6,6 +7,25 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+export type DatabaseType =
+  | 'trading-journal'
+  | 'daily-routine'
+  | 'notes'
+  | 'mistakes'
+  | 'accounts'
+  | 'trading-system'
+  | 'custom';
+
+export const DATABASE_TYPES: DatabaseType[] = [
+  'trading-journal',
+  'daily-routine',
+  'notes',
+  'mistakes',
+  'accounts',
+  'trading-system',
+  'custom',
+];
 
 export class CreateDatabaseDto {
   @IsString()
@@ -21,6 +41,14 @@ export class CreateDatabaseDto {
   title: string;
 
   @IsOptional()
+  @IsIn(DATABASE_TYPES, { message: 'Invalid database type' })
+  type?: DatabaseType;
+
+  @IsOptional()
   @IsUUID('4', { message: 'Section ID must be a valid UUID' })
   sectionId?: string;
+
+  @IsOptional()
+  @IsString()
+  icon?: string;
 }
