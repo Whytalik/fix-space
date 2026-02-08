@@ -7,9 +7,13 @@ export class Property {
   name: string;
   type: PropertyType;
   position: number;
+  icon?: string;
+  color?: string;
   isRequired: boolean;
+  isPrimary: boolean;
   createdAt: Date;
   updatedAt: Date;
+  config?: Record<string, unknown>;
 
   database?: Database;
 

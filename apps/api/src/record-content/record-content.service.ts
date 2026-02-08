@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { prisma } from '@nucleus/database';
+import { Prisma, prisma } from '@nucleus/database';
 import { UpdateRecordContentDto } from '@nucleus/domain';
+import { defaultRecordContentConfig } from '../config/schemas';
 
 @Injectable()
 export class RecordContentService {
@@ -21,6 +22,7 @@ export class RecordContentService {
       content = await prisma.recordContent.create({
         data: {
           recordId,
+          config: defaultRecordContentConfig as Prisma.JsonValue,
         },
       });
     }
@@ -47,6 +49,7 @@ export class RecordContentService {
       },
       create: {
         recordId,
+        config: defaultRecordContentConfig as Prisma.JsonValue,
       },
     });
   }
