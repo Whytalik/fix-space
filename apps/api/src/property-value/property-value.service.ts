@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { prisma } from '@nucleus/database';
+import { Prisma, prisma } from '@nucleus/database';
 import {
   CreatePropertyValueDto,
   UpdatePropertyValueDto,
@@ -58,7 +58,7 @@ export class PropertyValueService {
       data: {
         recordId,
         propertyId: createPropertyValueDto.propertyId,
-        value: createPropertyValueDto.value,
+        value: createPropertyValueDto.value as Prisma.InputJsonValue,
         computed: createPropertyValueDto.computed ?? false,
       },
     });
@@ -96,7 +96,7 @@ export class PropertyValueService {
     return await prisma.propertyValue.update({
       where: { id },
       data: {
-        value: updatePropertyValueDto.value,
+        value: updatePropertyValueDto.value as Prisma.InputJsonValue,
         computed: updatePropertyValueDto.computed,
       },
     });
