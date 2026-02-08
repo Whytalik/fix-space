@@ -1,7 +1,11 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { prisma } from '@nucleus/database';
+import { Prisma, prisma } from '@nucleus/database';
 import { CreateDatabaseDto, UpdateDatabaseDto } from '@nucleus/domain';
 import { defaultInitializationConfig } from '../config/initialization.config';
+import {
+  defaultDatabaseConfig,
+  defaultPropertyConfig,
+} from '../config/schemas';
 
 @Injectable()
 export class DatabaseService {
@@ -24,8 +28,13 @@ export class DatabaseService {
         data: {
           name: createDatabaseDto.name,
           title: createDatabaseDto.title,
+          icon: createDatabaseDto.icon,
           spaceId,
           sectionId: createDatabaseDto.sectionId,
+          config: {
+            ...defaultDatabaseConfig,
+            type: createDatabaseDto.type ?? 'custom',
+          },
         },
       });
 
@@ -37,6 +46,7 @@ export class DatabaseService {
             position: propertyDef.position,
             isRequired: propertyDef.isRequired ?? false,
             databaseId: database.id,
+            config: defaultPropertyConfig as Prisma.JsonValue,
           },
         });
       }
@@ -63,6 +73,7 @@ export class DatabaseService {
       data: {
         name: updateDatabaseDto.name,
         title: updateDatabaseDto.title,
+        icon: updateDatabaseDto.icon,
         sectionId: updateDatabaseDto.sectionId,
       },
     });

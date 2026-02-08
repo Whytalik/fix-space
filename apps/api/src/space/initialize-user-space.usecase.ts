@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InitializationConfigService } from '../config/initialization-config.service';
 import { DatabaseService } from '../database/database.service';
 import { SectionService } from '../section/section.service';
-import { CreateSpaceUseCase } from './create-space.usecase';
+import { SpaceService } from './space.service';
 
 @Injectable()
 export class InitializeUserSpaceUseCase {
   constructor(
-    private readonly createSpaceUseCase: CreateSpaceUseCase,
+    private readonly spaceService: SpaceService,
     private readonly sectionService: SectionService,
     private readonly databaseService: DatabaseService,
     private readonly configService: InitializationConfigService,
@@ -17,7 +17,7 @@ export class InitializeUserSpaceUseCase {
     const config = this.configService.getConfig();
     const spaceName = this.configService.interpolateSpaceName(username);
 
-    const space = await this.createSpaceUseCase.create(userId, {
+    const space = await this.spaceService.create(userId, {
       name: spaceName,
     });
 
@@ -36,6 +36,7 @@ export class InitializeUserSpaceUseCase {
       await this.databaseService.create(space.id, {
         name: databaseDef.name,
         title: databaseDef.title,
+        type: databaseDef.type,
       });
     }
 
