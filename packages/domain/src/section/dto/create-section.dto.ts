@@ -19,4 +19,12 @@ export class CreateSectionDto {
   @IsInt({ message: 'Position must be an integer' })
   @Min(0, { message: 'Position must be a non-negative integer' })
   position?: number;
+
+  @IsOptional()
+  @IsString()
+  icon?: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
 }

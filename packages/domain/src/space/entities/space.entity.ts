@@ -6,7 +6,9 @@ export class Space {
   id: string;
   ownerId: string;
   name: string;
+  icon?: string;
   createdAt: Date;
+  config?: Record<string, unknown>;
 
   owner?: User;
   sections?: Section[];

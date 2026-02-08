@@ -9,6 +9,8 @@ export class SectionService {
       data: {
         name: createSectionDto.name,
         position: createSectionDto.position,
+        icon: createSectionDto.icon,
+        color: createSectionDto.color,
         spaceId,
       },
     });
@@ -41,11 +43,26 @@ export class SectionService {
       throw new NotFoundException(`Section with id ${id} not found`);
     }
 
+    const isNameTaken = await prisma.section.findFirst({
+      where: {
+        name: updateSectionDto.name,
+        id: { not: id },
+      },
+    });
+
+    if (isNameTaken) {
+      throw new NotFoundException(
+        `Section with name ${updateSectionDto.name} already exists`,
+      );
+    }
+
     return await prisma.section.update({
       where: { id },
       data: {
         name: updateSectionDto.name,
         position: updateSectionDto.position,
+        icon: updateSectionDto.icon,
+        color: updateSectionDto.color,
       },
     });
   }
