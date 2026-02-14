@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { prisma } from '@nucleus/database';
 import { RegisterUserDto, UpdateUserDto } from '@nucleus/domain';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { RegisterUserService } from '../auth/register-user.usecase';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Public } from '../common/decorators/public.decorator';
 import { UserService } from './user.service';
 
 @Controller('users')

@@ -1,7 +1,7 @@
-import { Controller, Delete, Post, Body } from '@nestjs/common';
+import { Body, Controller, Delete, Post } from '@nestjs/common';
 import { LoginUserDto } from '@nucleus/domain';
-import { Public } from '../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
+import { Public } from './decorators/public.decorator';
 
 @Controller('sessions')
 export class SessionsController {
