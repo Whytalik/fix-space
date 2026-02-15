@@ -1,3 +1,5 @@
+import { DatabaseType } from '../database/database.config';
+
 export interface SectionDefinition {
   name: string;
   position: number;
@@ -9,15 +11,6 @@ export interface PropertyDefinition {
   position: number;
   isRequired?: boolean;
 }
-
-export type DatabaseType =
-  | 'trading-journal'
-  | 'daily-routine'
-  | 'notes'
-  | 'mistakes'
-  | 'accounts'
-  | 'trading-system'
-  | 'custom';
 
 export interface DatabaseDefinition {
   name: string;
