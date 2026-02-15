@@ -1,10 +1,12 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { RequestContextMiddleware } from './common/context/request-context.middleware';
+import { LoggerModule } from './common/logger/logger.module';
 import { validate } from './config/env.validation';
 import { DatabaseModule } from './database/database.module';
 import { JwtAuthGuard } from './jwt/jwt-auth.guard';
@@ -27,6 +29,7 @@ import { UserModule } from './user/user.module';
       ],
       validate,
     }),
+    LoggerModule,
     UserModule,
     AuthModule,
     JwtModule,
@@ -47,4 +50,8 @@ import { UserModule } from './user/user.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestContextMiddleware).forRoutes('*');
+  }
+}
