@@ -15,16 +15,19 @@ export class DatabaseResponseDto {
   title: string;
 
   @Expose()
+  icon?: string;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()
   updatedAt: Date;
 
   @Expose()
-  config?: Record<string, unknown>;
+  sectionId?: string;
 
   @Expose()
-  sectionId?: string;
+  config?: Record<string, unknown>;
 
   constructor(partial: Partial<DatabaseResponseDto>) {
     Object.assign(this, partial);

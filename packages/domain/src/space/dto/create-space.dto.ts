@@ -1,6 +1,5 @@
 import {
   IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
   MaxLength,
@@ -15,6 +14,6 @@ export class CreateSpaceDto {
   name: string;
 
   @IsOptional()
-  @IsObject()
-  config?: Record<string, unknown>;
+  @IsString()
+  icon?: string;
 }

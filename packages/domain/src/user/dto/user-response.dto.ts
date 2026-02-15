@@ -12,6 +12,9 @@ export class UserResponseDto {
   username: string;
 
   @Expose()
+  icon?: string;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()

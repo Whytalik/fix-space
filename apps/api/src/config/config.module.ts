@@ -7,4 +7,4 @@ import { InitializationConfigService } from './initialization-config.service';
   providers: [InitializationConfigService],
   exports: [InitializationConfigService],
 })
-export class InitializationConfigModule {}
+export class InitializationConfigModule { }

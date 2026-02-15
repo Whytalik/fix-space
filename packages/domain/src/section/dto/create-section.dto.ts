@@ -1,7 +1,6 @@
 import {
   IsInt,
   IsNotEmpty,
-  IsObject,
   IsOptional,
   IsString,
   MaxLength,
@@ -22,6 +21,10 @@ export class CreateSectionDto {
   position?: number;
 
   @IsOptional()
-  @IsObject()
-  config?: Record<string, unknown>;
+  @IsString()
+  icon?: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
 }

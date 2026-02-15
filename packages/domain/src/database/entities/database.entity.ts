@@ -6,10 +6,11 @@ export class Database {
   spaceId: string;
   name: string;
   title: string;
+  icon?: string;
   createdAt: Date;
   updatedAt: Date;
-  config?: Record<string, unknown>;
   sectionId?: string;
+  config?: Record<string, unknown>;
 
   space?: Space;
   section?: Section;
