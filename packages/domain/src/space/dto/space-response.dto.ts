@@ -14,6 +14,9 @@ export class SpaceResponseDto {
   name: string;
 
   @Expose()
+  icon?: string;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()

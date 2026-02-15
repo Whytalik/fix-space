@@ -6,7 +6,8 @@ export class Section {
   spaceId: string;
   name: string;
   position: number;
-  config?: Record<string, unknown>;
+  icon?: string;
+  color?: string;
   createdAt: Date;
   updatedAt: Date;
 

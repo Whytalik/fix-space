@@ -5,12 +5,10 @@ node_modules
 .pnp
 .pnp.js
 
-# Local env files
+# Environment files (only .env.example is committed)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.development
+.env.production
 packages/database/.env
 apps/web/.env
 
@@ -43,6 +41,8 @@ yarn-error.log*
 .project
 .classpath
 .c9/
+.claude
+CLAUDE.md
 *.launch
 .settings/
 *.sublime-workspace
