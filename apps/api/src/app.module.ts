@@ -15,7 +15,6 @@ import { PropertyValueModule } from './property-value/property-value.module';
 import { PropertyModule } from './property/property.module';
 import { RecordContentModule } from './record-content/record-content.module';
 import { RecordModule } from './record/record.module';
-import { SectionModule } from './section/section.module';
 import { SpaceModule } from './space/space.module';
 import { UserModule } from './user/user.module';
 
@@ -34,7 +33,6 @@ import { UserModule } from './user/user.module';
     AuthModule,
     JwtModule,
     SpaceModule,
-    SectionModule,
     DatabaseModule,
     PropertyModule,
     RecordModule,
