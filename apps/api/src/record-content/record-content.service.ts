@@ -1,11 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import { UpdateRecordContentDto } from '@nucleus/domain';
-import { defaultRecordContentConfig } from '../config/schemas';
+import { AppLogger } from '../common/logger/app-logger.service';
+import { defaultRecordContentConfig } from './record-content.config';
 
 @Injectable()
 export class RecordContentService {
+  constructor(private readonly logger: AppLogger) {
+    this.logger.setContext(RecordContentService.name);
+  }
+
   async findOrCreate(recordId: string) {
+    this.logger.debug('Finding or creating record content', { recordId });
+
     const record = await prisma.record.findUnique({
       where: { id: recordId },
     });
@@ -25,6 +32,11 @@ export class RecordContentService {
           config: defaultRecordContentConfig as Prisma.JsonValue,
         },
       });
+
+      this.logger.log('Record content created', {
+        contentId: content.id,
+        recordId,
+      });
     }
 
     return content;
@@ -34,6 +46,8 @@ export class RecordContentService {
     recordId: string,
     updateRecordContentDto: UpdateRecordContentDto,
   ) {
+    this.logger.debug('Upserting record content', { recordId });
+
     const record = await prisma.record.findUnique({
       where: { id: recordId },
     });
@@ -42,7 +56,7 @@ export class RecordContentService {
       throw new NotFoundException(`Record with id ${recordId} not found`);
     }
 
-    return await prisma.recordContent.upsert({
+    const content = await prisma.recordContent.upsert({
       where: { recordId },
       update: {
         lastEditedAt: new Date(),
@@ -52,9 +66,17 @@ export class RecordContentService {
         config: defaultRecordContentConfig as Prisma.JsonValue,
       },
     });
+
+    this.logger.log('Record content upserted', {
+      contentId: content.id,
+      recordId,
+    });
+    return content;
   }
 
   async remove(recordId: string) {
+    this.logger.debug('Removing record content', { recordId });
+
     const existingContent = await prisma.recordContent.findUnique({
       where: { recordId },
     });
@@ -65,8 +87,11 @@ export class RecordContentService {
       );
     }
 
-    return await prisma.recordContent.delete({
+    const content = await prisma.recordContent.delete({
       where: { recordId },
     });
+
+    this.logger.log('Record content removed', { recordId });
+    return content;
   }
 }

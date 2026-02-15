@@ -8,13 +8,23 @@ import {
   CreatePropertyValueDto,
   UpdatePropertyValueDto,
 } from '@nucleus/domain';
+import { AppLogger } from '../common/logger/app-logger.service';
 
 @Injectable()
 export class PropertyValueService {
+  constructor(private readonly logger: AppLogger) {
+    this.logger.setContext(PropertyValueService.name);
+  }
+
   async create(
     recordId: string,
     createPropertyValueDto: CreatePropertyValueDto,
   ) {
+    this.logger.debug('Creating property value', {
+      recordId,
+      propertyId: createPropertyValueDto.propertyId,
+    });
+
     const record = await prisma.record.findUnique({
       where: { id: recordId },
     });
@@ -34,6 +44,10 @@ export class PropertyValueService {
     }
 
     if (property.databaseId !== record.databaseId) {
+      this.logger.warn('Property-record database mismatch', {
+        propertyDatabaseId: property.databaseId,
+        recordDatabaseId: record.databaseId,
+      });
       throw new ConflictException(
         'Property does not belong to the same database as the record',
       );
@@ -49,12 +63,16 @@ export class PropertyValueService {
     });
 
     if (existingValue) {
+      this.logger.warn('Duplicate property value', {
+        recordId,
+        propertyId: createPropertyValueDto.propertyId,
+      });
       throw new ConflictException(
         'A value for this property already exists on this record',
       );
     }
 
-    return await prisma.propertyValue.create({
+    const propertyValue = await prisma.propertyValue.create({
       data: {
         recordId,
         propertyId: createPropertyValueDto.propertyId,
@@ -62,9 +80,16 @@ export class PropertyValueService {
         computed: createPropertyValueDto.computed ?? false,
       },
     });
+
+    this.logger.log('Property value created', {
+      propertyValueId: propertyValue.id,
+      recordId,
+    });
+    return propertyValue;
   }
 
   async findAll(recordId: string) {
+    this.logger.debug('Finding all property values', { recordId });
     return await prisma.propertyValue.findMany({
       where: { recordId },
       include: { property: true },
@@ -72,6 +97,8 @@ export class PropertyValueService {
   }
 
   async findOne(id: string) {
+    this.logger.debug('Finding property value', { id });
+
     const propertyValue = await prisma.propertyValue.findUnique({
       where: { id },
       include: { property: true },
@@ -85,6 +112,8 @@ export class PropertyValueService {
   }
 
   async update(id: string, updatePropertyValueDto: UpdatePropertyValueDto) {
+    this.logger.debug('Updating property value', { id });
+
     const existingValue = await prisma.propertyValue.findUnique({
       where: { id },
     });
@@ -93,16 +122,21 @@ export class PropertyValueService {
       throw new NotFoundException(`PropertyValue with id ${id} not found`);
     }
 
-    return await prisma.propertyValue.update({
+    const propertyValue = await prisma.propertyValue.update({
       where: { id },
       data: {
         value: updatePropertyValueDto.value as Prisma.InputJsonValue,
         computed: updatePropertyValueDto.computed,
       },
     });
+
+    this.logger.log('Property value updated', { id });
+    return propertyValue;
   }
 
   async remove(id: string) {
+    this.logger.debug('Removing property value', { id });
+
     const existingValue = await prisma.propertyValue.findUnique({
       where: { id },
     });
@@ -111,8 +145,11 @@ export class PropertyValueService {
       throw new NotFoundException(`PropertyValue with id ${id} not found`);
     }
 
-    return await prisma.propertyValue.delete({
+    const propertyValue = await prisma.propertyValue.delete({
       where: { id },
     });
+
+    this.logger.log('Property value removed', { id });
+    return propertyValue;
   }
 }

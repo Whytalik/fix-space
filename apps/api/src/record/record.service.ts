@@ -1,11 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import { CreateRecordDto, UpdateRecordDto } from '@nucleus/domain';
-import { defaultRecordConfig } from '../config/schemas';
+import { AppLogger } from '../common/logger/app-logger.service';
+import { defaultRecordConfig } from './record.config';
 
 @Injectable()
 export class RecordService {
+  constructor(private readonly logger: AppLogger) {
+    this.logger.setContext(RecordService.name);
+  }
+
   async create(databaseId: string, createRecordDto: CreateRecordDto) {
+    this.logger.debug('Creating record', { databaseId });
+
     const database = await prisma.database.findUnique({
       where: { id: databaseId },
     });
@@ -39,6 +46,12 @@ export class RecordService {
         });
       }
 
+      this.logger.log('Record created with property values', {
+        recordId: record.id,
+        databaseId,
+        propertyCount: properties.length,
+      });
+
       return await tx.record.findUnique({
         where: { id: record.id },
         include: { values: true, content: true },
@@ -47,6 +60,7 @@ export class RecordService {
   }
 
   async findAll(databaseId: string) {
+    this.logger.debug('Finding all records', { databaseId });
     return await prisma.record.findMany({
       where: { databaseId },
       include: { values: true, content: true },
@@ -55,6 +69,8 @@ export class RecordService {
   }
 
   async findOne(id: string) {
+    this.logger.debug('Finding record', { id });
+
     const record = await prisma.record.findUnique({
       where: { id },
       include: { values: true, content: true },
@@ -68,6 +84,8 @@ export class RecordService {
   }
 
   async update(id: string, updateRecordDto: UpdateRecordDto) {
+    this.logger.debug('Updating record', { id });
+
     const existingRecord = await prisma.record.findUnique({
       where: { id },
     });
@@ -76,7 +94,7 @@ export class RecordService {
       throw new NotFoundException(`Record with id ${id} not found`);
     }
 
-    return await prisma.record.update({
+    const record = await prisma.record.update({
       where: { id },
       data: {
         name: updateRecordDto.name,
@@ -84,9 +102,14 @@ export class RecordService {
       },
       include: { values: true, content: true },
     });
+
+    this.logger.log('Record updated', { id });
+    return record;
   }
 
   async remove(id: string) {
+    this.logger.debug('Removing record', { id });
+
     const existingRecord = await prisma.record.findUnique({
       where: { id },
     });
@@ -95,8 +118,11 @@ export class RecordService {
       throw new NotFoundException(`Record with id ${id} not found`);
     }
 
-    return await prisma.record.delete({
+    const record = await prisma.record.delete({
       where: { id },
     });
+
+    this.logger.log('Record removed', { id });
+    return record;
   }
 }
