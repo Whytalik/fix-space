@@ -1,7 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { InitializationConfigModule } from '../config/config.module';
 import { JwtModule } from '../jwt/jwt.module';
-import { SectionModule } from '../section/section.module';
 import { SpaceModule } from '../space/space.module';
 import { UserModule } from '../user/user.module';
 import { AuthService } from './auth.service';
@@ -13,7 +12,6 @@ import { SessionsController } from './sessions.controller';
     forwardRef(() => UserModule),
     JwtModule,
     SpaceModule,
-    SectionModule,
     InitializationConfigModule,
   ],
   controllers: [SessionsController],
