@@ -5,11 +5,21 @@ import {
 } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import { CreatePropertyDto, UpdatePropertyDto } from '@nucleus/domain';
-import { defaultPropertyConfig } from '../config/schemas';
+import { AppLogger } from '../common/logger/app-logger.service';
+import { defaultPropertyConfig } from './property.config';
 
 @Injectable()
 export class PropertyService {
+  constructor(private readonly logger: AppLogger) {
+    this.logger.setContext(PropertyService.name);
+  }
+
   async create(databaseId: string, createPropertyDto: CreatePropertyDto) {
+    this.logger.debug('Creating property', {
+      databaseId,
+      name: createPropertyDto.name,
+    });
+
     const isPropertyNameTaken = await prisma.property.findFirst({
       where: {
         name: createPropertyDto.name,
@@ -18,12 +28,16 @@ export class PropertyService {
     });
 
     if (isPropertyNameTaken) {
+      this.logger.warn('Duplicate property name', {
+        databaseId,
+        name: createPropertyDto.name,
+      });
       throw new ConflictException(
         'Property name is already taken in this database.',
       );
     }
 
-    return await prisma.property.create({
+    const property = await prisma.property.create({
       data: {
         name: createPropertyDto.name,
         type: createPropertyDto.type,
@@ -36,9 +50,16 @@ export class PropertyService {
         config: defaultPropertyConfig as Prisma.JsonValue,
       },
     });
+
+    this.logger.log('Property created', {
+      propertyId: property.id,
+      databaseId,
+    });
+    return property;
   }
 
   async findAll(databaseId: string) {
+    this.logger.debug('Finding all properties', { databaseId });
     return await prisma.property.findMany({
       where: { databaseId },
       orderBy: { position: 'asc' },
@@ -46,6 +67,8 @@ export class PropertyService {
   }
 
   async findOne(id: string) {
+    this.logger.debug('Finding property', { id });
+
     const property = await prisma.property.findUnique({
       where: { id },
     });
@@ -58,6 +81,8 @@ export class PropertyService {
   }
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto) {
+    this.logger.debug('Updating property', { id });
+
     const existingProperty = await prisma.property.findUnique({
       where: { id },
     });
@@ -79,13 +104,17 @@ export class PropertyService {
       });
 
       if (isPropertyNameTaken) {
+        this.logger.warn('Duplicate property name on update', {
+          id,
+          name: updatePropertyDto.name,
+        });
         throw new ConflictException(
           'Property name is already taken in this database.',
         );
       }
     }
 
-    return await prisma.property.update({
+    const property = await prisma.property.update({
       where: { id },
       data: {
         name: updatePropertyDto.name,
@@ -97,9 +126,14 @@ export class PropertyService {
         isPrimary: updatePropertyDto.isPrimary,
       },
     });
+
+    this.logger.log('Property updated', { id });
+    return property;
   }
 
   async remove(id: string) {
+    this.logger.debug('Removing property', { id });
+
     const existingProperty = await prisma.property.findUnique({
       where: { id },
     });
@@ -108,8 +142,11 @@ export class PropertyService {
       throw new NotFoundException(`Property with id ${id} not found`);
     }
 
-    return await prisma.property.delete({
+    const property = await prisma.property.delete({
       where: { id },
     });
+
+    this.logger.log('Property removed', { id });
+    return property;
   }
 }

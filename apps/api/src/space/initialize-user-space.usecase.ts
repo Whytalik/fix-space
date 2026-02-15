@@ -1,19 +1,23 @@
 import { Injectable } from '@nestjs/common';
+import { AppLogger } from '../common/logger/app-logger.service';
 import { InitializationConfigService } from '../config/initialization-config.service';
 import { DatabaseService } from '../database/database.service';
-import { SectionService } from '../section/section.service';
 import { SpaceService } from './space.service';
 
 @Injectable()
 export class InitializeUserSpaceUseCase {
   constructor(
     private readonly spaceService: SpaceService,
-    private readonly sectionService: SectionService,
     private readonly databaseService: DatabaseService,
     private readonly configService: InitializationConfigService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(InitializeUserSpaceUseCase.name);
+  }
 
   async initialize(userId: string, username: string) {
+    this.logger.log('Initializing user space', { userId, username });
+
     const config = this.configService.getConfig();
     const spaceName = this.configService.interpolateSpaceName(username);
 
@@ -26,7 +30,7 @@ export class InitializeUserSpaceUseCase {
     );
 
     for (const sectionDef of sortedSections) {
-      await this.sectionService.create(space.id, {
+      await this.spaceService.createSection(space.id, {
         name: sectionDef.name,
         position: sectionDef.position,
       });
@@ -39,6 +43,13 @@ export class InitializeUserSpaceUseCase {
         type: databaseDef.type,
       });
     }
+
+    this.logger.log('User space initialized', {
+      userId,
+      spaceId: space.id,
+      sections: sortedSections.length,
+      databases: config.databases.length,
+    });
 
     return space;
   }
