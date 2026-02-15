@@ -1,8 +1,6 @@
 import { z } from 'zod';
 
 export const envSchema = z.object({
-  // NODE_ENV is set by the runtime, not loaded from .env files.
-  // It is validated here but never belongs in an env file.
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
     .default('development'),

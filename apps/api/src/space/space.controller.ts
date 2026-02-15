@@ -6,9 +6,12 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateSpaceDto, UpdateSpaceDto } from '@nucleus/domain';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { RequireOwnership } from '../auth/decorators/required-ownership.decoractor';
+import { ResourceOwnerGuard } from '../auth/guards/resourse-owner.guard';
 import { SpaceService } from './space.service';
 
 @Controller('spaces')
@@ -31,16 +34,22 @@ export class SpaceController {
   }
 
   @Get(':id')
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({ model: 'space', param: 'ownerId', ownerField: 'id' })
   findOne(@Param('id') id: string) {
     return this.spaceService.findOne(id);
   }
 
   @Patch(':id')
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({ model: 'space', param: 'ownerId', ownerField: 'id' })
   update(@Param('id') id: string, @Body() updateSpaceDto: UpdateSpaceDto) {
     return this.spaceService.update(id, updateSpaceDto);
   }
 
   @Delete(':id')
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({ model: 'space', param: 'ownerId', ownerField: 'id' })
   remove(@Param('id') id: string) {
     return this.spaceService.remove(id);
   }
