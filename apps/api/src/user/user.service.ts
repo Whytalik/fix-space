@@ -29,6 +29,13 @@ export class UserService {
     });
   }
 
+  async findByEmailOrNull(email: string) {
+    this.logger.debug('Finding user by email (null if not found)', { email });
+    return prisma.user.findUnique({
+      where: { email },
+    });
+  }
+
   async findByUsername(username: string) {
     this.logger.debug('Finding user by username', { username });
     return prisma.user.findUniqueOrThrow({
