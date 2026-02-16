@@ -4,11 +4,15 @@ import { RegisterUserDto } from '@nucleus/domain';
 import { InitializeUserSpaceUseCase } from 'src/space/initialize-user-space.usecase';
 import { AppLogger } from '../common/logger/app-logger.service';
 import { hashPassword } from '../common/utils/password';
+import { MailService } from '../mail/mail.service';
+import { TokenService } from './token.service';
 
 @Injectable()
 export class RegisterUserService {
   constructor(
     private readonly initializeUserSpaceUseCase: InitializeUserSpaceUseCase,
+    private readonly tokenService: TokenService,
+    private readonly mailService: MailService,
     private readonly logger: AppLogger,
   ) {
     this.logger.setContext(RegisterUserService.name);
@@ -62,6 +66,25 @@ export class RegisterUserService {
       registerUserDto.username,
     );
 
-    return user;
+    // Generate verification token
+    const verificationToken =
+      await this.tokenService.createVerificationToken(user.id);
+
+    // Send verification email
+    await this.mailService.sendVerificationEmail(
+      user.email,
+      user.username,
+      verificationToken,
+    );
+
+    this.logger.log('Verification email sent', {
+      userId: user.id,
+      email: user.email,
+    });
+
+    return {
+      message:
+        'Registration successful. Please check your email to verify your account.',
+    };
   }
 }
