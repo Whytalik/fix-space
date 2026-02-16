@@ -3,18 +3,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { prisma } from '@nucleus/database';
 import { LoginUserDto } from '@nucleus/domain';
-import { Response } from 'express';
 import { AppLogger } from '../common/logger/app-logger.service';
-import {
-  clearAuthCookies,
-  CookieOptions,
-  parseDurationToMs,
-  setAccessTokenCookie,
-  setRefreshTokenCookie,
-} from '../common/utils/cookie.helper';
 import { comparePassword } from '../common/utils/password';
 import { UserService } from '../user/user.service';
 import { TokenService } from './token.service';
@@ -24,16 +15,12 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly tokenService: TokenService,
-    private readonly configService: ConfigService,
     private readonly logger: AppLogger,
   ) {
     this.logger.setContext(AuthService.name);
   }
 
-  async login(
-    loginUserDto: LoginUserDto,
-    res: Response,
-  ): Promise<{ message: string }> {
+  async login(loginUserDto: LoginUserDto) {
     this.logger.debug('Login attempt', { email: loginUserDto.email });
 
     const user = await prisma.user.findUnique({
@@ -77,35 +64,20 @@ export class AuthService {
     );
     const refreshToken = await this.tokenService.createRefreshToken(user.id);
 
-    // Set cookies
-    const cookieOpts = this.getCookieOptions();
-    setAccessTokenCookie(
-      res,
-      accessToken,
-      parseDurationToMs(
-        this.configService.get('JWT_ACCESS_EXPIRATION', '15m'),
-      ),
-      cookieOpts,
-    );
-    setRefreshTokenCookie(
-      res,
-      refreshToken,
-      parseDurationToMs(this.configService.get('JWT_REFRESH_EXPIRATION', '7d')),
-      cookieOpts,
-    );
-
     this.logger.log('Login successful', {
       userId: user.id,
       username: user.username,
     });
 
-    return { message: 'Login successful' };
+    // Return tokens - interceptor will set cookies
+    return {
+      message: 'Login successful',
+      accessToken,
+      refreshToken,
+    };
   }
 
-  async refresh(
-    refreshTokenRaw: string,
-    res: Response,
-  ): Promise<{ message: string }> {
+  async refresh(refreshTokenRaw: string) {
     if (!refreshTokenRaw) {
       throw new UnauthorizedException('Refresh token not provided');
     }
@@ -129,44 +101,31 @@ export class AuthService {
       user.username,
     );
 
-    // Set new cookies
-    const cookieOpts = this.getCookieOptions();
-    setAccessTokenCookie(
-      res,
-      newAccessToken,
-      parseDurationToMs(
-        this.configService.get('JWT_ACCESS_EXPIRATION', '15m'),
-      ),
-      cookieOpts,
-    );
-    setRefreshTokenCookie(
-      res,
-      newRefreshToken,
-      parseDurationToMs(this.configService.get('JWT_REFRESH_EXPIRATION', '7d')),
-      cookieOpts,
-    );
-
     this.logger.log('Token refreshed successfully', { userId: user.id });
 
-    return { message: 'Token refreshed successfully' };
+    // Return tokens - interceptor will set cookies
+    return {
+      message: 'Token refreshed successfully',
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    };
   }
 
-  async logout(
-    refreshTokenRaw: string,
-    res: Response,
-  ): Promise<{ message: string }> {
+  async logout(refreshTokenRaw: string) {
     if (refreshTokenRaw) {
       await this.tokenService.revokeRefreshToken(refreshTokenRaw);
     }
 
-    clearAuthCookies(res, this.getCookieOptions());
-
     this.logger.log('Logout successful');
 
-    return { message: 'Logged out successfully' };
+    // Return clearCookies flag - interceptor will clear cookies
+    return {
+      message: 'Logged out successfully',
+      clearCookies: true,
+    };
   }
 
-  async verifyEmail(token: string): Promise<{ message: string }> {
+  async verifyEmail(token: string) {
     const validated = await this.tokenService.validateVerificationToken(token);
 
     if (!validated) {
@@ -185,12 +144,5 @@ export class AuthService {
     });
 
     return { message: 'Email verified successfully' };
-  }
-
-  private getCookieOptions(): CookieOptions {
-    return {
-      domain: this.configService.get('COOKIE_DOMAIN', 'localhost'),
-      secure: this.configService.get('NODE_ENV') === 'production',
-    };
   }
 }
