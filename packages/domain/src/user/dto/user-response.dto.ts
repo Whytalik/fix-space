@@ -15,6 +15,9 @@ export class UserResponseDto {
   icon?: string;
 
   @Expose()
+  isVerified: boolean;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()
