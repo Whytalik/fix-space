@@ -46,7 +46,7 @@ model User {
   createdAt    DateTime @default(now())
 
   spaces             Space[]
-  userSettings       UserSettings[]
+  settings           Settings[]
   refreshTokens      RefreshToken[]
   verificationTokens EmailVerificationToken[]
 
@@ -82,7 +82,7 @@ model EmailVerificationToken {
   @@index([tokenHash])
 }
 
-model UserSettings {
+model Settings {
   id       String @id @default(uuid())
   userId   String
   key      String
@@ -412,15 +412,3 @@ model RecordContent {
  * }
  */
 
-model SystemSettings {
-  id        String   @id @default(uuid())
-  key       String   @unique
-  value     Json
-  category  String
-  isPublic  Boolean  @default(false)
-  updatedAt DateTime @updatedAt
-  updatedBy String?
-
-  @@index([category])
-  @@index([key])
-}
