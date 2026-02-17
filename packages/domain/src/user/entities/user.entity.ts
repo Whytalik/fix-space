@@ -6,6 +6,7 @@ export class User {
   username: string;
   passwordHash: string;
   icon?: string;
+  isVerified: boolean;
   createdAt: Date;
 
   spaces?: Space[];
