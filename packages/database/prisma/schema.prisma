@@ -42,12 +42,44 @@ model User {
   username     String   @unique
   passwordHash String
   icon         String?
+  isVerified   Boolean  @default(false)
   createdAt    DateTime @default(now())
 
-  spaces       Space[]
-  userSettings UserSettings[]
+  spaces             Space[]
+  userSettings       UserSettings[]
+  refreshTokens      RefreshToken[]
+  verificationTokens EmailVerificationToken[]
 
   @@index([email])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
 }
 
 model UserSettings {
