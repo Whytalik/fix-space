@@ -18,6 +18,7 @@ import { RecordContentModule } from './record-content/record-content.module';
 import { RecordModule } from './record/record.module';
 import { SpaceModule } from './space/space.module';
 import { UserModule } from './user/user.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { UserModule } from './user/user.module';
     RecordModule,
     PropertyValueModule,
     RecordContentModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [
