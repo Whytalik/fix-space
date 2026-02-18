@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
-import { UpdateRecordContentDto } from '@nucleus/domain';
+import {
+  RecordContentResponseDto,
+  UpdateRecordContentDto,
+} from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
 import { defaultRecordContentConfig } from './record-content.config';
 
@@ -10,7 +13,7 @@ export class RecordContentService {
     this.logger.setContext(RecordContentService.name);
   }
 
-  async findOrCreate(recordId: string) {
+  async findOrCreate(recordId: string): Promise<RecordContentResponseDto> {
     this.logger.debug('Finding or creating record content', { recordId });
 
     const record = await prisma.record.findUnique({
@@ -39,13 +42,13 @@ export class RecordContentService {
       });
     }
 
-    return content;
+    return new RecordContentResponseDto(content);
   }
 
   async upsert(
     recordId: string,
     updateRecordContentDto: UpdateRecordContentDto,
-  ) {
+  ): Promise<RecordContentResponseDto> {
     this.logger.debug('Upserting record content', { recordId });
 
     const record = await prisma.record.findUnique({
@@ -71,10 +74,10 @@ export class RecordContentService {
       contentId: content.id,
       recordId,
     });
-    return content;
+    return new RecordContentResponseDto(content);
   }
 
-  async remove(recordId: string) {
+  async remove(recordId: string): Promise<RecordContentResponseDto> {
     this.logger.debug('Removing record content', { recordId });
 
     const existingContent = await prisma.recordContent.findUnique({
@@ -92,6 +95,6 @@ export class RecordContentService {
     });
 
     this.logger.log('Record content removed', { recordId });
-    return content;
+    return new RecordContentResponseDto(content);
   }
 }

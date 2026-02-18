@@ -20,7 +20,7 @@ export class SpaceResponseDto {
   createdAt: Date;
 
   @Expose()
-  config?: Record<string, unknown>;
+  config?: unknown;
 
   @Expose()
   @Type(() => SectionResponseDto)

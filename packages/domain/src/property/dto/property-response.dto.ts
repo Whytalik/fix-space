@@ -1,5 +1,4 @@
 import { Exclude, Expose } from 'class-transformer';
-import { PropertyType } from './create-property.dto';
 
 @Exclude()
 export class PropertyResponseDto {
@@ -13,7 +12,7 @@ export class PropertyResponseDto {
   name: string;
 
   @Expose()
-  type: PropertyType;
+  type: string;
 
   @Expose()
   position: number;
@@ -37,7 +36,7 @@ export class PropertyResponseDto {
   updatedAt: Date;
 
   @Expose()
-  config?: Record<string, unknown>;
+  config?: unknown;
 
   constructor(partial: Partial<PropertyResponseDto>) {
     Object.assign(this, partial);

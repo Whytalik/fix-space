@@ -23,7 +23,7 @@ export class RecordResponseDto {
   updatedAt: Date;
 
   @Expose()
-  config?: Record<string, unknown>;
+  config?: unknown;
 
   @Expose()
   @Type(() => PropertyValueResponseDto)

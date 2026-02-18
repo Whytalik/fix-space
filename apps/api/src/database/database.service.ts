@@ -4,7 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
-import { CreateDatabaseDto, UpdateDatabaseDto } from '@nucleus/domain';
+import {
+  CreateDatabaseDto,
+  DatabaseResponseDto,
+  UpdateDatabaseDto,
+} from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
 import { defaultInitializationConfig } from '../config/initialization.config';
 import { defaultPropertyConfig } from '../property/property.config';
@@ -16,7 +20,10 @@ export class DatabaseService {
     this.logger.setContext(DatabaseService.name);
   }
 
-  async create(spaceId: string, createDatabaseDto: CreateDatabaseDto) {
+  async create(
+    spaceId: string,
+    createDatabaseDto: CreateDatabaseDto,
+  ): Promise<DatabaseResponseDto> {
     this.logger.debug('Creating database', {
       spaceId,
       name: createDatabaseDto.name,
@@ -73,18 +80,19 @@ export class DatabaseService {
         propertyCount: defaultInitializationConfig.defaultDatabaseProperties.length,
       });
 
-      return database;
+      return new DatabaseResponseDto(database);
     });
   }
 
-  async findAll(spaceId: string) {
+  async findAll(spaceId: string): Promise<DatabaseResponseDto[]> {
     this.logger.debug('Finding all databases', { spaceId });
-    return await prisma.database.findMany({
+    const databases = await prisma.database.findMany({
       where: { spaceId },
     });
+    return databases.map((database) => new DatabaseResponseDto(database));
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<DatabaseResponseDto> {
     this.logger.debug('Finding database', { id });
 
     const database = await prisma.database.findUnique({
@@ -95,10 +103,13 @@ export class DatabaseService {
       throw new NotFoundException(`Database with id ${id} not found`);
     }
 
-    return database;
+    return new DatabaseResponseDto(database);
   }
 
-  async update(id: string, updateDatabaseDto: UpdateDatabaseDto) {
+  async update(
+    id: string,
+    updateDatabaseDto: UpdateDatabaseDto,
+  ): Promise<DatabaseResponseDto> {
     this.logger.debug('Updating database', { id });
 
     const existingDatabase = await prisma.database.findUnique({
@@ -120,10 +131,10 @@ export class DatabaseService {
     });
 
     this.logger.log('Database updated', { id });
-    return database;
+    return new DatabaseResponseDto(database);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<DatabaseResponseDto> {
     this.logger.debug('Removing database', { id });
 
     const existingDatabase = await prisma.database.findUnique({
@@ -139,6 +150,6 @@ export class DatabaseService {
     });
 
     this.logger.log('Database removed', { id });
-    return database;
+    return new DatabaseResponseDto(database);
   }
 }
