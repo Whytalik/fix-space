@@ -12,7 +12,7 @@ export class RecordContentResponseDto {
   lastEditedAt: Date;
 
   @Expose()
-  config?: Record<string, unknown>;
+  config?: unknown;
 
   constructor(partial: Partial<RecordContentResponseDto>) {
     Object.assign(this, partial);
