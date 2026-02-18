@@ -21,7 +21,7 @@ export class UserResponseDto {
   createdAt: Date;
 
   @Expose()
-  settingsConfig?: Record<string, unknown>;
+  settingsConfig?: unknown;
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);

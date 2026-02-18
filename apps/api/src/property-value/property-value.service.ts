@@ -6,6 +6,7 @@ import {
 import { Prisma, prisma } from '@nucleus/database';
 import {
   CreatePropertyValueDto,
+  PropertyValueResponseDto,
   UpdatePropertyValueDto,
 } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
@@ -19,7 +20,7 @@ export class PropertyValueService {
   async create(
     recordId: string,
     createPropertyValueDto: CreatePropertyValueDto,
-  ) {
+  ): Promise<PropertyValueResponseDto> {
     this.logger.debug('Creating property value', {
       recordId,
       propertyId: createPropertyValueDto.propertyId,
@@ -85,18 +86,21 @@ export class PropertyValueService {
       propertyValueId: propertyValue.id,
       recordId,
     });
-    return propertyValue;
+    return new PropertyValueResponseDto(propertyValue);
   }
 
-  async findAll(recordId: string) {
+  async findAll(recordId: string): Promise<PropertyValueResponseDto[]> {
     this.logger.debug('Finding all property values', { recordId });
-    return await prisma.propertyValue.findMany({
+    const propertyValues = await prisma.propertyValue.findMany({
       where: { recordId },
       include: { property: true },
     });
+    return propertyValues.map(
+      (propertyValue) => new PropertyValueResponseDto(propertyValue),
+    );
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<PropertyValueResponseDto> {
     this.logger.debug('Finding property value', { id });
 
     const propertyValue = await prisma.propertyValue.findUnique({
@@ -108,10 +112,13 @@ export class PropertyValueService {
       throw new NotFoundException(`PropertyValue with id ${id} not found`);
     }
 
-    return propertyValue;
+    return new PropertyValueResponseDto(propertyValue);
   }
 
-  async update(id: string, updatePropertyValueDto: UpdatePropertyValueDto) {
+  async update(
+    id: string,
+    updatePropertyValueDto: UpdatePropertyValueDto,
+  ): Promise<PropertyValueResponseDto> {
     this.logger.debug('Updating property value', { id });
 
     const existingValue = await prisma.propertyValue.findUnique({
@@ -131,10 +138,10 @@ export class PropertyValueService {
     });
 
     this.logger.log('Property value updated', { id });
-    return propertyValue;
+    return new PropertyValueResponseDto(propertyValue);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<PropertyValueResponseDto> {
     this.logger.debug('Removing property value', { id });
 
     const existingValue = await prisma.propertyValue.findUnique({
@@ -150,6 +157,6 @@ export class PropertyValueService {
     });
 
     this.logger.log('Property value removed', { id });
-    return propertyValue;
+    return new PropertyValueResponseDto(propertyValue);
   }
 }
