@@ -27,7 +27,7 @@ export class DatabaseResponseDto {
   sectionId?: string;
 
   @Expose()
-  config?: Record<string, unknown>;
+  config?: unknown;
 
   constructor(partial: Partial<DatabaseResponseDto>) {
     Object.assign(this, partial);

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { prisma } from '@nucleus/database';
-import { UpdateUserDto } from '@nucleus/domain';
+import { UpdateUserDto, UserResponseDto } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
 import { hashPassword } from '../common/utils/password';
 
@@ -10,40 +10,45 @@ export class UserService {
     this.logger.setContext(UserService.name);
   }
 
-  async findAll() {
+  async findAll(): Promise<UserResponseDto[]> {
     this.logger.debug('Finding all users');
-    return prisma.user.findMany();
+    const users = await prisma.user.findMany();
+    return users.map((user) => new UserResponseDto(user));
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<UserResponseDto> {
     this.logger.debug('Finding user by id', { id });
-    return prisma.user.findUniqueOrThrow({
+    const user = await prisma.user.findUniqueOrThrow({
       where: { id },
     });
+    return new UserResponseDto(user);
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string): Promise<UserResponseDto> {
     this.logger.debug('Finding user by email', { email });
-    return prisma.user.findUniqueOrThrow({
+    const user = await prisma.user.findUniqueOrThrow({
       where: { email },
     });
+    return new UserResponseDto(user);
   }
 
-  async findByEmailOrNull(email: string) {
+  async findByEmailOrNull(email: string): Promise<UserResponseDto | null> {
     this.logger.debug('Finding user by email (null if not found)', { email });
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
     });
+    return user ? new UserResponseDto(user) : null;
   }
 
-  async findByUsername(username: string) {
+  async findByUsername(username: string): Promise<UserResponseDto> {
     this.logger.debug('Finding user by username', { username });
-    return prisma.user.findUniqueOrThrow({
+    const user = await prisma.user.findUniqueOrThrow({
       where: { username },
     });
+    return new UserResponseDto(user);
   }
 
-  async update(id: string, dto: UpdateUserDto) {
+  async update(id: string, dto: UpdateUserDto): Promise<UserResponseDto> {
     this.logger.debug('Updating user', { id });
     const { password, ...rest } = dto;
 
@@ -56,10 +61,10 @@ export class UserService {
     });
 
     this.logger.log('User updated', { id });
-    return user;
+    return new UserResponseDto(user);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<UserResponseDto> {
     this.logger.debug('Removing user', { id });
 
     const user = await prisma.user.delete({
@@ -67,6 +72,6 @@ export class UserService {
     });
 
     this.logger.log('User removed', { id });
-    return user;
+    return new UserResponseDto(user);
   }
 }
