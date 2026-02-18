@@ -12,11 +12,15 @@ import { CreateSpaceDto, UpdateSpaceDto } from '@nucleus/domain';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { RequireOwnership } from '../auth/decorators/required-ownership.decoractor';
 import { ResourceOwnerGuard } from '../auth/guards/resourse-owner.guard';
+import { DuplicateSpaceUseCase } from './providers/duplicate-space.usecase';
 import { SpaceService } from './space.service';
 
 @Controller('spaces')
 export class SpaceController {
-  constructor(private readonly spaceService: SpaceService) {}
+  constructor(
+    private readonly spaceService: SpaceService,
+    private readonly duplicateSpaceUseCase: DuplicateSpaceUseCase,
+  ) {}
 
   @Post()
   async create(
@@ -52,5 +56,16 @@ export class SpaceController {
   @RequireOwnership({ model: 'space', param: 'ownerId', ownerField: 'id' })
   remove(@Param('id') id: string) {
     return this.spaceService.remove(id);
+  }
+
+  @Post(':id/duplicate')
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({ model: 'space', param: 'ownerId', ownerField: 'id' })
+  duplicate(
+    @Param('id') id: string,
+    @CurrentUser('userId') userId: string,
+    @Body() body?: { name?: string },
+  ) {
+    return this.duplicateSpaceUseCase.execute(id, userId, { newName: body?.name });
   }
 }

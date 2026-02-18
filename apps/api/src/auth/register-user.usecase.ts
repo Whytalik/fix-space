@@ -1,10 +1,10 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { prisma } from '@nucleus/database';
 import { RegisterUserDto } from '@nucleus/domain';
-import { InitializeUserSpaceUseCase } from '../space/initialize-user-space.usecase';
 import { AppLogger } from '../common/logger/app-logger.service';
 import { hashPassword } from '../common/utils/password';
 import { MailService } from '../mail/mail.service';
+import { InitializeUserSpaceUseCase } from '../space/providers/initialize-user-space.usecase';
 import { TokenService } from './token.service';
 
 @Injectable()
