@@ -5,14 +5,15 @@ import {
 } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import {
-  CreateSectionDto,
   CreateSpaceDto,
+  DEFAULT_SPACE_SETTINGS,
   SectionOperationDto,
-  SectionOperationType,
+  SpaceResponseDto,
   UpdateSpaceDto,
 } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
-import { defaultSpaceConfig } from './space.config';
+import { SettingsService } from '../settings/settings.service';
+import { SectionService } from './providers/section.service';
 
 const sectionsInclude = {
   sections: {
@@ -24,12 +25,22 @@ const sectionsInclude = {
 
 @Injectable()
 export class SpaceService {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly sectionService: SectionService,
+    private readonly settingsService: SettingsService,
+  ) {
     this.logger.setContext(SpaceService.name);
   }
 
-  async create(ownerId: string, dto: CreateSpaceDto) {
+  async create(ownerId: string, dto: CreateSpaceDto): Promise<SpaceResponseDto> {
     this.logger.debug('Creating space', { ownerId, name: dto.name });
+
+    const spaceSettings = await this.settingsService.getSettings(
+      ownerId,
+      'space',
+      DEFAULT_SPACE_SETTINGS,
+    );
 
     try {
       const space = await prisma.space.create({
@@ -37,13 +48,13 @@ export class SpaceService {
           name: dto.name,
           icon: dto.icon,
           ownerId,
-          config: defaultSpaceConfig as Prisma.JsonValue,
+          config: spaceSettings as unknown as Prisma.JsonValue,
         },
         include: sectionsInclude,
       });
 
       this.logger.log('Space created', { spaceId: space.id, ownerId });
-      return space;
+      return new SpaceResponseDto(space);
     } catch (e: unknown) {
       if ((e as { code?: string })?.code === 'P2002') {
         this.logger.warn('Duplicate space name', { ownerId, name: dto.name });
@@ -55,15 +66,16 @@ export class SpaceService {
     }
   }
 
-  async findAll(ownerId: string) {
+  async findAll(ownerId: string): Promise<SpaceResponseDto[]> {
     this.logger.debug('Finding all spaces', { ownerId });
-    return prisma.space.findMany({
+    const spaces = await prisma.space.findMany({
       where: { ownerId },
       include: sectionsInclude,
     });
+    return spaces.map((space) => new SpaceResponseDto(space));
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<SpaceResponseDto> {
     this.logger.debug('Finding space', { id });
 
     const space = await prisma.space.findUnique({
@@ -75,10 +87,10 @@ export class SpaceService {
       throw new NotFoundException(`Space with id ${id} not found`);
     }
 
-    return space;
+    return new SpaceResponseDto(space);
   }
 
-  async update(id: string, dto: UpdateSpaceDto) {
+  async update(id: string, dto: UpdateSpaceDto): Promise<SpaceResponseDto> {
     this.logger.debug('Updating space', { id });
     const { sectionOperations, ...spaceData } = dto;
 
@@ -88,7 +100,7 @@ export class SpaceService {
           spaceId: id,
           count: sectionOperations.length,
         });
-        await this.processSectionOperations(
+        await this.sectionService.processOperations(
           tx,
           id,
           sectionOperations as SectionOperationDto[],
@@ -106,7 +118,7 @@ export class SpaceService {
         });
 
         this.logger.log('Space updated', { spaceId: id });
-        return space;
+        return new SpaceResponseDto(space);
       } catch (e: unknown) {
         if ((e as { code?: string })?.code === 'P2025') {
           throw new NotFoundException(`Space with id ${id} not found`);
@@ -122,7 +134,7 @@ export class SpaceService {
     });
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<SpaceResponseDto> {
     this.logger.debug('Removing space', { id });
 
     try {
@@ -131,167 +143,12 @@ export class SpaceService {
       });
 
       this.logger.log('Space removed', { id });
-      return space;
+      return new SpaceResponseDto(space);
     } catch (e: unknown) {
       if ((e as { code?: string })?.code === 'P2025') {
         throw new NotFoundException(`Space with id ${id} not found`);
       }
       throw e;
     }
-  }
-
-  async createSection(spaceId: string, dto: CreateSectionDto) {
-    this.logger.debug('Creating section', { spaceId, name: dto.name });
-
-    try {
-      const section = await prisma.section.create({
-        data: {
-          name: dto.name,
-          position: dto.position,
-          icon: dto.icon,
-          color: dto.color,
-          spaceId,
-        },
-      });
-
-      this.logger.log('Section created', {
-        sectionId: section.id,
-        spaceId,
-      });
-      return section;
-    } catch (e: unknown) {
-      if ((e as { code?: string })?.code === 'P2003') {
-        throw new NotFoundException(`Space with id ${spaceId} not found`);
-      }
-      throw e;
-    }
-  }
-
-  // ===== Section operations =====
-
-  private async processSectionOperations(
-    tx: Prisma.TransactionClient,
-    spaceId: string,
-    operations: SectionOperationDto[],
-  ) {
-    for (const operation of operations) {
-      switch (operation.operation) {
-        case SectionOperationType.CREATE:
-          await this.createSectionInternal(tx, spaceId, operation);
-          break;
-        case SectionOperationType.UPDATE:
-          await this.updateSectionInternal(tx, spaceId, operation);
-          break;
-        case SectionOperationType.DELETE:
-          await this.deleteSectionInternal(tx, spaceId, operation);
-          break;
-      }
-    }
-  }
-
-  private async createSectionInternal(
-    tx: Prisma.TransactionClient,
-    spaceId: string,
-    operation: SectionOperationDto,
-  ) {
-    if (!operation.create) {
-      throw new BadRequestException(
-        'CREATE operation requires "create" field with section data',
-      );
-    }
-
-    await tx.section.create({
-      data: {
-        name: operation.create.name,
-        position: operation.create.position,
-        icon: operation.create.icon,
-        color: operation.create.color,
-        spaceId,
-      },
-    });
-  }
-
-  private async updateSectionInternal(
-    tx: Prisma.TransactionClient,
-    spaceId: string,
-    operation: SectionOperationDto,
-  ) {
-    if (!operation.id) {
-      throw new BadRequestException('UPDATE operation requires "id" field');
-    }
-
-    const section = await tx.section.findUnique({
-      where: { id: operation.id },
-    });
-
-    if (!section) {
-      throw new NotFoundException(`Section with id ${operation.id} not found`);
-    }
-
-    if (section.spaceId !== spaceId) {
-      throw new BadRequestException(
-        `Section with id ${operation.id} does not belong to this space`,
-      );
-    }
-
-    if (operation.update?.name) {
-      const duplicate = await tx.section.findFirst({
-        where: {
-          name: operation.update.name,
-          spaceId,
-          id: { not: operation.id },
-        },
-      });
-
-      if (duplicate) {
-        this.logger.warn('Duplicate section name', {
-          spaceId,
-          name: operation.update.name,
-        });
-        throw new BadRequestException(
-          `Section with name "${operation.update.name}" already exists in this space`,
-        );
-      }
-    }
-
-    await tx.section.update({
-      where: { id: operation.id },
-      data: {
-        name: operation.update?.name,
-        position: operation.update?.position,
-        icon: operation.update?.icon,
-        color: operation.update?.color,
-      },
-    });
-  }
-
-  private async deleteSectionInternal(
-    tx: Prisma.TransactionClient,
-    spaceId: string,
-    operation: SectionOperationDto,
-  ) {
-    if (!operation.id) {
-      throw new BadRequestException('DELETE operation requires "id" field');
-    }
-
-    const section = await tx.section.findUnique({
-      where: { id: operation.id },
-    });
-
-    if (!section) {
-      throw new NotFoundException(`Section with id ${operation.id} not found`);
-    }
-
-    if (section.spaceId !== spaceId) {
-      throw new BadRequestException(
-        `Section with id ${operation.id} does not belong to this space`,
-      );
-    }
-
-    await tx.section.delete({
-      where: { id: operation.id },
-    });
-
-    this.logger.log('Section deleted', { sectionId: operation.id, spaceId });
   }
 }

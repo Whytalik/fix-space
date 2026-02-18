@@ -1,13 +1,12 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException } from '@nestjs/common';
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { prisma } from '@nucleus/database';
+import { AppLogger } from '../../common/logger/app-logger.service';
+import * as passwordUtils from '../../common/utils/password';
+import { MailService } from '../../mail/mail.service';
+import { InitializeUserSpaceUseCase } from '../../space/providers/initialize-user-space.usecase';
 import { RegisterUserService } from '../register-user.usecase';
 import { TokenService } from '../token.service';
-import { MailService } from '../../mail/mail.service';
-import { AppLogger } from '../../common/logger/app-logger.service';
-import { InitializeUserSpaceUseCase } from '../../space/initialize-user-space.usecase';
-import { prisma } from '@nucleus/database';
-import * as passwordUtils from '../../common/utils/password';
 
 // Mock modules
 jest.mock('@nucleus/database', () => ({
@@ -471,7 +470,7 @@ describe('RegisterUserService', () => {
       });
 
       const start1 = Date.now();
-      await service.register(registerDto).catch(() => {});
+      await service.register(registerDto).catch(() => { });
       const duration1 = Date.now() - start1;
 
       // Test existing username timing
@@ -483,7 +482,7 @@ describe('RegisterUserService', () => {
         });
 
       const start2 = Date.now();
-      await service.register(registerDto).catch(() => {});
+      await service.register(registerDto).catch(() => { });
       const duration2 = Date.now() - start2;
 
       // Timings should be similar
