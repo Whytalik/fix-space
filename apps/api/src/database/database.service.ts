@@ -9,14 +9,18 @@ import {
   DatabaseResponseDto,
   UpdateDatabaseDto,
 } from '@nucleus/domain';
+import { PropertyType } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
 import { defaultInitializationConfig } from '../config/initialization.config';
-import { defaultPropertyConfig } from '../property/property.config';
+import { PropertyTypeRegistry } from '../property/types';
 import { defaultDatabaseConfig } from './database.config';
 
 @Injectable()
 export class DatabaseService {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly typeRegistry: PropertyTypeRegistry,
+  ) {
     this.logger.setContext(DatabaseService.name);
   }
 
@@ -62,6 +66,11 @@ export class DatabaseService {
       });
 
       for (const propertyDef of defaultInitializationConfig.defaultDatabaseProperties) {
+        const handler = this.typeRegistry.getHandler(
+          propertyDef.type as PropertyType,
+        );
+        const config = handler.getDefaultConfig();
+
         await tx.property.create({
           data: {
             name: propertyDef.name,
@@ -69,7 +78,7 @@ export class DatabaseService {
             position: propertyDef.position,
             isRequired: propertyDef.isRequired ?? false,
             databaseId: database.id,
-            config: defaultPropertyConfig as Prisma.JsonValue,
+            config: config as Prisma.JsonValue,
           },
         });
       }
