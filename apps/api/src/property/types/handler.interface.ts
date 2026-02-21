@@ -1,8 +1,17 @@
-import { PropertyType } from "@nucleus/domain";
+import { PropertyType } from '@nucleus/domain';
 
 export interface PropertyTypeHandler {
-  type: PropertyType;
-  validate(value: unknown): boolean;
-  formatValue(value: unknown): unknown;
-  getDefaultValue(): unknown;
+  readonly type: PropertyType;
+
+  // Config operations (Property.config column)
+  getDefaultConfig(): Record<string, unknown>;
+  validateConfig(config: Record<string, unknown>): string[] | null;
+
+  // Value operations (PropertyValue.value column)
+  validateValue(
+    value: unknown,
+    config: Record<string, unknown>,
+  ): string[] | null;
+  formatValue(value: unknown, config: Record<string, unknown>): unknown;
+  getDefaultValue(config: Record<string, unknown>): unknown;
 }

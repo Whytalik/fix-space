@@ -1,17 +1,32 @@
-import { Injectable } from "@nestjs/common";
-import { PropertyType } from "@nucleus/domain";
-import { PropertyTypeHandler } from "../handler.interface";
+import { Injectable } from '@nestjs/common';
+import { PropertyType } from '@nucleus/domain';
+import { PropertyTypeHandler } from '../handler.interface';
 
 @Injectable()
 export class CheckboxHandler implements PropertyTypeHandler {
-  type: PropertyType;
-  validate(value: unknown): boolean {
-    throw new Error("Method not implemented.");
+  readonly type = PropertyType.TEXT; // placeholder — update when CHECKBOX added to enum
+
+  getDefaultConfig(): Record<string, unknown> {
+    return { defaultValue: false };
   }
-  formatValue(value: unknown): unknown {
-    throw new Error("Method not implemented.");
+
+  validateConfig(_config: Record<string, unknown>): string[] | null {
+    return null;
   }
-  getDefaultValue(): unknown {
-    throw new Error("Method not implemented.");
+
+  validateValue(value: unknown, _config: Record<string, unknown>): string[] | null {
+    if (value !== null && typeof value !== 'boolean') {
+      return ['Checkbox value must be a boolean or null'];
+    }
+    return null;
+  }
+
+  formatValue(value: unknown, _config: Record<string, unknown>): unknown {
+    if (value === null || value === undefined) return false;
+    return Boolean(value);
+  }
+
+  getDefaultValue(_config: Record<string, unknown>): unknown {
+    return false;
   }
 }
