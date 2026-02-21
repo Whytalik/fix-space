@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { PropertyController } from './property.controller';
 import { PropertyService } from './property.service';
 import {
-  PROPERTY_TYPE_HANDLERS,
   NumberHandler,
+  PROPERTY_TYPE_HANDLERS,
   PropertyTypeRegistry,
   TextHandler,
 } from './types';
@@ -25,4 +25,4 @@ const handlers = [TextHandler, NumberHandler];
   ],
   exports: [PropertyService, PropertyTypeRegistry],
 })
-export class PropertyModule {}
+export class PropertyModule { }
