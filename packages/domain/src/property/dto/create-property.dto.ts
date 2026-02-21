@@ -46,4 +46,7 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsString()
   color?: string;
+
+  @IsOptional()
+  config?: Record<string, unknown>;
 }
