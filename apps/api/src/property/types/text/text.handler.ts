@@ -31,6 +31,14 @@ export class TextHandler implements PropertyTypeHandler {
       errors.push('isRichText must be a boolean');
     }
 
+    const validUrlHandling = ['none', 'detect', 'preview'];
+    if (
+      config.urlHandling !== undefined &&
+      !validUrlHandling.includes(config.urlHandling as string)
+    ) {
+      errors.push(`urlHandling must be one of: ${validUrlHandling.join(', ')}`);
+    }
+
     return errors.length > 0 ? errors : null;
   }
 
