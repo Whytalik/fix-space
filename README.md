@@ -28,29 +28,31 @@ Traders often struggle with fragmented data and a lack of centralized, specializ
 
 ## 🛠️ Tech Stack
 
-The project is a monorepo built with Turborepo and uses the following technologies:
-
-- **Frontend:** [Next.js](https://nextjs.org/) with [TypeScript](https://www.typescriptlang.org/) and [React Query](https://tanstack.com/query/latest)
-- **Backend:** [NestJS](https://nestjs.com/) with [TypeScript](https://www.typescriptlang.org/)
-- **Database ORM:** [Prisma](https://www.prisma.io/)
-- **Database:** [PostgreSQL](https://www.postgresql.org/)
-- **AI Integration:** [OpenAI API](https://openai.com/docs) 🤖
-- **Deployment:** [Vercel](https://vercel.com/) (Frontend) & [Google Cloud Run](https://cloud.google.com/run) (Backend)
+| Category       | Technology                                                                                            |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| **Frontend**   | [Next.js 16](https://nextjs.org/) + [React 19](https://react.dev/) (Turbopack)                        |
+| **Backend**    | [NestJS 11](https://nestjs.com/)                                                                      |
+| **Database**   | [PostgreSQL 16](https://www.postgresql.org/)                                                          |
+| **ORM**        | [Prisma 7](https://www.prisma.io/)                                                                    |
+| **Auth**       | JWT (access + refresh tokens) + [bcryptjs](https://github.com/dcodeIO/bcrypt.js)                      |
+| **Email**      | [Nodemailer](https://nodemailer.com/) (Ethereal in dev)                                               |
+| **Language**   | [TypeScript](https://www.typescriptlang.org/)                                                         |
+| **Monorepo**   | [Turborepo 2.8](https://turbo.build/) + [pnpm 9.15](https://pnpm.io/)                                 |
+| **Deployment** | [Vercel](https://vercel.com/) (Frontend) · [Google Cloud Run](https://cloud.google.com/run) (Backend) |
 
 ## 📂 Monorepo Structure
 
 ```shell
 .
-├── apps
-│   ├── api                       # 🔌 NestJS API
-│   └── web                       # 🌐 Next.js web application
-└── packages
-    ├── @nucleus/domain                 # Shared NestJS resources
-    ├── @nucleus/database            # 🗄️ Prisma schema, client, and seed scripts
-    ├── @nucleus/eslint-config       # ✅ ESLint configurations
-    ├── @nucleus/jest-config         # 🧪 Jest configurations
-    ├── @nucleus/typescript-config   # 📘 Shared tsconfig.json files
-    └── @nucleus/ui                  # 🎨 Shared React components
+├── apps/
+│   ├── api/                      # 🔌 NestJS REST API (port 3000)
+│   └── web/                      # 🌐 Next.js frontend (port 3001)
+└── packages/
+    ├── database/                 # 🗄️ @nucleus/database — Prisma schema, client, migrations
+    ├── domain/                   # 📦 @nucleus/domain — Shared DTOs & entities (class-validator)
+    ├── eslint-config/            # ✅ @nucleus/eslint-config — ESLint configurations
+    ├── jest-config/              # 🧪 @nucleus/jest-config — Shared Jest setup
+    └── typescript-config/        # 📘 @nucleus/typescript-config — Shared tsconfig files
 ```
 
 ## 🚀 Getting Started
