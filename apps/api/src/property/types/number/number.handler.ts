@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import {
   DEFAULT_NUMBER_PROPERTY,
-  NumberProperty,
+  NUMBER_FORMAT_VALUES,
+  NumberFormat,
   PropertyType,
 } from '@nucleus/domain';
 import { PropertyTypeHandler } from '../handler.interface';
-
-const VALID_FORMATS = ['integer', 'float', 'currency', 'percentage'];
 
 @Injectable()
 export class NumberHandler implements PropertyTypeHandler {
@@ -26,8 +25,11 @@ export class NumberHandler implements PropertyTypeHandler {
       errors.push('defaultValue must be a number');
     }
 
-    if (config.format && !VALID_FORMATS.includes(config.format as string)) {
-      errors.push(`format must be one of: ${VALID_FORMATS.join(', ')}`);
+    if (
+      config.format &&
+      !NUMBER_FORMAT_VALUES.includes(config.format as NumberFormat)
+    ) {
+      errors.push(`format must be one of: ${NUMBER_FORMAT_VALUES.join(', ')}`);
     }
 
     if (config.decimalPlaces !== undefined) {
@@ -60,8 +62,10 @@ export class NumberHandler implements PropertyTypeHandler {
       return ['Number value must be a number or null'];
     }
 
-    const typedConfig = config as unknown as NumberProperty;
-    if (typedConfig.format === 'integer' && !Number.isInteger(value)) {
+    if (
+      (config.format as NumberFormat | undefined) === 'integer' &&
+      !Number.isInteger(value)
+    ) {
       return ['Value must be an integer for integer format'];
     }
 
@@ -74,16 +78,16 @@ export class NumberHandler implements PropertyTypeHandler {
     const num = Number(value);
     if (Number.isNaN(num)) return 0;
 
-    const typedConfig = config as unknown as NumberProperty;
-    if (typedConfig.format === 'integer') return Math.round(num);
-    if (typedConfig.decimalPlaces !== undefined) {
-      return parseFloat(num.toFixed(typedConfig.decimalPlaces));
-    }
+    const format = config.format as NumberFormat | undefined;
+    const decimalPlaces = config.decimalPlaces as number | undefined;
+
+    if (format === 'integer') return Math.round(num);
+    if (decimalPlaces !== undefined) return parseFloat(num.toFixed(decimalPlaces));
 
     return num;
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (config as unknown as NumberProperty).defaultValue ?? 0;
+    return (config.defaultValue as number | undefined) ?? 0;
   }
 }

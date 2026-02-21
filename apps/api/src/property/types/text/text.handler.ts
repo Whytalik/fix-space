@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import {
   DEFAULT_TEXT_PROPERTY,
   PropertyType,
-  TextProperty,
+  URL_HANDLING_VALUES,
+  UrlHandling,
 } from '@nucleus/domain';
 import { PropertyTypeHandler } from '../handler.interface';
 
@@ -31,20 +32,18 @@ export class TextHandler implements PropertyTypeHandler {
       errors.push('isRichText must be a boolean');
     }
 
-    const validUrlHandling = ['none', 'detect', 'preview'];
     if (
       config.urlHandling !== undefined &&
-      !validUrlHandling.includes(config.urlHandling as string)
+      !URL_HANDLING_VALUES.includes(config.urlHandling as UrlHandling)
     ) {
-      errors.push(`urlHandling must be one of: ${validUrlHandling.join(', ')}`);
+      errors.push(`urlHandling must be one of: ${URL_HANDLING_VALUES.join(', ')}`);
     }
 
     return errors.length > 0 ? errors : null;
   }
 
   validateValue(
-    value: unknown,
-    _config: Record<string, unknown>,
+    value: unknown
   ): string[] | null {
     if (value !== null && typeof value !== 'string') {
       return ['Text value must be a string or null'];
@@ -52,12 +51,12 @@ export class TextHandler implements PropertyTypeHandler {
     return null;
   }
 
-  formatValue(value: unknown, _config: Record<string, unknown>): unknown {
+  formatValue(value: unknown): unknown {
     if (value === null || value === undefined) return '';
     return String(value);
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (config as unknown as TextProperty).defaultValue ?? '';
+    return (config.defaultValue as string | undefined) ?? '';
   }
 }
