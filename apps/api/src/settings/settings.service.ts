@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma, prisma } from '@nucleus/database';
 
 @Injectable()
 export class SettingsService {
@@ -8,7 +8,6 @@ export class SettingsService {
     category: string,
     defaultValues: T,
   ): Promise<T> {
-
     const dbSettings = await prisma.settings.findMany({
       where: { userId, category },
     });
@@ -17,8 +16,7 @@ export class SettingsService {
 
     for (const setting of dbSettings) {
       if (setting.key in result) {
-        result[setting.key as keyof T] =
-          setting.value as T[keyof T];
+        result[setting.key as keyof T] = setting.value as T[keyof T];
       }
     }
 
@@ -31,12 +29,10 @@ export class SettingsService {
     updateDto: Partial<T>,
     defaultValues: T,
   ): Promise<T> {
-
     const operations = Object.entries({ ...updateDto }).map(([key, value]) => {
       const defaultValue = defaultValues[key as keyof T];
 
-      const isEqual =
-        JSON.stringify(value) === JSON.stringify(defaultValue);
+      const isEqual = JSON.stringify(value) === JSON.stringify(defaultValue);
 
       if (isEqual) {
         return prisma.settings.deleteMany({

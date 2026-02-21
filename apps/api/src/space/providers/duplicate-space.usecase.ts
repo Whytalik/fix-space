@@ -55,7 +55,8 @@ export class DuplicateSpaceUseCase {
     }
 
     const newName =
-      options?.newName ?? (await this.generateUniqueName(ownerId, sourceSpace.name));
+      options?.newName ??
+      (await this.generateUniqueName(ownerId, sourceSpace.name));
 
     const spaceSettings = await this.settingsService.getSettings(
       ownerId,
@@ -70,7 +71,9 @@ export class DuplicateSpaceUseCase {
           name: newName,
           icon: sourceSpace.icon,
           ownerId,
-          config: sourceSpace.config ?? (spaceSettings as unknown as Prisma.JsonValue),
+          config:
+            sourceSpace.config ??
+            (spaceSettings as unknown as Prisma.JsonValue),
         },
       });
 

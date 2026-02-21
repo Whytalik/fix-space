@@ -1,14 +1,19 @@
 import { Body, Controller, Get, Patch } from '@nestjs/common';
 import {
-  DEFAULT_DATABASE_SETTINGS, DEFAULT_SECTION_SETTINGS, DEFAULT_SPACE_SETTINGS, DatabaseSettings, SectionSettings, SpaceSettings,
-  User
+  DEFAULT_DATABASE_SETTINGS,
+  DEFAULT_SECTION_SETTINGS,
+  DEFAULT_SPACE_SETTINGS,
+  DatabaseSettings,
+  SectionSettings,
+  SpaceSettings,
+  User,
 } from '@nucleus/domain';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { SettingsService } from './settings.service';
 
 @Controller('settings')
 export class SettingsController {
-  constructor(private readonly settingsService: SettingsService) { }
+  constructor(private readonly settingsService: SettingsService) {}
 
   @Get('space')
   async getSpaceSettings(@CurrentUser() user: User) {
