@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from '@jest/globals';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { prisma } from '@nucleus/database';
@@ -50,10 +58,7 @@ describe('Auth (e2e)', () => {
     if (testUserEmail) {
       await prisma.user.deleteMany({
         where: {
-          OR: [
-            { email: testUserEmail },
-            { username: testUsername },
-          ],
+          OR: [{ email: testUserEmail }, { username: testUsername }],
         },
       });
     }
@@ -215,13 +220,11 @@ describe('Auth (e2e)', () => {
   describe('POST /auth/verify', () => {
     beforeEach(async () => {
       // Register a user and get verification token
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: testUserEmail,
-          username: testUsername,
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: testUserEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
       const user = await prisma.user.findUnique({
         where: { email: testUserEmail },
@@ -295,13 +298,11 @@ describe('Auth (e2e)', () => {
   describe('POST /auth/login', () => {
     beforeEach(async () => {
       // Register and verify a user
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: testUserEmail,
-          username: testUsername,
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: testUserEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
       // Manually verify the user (bypass email verification for testing)
       await prisma.user.update({
@@ -326,8 +327,12 @@ describe('Auth (e2e)', () => {
       // Check cookies are set
       const cookies = response.headers['set-cookie'];
       expect(cookies).toBeDefined();
-      expect(cookies.some((c: string) => c.startsWith('access_token='))).toBe(true);
-      expect(cookies.some((c: string) => c.startsWith('refresh_token='))).toBe(true);
+      expect(cookies.some((c: string) => c.startsWith('access_token='))).toBe(
+        true,
+      );
+      expect(cookies.some((c: string) => c.startsWith('refresh_token='))).toBe(
+        true,
+      );
     });
 
     it('should create refresh token in database on login', async () => {
@@ -405,12 +410,10 @@ describe('Auth (e2e)', () => {
       // Make 6 requests (limit is 5)
       for (let i = 0; i < 6; i++) {
         requests.push(
-          request(app.getHttpServer())
-            .post('/auth/login')
-            .send({
-              email: testUserEmail,
-              password: 'wrong-password',
-            }),
+          request(app.getHttpServer()).post('/auth/login').send({
+            email: testUserEmail,
+            password: 'wrong-password',
+          }),
         );
       }
 
@@ -488,13 +491,11 @@ describe('Auth (e2e)', () => {
 
     beforeEach(async () => {
       // Register, verify, and login a user
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: testUserEmail,
-          username: testUsername,
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: testUserEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
       await prisma.user.update({
         where: { email: testUserEmail },
@@ -517,7 +518,10 @@ describe('Auth (e2e)', () => {
         .set('Cookie', [`refresh_token=${refreshToken}`])
         .expect(200);
 
-      expect(response.body).toHaveProperty('message', 'Token refreshed successfully');
+      expect(response.body).toHaveProperty(
+        'message',
+        'Token refreshed successfully',
+      );
       expect(response.body).toHaveProperty('accessToken');
       expect(response.body).toHaveProperty('refreshToken');
       expect(response.body.refreshToken).not.toBe(refreshToken); // Token should be rotated
@@ -608,13 +612,11 @@ describe('Auth (e2e)', () => {
 
     beforeEach(async () => {
       // Register, verify, and login a user
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: testUserEmail,
-          username: testUsername,
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: testUserEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
       await prisma.user.update({
         where: { email: testUserEmail },
@@ -639,7 +641,10 @@ describe('Auth (e2e)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty('message', 'Logged out successfully');
+      expect(response.body).toHaveProperty(
+        'message',
+        'Logged out successfully',
+      );
       expect(response.body).toHaveProperty('clearCookies', true);
     });
 
@@ -669,7 +674,9 @@ describe('Auth (e2e)', () => {
       const cookies = response.headers['set-cookie'];
       if (cookies) {
         // Check that cookies are cleared (set to empty or expired)
-        expect(cookies.some((c: string) => c.includes('access_token'))).toBe(true);
+        expect(cookies.some((c: string) => c.includes('access_token'))).toBe(
+          true,
+        );
       }
     });
 
@@ -720,7 +727,9 @@ describe('Auth (e2e)', () => {
         })
         .expect(201);
 
-      expect(registerResponse.body.message).toContain('Registration successful');
+      expect(registerResponse.body.message).toContain(
+        'Registration successful',
+      );
 
       // Step 2: Manually verify (in real app, this would be done via email link)
       const user = await prisma.user.findUnique({
@@ -803,13 +812,11 @@ describe('Auth (e2e)', () => {
   describe('Token Blacklisting', () => {
     it('should not allow reuse of revoked refresh token', async () => {
       // Register and login
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: testUserEmail,
-          username: testUsername,
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: testUserEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
       await prisma.user.update({
         where: { email: testUserEmail },
@@ -844,13 +851,11 @@ describe('Auth (e2e)', () => {
 
     it('should mark token as revoked in database', async () => {
       // Register and login
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: testUserEmail,
-          username: testUsername,
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: testUserEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
       await prisma.user.update({
         where: { email: testUserEmail },
@@ -890,13 +895,11 @@ describe('Auth (e2e)', () => {
 
   describe('Security Tests', () => {
     it('should prevent timing attacks on login', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: testUserEmail,
-          username: testUsername,
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: testUserEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
       await prisma.user.update({
         where: { email: testUserEmail },
@@ -905,22 +908,18 @@ describe('Auth (e2e)', () => {
 
       // Login with non-existent user
       const start1 = Date.now();
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: 'nonexistent@example.com',
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/login').send({
+        email: 'nonexistent@example.com',
+        password: testPassword,
+      });
       const duration1 = Date.now() - start1;
 
       // Login with wrong password
       const start2 = Date.now();
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: testUserEmail,
-          password: 'WrongPassword123!',
-        });
+      await request(app.getHttpServer()).post('/auth/login').send({
+        email: testUserEmail,
+        password: 'WrongPassword123!',
+      });
       const duration2 = Date.now() - start2;
 
       // Timings should be similar (within 100ms)
@@ -929,13 +928,11 @@ describe('Auth (e2e)', () => {
     });
 
     it('should not store plain text passwords', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: testUserEmail,
-          username: testUsername,
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: testUserEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
       const user = await prisma.user.findUnique({
         where: { email: testUserEmail },
@@ -947,13 +944,11 @@ describe('Auth (e2e)', () => {
     });
 
     it('should hash passwords with sufficient complexity', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: testUserEmail,
-          username: testUsername,
-          password: testPassword,
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        email: testUserEmail,
+        username: testUsername,
+        password: testPassword,
+      });
 
       const user = await prisma.user.findUnique({
         where: { email: testUserEmail },
