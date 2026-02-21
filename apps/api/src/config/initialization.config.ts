@@ -33,8 +33,16 @@ export const defaultInitializationConfig: InitializationConfig = {
     { name: 'Settings', position: 2 },
   ],
   databases: [
-    { name: '[DB] Trading Journal', title: 'Trading Journal', type: 'trading-journal' },
-    { name: '[DB] Session Routine', title: 'Session Routine', type: 'daily-routine' },
+    {
+      name: '[DB] Trading Journal',
+      title: 'Trading Journal',
+      type: 'trading-journal',
+    },
+    {
+      name: '[DB] Session Routine',
+      title: 'Session Routine',
+      type: 'daily-routine',
+    },
     { name: '[DB] Notes', title: 'Notes', type: 'notes' },
     { name: '[DB] Mistakes', title: 'Mistakes', type: 'mistakes' },
     { name: '[DB] Accounts', title: 'Accounts', type: 'accounts' },

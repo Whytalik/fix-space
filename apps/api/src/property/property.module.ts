@@ -18,11 +18,12 @@ const handlers = [TextHandler, NumberHandler];
     ...handlers,
     {
       provide: PROPERTY_TYPE_HANDLERS,
-      useFactory: (...handlerInstances: InstanceType<(typeof handlers)[number]>[]) =>
-        handlerInstances,
+      useFactory: (
+        ...handlerInstances: InstanceType<(typeof handlers)[number]>[]
+      ) => handlerInstances,
       inject: handlers,
     },
   ],
   exports: [PropertyService, PropertyTypeRegistry],
 })
-export class PropertyModule { }
+export class PropertyModule {}

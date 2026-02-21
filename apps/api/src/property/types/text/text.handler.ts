@@ -36,15 +36,15 @@ export class TextHandler implements PropertyTypeHandler {
       config.urlHandling !== undefined &&
       !URL_HANDLING_VALUES.includes(config.urlHandling as UrlHandling)
     ) {
-      errors.push(`urlHandling must be one of: ${URL_HANDLING_VALUES.join(', ')}`);
+      errors.push(
+        `urlHandling must be one of: ${URL_HANDLING_VALUES.join(', ')}`,
+      );
     }
 
     return errors.length > 0 ? errors : null;
   }
 
-  validateValue(
-    value: unknown
-  ): string[] | null {
+  validateValue(value: unknown): string[] | null {
     if (value !== null && typeof value !== 'string') {
       return ['Text value must be a string or null'];
     }

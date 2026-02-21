@@ -53,7 +53,9 @@ describe('SpaceController', () => {
       const result = await controller.create('user-123', dto);
 
       expect(result).toEqual(mockSpaceResponse);
-      expect(mockSpaceService.create).toHaveBeenCalledWith('user-123', { ...dto });
+      expect(mockSpaceService.create).toHaveBeenCalledWith('user-123', {
+        ...dto,
+      });
     });
   });
 
@@ -82,7 +84,10 @@ describe('SpaceController', () => {
   describe('update', () => {
     it('should call spaceService.update with id and dto', async () => {
       const dto = { name: 'Updated' };
-      mockSpaceService.update.mockResolvedValue({ ...mockSpaceResponse, name: 'Updated' } as SpaceResponseDto);
+      mockSpaceService.update.mockResolvedValue({
+        ...mockSpaceResponse,
+        name: 'Updated',
+      } as SpaceResponseDto);
 
       const result = await controller.update('space-123', dto);
 
@@ -106,10 +111,16 @@ describe('SpaceController', () => {
     it('should call duplicateSpaceUseCase.execute with id, userId, and name', async () => {
       mockDuplicateSpaceUseCase.execute.mockResolvedValue(mockSpaceResponse);
 
-      const result = await controller.duplicate('space-123', 'user-123', { name: 'Copy' });
+      const result = await controller.duplicate('space-123', 'user-123', {
+        name: 'Copy',
+      });
 
       expect(result).toEqual(mockSpaceResponse);
-      expect(mockDuplicateSpaceUseCase.execute).toHaveBeenCalledWith('space-123', 'user-123', { newName: 'Copy' });
+      expect(mockDuplicateSpaceUseCase.execute).toHaveBeenCalledWith(
+        'space-123',
+        'user-123',
+        { newName: 'Copy' },
+      );
     });
 
     it('should pass undefined newName when body has no name', async () => {
@@ -117,7 +128,11 @@ describe('SpaceController', () => {
 
       await controller.duplicate('space-123', 'user-123', {});
 
-      expect(mockDuplicateSpaceUseCase.execute).toHaveBeenCalledWith('space-123', 'user-123', { newName: undefined });
+      expect(mockDuplicateSpaceUseCase.execute).toHaveBeenCalledWith(
+        'space-123',
+        'user-123',
+        { newName: undefined },
+      );
     });
   });
 });

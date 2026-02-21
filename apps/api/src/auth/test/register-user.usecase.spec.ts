@@ -437,12 +437,12 @@ describe('RegisterUserService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-      (
-        mockTokenService.createVerificationToken as jest.Mock
-      ).mockResolvedValue('token');
-      (
-        mockMailService.sendVerificationEmail as jest.Mock
-      ).mockResolvedValue(undefined);
+      (mockTokenService.createVerificationToken as jest.Mock).mockResolvedValue(
+        'token',
+      );
+      (mockMailService.sendVerificationEmail as jest.Mock).mockResolvedValue(
+        undefined,
+      );
       (
         mockInitializeUserSpaceUseCase.initialize as jest.Mock
       ).mockResolvedValue(undefined);
@@ -450,9 +450,7 @@ describe('RegisterUserService', () => {
       await service.register(registerDto);
 
       const createCall = (prisma.user.create as jest.Mock).mock.calls[0][0];
-      expect(createCall.data.passwordHash).not.toContain(
-        registerDto.password,
-      );
+      expect(createCall.data.passwordHash).not.toContain(registerDto.password);
       expect(createCall.data.password).toBeUndefined();
     });
 
@@ -470,7 +468,7 @@ describe('RegisterUserService', () => {
       });
 
       const start1 = Date.now();
-      await service.register(registerDto).catch(() => { });
+      await service.register(registerDto).catch(() => {});
       const duration1 = Date.now() - start1;
 
       // Test existing username timing
@@ -482,7 +480,7 @@ describe('RegisterUserService', () => {
         });
 
       const start2 = Date.now();
-      await service.register(registerDto).catch(() => { });
+      await service.register(registerDto).catch(() => {});
       const duration2 = Date.now() - start2;
 
       // Timings should be similar

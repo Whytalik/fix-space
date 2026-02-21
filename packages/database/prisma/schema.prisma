@@ -411,4 +411,3 @@ model RecordContent {
  * @@index([createdAt])
  * }
  */
-

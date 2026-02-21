@@ -60,7 +60,10 @@ export class TokenService {
     return { userId: record.userId, tokenId: record.id };
   }
 
-  async rotateRefreshToken(oldTokenId: string, userId: string): Promise<string> {
+  async rotateRefreshToken(
+    oldTokenId: string,
+    userId: string,
+  ): Promise<string> {
     // Revoke old token
     await prisma.refreshToken.update({
       where: { id: oldTokenId },
