@@ -14,6 +14,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Debug secrets
+        run: |
+          echo "REPO='${GITLAB_REPO}'"
+          if [ -z "${GITLAB_REPO}" ]; then echo "REPO IS EMPTY"; fi
+
       - name: Push to GitLab
         run: |
           git remote add gitlab https://oauth2:${GITLAB_TOKEN}@${GITLAB_REPO}
