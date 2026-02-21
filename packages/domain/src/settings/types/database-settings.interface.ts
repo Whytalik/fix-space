@@ -1,4 +1,3 @@
-
 export interface DatabaseSettings {
   defaultDatabaseIcon: string;
   defaultViewType: 'table';

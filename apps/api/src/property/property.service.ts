@@ -143,8 +143,9 @@ export class PropertyService {
       }
     }
 
-    let configToSave =
-      existingProperty.config as Record<string, unknown> | undefined;
+    let configToSave = existingProperty.config as
+      | Record<string, unknown>
+      | undefined;
 
     if (
       updatePropertyDto.type &&

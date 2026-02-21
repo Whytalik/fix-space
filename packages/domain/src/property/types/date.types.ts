@@ -1,4 +1,8 @@
-export const DATA_FORMATS_VALUES = ['DD.MM.YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'] as const;
+export const DATA_FORMATS_VALUES = [
+  'DD.MM.YYYY',
+  'MM/DD/YYYY',
+  'YYYY-MM-DD',
+] as const;
 export type DataFormat = (typeof DATA_FORMATS_VALUES)[number];
 
 export const TIME_FORMATS_VALUES = ['HH:mm', 'hh:mm A'] as const;

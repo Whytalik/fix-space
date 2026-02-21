@@ -11,7 +11,17 @@ import { SpaceService } from './space.service';
 @Module({
   imports: [DatabaseModule, InitializationConfigModule, SettingsModule],
   controllers: [SpaceController],
-  providers: [SpaceService, SectionService, InitializeUserSpaceUseCase, DuplicateSpaceUseCase],
-  exports: [SpaceService, SectionService, InitializeUserSpaceUseCase, DuplicateSpaceUseCase],
+  providers: [
+    SpaceService,
+    SectionService,
+    InitializeUserSpaceUseCase,
+    DuplicateSpaceUseCase,
+  ],
+  exports: [
+    SpaceService,
+    SectionService,
+    InitializeUserSpaceUseCase,
+    DuplicateSpaceUseCase,
+  ],
 })
-export class SpaceModule { }
+export class SpaceModule {}

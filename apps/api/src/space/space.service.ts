@@ -33,7 +33,10 @@ export class SpaceService {
     this.logger.setContext(SpaceService.name);
   }
 
-  async create(ownerId: string, dto: CreateSpaceDto): Promise<SpaceResponseDto> {
+  async create(
+    ownerId: string,
+    dto: CreateSpaceDto,
+  ): Promise<SpaceResponseDto> {
     this.logger.debug('Creating space', { ownerId, name: dto.name });
 
     const spaceSettings = await this.settingsService.getSettings(

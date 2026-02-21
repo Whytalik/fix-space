@@ -18,7 +18,7 @@
       "persistent": true
     },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "^format"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
@@ -38,6 +38,7 @@
       "cache": false
     },
     "lint": {},
+    "format": {},
     "test": {},
     "test:e2e": {}
   }

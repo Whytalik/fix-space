@@ -18,7 +18,10 @@ export class SectionService {
     this.logger.setContext(SectionService.name);
   }
 
-  async create(spaceId: string, dto: CreateSectionDto): Promise<SectionResponseDto> {
+  async create(
+    spaceId: string,
+    dto: CreateSectionDto,
+  ): Promise<SectionResponseDto> {
     this.logger.debug('Creating section', { spaceId, name: dto.name });
 
     try {

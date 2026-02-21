@@ -82,7 +82,8 @@ export class NumberHandler implements PropertyTypeHandler {
     const decimalPlaces = config.decimalPlaces as number | undefined;
 
     if (format === 'integer') return Math.round(num);
-    if (decimalPlaces !== undefined) return parseFloat(num.toFixed(decimalPlaces));
+    if (decimalPlaces !== undefined)
+      return parseFloat(num.toFixed(decimalPlaces));
 
     return num;
   }

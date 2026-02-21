@@ -76,11 +76,18 @@ describe('SpaceService', () => {
       mockSettingsService.getSettings.mockResolvedValue(mockSpaceSettings);
       (prisma.space.create as jest.Mock).mockResolvedValue(mockSpace);
 
-      const result = await service.create('user-123', { name: 'Test Space', icon: '🚀' });
+      const result = await service.create('user-123', {
+        name: 'Test Space',
+        icon: '🚀',
+      });
 
       expect(result.id).toBe('space-123');
       expect(result.name).toBe('Test Space');
-      expect(mockSettingsService.getSettings).toHaveBeenCalledWith('user-123', 'space', expect.any(Object));
+      expect(mockSettingsService.getSettings).toHaveBeenCalledWith(
+        'user-123',
+        'space',
+        expect.any(Object),
+      );
       expect(prisma.space.create).toHaveBeenCalledWith({
         data: {
           name: 'Test Space',
@@ -90,31 +97,45 @@ describe('SpaceService', () => {
         },
         include: { sections: { orderBy: { position: 'asc' } } },
       });
-      expect(mockLogger.log).toHaveBeenCalledWith('Space created', { spaceId: 'space-123', ownerId: 'user-123' });
+      expect(mockLogger.log).toHaveBeenCalledWith('Space created', {
+        spaceId: 'space-123',
+        ownerId: 'user-123',
+      });
     });
 
     it('should throw BadRequestException on duplicate name (P2002)', async () => {
       mockSettingsService.getSettings.mockResolvedValue(mockSpaceSettings);
-      const prismaError = Object.assign(new Error('Unique constraint'), { code: 'P2002' });
+      const prismaError = Object.assign(new Error('Unique constraint'), {
+        code: 'P2002',
+      });
       (prisma.space.create as jest.Mock).mockRejectedValue(prismaError);
 
-      await expect(service.create('user-123', { name: 'Duplicate' })).rejects.toThrow(BadRequestException);
-      await expect(service.create('user-123', { name: 'Duplicate' })).rejects.toThrow(
-        'Space with this name already exists for the owner',
-      );
+      await expect(
+        service.create('user-123', { name: 'Duplicate' }),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.create('user-123', { name: 'Duplicate' }),
+      ).rejects.toThrow('Space with this name already exists for the owner');
     });
 
     it('should rethrow unknown errors', async () => {
       mockSettingsService.getSettings.mockResolvedValue(mockSpaceSettings);
-      (prisma.space.create as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (prisma.space.create as jest.Mock).mockRejectedValue(
+        new Error('DB error'),
+      );
 
-      await expect(service.create('user-123', { name: 'Test' })).rejects.toThrow('DB error');
+      await expect(
+        service.create('user-123', { name: 'Test' }),
+      ).rejects.toThrow('DB error');
     });
   });
 
   describe('findAll', () => {
     it('should return array of SpaceResponseDto for owner', async () => {
-      const spaces = [mockSpace, { ...mockSpace, id: 'space-456', name: 'Space 2' }];
+      const spaces = [
+        mockSpace,
+        { ...mockSpace, id: 'space-456', name: 'Space 2' },
+      ];
       (prisma.space.findMany as jest.Mock).mockResolvedValue(spaces);
 
       const result = await service.findAll('user-123');
@@ -154,8 +175,12 @@ describe('SpaceService', () => {
     it('should throw NotFoundException when space not found', async () => {
       (prisma.space.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
-      await expect(service.findOne('nonexistent')).rejects.toThrow('Space with id nonexistent not found');
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        'Space with id nonexistent not found',
+      );
     });
   });
 
@@ -163,11 +188,19 @@ describe('SpaceService', () => {
     it('should update space name and return SpaceResponseDto', async () => {
       const updatedSpace = { ...mockSpace, name: 'Updated Name' };
       const mockTx = {
-        space: { update: jest.fn<() => Promise<typeof updatedSpace>>().mockResolvedValue(updatedSpace) },
+        space: {
+          update: jest
+            .fn<() => Promise<typeof updatedSpace>>()
+            .mockResolvedValue(updatedSpace),
+        },
       };
-      (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx));
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+      );
 
-      const result = await service.update('space-123', { name: 'Updated Name' });
+      const result = await service.update('space-123', {
+        name: 'Updated Name',
+      });
 
       expect(result.name).toBe('Updated Name');
       expect(mockTx.space.update).toHaveBeenCalledWith({
@@ -179,22 +212,43 @@ describe('SpaceService', () => {
 
     it('should process section operations before updating space', async () => {
       const mockTx = {
-        space: { update: jest.fn<() => Promise<typeof mockSpace>>().mockResolvedValue(mockSpace) },
+        space: {
+          update: jest
+            .fn<() => Promise<typeof mockSpace>>()
+            .mockResolvedValue(mockSpace),
+        },
       };
-      (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx));
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+      );
 
-      const sectionOps = [{ operation: 'CREATE' as const, create: { name: 'New Section' } }];
+      const sectionOps = [
+        { operation: 'CREATE' as const, create: { name: 'New Section' } },
+      ];
 
-      await service.update('space-123', { name: 'Test', sectionOperations: sectionOps as any });
+      await service.update('space-123', {
+        name: 'Test',
+        sectionOperations: sectionOps as any,
+      });
 
-      expect(mockSectionService.processOperations).toHaveBeenCalledWith(mockTx, 'space-123', sectionOps);
+      expect(mockSectionService.processOperations).toHaveBeenCalledWith(
+        mockTx,
+        'space-123',
+        sectionOps,
+      );
     });
 
     it('should not process section operations when empty', async () => {
       const mockTx = {
-        space: { update: jest.fn<() => Promise<typeof mockSpace>>().mockResolvedValue(mockSpace) },
+        space: {
+          update: jest
+            .fn<() => Promise<typeof mockSpace>>()
+            .mockResolvedValue(mockSpace),
+        },
       };
-      (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx));
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+      );
 
       await service.update('space-123', { name: 'Test' });
 
@@ -202,13 +256,19 @@ describe('SpaceService', () => {
     });
 
     it('should throw NotFoundException on P2025', async () => {
-      const prismaError = Object.assign(new Error('Not found'), { code: 'P2025' });
+      const prismaError = Object.assign(new Error('Not found'), {
+        code: 'P2025',
+      });
       const mockTx = {
         space: { update: jest.fn().mockRejectedValue(prismaError) },
       };
-      (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx));
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+      );
 
-      await expect(service.update('nonexistent', { name: 'Test' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', { name: 'Test' }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw BadRequestException on duplicate name (P2002)', async () => {
@@ -216,9 +276,13 @@ describe('SpaceService', () => {
       const mockTx = {
         space: { update: jest.fn().mockRejectedValue(prismaError) },
       };
-      (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx));
+      (prisma.$transaction as jest.Mock).mockImplementation(
+        async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+      );
 
-      await expect(service.update('space-123', { name: 'Duplicate' })).rejects.toThrow(BadRequestException);
+      await expect(
+        service.update('space-123', { name: 'Duplicate' }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -229,19 +293,29 @@ describe('SpaceService', () => {
       const result = await service.remove('space-123');
 
       expect(result.id).toBe('space-123');
-      expect(prisma.space.delete).toHaveBeenCalledWith({ where: { id: 'space-123' } });
-      expect(mockLogger.log).toHaveBeenCalledWith('Space removed', { id: 'space-123' });
+      expect(prisma.space.delete).toHaveBeenCalledWith({
+        where: { id: 'space-123' },
+      });
+      expect(mockLogger.log).toHaveBeenCalledWith('Space removed', {
+        id: 'space-123',
+      });
     });
 
     it('should throw NotFoundException on P2025', async () => {
-      const prismaError = Object.assign(new Error('Not found'), { code: 'P2025' });
+      const prismaError = Object.assign(new Error('Not found'), {
+        code: 'P2025',
+      });
       (prisma.space.delete as jest.Mock).mockRejectedValue(prismaError);
 
-      await expect(service.remove('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.remove('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should rethrow unknown errors', async () => {
-      (prisma.space.delete as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (prisma.space.delete as jest.Mock).mockRejectedValue(
+        new Error('DB error'),
+      );
 
       await expect(service.remove('space-123')).rejects.toThrow('DB error');
     });

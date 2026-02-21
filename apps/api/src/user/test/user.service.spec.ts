@@ -60,7 +60,15 @@ describe('UserService', () => {
 
   describe('findAll', () => {
     it('should return array of UserResponseDto', async () => {
-      const users = [mockUser, { ...mockUser, id: 'user-456', email: 'other@example.com', username: 'otheruser' }];
+      const users = [
+        mockUser,
+        {
+          ...mockUser,
+          id: 'user-456',
+          email: 'other@example.com',
+          username: 'otheruser',
+        },
+      ];
       (prisma.user.findMany as jest.Mock).mockResolvedValue(users);
 
       const result = await service.findAll();
@@ -183,23 +191,31 @@ describe('UserService', () => {
       const updatedUser = { ...mockUser, username: 'newusername' };
       (prisma.user.update as jest.Mock).mockResolvedValue(updatedUser);
 
-      const result = await service.update('user-123', { username: 'newusername' });
+      const result = await service.update('user-123', {
+        username: 'newusername',
+      });
 
       expect(result.username).toBe('newusername');
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'user-123' },
         data: { username: 'newusername' },
       });
-      expect(mockLogger.log).toHaveBeenCalledWith('User updated', { id: 'user-123' });
+      expect(mockLogger.log).toHaveBeenCalledWith('User updated', {
+        id: 'user-123',
+      });
     });
 
     it('should hash password when password is provided', async () => {
-      (passwordUtils.hashPassword as jest.Mock).mockResolvedValue('new-hashed-password');
+      (passwordUtils.hashPassword as jest.Mock).mockResolvedValue(
+        'new-hashed-password',
+      );
       (prisma.user.update as jest.Mock).mockResolvedValue(mockUser);
 
       await service.update('user-123', { password: 'NewPassword123!' });
 
-      expect(passwordUtils.hashPassword).toHaveBeenCalledWith('NewPassword123!');
+      expect(passwordUtils.hashPassword).toHaveBeenCalledWith(
+        'NewPassword123!',
+      );
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'user-123' },
         data: { passwordHash: 'new-hashed-password' },
@@ -242,7 +258,9 @@ describe('UserService', () => {
       expect(prisma.user.delete).toHaveBeenCalledWith({
         where: { id: 'user-123' },
       });
-      expect(mockLogger.log).toHaveBeenCalledWith('User removed', { id: 'user-123' });
+      expect(mockLogger.log).toHaveBeenCalledWith('User removed', {
+        id: 'user-123',
+      });
     });
 
     it('should throw when user not found', async () => {

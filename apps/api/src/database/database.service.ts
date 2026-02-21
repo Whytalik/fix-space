@@ -86,7 +86,8 @@ export class DatabaseService {
       this.logger.log('Database created with default properties', {
         databaseId: database.id,
         spaceId,
-        propertyCount: defaultInitializationConfig.defaultDatabaseProperties.length,
+        propertyCount:
+          defaultInitializationConfig.defaultDatabaseProperties.length,
       });
 
       return new DatabaseResponseDto(database);
