@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -7,14 +8,18 @@ import { Prisma, prisma } from '@nucleus/database';
 import {
   CreatePropertyDto,
   PropertyResponseDto,
+  PropertyType,
   UpdatePropertyDto,
 } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
-import { defaultPropertyConfig } from './property.config';
+import { PropertyTypeRegistry } from './types';
 
 @Injectable()
 export class PropertyService {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly typeRegistry: PropertyTypeRegistry,
+  ) {
     this.logger.setContext(PropertyService.name);
   }
 
@@ -44,6 +49,19 @@ export class PropertyService {
       );
     }
 
+    const handler = this.typeRegistry.getHandler(createPropertyDto.type);
+    const defaultConfig = handler.getDefaultConfig();
+    const mergedConfig = createPropertyDto.config
+      ? { ...defaultConfig, ...createPropertyDto.config }
+      : defaultConfig;
+
+    const configErrors = handler.validateConfig(mergedConfig);
+    if (configErrors) {
+      throw new BadRequestException(
+        `Invalid config for ${createPropertyDto.type}: ${configErrors.join('; ')}`,
+      );
+    }
+
     const property = await prisma.property.create({
       data: {
         name: createPropertyDto.name,
@@ -54,7 +72,7 @@ export class PropertyService {
         isRequired: createPropertyDto.isRequired ?? false,
         isPrimary: createPropertyDto.isPrimary ?? false,
         databaseId,
-        config: defaultPropertyConfig as Prisma.JsonValue,
+        config: mergedConfig as Prisma.JsonValue,
       },
     });
 
@@ -125,6 +143,31 @@ export class PropertyService {
       }
     }
 
+    let configToSave =
+      existingProperty.config as Record<string, unknown> | undefined;
+
+    if (
+      updatePropertyDto.type &&
+      updatePropertyDto.type !== existingProperty.type
+    ) {
+      const handler = this.typeRegistry.getHandler(updatePropertyDto.type);
+      configToSave = handler.getDefaultConfig();
+    }
+
+    if (updatePropertyDto.config) {
+      const effectiveType =
+        updatePropertyDto.type ?? (existingProperty.type as PropertyType);
+      const handler = this.typeRegistry.getHandler(effectiveType);
+      const merged = { ...configToSave, ...updatePropertyDto.config };
+      const configErrors = handler.validateConfig(merged);
+      if (configErrors) {
+        throw new BadRequestException(
+          `Invalid config for ${effectiveType}: ${configErrors.join('; ')}`,
+        );
+      }
+      configToSave = merged;
+    }
+
     const property = await prisma.property.update({
       where: { id },
       data: {
@@ -135,6 +178,9 @@ export class PropertyService {
         color: updatePropertyDto.color,
         isRequired: updatePropertyDto.isRequired,
         isPrimary: updatePropertyDto.isPrimary,
+        ...(configToSave !== undefined && {
+          config: configToSave as Prisma.JsonValue,
+        }),
       },
     });
 
