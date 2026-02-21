@@ -67,8 +67,9 @@ export class RegisterUserService {
     );
 
     // Generate verification token
-    const verificationToken =
-      await this.tokenService.createVerificationToken(user.id);
+    const verificationToken = await this.tokenService.createVerificationToken(
+      user.id,
+    );
 
     // Send verification email
     await this.mailService.sendVerificationEmail(

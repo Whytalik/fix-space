@@ -2,11 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import {
   CreateRecordDto,
+  DEFAULT_RECORD_SETTINGS,
   RecordResponseDto,
   UpdateRecordDto,
 } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
-import { defaultRecordConfig } from './record.config';
 
 @Injectable()
 export class RecordService {
@@ -17,11 +17,12 @@ export class RecordService {
   async create(
     databaseId: string,
     createRecordDto: CreateRecordDto,
+    userId: string,
   ): Promise<RecordResponseDto> {
     this.logger.debug('Creating record', { databaseId });
 
-    const database = await prisma.database.findUnique({
-      where: { id: databaseId },
+    const database = await prisma.database.findFirst({
+      where: { id: databaseId, space: { ownerId: userId } },
     });
 
     if (!database) {
@@ -38,7 +39,7 @@ export class RecordService {
           databaseId,
           name: createRecordDto.name,
           icon: createRecordDto.icon,
-          config: defaultRecordConfig as Prisma.JsonValue,
+          config: DEFAULT_RECORD_SETTINGS as Prisma.JsonValue,
         },
       });
 
@@ -68,21 +69,21 @@ export class RecordService {
     });
   }
 
-  async findAll(databaseId: string): Promise<RecordResponseDto[]> {
+  async findAll(databaseId: string, userId: string): Promise<RecordResponseDto[]> {
     this.logger.debug('Finding all records', { databaseId });
     const records = await prisma.record.findMany({
-      where: { databaseId },
+      where: { databaseId, database: { space: { ownerId: userId } } },
       include: { values: true, content: true },
       orderBy: { createdAt: 'desc' },
     });
     return records.map((record) => new RecordResponseDto(record));
   }
 
-  async findOne(id: string): Promise<RecordResponseDto> {
+  async findOne(id: string, userId: string): Promise<RecordResponseDto> {
     this.logger.debug('Finding record', { id });
 
-    const record = await prisma.record.findUnique({
-      where: { id },
+    const record = await prisma.record.findFirst({
+      where: { id, database: { space: { ownerId: userId } } },
       include: { values: true, content: true },
     });
 
@@ -96,11 +97,12 @@ export class RecordService {
   async update(
     id: string,
     updateRecordDto: UpdateRecordDto,
+    userId: string,
   ): Promise<RecordResponseDto> {
     this.logger.debug('Updating record', { id });
 
-    const existingRecord = await prisma.record.findUnique({
-      where: { id },
+    const existingRecord = await prisma.record.findFirst({
+      where: { id, database: { space: { ownerId: userId } } },
     });
 
     if (!existingRecord) {
@@ -120,11 +122,11 @@ export class RecordService {
     return new RecordResponseDto(record);
   }
 
-  async remove(id: string): Promise<RecordResponseDto> {
+  async remove(id: string, userId: string): Promise<RecordResponseDto> {
     this.logger.debug('Removing record', { id });
 
-    const existingRecord = await prisma.record.findUnique({
-      where: { id },
+    const existingRecord = await prisma.record.findFirst({
+      where: { id, database: { space: { ownerId: userId } } },
     });
 
     if (!existingRecord) {
