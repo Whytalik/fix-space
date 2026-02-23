@@ -39,28 +39,28 @@ export class SpaceController {
 
   @Get(':id')
   @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({ model: 'space', param: 'ownerId', ownerField: 'id' })
+  @RequireOwnership({ model: 'space', param: 'id', ownerField: 'ownerId' })
   findOne(@Param('id') id: string) {
     return this.spaceService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({ model: 'space', param: 'ownerId', ownerField: 'id' })
+  @RequireOwnership({ model: 'space', param: 'id', ownerField: 'ownerId' })
   update(@Param('id') id: string, @Body() updateSpaceDto: UpdateSpaceDto) {
     return this.spaceService.update(id, updateSpaceDto);
   }
 
   @Delete(':id')
   @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({ model: 'space', param: 'ownerId', ownerField: 'id' })
+  @RequireOwnership({ model: 'space', param: 'id', ownerField: 'ownerId' })
   remove(@Param('id') id: string) {
     return this.spaceService.remove(id);
   }
 
   @Post(':id/duplicate')
   @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({ model: 'space', param: 'ownerId', ownerField: 'id' })
+  @RequireOwnership({ model: 'space', param: 'id', ownerField: 'ownerId' })
   duplicate(
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,

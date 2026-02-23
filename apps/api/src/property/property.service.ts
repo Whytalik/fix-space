@@ -26,11 +26,20 @@ export class PropertyService {
   async create(
     databaseId: string,
     createPropertyDto: CreatePropertyDto,
+    userId: string,
   ): Promise<PropertyResponseDto> {
     this.logger.debug('Creating property', {
       databaseId,
       name: createPropertyDto.name,
     });
+
+    const database = await prisma.database.findFirst({
+      where: { id: databaseId, space: { ownerId: userId } },
+    });
+
+    if (!database) {
+      throw new NotFoundException(`Database not found`);
+    }
 
     const isPropertyNameTaken = await prisma.property.findFirst({
       where: {
@@ -83,20 +92,20 @@ export class PropertyService {
     return new PropertyResponseDto(property);
   }
 
-  async findAll(databaseId: string): Promise<PropertyResponseDto[]> {
+  async findAll(databaseId: string, userId: string): Promise<PropertyResponseDto[]> {
     this.logger.debug('Finding all properties', { databaseId });
     const properties = await prisma.property.findMany({
-      where: { databaseId },
+      where: { databaseId, database: { space: { ownerId: userId } } },
       orderBy: { position: 'asc' },
     });
     return properties.map((property) => new PropertyResponseDto(property));
   }
 
-  async findOne(id: string): Promise<PropertyResponseDto> {
+  async findOne(id: string, userId: string): Promise<PropertyResponseDto> {
     this.logger.debug('Finding property', { id });
 
-    const property = await prisma.property.findUnique({
-      where: { id },
+    const property = await prisma.property.findFirst({
+      where: { id, database: { space: { ownerId: userId } } },
     });
 
     if (!property) {
@@ -109,11 +118,12 @@ export class PropertyService {
   async update(
     id: string,
     updatePropertyDto: UpdatePropertyDto,
+    userId: string,
   ): Promise<PropertyResponseDto> {
     this.logger.debug('Updating property', { id });
 
-    const existingProperty = await prisma.property.findUnique({
-      where: { id },
+    const existingProperty = await prisma.property.findFirst({
+      where: { id, database: { space: { ownerId: userId } } },
     });
 
     if (!existingProperty) {
@@ -189,11 +199,11 @@ export class PropertyService {
     return new PropertyResponseDto(property);
   }
 
-  async remove(id: string): Promise<PropertyResponseDto> {
+  async remove(id: string, userId: string): Promise<PropertyResponseDto> {
     this.logger.debug('Removing property', { id });
 
-    const existingProperty = await prisma.property.findUnique({
-      where: { id },
+    const existingProperty = await prisma.property.findFirst({
+      where: { id, database: { space: { ownerId: userId } } },
     });
 
     if (!existingProperty) {

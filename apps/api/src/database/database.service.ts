@@ -27,11 +27,20 @@ export class DatabaseService {
   async create(
     spaceId: string,
     createDatabaseDto: CreateDatabaseDto,
+    userId: string,
   ): Promise<DatabaseResponseDto> {
     this.logger.debug('Creating database', {
       spaceId,
       name: createDatabaseDto.name,
     });
+
+    const space = await prisma.space.findFirst({
+      where: { id: spaceId, ownerId: userId },
+    });
+
+    if (!space) {
+      throw new NotFoundException(`Space not found`);
+    }
 
     const isDatabaseNameTaken = await prisma.database.findFirst({
       where: {
@@ -94,10 +103,10 @@ export class DatabaseService {
     });
   }
 
-  async findAll(spaceId: string): Promise<DatabaseResponseDto[]> {
+  async findAll(spaceId: string, userId: string): Promise<DatabaseResponseDto[]> {
     this.logger.debug('Finding all databases', { spaceId });
     const databases = await prisma.database.findMany({
-      where: { spaceId },
+      where: { spaceId, space: { ownerId: userId } },
     });
     return databases.map((database) => new DatabaseResponseDto(database));
   }
