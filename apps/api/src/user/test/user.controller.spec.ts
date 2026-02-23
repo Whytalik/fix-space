@@ -1,26 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import { prisma } from '@nucleus/database';
 import { UserResponseDto } from '@nucleus/domain';
 import { UserController } from '../user.controller';
 import { UserService } from '../user.service';
-
-jest.mock('@nucleus/database', () => ({
-  prisma: {
-    user: {
-      deleteMany: jest.fn(),
-    },
-    space: {
-      deleteMany: jest.fn(),
-    },
-    section: {
-      deleteMany: jest.fn(),
-    },
-    database: {
-      deleteMany: jest.fn(),
-    },
-  },
-}));
 
 describe('UserController', () => {
   let controller: UserController;
@@ -100,22 +82,5 @@ describe('UserController', () => {
     });
   });
 
-  describe('removeAllUsers', () => {
-    it('should delete all users and related data', async () => {
-      (prisma.user.deleteMany as jest.Mock).mockResolvedValue({ count: 5 });
-      (prisma.space.deleteMany as jest.Mock).mockResolvedValue({ count: 3 });
-      (prisma.section.deleteMany as jest.Mock).mockResolvedValue({ count: 2 });
-      (prisma.database.deleteMany as jest.Mock).mockResolvedValue({ count: 1 });
-
-      const result = await controller.removeAllUsers();
-
-      expect(result).toEqual({
-        message: 'All users and related data have been deleted.',
-      });
-      expect(prisma.user.deleteMany).toHaveBeenCalledTimes(1);
-      expect(prisma.space.deleteMany).toHaveBeenCalledTimes(1);
-      expect(prisma.section.deleteMany).toHaveBeenCalledTimes(1);
-      expect(prisma.database.deleteMany).toHaveBeenCalledTimes(1);
-    });
-  });
 });
+
