@@ -14,6 +14,11 @@ export enum PropertyType {
   TEXT = 'TEXT',
   NUMBER = 'NUMBER',
   DATE = 'DATE',
+  CHECKBOX = 'CHECKBOX',
+  SELECT = 'SELECT',
+  STATUS = 'STATUS',
+  RELATION = 'RELATION',
+  FORMULA = 'FORMULA',
 }
 
 export class CreatePropertyDto {
