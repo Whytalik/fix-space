@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -6,14 +7,19 @@ import {
 import { Prisma, prisma } from '@nucleus/database';
 import {
   CreatePropertyValueDto,
+  PropertyType,
   PropertyValueResponseDto,
   UpdatePropertyValueDto,
 } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
+import { PropertyTypeRegistry } from '../property/types';
 
 @Injectable()
 export class PropertyValueService {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly typeRegistry: PropertyTypeRegistry,
+  ) {
     this.logger.setContext(PropertyValueService.name);
   }
 
@@ -73,11 +79,30 @@ export class PropertyValueService {
       );
     }
 
+    const handler = this.typeRegistry.getHandler(property.type as PropertyType);
+    const config =
+      (property.config as Record<string, unknown> | null) ??
+      handler.getDefaultConfig();
+
+    const rawValue =
+      createPropertyValueDto.value !== undefined
+        ? createPropertyValueDto.value
+        : handler.getDefaultValue(config);
+
+    const valueErrors = handler.validateValue(rawValue, config);
+    if (valueErrors) {
+      throw new BadRequestException(
+        `Invalid value for property type ${property.type}: ${valueErrors.join('; ')}`,
+      );
+    }
+
+    const formattedValue = handler.formatValue(rawValue, config);
+
     const propertyValue = await prisma.propertyValue.create({
       data: {
         recordId,
         propertyId: createPropertyValueDto.propertyId,
-        value: createPropertyValueDto.value as Prisma.InputJsonValue,
+        value: formattedValue as Prisma.InputJsonValue,
         computed: createPropertyValueDto.computed ?? false,
       },
     });
@@ -123,16 +148,42 @@ export class PropertyValueService {
 
     const existingValue = await prisma.propertyValue.findUnique({
       where: { id },
+      include: { property: true },
     });
 
     if (!existingValue) {
       throw new NotFoundException(`PropertyValue with id ${id} not found`);
     }
 
+    let formattedValue: unknown = undefined;
+
+    if (updatePropertyValueDto.value !== undefined) {
+      const handler = this.typeRegistry.getHandler(
+        existingValue.property.type as PropertyType,
+      );
+      const config =
+        (existingValue.property.config as Record<string, unknown> | null) ??
+        handler.getDefaultConfig();
+
+      const valueErrors = handler.validateValue(
+        updatePropertyValueDto.value,
+        config,
+      );
+      if (valueErrors) {
+        throw new BadRequestException(
+          `Invalid value for property type ${existingValue.property.type}: ${valueErrors.join('; ')}`,
+        );
+      }
+
+      formattedValue = handler.formatValue(updatePropertyValueDto.value, config);
+    }
+
     const propertyValue = await prisma.propertyValue.update({
       where: { id },
       data: {
-        value: updatePropertyValueDto.value as Prisma.InputJsonValue,
+        ...(formattedValue !== undefined && {
+          value: formattedValue as Prisma.InputJsonValue,
+        }),
         computed: updatePropertyValueDto.computed,
       },
     });
