@@ -115,7 +115,7 @@ describe('InitializeUserSpaceUseCase', () => {
       name: 'db-1',
       title: 'Tasks',
       type: 'table',
-    });
+    }, 'user-123');
   });
 
   it('should return the created space', async () => {

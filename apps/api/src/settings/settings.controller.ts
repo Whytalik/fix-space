@@ -8,7 +8,7 @@ import {
   SpaceSettings,
   User,
 } from '@nucleus/domain';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SettingsService } from './settings.service';
 
 @Controller('settings')
