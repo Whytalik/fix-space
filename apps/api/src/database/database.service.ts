@@ -9,25 +9,38 @@ import {
   DatabaseResponseDto,
   UpdateDatabaseDto,
 } from '@nucleus/domain';
+import { PropertyType } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
 import { defaultInitializationConfig } from '../config/initialization.config';
-import { defaultPropertyConfig } from '../property/property.config';
+import { PropertyTypeRegistry } from '../property/types';
 import { defaultDatabaseConfig } from './database.config';
 
 @Injectable()
 export class DatabaseService {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly typeRegistry: PropertyTypeRegistry,
+  ) {
     this.logger.setContext(DatabaseService.name);
   }
 
   async create(
     spaceId: string,
     createDatabaseDto: CreateDatabaseDto,
+    userId: string,
   ): Promise<DatabaseResponseDto> {
     this.logger.debug('Creating database', {
       spaceId,
       name: createDatabaseDto.name,
     });
+
+    const space = await prisma.space.findFirst({
+      where: { id: spaceId, ownerId: userId },
+    });
+
+    if (!space) {
+      throw new NotFoundException(`Space not found`);
+    }
 
     const isDatabaseNameTaken = await prisma.database.findFirst({
       where: {
@@ -62,6 +75,11 @@ export class DatabaseService {
       });
 
       for (const propertyDef of defaultInitializationConfig.defaultDatabaseProperties) {
+        const handler = this.typeRegistry.getHandler(
+          propertyDef.type as PropertyType,
+        );
+        const config = handler.getDefaultConfig();
+
         await tx.property.create({
           data: {
             name: propertyDef.name,
@@ -69,7 +87,7 @@ export class DatabaseService {
             position: propertyDef.position,
             isRequired: propertyDef.isRequired ?? false,
             databaseId: database.id,
-            config: defaultPropertyConfig as Prisma.JsonValue,
+            config: config as Prisma.JsonValue,
           },
         });
       }
@@ -77,17 +95,18 @@ export class DatabaseService {
       this.logger.log('Database created with default properties', {
         databaseId: database.id,
         spaceId,
-        propertyCount: defaultInitializationConfig.defaultDatabaseProperties.length,
+        propertyCount:
+          defaultInitializationConfig.defaultDatabaseProperties.length,
       });
 
       return new DatabaseResponseDto(database);
     });
   }
 
-  async findAll(spaceId: string): Promise<DatabaseResponseDto[]> {
+  async findAll(spaceId: string, userId: string): Promise<DatabaseResponseDto[]> {
     this.logger.debug('Finding all databases', { spaceId });
     const databases = await prisma.database.findMany({
-      where: { spaceId },
+      where: { spaceId, space: { ownerId: userId } },
     });
     return databases.map((database) => new DatabaseResponseDto(database));
   }

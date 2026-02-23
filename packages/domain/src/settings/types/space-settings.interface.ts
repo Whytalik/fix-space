@@ -1,4 +1,3 @@
-
 export interface SpaceSettings {
   defaultSpaceIcon: string;
   sidebarCollapsed: boolean;

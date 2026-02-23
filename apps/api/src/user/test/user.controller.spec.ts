@@ -71,13 +71,19 @@ describe('UserController', () => {
   describe('updateCurrentUser', () => {
     it('should call userService.update with userId and dto', async () => {
       const updateDto = { username: 'newname' };
-      const updatedUser = { ...mockUserResponse, username: 'newname' } as unknown as UserResponseDto;
+      const updatedUser = {
+        ...mockUserResponse,
+        username: 'newname',
+      } as unknown as UserResponseDto;
       mockUserService.update.mockResolvedValue(updatedUser);
 
       const result = await controller.updateCurrentUser('user-123', updateDto);
 
       expect(result).toEqual(updatedUser);
-      expect(mockUserService.update).toHaveBeenCalledWith('user-123', updateDto);
+      expect(mockUserService.update).toHaveBeenCalledWith(
+        'user-123',
+        updateDto,
+      );
       expect(mockUserService.update).toHaveBeenCalledTimes(1);
     });
   });

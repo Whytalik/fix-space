@@ -37,10 +37,7 @@ export function setRefreshTokenCookie(
   });
 }
 
-export function clearAuthCookies(
-  res: Response,
-  options: CookieOptions,
-): void {
+export function clearAuthCookies(res: Response, options: CookieOptions): void {
   const shared = {
     httpOnly: true,
     secure: options.secure,

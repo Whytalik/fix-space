@@ -18,6 +18,11 @@ enum PropertyType {
   TEXT
   NUMBER
   DATE
+  CHECKBOX
+  SELECT
+  STATUS
+  RELATION
+  FORMULA
 }
 
 enum ViewType {
@@ -411,4 +416,3 @@ model RecordContent {
  * @@index([createdAt])
  * }
  */
-
