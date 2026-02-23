@@ -20,10 +20,10 @@ export class SpaceController {
   constructor(
     private readonly spaceService: SpaceService,
     private readonly duplicateSpaceUseCase: DuplicateSpaceUseCase,
-  ) {}
+  ) { }
 
   @Post()
-  async create(
+  create(
     @CurrentUser('userId') userId: string,
     @Body() createSpaceDto: CreateSpaceDto,
   ) {
@@ -33,7 +33,7 @@ export class SpaceController {
   }
 
   @Get()
-  async findAll(@CurrentUser('userId') userId: string) {
+  findAll(@CurrentUser('userId') userId: string) {
     return this.spaceService.findAll(userId);
   }
 

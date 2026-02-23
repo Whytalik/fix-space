@@ -9,14 +9,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CreateDatabaseDto, UpdateDatabaseDto } from '@nucleus/domain';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { RequireOwnership } from 'src/auth/decorators/required-ownership.decoractor';
-import { ResourceOwnerGuard } from './../auth/guards/resourse-owner.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { RequireOwnership } from '../auth/decorators/required-ownership.decoractor';
+import { ResourceOwnerGuard } from '../auth/guards/resourse-owner.guard';
 import { DatabaseService } from './database.service';
 
 @Controller('spaces/:spaceId/databases')
 export class DatabaseController {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly databaseService: DatabaseService) { }
 
   @Post()
   create(
