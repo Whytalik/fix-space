@@ -40,10 +40,7 @@ describe('SectionService', () => {
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SectionService,
-        { provide: AppLogger, useValue: mockLogger },
-      ],
+      providers: [SectionService, { provide: AppLogger, useValue: mockLogger }],
     }).compile();
 
     service = module.get<SectionService>(SectionService);
@@ -77,19 +74,27 @@ describe('SectionService', () => {
     });
 
     it('should throw NotFoundException when space not found (P2003)', async () => {
-      const prismaError = Object.assign(new Error('Foreign key'), { code: 'P2003' });
+      const prismaError = Object.assign(new Error('Foreign key'), {
+        code: 'P2003',
+      });
       (prisma.section.create as jest.Mock).mockRejectedValue(prismaError);
 
-      await expect(service.create('nonexistent', { name: 'Test' })).rejects.toThrow(NotFoundException);
-      await expect(service.create('nonexistent', { name: 'Test' })).rejects.toThrow(
-        'Space with id nonexistent not found',
-      );
+      await expect(
+        service.create('nonexistent', { name: 'Test' }),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.create('nonexistent', { name: 'Test' }),
+      ).rejects.toThrow('Space with id nonexistent not found');
     });
 
     it('should rethrow unknown errors', async () => {
-      (prisma.section.create as jest.Mock).mockRejectedValue(new Error('DB error'));
+      (prisma.section.create as jest.Mock).mockRejectedValue(
+        new Error('DB error'),
+      );
 
-      await expect(service.create('space-123', { name: 'Test' })).rejects.toThrow('DB error');
+      await expect(
+        service.create('space-123', { name: 'Test' }),
+      ).rejects.toThrow('DB error');
     });
   });
 
@@ -143,7 +148,10 @@ describe('SectionService', () => {
       it('should update a section via transaction', async () => {
         mockTx.section.findUnique.mockResolvedValue(mockSection);
         mockTx.section.findFirst.mockResolvedValue(null);
-        mockTx.section.update.mockResolvedValue({ ...mockSection, name: 'Updated' });
+        mockTx.section.update.mockResolvedValue({
+          ...mockSection,
+          name: 'Updated',
+        });
 
         await service.processOperations(mockTx as any, 'space-123', [
           {
@@ -155,7 +163,12 @@ describe('SectionService', () => {
 
         expect(mockTx.section.update).toHaveBeenCalledWith({
           where: { id: 'section-123' },
-          data: { name: 'Updated', position: undefined, icon: undefined, color: undefined },
+          data: {
+            name: 'Updated',
+            position: undefined,
+            icon: undefined,
+            color: undefined,
+          },
         });
       });
 
@@ -178,7 +191,10 @@ describe('SectionService', () => {
       });
 
       it('should throw BadRequestException when section belongs to different space', async () => {
-        mockTx.section.findUnique.mockResolvedValue({ ...mockSection, spaceId: 'other-space' });
+        mockTx.section.findUnique.mockResolvedValue({
+          ...mockSection,
+          spaceId: 'other-space',
+        });
 
         await expect(
           service.processOperations(mockTx as any, 'space-123', [
@@ -189,7 +205,10 @@ describe('SectionService', () => {
 
       it('should throw BadRequestException on duplicate section name', async () => {
         mockTx.section.findUnique.mockResolvedValue(mockSection);
-        mockTx.section.findFirst.mockResolvedValue({ id: 'other-section', name: 'Duplicate' });
+        mockTx.section.findFirst.mockResolvedValue({
+          id: 'other-section',
+          name: 'Duplicate',
+        });
 
         await expect(
           service.processOperations(mockTx as any, 'space-123', [
@@ -199,7 +218,9 @@ describe('SectionService', () => {
               update: { name: 'Duplicate' },
             },
           ]),
-        ).rejects.toThrow('Section with name "Duplicate" already exists in this space');
+        ).rejects.toThrow(
+          'Section with name "Duplicate" already exists in this space',
+        );
       });
     });
 
@@ -212,7 +233,9 @@ describe('SectionService', () => {
           { operation: SectionOperationType.DELETE, id: 'section-123' },
         ]);
 
-        expect(mockTx.section.delete).toHaveBeenCalledWith({ where: { id: 'section-123' } });
+        expect(mockTx.section.delete).toHaveBeenCalledWith({
+          where: { id: 'section-123' },
+        });
         expect(mockLogger.log).toHaveBeenCalledWith('Section deleted', {
           sectionId: 'section-123',
           spaceId: 'space-123',
@@ -238,7 +261,10 @@ describe('SectionService', () => {
       });
 
       it('should throw BadRequestException when section belongs to different space', async () => {
-        mockTx.section.findUnique.mockResolvedValue({ ...mockSection, spaceId: 'other-space' });
+        mockTx.section.findUnique.mockResolvedValue({
+          ...mockSection,
+          spaceId: 'other-space',
+        });
 
         await expect(
           service.processOperations(mockTx as any, 'space-123', [

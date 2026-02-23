@@ -24,7 +24,9 @@ export class MailService implements OnModuleInit {
 
     if (!smtpHost) {
       // Development mode: use Ethereal test account
-      this.logger.log('No SMTP_HOST configured, creating Ethereal test account');
+      this.logger.log(
+        'No SMTP_HOST configured, creating Ethereal test account',
+      );
       const testAccount = await nodemailer.createTestAccount();
 
       this.transporter = nodemailer.createTransport({

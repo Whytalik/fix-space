@@ -313,9 +313,12 @@ describe('TokenService', () => {
         data: { revokedAt: expect.any(Date) },
       });
       expect(prisma.refreshToken.create).toHaveBeenCalledTimes(1);
-      expect(mockLogger.debug).toHaveBeenCalledWith('Old refresh token revoked', {
-        tokenId: oldTokenId,
-      });
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'Old refresh token revoked',
+        {
+          tokenId: oldTokenId,
+        },
+      );
     });
 
     it('should generate new token different from any previous', async () => {
@@ -405,9 +408,7 @@ describe('TokenService', () => {
         count: 0,
       });
 
-      await expect(
-        service.revokeRefreshToken(rawToken),
-      ).resolves.not.toThrow();
+      await expect(service.revokeRefreshToken(rawToken)).resolves.not.toThrow();
     });
   });
 
@@ -550,9 +551,7 @@ describe('TokenService', () => {
       const userId = 'user-123';
       const tokenId = 'token-id';
 
-      (
-        prisma.emailVerificationToken.findFirst as jest.Mock
-      ).mockResolvedValue({
+      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue({
         id: tokenId,
         userId,
         tokenHash: 'hash',
@@ -575,9 +574,9 @@ describe('TokenService', () => {
     it('should return null for expired token', async () => {
       const rawToken = 'expired-token';
 
-      (
-        prisma.emailVerificationToken.findFirst as jest.Mock
-      ).mockResolvedValue(null);
+      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       const result = await service.validateVerificationToken(rawToken);
 
@@ -590,9 +589,9 @@ describe('TokenService', () => {
     it('should return null for already used token', async () => {
       const rawToken = 'used-token';
 
-      (
-        prisma.emailVerificationToken.findFirst as jest.Mock
-      ).mockResolvedValue(null);
+      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       const result = await service.validateVerificationToken(rawToken);
 
@@ -602,9 +601,9 @@ describe('TokenService', () => {
     it('should check token has not been used', async () => {
       const rawToken = 'token';
 
-      (
-        prisma.emailVerificationToken.findFirst as jest.Mock
-      ).mockResolvedValue(null);
+      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(
+        null,
+      );
 
       await service.validateVerificationToken(rawToken);
 

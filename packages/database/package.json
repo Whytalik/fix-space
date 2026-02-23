@@ -16,7 +16,7 @@
     "db:push": "dotenv -e ../../.env.development -e ../../.env -- prisma db push",
     "db:seed": "dotenv -e ../../.env.development -e ../../.env -- tsx src/seed.ts",
     "db:generate": "dotenv -e ../../.env.development -e ../../.env -- prisma generate",
-    "format": "prisma format",
+    "format": "dotenv -e ../../.env.development -e ../../.env -- prisma format",
     "lint": "eslint . --max-warnings 0",
     "studio": "dotenv -e ../../.env.development -e ../../.env -- prisma studio"
   },

@@ -1,4 +1,3 @@
-
 export interface SectionSettings {
   defaultSectionIcon: string;
   defaultSectionColor: string;
