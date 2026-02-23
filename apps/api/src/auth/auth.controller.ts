@@ -8,11 +8,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import {
-  LoginUserDto,
-  RegisterUserDto,
-  VerifyEmailDto,
-} from '@nucleus/domain';
+import { LoginUserDto, RegisterUserDto, VerifyEmailDto } from '@nucleus/domain';
 import { AuthCookiesInterceptor } from '../common/interceptors/auth-cookies.interceptor';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';

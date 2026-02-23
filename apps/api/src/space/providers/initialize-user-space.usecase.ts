@@ -39,11 +39,15 @@ export class InitializeUserSpaceUseCase {
     }
 
     for (const databaseDef of config.databases) {
-      await this.databaseService.create(space.id, {
-        name: databaseDef.name,
-        title: databaseDef.title,
-        type: databaseDef.type,
-      });
+      await this.databaseService.create(
+        space.id,
+        {
+          name: databaseDef.name,
+          title: databaseDef.title,
+          type: databaseDef.type,
+        },
+        userId,
+      );
     }
 
     this.logger.log('User space initialized', {

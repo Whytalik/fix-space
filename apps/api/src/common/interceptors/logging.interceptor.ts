@@ -33,9 +33,7 @@ export class LoggingInterceptor implements NestInterceptor {
     );
 
     if (Object.keys(body || {}).length > 0) {
-      this.logger.debug(
-        `Body: ${JSON.stringify(body)} | reqId=${requestId}`,
-      );
+      this.logger.debug(`Body: ${JSON.stringify(body)} | reqId=${requestId}`);
     }
 
     const now = Date.now();
