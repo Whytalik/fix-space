@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CreateDatabaseDto, UpdateDatabaseDto } from '@nucleus/domain';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { RequireOwnership } from 'src/auth/decorators/required-ownership.decoractor';
 import { ResourceOwnerGuard } from './../auth/guards/resourse-owner.guard';
 import { DatabaseService } from './database.service';
@@ -20,26 +21,30 @@ export class DatabaseController {
   @Post()
   create(
     @Param('spaceId') spaceId: string,
+    @CurrentUser('userId') userId: string,
     @Body() createDatabaseDto: CreateDatabaseDto,
   ) {
-    return this.databaseService.create(spaceId, createDatabaseDto);
+    return this.databaseService.create(spaceId, createDatabaseDto, userId);
   }
 
   @Get()
-  findAll(@Param('spaceId') spaceId: string) {
-    return this.databaseService.findAll(spaceId);
+  findAll(
+    @Param('spaceId') spaceId: string,
+    @CurrentUser('userId') userId: string,
+  ) {
+    return this.databaseService.findAll(spaceId, userId);
   }
 
   @Get(':id')
   @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({ model: 'database', param: 'spaceId', ownerField: 'id' })
+  @RequireOwnership({ model: 'space', param: 'spaceId', ownerField: 'ownerId' })
   findOne(@Param('id') id: string) {
     return this.databaseService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({ model: 'database', param: 'spaceId', ownerField: 'id' })
+  @RequireOwnership({ model: 'space', param: 'spaceId', ownerField: 'ownerId' })
   update(
     @Param('id') id: string,
     @Body() updateDatabaseDto: UpdateDatabaseDto,
@@ -49,7 +54,7 @@ export class DatabaseController {
 
   @Delete(':id')
   @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({ model: 'database', param: 'spaceId', ownerField: 'id' })
+  @RequireOwnership({ model: 'space', param: 'spaceId', ownerField: 'ownerId' })
   remove(@Param('id') id: string) {
     return this.databaseService.remove(id);
   }

@@ -13,11 +13,11 @@ export class RecordContentService {
     this.logger.setContext(RecordContentService.name);
   }
 
-  async findOrCreate(recordId: string): Promise<RecordContentResponseDto> {
+  async findOrCreate(recordId: string, userId: string): Promise<RecordContentResponseDto> {
     this.logger.debug('Finding or creating record content', { recordId });
 
-    const record = await prisma.record.findUnique({
-      where: { id: recordId },
+    const record = await prisma.record.findFirst({
+      where: { id: recordId, database: { space: { ownerId: userId } } },
     });
 
     if (!record) {
@@ -48,11 +48,12 @@ export class RecordContentService {
   async upsert(
     recordId: string,
     updateRecordContentDto: UpdateRecordContentDto,
+    userId: string,
   ): Promise<RecordContentResponseDto> {
     this.logger.debug('Upserting record content', { recordId });
 
-    const record = await prisma.record.findUnique({
-      where: { id: recordId },
+    const record = await prisma.record.findFirst({
+      where: { id: recordId, database: { space: { ownerId: userId } } },
     });
 
     if (!record) {
@@ -77,8 +78,16 @@ export class RecordContentService {
     return new RecordContentResponseDto(content);
   }
 
-  async remove(recordId: string): Promise<RecordContentResponseDto> {
+  async remove(recordId: string, userId: string): Promise<RecordContentResponseDto> {
     this.logger.debug('Removing record content', { recordId });
+
+    const record = await prisma.record.findFirst({
+      where: { id: recordId, database: { space: { ownerId: userId } } },
+    });
+
+    if (!record) {
+      throw new NotFoundException(`Record with id ${recordId} not found`);
+    }
 
     const existingContent = await prisma.recordContent.findUnique({
       where: { recordId },
