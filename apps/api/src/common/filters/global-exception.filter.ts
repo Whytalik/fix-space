@@ -43,9 +43,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message =
         typeof exceptionResponse === 'string'
           ? exceptionResponse
-          : (exceptionResponse as Record<string, unknown>).message as
+          : ((exceptionResponse as Record<string, unknown>).message as
               | string
-              | string[];
+              | string[]);
       errorType = 'HTTP';
 
       if (status >= 500) {
@@ -107,7 +107,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       exception instanceof Error &&
       'code' in exception &&
       typeof (exception as { code: unknown }).code === 'string' &&
-      ((exception as { code: string }).code).startsWith('P')
+      (exception as { code: string }).code.startsWith('P')
     );
   }
 }
