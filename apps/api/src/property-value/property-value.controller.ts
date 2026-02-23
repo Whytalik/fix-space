@@ -16,7 +16,7 @@ import { PropertyValueService } from './property-value.service';
 
 @Controller('records/:recordId/values')
 export class PropertyValueController {
-  constructor(private readonly propertyValueService: PropertyValueService) {}
+  constructor(private readonly propertyValueService: PropertyValueService) { }
 
   @Post()
   create(

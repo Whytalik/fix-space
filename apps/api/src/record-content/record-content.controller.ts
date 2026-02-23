@@ -5,7 +5,7 @@ import { RecordContentService } from './record-content.service';
 
 @Controller('records/:recordId/content')
 export class RecordContentController {
-  constructor(private readonly recordContentService: RecordContentService) {}
+  constructor(private readonly recordContentService: RecordContentService) { }
 
   @Get()
   findOrCreate(

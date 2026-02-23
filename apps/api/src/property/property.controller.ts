@@ -13,7 +13,7 @@ import { PropertyService } from './property.service';
 
 @Controller('databases/:databaseId/properties')
 export class PropertyController {
-  constructor(private readonly propertyService: PropertyService) {}
+  constructor(private readonly propertyService: PropertyService) { }
 
   @Post()
   create(
