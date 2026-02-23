@@ -2,11 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import {
   CreateRecordDto,
+  DEFAULT_RECORD_SETTINGS,
   RecordResponseDto,
   UpdateRecordDto,
 } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
-import { defaultRecordConfig } from './record.config';
 
 @Injectable()
 export class RecordService {
@@ -39,7 +39,7 @@ export class RecordService {
           databaseId,
           name: createRecordDto.name,
           icon: createRecordDto.icon,
-          config: defaultRecordConfig as Prisma.JsonValue,
+          config: DEFAULT_RECORD_SETTINGS as Prisma.JsonValue,
         },
       });
 
