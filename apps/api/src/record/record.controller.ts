@@ -13,7 +13,7 @@ import { RecordService } from './record.service';
 
 @Controller('databases/:databaseId/records')
 export class RecordController {
-  constructor(private readonly recordService: RecordService) {}
+  constructor(private readonly recordService: RecordService) { }
 
   @Post()
   create(
