@@ -6,7 +6,6 @@ import {
   DatabaseSettings,
   SectionSettings,
   SpaceSettings,
-  User,
 } from '@nucleus/domain';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { SettingsService } from './settings.service';
@@ -16,9 +15,9 @@ export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @Get('space')
-  async getSpaceSettings(@CurrentUser() user: User) {
+  async getSpaceSettings(@CurrentUser('userId') userId: string) {
     return this.settingsService.getSettings(
-      user.id,
+      userId,
       'space',
       DEFAULT_SPACE_SETTINGS,
     );
@@ -26,11 +25,11 @@ export class SettingsController {
 
   @Patch('space')
   async updateSpaceSettings(
-    @CurrentUser() user: User,
+    @CurrentUser('userId') userId: string,
     @Body() updateSettingsDto: Partial<SpaceSettings>,
   ) {
     return this.settingsService.updateSettings(
-      user.id,
+      userId,
       'space',
       updateSettingsDto,
       DEFAULT_SPACE_SETTINGS,
@@ -38,9 +37,9 @@ export class SettingsController {
   }
 
   @Get('database')
-  async getDatabaseSettings(@CurrentUser() user: User) {
+  async getDatabaseSettings(@CurrentUser('userId') userId: string) {
     return this.settingsService.getSettings(
-      user.id,
+      userId,
       'database',
       DEFAULT_DATABASE_SETTINGS,
     );
@@ -48,11 +47,11 @@ export class SettingsController {
 
   @Patch('database')
   async updateDatabaseSettings(
-    @CurrentUser() user: User,
+    @CurrentUser('userId') userId: string,
     @Body() updateSettingsDto: Partial<DatabaseSettings>,
   ) {
     return this.settingsService.updateSettings(
-      user.id,
+      userId,
       'database',
       updateSettingsDto,
       DEFAULT_DATABASE_SETTINGS,
@@ -60,9 +59,9 @@ export class SettingsController {
   }
 
   @Get('section')
-  async getSectionSettings(@CurrentUser() user: User) {
+  async getSectionSettings(@CurrentUser('userId') userId: string) {
     return this.settingsService.getSettings(
-      user.id,
+      userId,
       'section',
       DEFAULT_SECTION_SETTINGS,
     );
@@ -70,11 +69,11 @@ export class SettingsController {
 
   @Patch('section')
   async updateSectionSettings(
-    @CurrentUser() user: User,
+    @CurrentUser('userId') userId: string,
     @Body() updateSettingsDto: Partial<SectionSettings>,
   ) {
     return this.settingsService.updateSettings(
-      user.id,
+      userId,
       'section',
       updateSettingsDto,
       DEFAULT_SECTION_SETTINGS,
