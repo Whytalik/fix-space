@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   HttpCode,
   HttpStatus,
   Post,
   Req,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
 import { LoginUserDto, RegisterUserDto, VerifyEmailDto } from '@nucleus/domain';
 import { AuthCookiesInterceptor } from '../common/interceptors/auth-cookies.interceptor';
@@ -20,6 +22,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly registerUserService: RegisterUserService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Public()
@@ -57,5 +60,25 @@ export class AuthController {
   async logout(@Req() req: any) {
     const refreshToken = req.cookies?.['refresh_token'];
     return this.authService.logout(refreshToken);
+  }
+
+  @Public()
+  @Post('dev/verify-user')
+  @HttpCode(HttpStatus.OK)
+  async devVerifyUser(@Body('email') email: string) {
+    if (this.configService.get('NODE_ENV') !== 'development') {
+      throw new ForbiddenException('Available in development only');
+    }
+    return this.authService.devVerifyUser(email);
+  }
+
+  @Public()
+  @Post('dev/reset')
+  @HttpCode(HttpStatus.OK)
+  async devResetTestData(@Body('email') email: string) {
+    if (this.configService.get('NODE_ENV') !== 'development') {
+      throw new ForbiddenException('Available in development only');
+    }
+    return this.authService.devResetTestData(email);
   }
 }
