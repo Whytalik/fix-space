@@ -62,8 +62,9 @@ export class AuthCookiesInterceptor implements NestInterceptor {
           );
         }
 
-        // Return response without tokens (they're in cookies)
-        const { accessToken, refreshToken, clearCookies, ...rest } = data || {};
+        // Return response with accessToken in body for API clients (e.g. Postman)
+        // refreshToken stays cookie-only (httpOnly)
+        const { refreshToken, clearCookies, ...rest } = data || {};
         return rest;
       }),
     );
