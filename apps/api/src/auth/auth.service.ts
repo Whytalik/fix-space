@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { prisma } from '@nucleus/database';
@@ -144,5 +145,36 @@ export class AuthService {
     });
 
     return { message: 'Email verified successfully' };
+  }
+
+  async devResetTestData(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return { message: `No user found for ${email} — nothing to reset` };
+    }
+
+    await prisma.user.delete({ where: { email } });
+
+    this.logger.log('Dev: test data reset', { email });
+
+    return { message: `Test data for ${email} deleted (cascade)` };
+  }
+
+  async devVerifyUser(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+
+    await prisma.user.update({
+      where: { email },
+      data: { isVerified: true },
+    });
+
+    this.logger.log('Dev: user verified', { userId: user.id, email });
+
+    return { message: `User ${email} verified successfully` };
   }
 }

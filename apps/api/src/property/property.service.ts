@@ -71,18 +71,38 @@ export class PropertyService {
       );
     }
 
-    const property = await prisma.property.create({
-      data: {
-        name: createPropertyDto.name,
-        type: createPropertyDto.type,
-        position: createPropertyDto.position,
-        icon: createPropertyDto.icon,
-        color: createPropertyDto.color,
-        isRequired: createPropertyDto.isRequired ?? false,
-        isPrimary: createPropertyDto.isPrimary ?? false,
-        databaseId,
-        config: mergedConfig as Prisma.JsonValue,
-      },
+    const [property] = await prisma.$transaction(async (tx) => {
+      const created = await tx.property.create({
+        data: {
+          name: createPropertyDto.name,
+          type: createPropertyDto.type,
+          position: createPropertyDto.position,
+          icon: createPropertyDto.icon,
+          color: createPropertyDto.color,
+          isRequired: createPropertyDto.isRequired ?? false,
+          isPrimary: createPropertyDto.isPrimary ?? false,
+          databaseId,
+          config: mergedConfig as Prisma.JsonValue,
+        },
+      });
+
+      const existingRecords = await tx.record.findMany({
+        where: { databaseId },
+        select: { id: true },
+      });
+
+      if (existingRecords.length > 0) {
+        await tx.propertyValue.createMany({
+          data: existingRecords.map((record) => ({
+            recordId: record.id,
+            propertyId: created.id,
+            value: null,
+            computed: false,
+          })),
+        });
+      }
+
+      return [created];
     });
 
     this.logger.log('Property created', {
