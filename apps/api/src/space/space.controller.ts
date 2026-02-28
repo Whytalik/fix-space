@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CreateSpaceDto, UpdateSpaceDto } from '@nucleus/domain';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { RequireOwnership } from '../auth/decorators/required-ownership.decoractor';
@@ -20,13 +11,10 @@ export class SpaceController {
   constructor(
     private readonly spaceService: SpaceService,
     private readonly duplicateSpaceUseCase: DuplicateSpaceUseCase,
-  ) { }
+  ) {}
 
   @Post()
-  create(
-    @CurrentUser('userId') userId: string,
-    @Body() createSpaceDto: CreateSpaceDto,
-  ) {
+  create(@CurrentUser('userId') userId: string, @Body() createSpaceDto: CreateSpaceDto) {
     return this.spaceService.create(userId, {
       ...createSpaceDto,
     });
@@ -61,11 +49,7 @@ export class SpaceController {
   @Post(':id/duplicate')
   @UseGuards(ResourceOwnerGuard)
   @RequireOwnership({ model: 'space', param: 'id', ownerField: 'ownerId' })
-  duplicate(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-    @Body() body?: { name?: string },
-  ) {
+  duplicate(@Param('id') id: string, @CurrentUser('userId') userId: string, @Body() body?: { name?: string }) {
     return this.duplicateSpaceUseCase.execute(id, userId, {
       newName: body?.name,
     });

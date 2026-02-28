@@ -47,10 +47,7 @@ describe('RecordContentService', () => {
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        RecordContentService,
-        { provide: AppLogger, useValue: mockLogger },
-      ],
+      providers: [RecordContentService, { provide: AppLogger, useValue: mockLogger }],
     }).compile();
 
     service = module.get<RecordContentService>(RecordContentService);
@@ -97,9 +94,7 @@ describe('RecordContentService', () => {
     it('should throw NotFoundException when record not found', async () => {
       (prisma.record.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.findOrCreate('record-nonexistent', 'user-123')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOrCreate('record-nonexistent', 'user-123')).rejects.toThrow(NotFoundException);
       await expect(service.findOrCreate('record-nonexistent', 'user-123')).rejects.toThrow(
         'Record with id record-nonexistent not found',
       );
@@ -135,9 +130,7 @@ describe('RecordContentService', () => {
     it('should throw NotFoundException when record not found', async () => {
       (prisma.record.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.upsert('record-nonexistent', {}, 'user-123')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.upsert('record-nonexistent', {}, 'user-123')).rejects.toThrow(NotFoundException);
       await expect(service.upsert('record-nonexistent', {}, 'user-123')).rejects.toThrow(
         'Record with id record-nonexistent not found',
       );
@@ -167,9 +160,7 @@ describe('RecordContentService', () => {
     it('should throw NotFoundException when record not found', async () => {
       (prisma.record.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.remove('record-nonexistent', 'user-123')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.remove('record-nonexistent', 'user-123')).rejects.toThrow(NotFoundException);
       await expect(service.remove('record-nonexistent', 'user-123')).rejects.toThrow(
         'Record with id record-nonexistent not found',
       );

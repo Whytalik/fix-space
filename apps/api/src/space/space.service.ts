@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import {
   CreateSpaceDto,
@@ -33,17 +29,10 @@ export class SpaceService {
     this.logger.setContext(SpaceService.name);
   }
 
-  async create(
-    ownerId: string,
-    dto: CreateSpaceDto,
-  ): Promise<SpaceResponseDto> {
+  async create(ownerId: string, dto: CreateSpaceDto): Promise<SpaceResponseDto> {
     this.logger.debug('Creating space', { ownerId, name: dto.name });
 
-    const spaceSettings = await this.settingsService.getSettings(
-      ownerId,
-      'space',
-      DEFAULT_SPACE_SETTINGS,
-    );
+    const spaceSettings = await this.settingsService.getSettings(ownerId, 'space', DEFAULT_SPACE_SETTINGS);
 
     try {
       const space = await prisma.space.create({
@@ -61,9 +50,7 @@ export class SpaceService {
     } catch (e: unknown) {
       if ((e as { code?: string })?.code === 'P2002') {
         this.logger.warn('Duplicate space name', { ownerId, name: dto.name });
-        throw new BadRequestException(
-          'Space with this name already exists for the owner',
-        );
+        throw new BadRequestException('Space with this name already exists for the owner');
       }
       throw e;
     }
@@ -103,11 +90,7 @@ export class SpaceService {
           spaceId: id,
           count: sectionOperations.length,
         });
-        await this.sectionService.processOperations(
-          tx,
-          id,
-          sectionOperations as SectionOperationDto[],
-        );
+        await this.sectionService.processOperations(tx, id, sectionOperations as SectionOperationDto[]);
       }
 
       try {
@@ -128,9 +111,7 @@ export class SpaceService {
         }
         if ((e as { code?: string })?.code === 'P2002') {
           this.logger.warn('Duplicate space name on update', { id });
-          throw new BadRequestException(
-            'Space with this name already exists for the owner',
-          );
+          throw new BadRequestException('Space with this name already exists for the owner');
         }
         throw e;
       }

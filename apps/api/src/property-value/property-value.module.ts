@@ -9,4 +9,4 @@ import { PropertyValueService } from './property-value.service';
   providers: [PropertyValueService],
   exports: [PropertyValueService],
 })
-export class PropertyValueModule { }
+export class PropertyValueModule {}

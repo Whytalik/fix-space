@@ -98,11 +98,7 @@ describe('PropertyValueService', () => {
       (prisma.propertyValue.findUnique as jest.Mock).mockResolvedValue(null);
       (prisma.propertyValue.create as jest.Mock).mockResolvedValue(mockPropertyValue);
 
-      const result = await service.create(
-        'record-123',
-        { propertyId: 'prop-123', value: 'Hello' },
-        'user-123',
-      );
+      const result = await service.create('record-123', { propertyId: 'prop-123', value: 'Hello' }, 'user-123');
 
       expect(result.id).toBe('pv-123');
       expect(result.value).toBe('Hello');
@@ -146,24 +142,24 @@ describe('PropertyValueService', () => {
     it('should throw NotFoundException when record not found', async () => {
       (prisma.record.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.create('record-nonexistent', { propertyId: 'prop-123' }, 'user-123'),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.create('record-nonexistent', { propertyId: 'prop-123' }, 'user-123'),
-      ).rejects.toThrow('Record with id record-nonexistent not found');
+      await expect(service.create('record-nonexistent', { propertyId: 'prop-123' }, 'user-123')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.create('record-nonexistent', { propertyId: 'prop-123' }, 'user-123')).rejects.toThrow(
+        'Record with id record-nonexistent not found',
+      );
     });
 
     it('should throw NotFoundException when property not found', async () => {
       (prisma.record.findFirst as jest.Mock).mockResolvedValue(mockRecord);
       (prisma.property.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.create('record-123', { propertyId: 'prop-nonexistent' }, 'user-123'),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.create('record-123', { propertyId: 'prop-nonexistent' }, 'user-123'),
-      ).rejects.toThrow('Property with id prop-nonexistent not found');
+      await expect(service.create('record-123', { propertyId: 'prop-nonexistent' }, 'user-123')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.create('record-123', { propertyId: 'prop-nonexistent' }, 'user-123')).rejects.toThrow(
+        'Property with id prop-nonexistent not found',
+      );
     });
 
     it('should throw ConflictException when property belongs to a different database', async () => {
@@ -171,12 +167,12 @@ describe('PropertyValueService', () => {
       (prisma.record.findFirst as jest.Mock).mockResolvedValue(mockRecord);
       (prisma.property.findUnique as jest.Mock).mockResolvedValue(propertyOtherDb);
 
-      await expect(
-        service.create('record-123', { propertyId: 'prop-123' }, 'user-123'),
-      ).rejects.toThrow(ConflictException);
-      await expect(
-        service.create('record-123', { propertyId: 'prop-123' }, 'user-123'),
-      ).rejects.toThrow('Property does not belong to the same database as the record');
+      await expect(service.create('record-123', { propertyId: 'prop-123' }, 'user-123')).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.create('record-123', { propertyId: 'prop-123' }, 'user-123')).rejects.toThrow(
+        'Property does not belong to the same database as the record',
+      );
     });
 
     it('should throw ConflictException when property value already exists', async () => {
@@ -184,12 +180,12 @@ describe('PropertyValueService', () => {
       (prisma.property.findUnique as jest.Mock).mockResolvedValue(mockProperty);
       (prisma.propertyValue.findUnique as jest.Mock).mockResolvedValue(mockPropertyValue);
 
-      await expect(
-        service.create('record-123', { propertyId: 'prop-123' }, 'user-123'),
-      ).rejects.toThrow(ConflictException);
-      await expect(
-        service.create('record-123', { propertyId: 'prop-123' }, 'user-123'),
-      ).rejects.toThrow('A value for this property already exists on this record');
+      await expect(service.create('record-123', { propertyId: 'prop-123' }, 'user-123')).rejects.toThrow(
+        ConflictException,
+      );
+      await expect(service.create('record-123', { propertyId: 'prop-123' }, 'user-123')).rejects.toThrow(
+        'A value for this property already exists on this record',
+      );
     });
 
     it('should throw BadRequestException when value validation fails', async () => {
@@ -200,12 +196,12 @@ describe('PropertyValueService', () => {
         .mockReturnValueOnce(['Text value must be a string or null'])
         .mockReturnValueOnce(['Text value must be a string or null']);
 
-      await expect(
-        service.create('record-123', { propertyId: 'prop-123', value: 123 }, 'user-123'),
-      ).rejects.toThrow(BadRequestException);
-      await expect(
-        service.create('record-123', { propertyId: 'prop-123', value: 123 }, 'user-123'),
-      ).rejects.toThrow('Invalid value for property type text');
+      await expect(service.create('record-123', { propertyId: 'prop-123', value: 123 }, 'user-123')).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.create('record-123', { propertyId: 'prop-123', value: 123 }, 'user-123')).rejects.toThrow(
+        'Invalid value for property type text',
+      );
     });
   });
 
@@ -300,12 +296,10 @@ describe('PropertyValueService', () => {
     it('should throw NotFoundException when property value not found', async () => {
       (prisma.propertyValue.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.update('nonexistent', { value: 'Updated' }, 'user-123'),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.update('nonexistent', { value: 'Updated' }, 'user-123'),
-      ).rejects.toThrow('PropertyValue with id nonexistent not found');
+      await expect(service.update('nonexistent', { value: 'Updated' }, 'user-123')).rejects.toThrow(NotFoundException);
+      await expect(service.update('nonexistent', { value: 'Updated' }, 'user-123')).rejects.toThrow(
+        'PropertyValue with id nonexistent not found',
+      );
     });
 
     it('should throw BadRequestException when updated value is invalid', async () => {
@@ -314,12 +308,10 @@ describe('PropertyValueService', () => {
         .mockReturnValueOnce(['Text value must be a string or null'])
         .mockReturnValueOnce(['Text value must be a string or null']);
 
-      await expect(
-        service.update('pv-123', { value: 999 }, 'user-123'),
-      ).rejects.toThrow(BadRequestException);
-      await expect(
-        service.update('pv-123', { value: 999 }, 'user-123'),
-      ).rejects.toThrow('Invalid value for property type text');
+      await expect(service.update('pv-123', { value: 999 }, 'user-123')).rejects.toThrow(BadRequestException);
+      await expect(service.update('pv-123', { value: 999 }, 'user-123')).rejects.toThrow(
+        'Invalid value for property type text',
+      );
     });
   });
 

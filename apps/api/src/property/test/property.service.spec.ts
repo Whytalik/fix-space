@@ -225,11 +225,7 @@ describe('PropertyService', () => {
       (prisma.property.findFirst as jest.Mock).mockResolvedValueOnce(mockProperty).mockResolvedValueOnce(null);
       (prisma.property.update as jest.Mock).mockResolvedValue(updatedProperty);
 
-      const result = await service.update(
-        'prop-123',
-        { name: 'Updated Title', icon: '🔤' },
-        'user-123',
-      );
+      const result = await service.update('prop-123', { name: 'Updated Title', icon: '🔤' }, 'user-123');
 
       expect(result.name).toBe('Updated Title');
       expect(result.icon).toBe('🔤');
@@ -256,12 +252,10 @@ describe('PropertyService', () => {
     it('should throw NotFoundException when property not found', async () => {
       (prisma.property.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.update('nonexistent', { name: 'Updated' }, 'user-123'),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.update('nonexistent', { name: 'Updated' }, 'user-123'),
-      ).rejects.toThrow('Property with id nonexistent not found');
+      await expect(service.update('nonexistent', { name: 'Updated' }, 'user-123')).rejects.toThrow(NotFoundException);
+      await expect(service.update('nonexistent', { name: 'Updated' }, 'user-123')).rejects.toThrow(
+        'Property with id nonexistent not found',
+      );
     });
 
     it('should throw ConflictException when new name is taken by another property', async () => {
@@ -272,12 +266,10 @@ describe('PropertyService', () => {
         .mockResolvedValueOnce(mockProperty)
         .mockResolvedValueOnce(anotherProperty);
 
-      await expect(
-        service.update('prop-123', { name: 'New Name' }, 'user-123'),
-      ).rejects.toThrow(ConflictException);
-      await expect(
-        service.update('prop-123', { name: 'New Name' }, 'user-123'),
-      ).rejects.toThrow('Property name is already taken in this database.');
+      await expect(service.update('prop-123', { name: 'New Name' }, 'user-123')).rejects.toThrow(ConflictException);
+      await expect(service.update('prop-123', { name: 'New Name' }, 'user-123')).rejects.toThrow(
+        'Property name is already taken in this database.',
+      );
     });
 
     it('should reset config to new handler default when type changes', async () => {
@@ -290,7 +282,11 @@ describe('PropertyService', () => {
       };
       mockTypeRegistry.getHandler.mockReturnValueOnce(newMockHandler);
       (prisma.property.findFirst as jest.Mock).mockResolvedValue(mockProperty);
-      (prisma.property.update as jest.Mock).mockResolvedValue({ ...mockProperty, type: 'number', config: newDefaultConfig });
+      (prisma.property.update as jest.Mock).mockResolvedValue({
+        ...mockProperty,
+        type: 'number',
+        config: newDefaultConfig,
+      });
 
       await service.update('prop-123', { type: PropertyType.NUMBER }, 'user-123');
 
@@ -301,9 +297,9 @@ describe('PropertyService', () => {
       mockHandler.validateConfig.mockReturnValueOnce(['invalid field']);
       (prisma.property.findFirst as jest.Mock).mockResolvedValue(mockProperty);
 
-      await expect(
-        service.update('prop-123', { config: { badField: 'bad' } }, 'user-123'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.update('prop-123', { config: { badField: 'bad' } }, 'user-123')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -326,9 +322,7 @@ describe('PropertyService', () => {
       (prisma.property.findFirst as jest.Mock).mockResolvedValue(null);
 
       await expect(service.remove('nonexistent', 'user-123')).rejects.toThrow(NotFoundException);
-      await expect(service.remove('nonexistent', 'user-123')).rejects.toThrow(
-        'Property with id nonexistent not found',
-      );
+      await expect(service.remove('nonexistent', 'user-123')).rejects.toThrow('Property with id nonexistent not found');
     });
   });
 });

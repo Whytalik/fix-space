@@ -5,7 +5,7 @@ import { UserService } from './user.service';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Get('me')
   getCurrentUser(@CurrentUser('userId') userId: string) {
@@ -13,10 +13,7 @@ export class UserController {
   }
 
   @Patch('me')
-  updateCurrentUser(
-    @CurrentUser('userId') userId: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+  updateCurrentUser(@CurrentUser('userId') userId: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(userId, updateUserDto);
   }
 

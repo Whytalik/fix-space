@@ -5,12 +5,7 @@ export interface CookieOptions {
   secure: boolean;
 }
 
-export function setAccessTokenCookie(
-  res: Response,
-  token: string,
-  maxAgeMs: number,
-  options: CookieOptions,
-): void {
+export function setAccessTokenCookie(res: Response, token: string, maxAgeMs: number, options: CookieOptions): void {
   res.cookie('access_token', token, {
     httpOnly: true,
     secure: options.secure,
@@ -21,12 +16,7 @@ export function setAccessTokenCookie(
   });
 }
 
-export function setRefreshTokenCookie(
-  res: Response,
-  token: string,
-  maxAgeMs: number,
-  options: CookieOptions,
-): void {
+export function setRefreshTokenCookie(res: Response, token: string, maxAgeMs: number, options: CookieOptions): void {
   res.cookie('refresh_token', token, {
     httpOnly: true,
     secure: options.secure,

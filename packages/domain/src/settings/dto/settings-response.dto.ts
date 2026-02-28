@@ -1,12 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 
-export type JsonValue =
-  | string
-  | number
-  | boolean
-  | { [key: string]: JsonValue }
-  | JsonValue[]
-  | null;
+export type JsonValue = string | number | boolean | { [key: string]: JsonValue } | JsonValue[] | null;
 
 @Exclude()
 export class SettingsResponseDto {

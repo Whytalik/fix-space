@@ -13,27 +13,18 @@ export class RelationHandler implements PropertyTypeHandler {
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (
-      config.relatedEntityId !== undefined &&
-      typeof config.relatedEntityId !== 'string'
-    ) {
+    if (config.relatedEntityId !== undefined && typeof config.relatedEntityId !== 'string') {
       errors.push('relatedEntityId must be a string');
     }
 
-    if (
-      config.multiple !== undefined &&
-      typeof config.multiple !== 'boolean'
-    ) {
+    if (config.multiple !== undefined && typeof config.multiple !== 'boolean') {
       errors.push('multiple must be a boolean');
     }
 
     return errors.length > 0 ? errors : null;
   }
 
-  validateValue(
-    value: unknown,
-    config: Record<string, unknown>,
-  ): string[] | null {
+  validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
     if (value === null) return null;
 
     const isMultiple = config.multiple as boolean | undefined;

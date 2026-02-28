@@ -65,9 +65,7 @@ describe('InitializeUserSpaceUseCase', () => {
       ],
     }).compile();
 
-    useCase = module.get<InitializeUserSpaceUseCase>(
-      InitializeUserSpaceUseCase,
-    );
+    useCase = module.get<InitializeUserSpaceUseCase>(InitializeUserSpaceUseCase);
   });
 
   it('should create space with interpolated name', async () => {
@@ -77,9 +75,7 @@ describe('InitializeUserSpaceUseCase', () => {
 
     await useCase.initialize('user-123', 'testuser');
 
-    expect(mockConfigService.interpolateSpaceName).toHaveBeenCalledWith(
-      'testuser',
-    );
+    expect(mockConfigService.interpolateSpaceName).toHaveBeenCalledWith('testuser');
     expect(mockSpaceService.create).toHaveBeenCalledWith('user-123', {
       name: "testuser's Space",
     });
@@ -111,11 +107,15 @@ describe('InitializeUserSpaceUseCase', () => {
 
     await useCase.initialize('user-123', 'testuser');
 
-    expect(mockDatabaseService.create).toHaveBeenCalledWith('space-123', {
-      name: 'db-1',
-      title: 'Tasks',
-      type: 'table',
-    }, 'user-123');
+    expect(mockDatabaseService.create).toHaveBeenCalledWith(
+      'space-123',
+      {
+        name: 'db-1',
+        title: 'Tasks',
+        type: 'table',
+      },
+      'user-123',
+    );
   });
 
   it('should return the created space', async () => {

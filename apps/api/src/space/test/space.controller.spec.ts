@@ -116,11 +116,7 @@ describe('SpaceController', () => {
       });
 
       expect(result).toEqual(mockSpaceResponse);
-      expect(mockDuplicateSpaceUseCase.execute).toHaveBeenCalledWith(
-        'space-123',
-        'user-123',
-        { newName: 'Copy' },
-      );
+      expect(mockDuplicateSpaceUseCase.execute).toHaveBeenCalledWith('space-123', 'user-123', { newName: 'Copy' });
     });
 
     it('should pass undefined newName when body has no name', async () => {
@@ -128,11 +124,7 @@ describe('SpaceController', () => {
 
       await controller.duplicate('space-123', 'user-123', {});
 
-      expect(mockDuplicateSpaceUseCase.execute).toHaveBeenCalledWith(
-        'space-123',
-        'user-123',
-        { newName: undefined },
-      );
+      expect(mockDuplicateSpaceUseCase.execute).toHaveBeenCalledWith('space-123', 'user-123', { newName: undefined });
     });
   });
 });

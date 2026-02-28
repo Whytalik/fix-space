@@ -8,10 +8,7 @@ export interface PropertyTypeHandler {
   validateConfig(config: Record<string, unknown>): string[] | null;
 
   // Value operations (PropertyValue.value column)
-  validateValue(
-    value: unknown,
-    config: Record<string, unknown>,
-  ): string[] | null;
+  validateValue(value: unknown, config: Record<string, unknown>): string[] | null;
   formatValue(value: unknown, config: Record<string, unknown>): unknown;
   getDefaultValue(config: Record<string, unknown>): unknown;
 }

@@ -15,19 +15,13 @@ export class StatusHandler implements PropertyTypeHandler {
   readonly type = PropertyType.STATUS;
 
   getDefaultConfig(): Record<string, unknown> {
-    return JSON.parse(JSON.stringify(DEFAULT_STATUS_PROPERTY)) as Record<
-      string,
-      unknown
-    >;
+    return JSON.parse(JSON.stringify(DEFAULT_STATUS_PROPERTY)) as Record<string, unknown>;
   }
 
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (
-      config.defaultOption !== undefined &&
-      typeof config.defaultOption !== 'string'
-    ) {
+    if (config.defaultOption !== undefined && typeof config.defaultOption !== 'string') {
       errors.push('defaultOption must be a string');
     }
 
@@ -43,12 +37,8 @@ export class StatusHandler implements PropertyTypeHandler {
 
           const c = cat as Record<string, unknown>;
 
-          if (
-            !STATUS_CATEGORY_VALUES.includes(c.category as StatusCategory)
-          ) {
-            errors.push(
-              `categories[${i}].category must be one of: ${STATUS_CATEGORY_VALUES.join(', ')}`,
-            );
+          if (!STATUS_CATEGORY_VALUES.includes(c.category as StatusCategory)) {
+            errors.push(`categories[${i}].category must be one of: ${STATUS_CATEGORY_VALUES.join(', ')}`);
           }
 
           if (typeof c.defaultOption !== 'string') {
@@ -60,28 +50,18 @@ export class StatusHandler implements PropertyTypeHandler {
           } else {
             (c.options as unknown[]).forEach((opt, j) => {
               if (typeof opt !== 'object' || opt === null) {
-                errors.push(
-                  `categories[${i}].options[${j}] must be an object`,
-                );
+                errors.push(`categories[${i}].options[${j}] must be an object`);
                 return;
               }
 
               const o = opt as Record<string, unknown>;
 
               if (typeof o.name !== 'string') {
-                errors.push(
-                  `categories[${i}].options[${j}].name must be a string`,
-                );
+                errors.push(`categories[${i}].options[${j}].name must be a string`);
               }
 
-              if (
-                !STATUS_OPTION_COLOR_VALUES.includes(
-                  o.color as StatusOptionColor,
-                )
-              ) {
-                errors.push(
-                  `categories[${i}].options[${j}].color must be a valid status color`,
-                );
+              if (!STATUS_OPTION_COLOR_VALUES.includes(o.color as StatusOptionColor)) {
+                errors.push(`categories[${i}].options[${j}].color must be a valid status color`);
               }
             });
           }
@@ -92,10 +72,7 @@ export class StatusHandler implements PropertyTypeHandler {
     return errors.length > 0 ? errors : null;
   }
 
-  validateValue(
-    value: unknown,
-    config: Record<string, unknown>,
-  ): string[] | null {
+  validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
     if (value === null) return null;
 
     if (typeof value !== 'string') {
@@ -106,9 +83,7 @@ export class StatusHandler implements PropertyTypeHandler {
     if (categories) {
       const allOptions = categories.flatMap((c) => c.options.map((o) => o.name));
       if (!allOptions.includes(value)) {
-        return [
-          `Status value must be one of: ${allOptions.join(', ')}`,
-        ];
+        return [`Status value must be one of: ${allOptions.join(', ')}`];
       }
     }
 
@@ -121,9 +96,6 @@ export class StatusHandler implements PropertyTypeHandler {
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (
-      (config.defaultOption as string | undefined) ??
-      DEFAULT_STATUS_PROPERTY.defaultOption
-    );
+    return (config.defaultOption as string | undefined) ?? DEFAULT_STATUS_PROPERTY.defaultOption;
   }
 }

@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
 import {
   CreatePropertyValueDto,
@@ -46,9 +41,7 @@ export class PropertyValueService {
     });
 
     if (!property) {
-      throw new NotFoundException(
-        `Property with id ${createPropertyValueDto.propertyId} not found`,
-      );
+      throw new NotFoundException(`Property with id ${createPropertyValueDto.propertyId} not found`);
     }
 
     if (property.databaseId !== record.databaseId) {
@@ -56,9 +49,7 @@ export class PropertyValueService {
         propertyDatabaseId: property.databaseId,
         recordDatabaseId: record.databaseId,
       });
-      throw new ConflictException(
-        'Property does not belong to the same database as the record',
-      );
+      throw new ConflictException('Property does not belong to the same database as the record');
     }
 
     const existingValue = await prisma.propertyValue.findUnique({
@@ -75,26 +66,18 @@ export class PropertyValueService {
         recordId,
         propertyId: createPropertyValueDto.propertyId,
       });
-      throw new ConflictException(
-        'A value for this property already exists on this record',
-      );
+      throw new ConflictException('A value for this property already exists on this record');
     }
 
     const handler = this.typeRegistry.getHandler(property.type as PropertyType);
-    const config =
-      (property.config as Record<string, unknown> | null) ??
-      handler.getDefaultConfig();
+    const config = (property.config as Record<string, unknown> | null) ?? handler.getDefaultConfig();
 
     const rawValue =
-      createPropertyValueDto.value !== undefined
-        ? createPropertyValueDto.value
-        : handler.getDefaultValue(config);
+      createPropertyValueDto.value !== undefined ? createPropertyValueDto.value : handler.getDefaultValue(config);
 
     const valueErrors = handler.validateValue(rawValue, config);
     if (valueErrors) {
-      throw new BadRequestException(
-        `Invalid value for property type ${property.type}: ${valueErrors.join('; ')}`,
-      );
+      throw new BadRequestException(`Invalid value for property type ${property.type}: ${valueErrors.join('; ')}`);
     }
 
     const formattedValue = handler.formatValue(rawValue, config);
@@ -121,9 +104,7 @@ export class PropertyValueService {
       where: { recordId, record: { database: { space: { ownerId: userId } } } },
       include: { property: true },
     });
-    return propertyValues.map(
-      (propertyValue) => new PropertyValueResponseDto(propertyValue),
-    );
+    return propertyValues.map((propertyValue) => new PropertyValueResponseDto(propertyValue));
   }
 
   async findOne(id: string, userId: string): Promise<PropertyValueResponseDto> {
@@ -160,17 +141,10 @@ export class PropertyValueService {
     let formattedValue: unknown = undefined;
 
     if (updatePropertyValueDto.value !== undefined) {
-      const handler = this.typeRegistry.getHandler(
-        existingValue.property.type as PropertyType,
-      );
-      const config =
-        (existingValue.property.config as Record<string, unknown> | null) ??
-        handler.getDefaultConfig();
+      const handler = this.typeRegistry.getHandler(existingValue.property.type as PropertyType);
+      const config = (existingValue.property.config as Record<string, unknown> | null) ?? handler.getDefaultConfig();
 
-      const valueErrors = handler.validateValue(
-        updatePropertyValueDto.value,
-        config,
-      );
+      const valueErrors = handler.validateValue(updatePropertyValueDto.value, config);
       if (valueErrors) {
         throw new BadRequestException(
           `Invalid value for property type ${existingValue.property.type}: ${valueErrors.join('; ')}`,
