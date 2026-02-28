@@ -15,6 +15,7 @@ interface AppContextValue {
   space: SpaceResponseDto | null;
   spaces: SpaceResponseDto[];
   setSpace: (space: SpaceResponseDto) => void;
+  clearSession: () => void;
   isLoading: boolean;
 }
 
@@ -23,6 +24,7 @@ const AppContext = createContext<AppContextValue>({
   space: null,
   spaces: [],
   setSpace: () => {},
+  clearSession: () => {},
   isLoading: true,
 });
 
@@ -69,6 +71,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
+  function clearSession() {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("username");
+    clearCached(CACHE_KEY_USER, CACHE_KEY_SPACES);
+    setUser(null);
+    setSpace(null);
+    setSpaces([]);
+  }
+
   return (
     <AppContext.Provider
       value={{
@@ -76,6 +87,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         space,
         spaces,
         setSpace,
+        clearSession,
         isLoading,
       }}
     >
