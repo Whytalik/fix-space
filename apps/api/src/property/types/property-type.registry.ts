@@ -1,7 +1,7 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { PropertyType } from '@nucleus/domain';
-import { PropertyTypeHandler } from './handler.interface';
-import { PROPERTY_TYPE_HANDLERS } from './property-type.tokens';
+import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import { PropertyType } from "@nucleus/domain";
+import { PropertyTypeHandler } from "./handler.interface";
+import { PROPERTY_TYPE_HANDLERS } from "./property-type.tokens";
 
 @Injectable()
 export class PropertyTypeRegistry implements OnModuleInit {

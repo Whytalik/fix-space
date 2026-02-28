@@ -1,13 +1,13 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 import {
   clearAuthCookies,
   parseDurationToMs,
   setAccessTokenCookie,
   setRefreshTokenCookie,
-} from '../utils/cookie.helper';
+} from "../utils/cookie.helper";
 
 export interface AuthCookieData {
   accessToken?: string;
@@ -24,8 +24,8 @@ export class AuthCookiesInterceptor implements NestInterceptor {
       map((data) => {
         const response = context.switchToHttp().getResponse();
         const cookieOptions = {
-          domain: this.configService.get('COOKIE_DOMAIN', 'localhost'),
-          secure: this.configService.get('NODE_ENV') === 'production',
+          domain: this.configService.get("COOKIE_DOMAIN", "localhost"),
+          secure: this.configService.get("NODE_ENV") === "production",
         };
 
         // Clear cookies if requested
@@ -38,7 +38,7 @@ export class AuthCookiesInterceptor implements NestInterceptor {
           setAccessTokenCookie(
             response,
             data.accessToken,
-            parseDurationToMs(this.configService.get('JWT_ACCESS_EXPIRATION', '15m')),
+            parseDurationToMs(this.configService.get("JWT_ACCESS_EXPIRATION", "15m")),
             cookieOptions,
           );
         }
@@ -48,7 +48,7 @@ export class AuthCookiesInterceptor implements NestInterceptor {
           setRefreshTokenCookie(
             response,
             data.refreshToken,
-            parseDurationToMs(this.configService.get('JWT_REFRESH_EXPIRATION', '7d')),
+            parseDurationToMs(this.configService.get("JWT_REFRESH_EXPIRATION", "7d")),
             cookieOptions,
           );
         }

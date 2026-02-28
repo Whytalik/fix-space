@@ -1,9 +1,9 @@
 export interface DatabaseSettings {
   defaultDatabaseIcon: string;
-  defaultViewType: 'table';
+  defaultViewType: "table";
 }
 
 export const DEFAULT_DATABASE_SETTINGS = {
-  defaultDatabaseIcon: '📊',
-  defaultViewType: 'table',
+  defaultDatabaseIcon: "📊",
+  defaultViewType: "table",
 } satisfies DatabaseSettings;

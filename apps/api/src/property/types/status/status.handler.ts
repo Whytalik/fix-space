@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import {
   DEFAULT_STATUS_PROPERTY,
   PropertyType,
@@ -7,8 +7,8 @@ import {
   StatusCategory,
   StatusCategoryConfig,
   StatusOptionColor,
-} from '@nucleus/domain';
-import { PropertyTypeHandler } from '../handler.interface';
+} from "@nucleus/domain";
+import { PropertyTypeHandler } from "../handler.interface";
 
 @Injectable()
 export class StatusHandler implements PropertyTypeHandler {
@@ -21,16 +21,16 @@ export class StatusHandler implements PropertyTypeHandler {
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (config.defaultOption !== undefined && typeof config.defaultOption !== 'string') {
-      errors.push('defaultOption must be a string');
+    if (config.defaultOption !== undefined && typeof config.defaultOption !== "string") {
+      errors.push("defaultOption must be a string");
     }
 
     if (config.categories !== undefined) {
       if (!Array.isArray(config.categories)) {
-        errors.push('categories must be an array');
+        errors.push("categories must be an array");
       } else {
         (config.categories as unknown[]).forEach((cat, i) => {
-          if (typeof cat !== 'object' || cat === null) {
+          if (typeof cat !== "object" || cat === null) {
             errors.push(`categories[${i}] must be an object`);
             return;
           }
@@ -38,10 +38,10 @@ export class StatusHandler implements PropertyTypeHandler {
           const c = cat as Record<string, unknown>;
 
           if (!STATUS_CATEGORY_VALUES.includes(c.category as StatusCategory)) {
-            errors.push(`categories[${i}].category must be one of: ${STATUS_CATEGORY_VALUES.join(', ')}`);
+            errors.push(`categories[${i}].category must be one of: ${STATUS_CATEGORY_VALUES.join(", ")}`);
           }
 
-          if (typeof c.defaultOption !== 'string') {
+          if (typeof c.defaultOption !== "string") {
             errors.push(`categories[${i}].defaultOption must be a string`);
           }
 
@@ -49,14 +49,14 @@ export class StatusHandler implements PropertyTypeHandler {
             errors.push(`categories[${i}].options must be an array`);
           } else {
             (c.options as unknown[]).forEach((opt, j) => {
-              if (typeof opt !== 'object' || opt === null) {
+              if (typeof opt !== "object" || opt === null) {
                 errors.push(`categories[${i}].options[${j}] must be an object`);
                 return;
               }
 
               const o = opt as Record<string, unknown>;
 
-              if (typeof o.name !== 'string') {
+              if (typeof o.name !== "string") {
                 errors.push(`categories[${i}].options[${j}].name must be a string`);
               }
 
@@ -75,15 +75,15 @@ export class StatusHandler implements PropertyTypeHandler {
   validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
     if (value === null) return null;
 
-    if (typeof value !== 'string') {
-      return ['Status value must be a string or null'];
+    if (typeof value !== "string") {
+      return ["Status value must be a string or null"];
     }
 
     const categories = config.categories as StatusCategoryConfig[] | undefined;
     if (categories) {
       const allOptions = categories.flatMap((c) => c.options.map((o) => o.name));
       if (!allOptions.includes(value)) {
-        return [`Status value must be one of: ${allOptions.join(', ')}`];
+        return [`Status value must be one of: ${allOptions.join(", ")}`];
       }
     }
 

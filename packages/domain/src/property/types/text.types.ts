@@ -1,4 +1,4 @@
-export const URL_HANDLING_VALUES = ['none', 'detect', 'preview'] as const;
+export const URL_HANDLING_VALUES = ["none", "detect", "preview"] as const;
 export type UrlHandling = (typeof URL_HANDLING_VALUES)[number];
 
 export interface TextProperty {
@@ -8,7 +8,7 @@ export interface TextProperty {
 }
 
 export const DEFAULT_TEXT_PROPERTY = {
-  defaultValue: '',
+  defaultValue: "",
   isRichText: false,
-  urlHandling: 'none',
+  urlHandling: "none",
 } satisfies TextProperty;

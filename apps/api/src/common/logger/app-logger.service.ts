@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 
-import { getRequestContext } from '../context/request-context';
+import { getRequestContext } from "../context/request-context";
 
 @Injectable()
 export class AppLogger {
@@ -35,16 +35,16 @@ export class AppLogger {
     if (ctx?.userId) contextParts.push(`userId=${ctx.userId}`);
 
     if (contextParts.length > 0) {
-      parts.push(`| ${contextParts.join(', ')}`);
+      parts.push(`| ${contextParts.join(", ")}`);
     }
 
     if (details && Object.keys(details).length > 0) {
       const detailStr = Object.entries(details)
-        .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : v}`)
-        .join(', ');
+        .map(([k, v]) => `${k}=${typeof v === "object" ? JSON.stringify(v) : v}`)
+        .join(", ");
       parts.push(`| ${detailStr}`);
     }
 
-    return parts.join(' ');
+    return parts.join(" ");
   }
 }

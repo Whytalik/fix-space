@@ -1,29 +1,29 @@
-'use client';
+"use client";
 
-import { devVerifyUser, register } from '@/lib/api/auth';
-import { ApiError } from '@/lib/api/client';
-import { Button, Card } from '@nucleus/ui';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { devVerifyUser, register } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
+import { Button, Card } from "@nucleus/ui";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [devVerifying, setDevVerifying] = useState(false);
 
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = process.env.NODE_ENV === "development";
 
   async function handleDevVerify() {
     setDevVerifying(true);
     try {
       await devVerifyUser(email);
-      router.push('/login');
+      router.push("/login");
     } finally {
       setDevVerifying(false);
     }
@@ -35,10 +35,14 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await register({ email, username, password });
+      await register({
+        email,
+        username,
+        password,
+      });
       setSuccess(true);
     } catch (err) {
-      setErrors(err instanceof ApiError ? err.messages : ['Unable to connect to the server. Please try again.']);
+      setErrors(err instanceof ApiError ? err.messages : ["Unable to connect to the server. Please try again."]);
     } finally {
       setLoading(false);
     }
@@ -58,10 +62,10 @@ export default function RegisterPage() {
           </p>
           {isDev && (
             <Button onClick={handleDevVerify} loading={devVerifying} className="mt-2">
-              {devVerifying ? 'Verifying…' : 'Verify instantly (dev)'}
+              {devVerifying ? "Verifying…" : "Verify instantly (dev)"}
             </Button>
           )}
-          <Button variant="secondary" onClick={() => router.push('/login')}>
+          <Button variant="secondary" onClick={() => router.push("/login")}>
             Go to sign in
           </Button>
         </div>
@@ -143,13 +147,13 @@ export default function RegisterPage() {
             )}
 
             <Button type="submit" loading={loading} className="mt-1">
-              {loading ? 'Creating account…' : 'Create account'}
+              {loading ? "Creating account…" : "Create account"}
             </Button>
           </form>
         </Card>
 
         <p className="text-center mt-5 text-[13.5px] text-ink-secondary">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <Link href="/login" className="font-semibold text-accent">
             Sign in
           </Link>
