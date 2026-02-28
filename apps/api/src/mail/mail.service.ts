@@ -24,9 +24,7 @@ export class MailService implements OnModuleInit {
 
     if (!smtpHost) {
       // Development mode: use Ethereal test account
-      this.logger.log(
-        'No SMTP_HOST configured, creating Ethereal test account',
-      );
+      this.logger.log('No SMTP_HOST configured, creating Ethereal test account');
       const testAccount = await nodemailer.createTestAccount();
 
       this.transporter = nodemailer.createTransport({
@@ -58,20 +56,10 @@ export class MailService implements OnModuleInit {
     }
   }
 
-  async sendVerificationEmail(
-    to: string,
-    username: string,
-    token: string,
-  ): Promise<void> {
-    const appUrl = this.configService.get<string>(
-      'APP_URL',
-      'http://localhost:3001',
-    );
+  async sendVerificationEmail(to: string, username: string, token: string): Promise<void> {
+    const appUrl = this.configService.get<string>('APP_URL', 'http://localhost:3001');
     const verificationLink = `${appUrl}/auth/verify?token=${token}`;
-    const from = this.configService.get<string>(
-      'MAIL_FROM',
-      'noreply@nucleus.app',
-    );
+    const from = this.configService.get<string>('MAIL_FROM', 'noreply@nucleus.app');
 
     const mailOptions = {
       from,
@@ -112,9 +100,7 @@ export class MailService implements OnModuleInit {
     const smtpHost = this.configService.get<string>('SMTP_HOST');
     if (!smtpHost) {
       const previewUrl = nodemailer.getTestMessageUrl(info);
-      this.logger.log(
-        `📧 Ethereal email preview: ${previewUrl || 'Preview URL not available'}`,
-      );
+      this.logger.log(`📧 Ethereal email preview: ${previewUrl || 'Preview URL not available'}`);
     }
   }
 }
