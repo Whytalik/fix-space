@@ -1,0 +1,9 @@
+@layer utilities {
+  .text-muted {
+    color: var(--color-ink-muted);
+  }
+
+  .shadow-accent {
+    box-shadow: var(--shadow-accent);
+  }
+}
