@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InitializationConfig, defaultInitializationConfig } from './initialization.config';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { InitializationConfig, defaultInitializationConfig } from "./initialization.config";
 
 @Injectable()
 export class InitializationConfigService {
@@ -8,7 +8,7 @@ export class InitializationConfigService {
 
   constructor(private configService: ConfigService) {
     const spaceNameTemplate = this.configService.get<string>(
-      'SPACE_NAME_TEMPLATE',
+      "SPACE_NAME_TEMPLATE",
       defaultInitializationConfig.spaceNameTemplate,
     );
 
@@ -23,6 +23,6 @@ export class InitializationConfigService {
   }
 
   interpolateSpaceName(username: string): string {
-    return this.config.spaceNameTemplate.replace('{{username}}', username);
+    return this.config.spaceNameTemplate.replace("{{username}}", username);
   }
 }

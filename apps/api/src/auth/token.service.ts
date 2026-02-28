@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { prisma } from '@nucleus/database';
-import { AppLogger } from '../common/logger/app-logger.service';
-import { parseDurationToMs } from '../common/utils/cookie.helper';
-import { generateRandomToken, hashToken } from '../common/utils/token.helper';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import { prisma } from "@nucleus/database";
+import { AppLogger } from "../common/logger/app-logger.service";
+import { parseDurationToMs } from "../common/utils/cookie.helper";
+import { generateRandomToken, hashToken } from "../common/utils/token.helper";
 
 @Injectable()
 export class TokenService {
@@ -24,13 +24,13 @@ export class TokenService {
   async createRefreshToken(userId: string): Promise<string> {
     const rawToken = generateRandomToken();
     const tokenHash = hashToken(rawToken);
-    const expiresAt = new Date(Date.now() + parseDurationToMs(this.configService.get('JWT_REFRESH_EXPIRATION', '7d')));
+    const expiresAt = new Date(Date.now() + parseDurationToMs(this.configService.get("JWT_REFRESH_EXPIRATION", "7d")));
 
     await prisma.refreshToken.create({
       data: { userId, tokenHash, expiresAt },
     });
 
-    this.logger.debug('Refresh token created', { userId });
+    this.logger.debug("Refresh token created", { userId });
 
     return rawToken;
   }
@@ -46,7 +46,7 @@ export class TokenService {
     });
 
     if (!record) {
-      this.logger.warn('Invalid or expired refresh token');
+      this.logger.warn("Invalid or expired refresh token");
       return null;
     }
 
@@ -60,7 +60,7 @@ export class TokenService {
       data: { revokedAt: new Date() },
     });
 
-    this.logger.debug('Old refresh token revoked', { tokenId: oldTokenId });
+    this.logger.debug("Old refresh token revoked", { tokenId: oldTokenId });
 
     // Create new one
     return this.createRefreshToken(userId);
@@ -73,7 +73,7 @@ export class TokenService {
       data: { revokedAt: new Date() },
     });
 
-    this.logger.debug('Refresh token revoked by hash');
+    this.logger.debug("Refresh token revoked by hash");
   }
 
   async revokeAllUserRefreshTokens(userId: string): Promise<void> {
@@ -82,20 +82,20 @@ export class TokenService {
       data: { revokedAt: new Date() },
     });
 
-    this.logger.log('All refresh tokens revoked for user', { userId });
+    this.logger.log("All refresh tokens revoked for user", { userId });
   }
 
   async createVerificationToken(userId: string): Promise<string> {
     const rawToken = generateRandomToken();
     const tokenHash = hashToken(rawToken);
-    const hours = this.configService.get<number>('VERIFICATION_TOKEN_EXPIRATION_HOURS', 24);
+    const hours = this.configService.get<number>("VERIFICATION_TOKEN_EXPIRATION_HOURS", 24);
     const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
 
     await prisma.emailVerificationToken.create({
       data: { userId, tokenHash, expiresAt },
     });
 
-    this.logger.debug('Verification token created', { userId });
+    this.logger.debug("Verification token created", { userId });
 
     return rawToken;
   }
@@ -111,7 +111,7 @@ export class TokenService {
     });
 
     if (!record) {
-      this.logger.warn('Invalid or expired verification token');
+      this.logger.warn("Invalid or expired verification token");
       return null;
     }
 
@@ -124,6 +124,6 @@ export class TokenService {
       data: { usedAt: new Date() },
     });
 
-    this.logger.debug('Verification token marked as used', { tokenId });
+    this.logger.debug("Verification token marked as used", { tokenId });
   }
 }

@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { AppLogger } from '../../common/logger/app-logger.service';
-import { InitializationConfigService } from '../../config/initialization-config.service';
-import { DatabaseService } from '../../database/database.service';
-import { SectionService } from './section.service';
-import { SpaceService } from '../space.service';
+import { Injectable } from "@nestjs/common";
+import { AppLogger } from "../../common/logger/app-logger.service";
+import { InitializationConfigService } from "../../config/initialization-config.service";
+import { DatabaseService } from "../../database/database.service";
+import { SectionService } from "./section.service";
+import { SpaceService } from "../space.service";
 
 @Injectable()
 export class InitializeUserSpaceUseCase {
@@ -18,7 +18,7 @@ export class InitializeUserSpaceUseCase {
   }
 
   async initialize(userId: string, username: string) {
-    this.logger.log('Initializing user space', { userId, username });
+    this.logger.log("Initializing user space", { userId, username });
 
     const config = this.configService.getConfig();
     const spaceName = this.configService.interpolateSpaceName(username);
@@ -48,7 +48,7 @@ export class InitializeUserSpaceUseCase {
       );
     }
 
-    this.logger.log('User space initialized', {
+    this.logger.log("User space initialized", {
       userId,
       spaceId: space.id,
       sections: sortedSections.length,

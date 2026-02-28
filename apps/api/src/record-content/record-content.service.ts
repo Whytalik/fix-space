@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, prisma } from '@nucleus/database';
-import { RecordContentResponseDto, UpdateRecordContentDto } from '@nucleus/domain';
-import { AppLogger } from '../common/logger/app-logger.service';
-import { defaultRecordContentConfig } from './record-content.config';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma, prisma } from "@nucleus/database";
+import { RecordContentResponseDto, UpdateRecordContentDto } from "@nucleus/domain";
+import { AppLogger } from "../common/logger/app-logger.service";
+import { defaultRecordContentConfig } from "./record-content.config";
 
 @Injectable()
 export class RecordContentService {
@@ -11,10 +11,17 @@ export class RecordContentService {
   }
 
   async findOrCreate(recordId: string, userId: string): Promise<RecordContentResponseDto> {
-    this.logger.debug('Finding or creating record content', { recordId });
+    this.logger.debug("Finding or creating record content", { recordId });
 
     const record = await prisma.record.findFirst({
-      where: { id: recordId, database: { space: { ownerId: userId } } },
+      where: {
+        id: recordId,
+        database: {
+          space: {
+            ownerId: userId,
+          },
+        },
+      },
     });
 
     if (!record) {
@@ -33,7 +40,7 @@ export class RecordContentService {
         },
       });
 
-      this.logger.log('Record content created', {
+      this.logger.log("Record content created", {
         contentId: content.id,
         recordId,
       });
@@ -47,10 +54,17 @@ export class RecordContentService {
     updateRecordContentDto: UpdateRecordContentDto,
     userId: string,
   ): Promise<RecordContentResponseDto> {
-    this.logger.debug('Upserting record content', { recordId });
+    this.logger.debug("Upserting record content", { recordId });
 
     const record = await prisma.record.findFirst({
-      where: { id: recordId, database: { space: { ownerId: userId } } },
+      where: {
+        id: recordId,
+        database: {
+          space: {
+            ownerId: userId,
+          },
+        },
+      },
     });
 
     if (!record) {
@@ -68,7 +82,7 @@ export class RecordContentService {
       },
     });
 
-    this.logger.log('Record content upserted', {
+    this.logger.log("Record content upserted", {
       contentId: content.id,
       recordId,
     });
@@ -76,10 +90,17 @@ export class RecordContentService {
   }
 
   async remove(recordId: string, userId: string): Promise<RecordContentResponseDto> {
-    this.logger.debug('Removing record content', { recordId });
+    this.logger.debug("Removing record content", { recordId });
 
     const record = await prisma.record.findFirst({
-      where: { id: recordId, database: { space: { ownerId: userId } } },
+      where: {
+        id: recordId,
+        database: {
+          space: {
+            ownerId: userId,
+          },
+        },
+      },
     });
 
     if (!record) {
@@ -98,7 +119,7 @@ export class RecordContentService {
       where: { recordId },
     });
 
-    this.logger.log('Record content removed', { recordId });
+    this.logger.log("Record content removed", { recordId });
     return new RecordContentResponseDto(content);
   }
 }
