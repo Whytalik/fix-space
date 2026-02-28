@@ -1,6 +1,25 @@
-import { LogoIcon } from '@nucleus/ui';
+"use client";
+
+import { Sidebar } from "@/components/home/sidebar/sidebar";
+import { useAppContext } from "@/context/app-context";
+import { LogoIcon } from "@nucleus/ui";
 
 export default function Home() {
+  const { user, isLoading } = useAppContext();
+
+  if (isLoading) return null;
+
+  if (user) {
+    return (
+      <div className="flex flex-1 min-h-0">
+        <Sidebar />
+        <main className="flex-1 flex items-center justify-center">
+          <h1 className="text-2xl font-bold text-ink">Welcome back, {user.username}!</h1>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <main className="flex flex-col items-center justify-center flex-1 gap-5 px-6 text-center">
       <LogoIcon size={72} />
