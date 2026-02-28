@@ -163,9 +163,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@nucleus/database':
-        specifier: workspace:^
-        version: link:../../packages/database
       '@nucleus/ui':
         specifier: workspace:*
         version: link:../../packages/ui
