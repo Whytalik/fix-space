@@ -37,6 +37,9 @@
       "dependsOn": ["^db:generate"],
       "cache": false
     },
+    "@nucleus/ui#build": {
+      "outputs": []
+    },
     "lint": {},
     "format": {},
     "test": {},
