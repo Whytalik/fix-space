@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, prisma } from '@nucleus/database';
-import { CreateSectionDto, SectionOperationDto, SectionOperationType, SectionResponseDto } from '@nucleus/domain';
-import { AppLogger } from '../../common/logger/app-logger.service';
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma, prisma } from "@nucleus/database";
+import { CreateSectionDto, SectionOperationDto, SectionOperationType, SectionResponseDto } from "@nucleus/domain";
+import { AppLogger } from "../../common/logger/app-logger.service";
 
 @Injectable()
 export class SectionService {
@@ -10,7 +10,10 @@ export class SectionService {
   }
 
   async create(spaceId: string, dto: CreateSectionDto): Promise<SectionResponseDto> {
-    this.logger.debug('Creating section', { spaceId, name: dto.name });
+    this.logger.debug("Creating section", {
+      spaceId,
+      name: dto.name,
+    });
 
     try {
       const section = await prisma.section.create({
@@ -23,13 +26,19 @@ export class SectionService {
         },
       });
 
-      this.logger.log('Section created', {
+      this.logger.log("Section created", {
         sectionId: section.id,
         spaceId,
       });
       return new SectionResponseDto(section);
     } catch (e: unknown) {
-      if ((e as { code?: string })?.code === 'P2003') {
+      if (
+        (
+          e as {
+            code?: string;
+          }
+        )?.code === "P2003"
+      ) {
         throw new NotFoundException(`Space with id ${spaceId} not found`);
       }
       throw e;
@@ -74,7 +83,9 @@ export class SectionService {
     }
 
     const section = await tx.section.findUnique({
-      where: { id: operation.id },
+      where: {
+        id: operation.id,
+      },
     });
 
     if (!section) {
@@ -90,12 +101,14 @@ export class SectionService {
         where: {
           name: operation.update.name,
           spaceId,
-          id: { not: operation.id },
+          id: {
+            not: operation.id,
+          },
         },
       });
 
       if (duplicate) {
-        this.logger.warn('Duplicate section name', {
+        this.logger.warn("Duplicate section name", {
           spaceId,
           name: operation.update.name,
         });
@@ -104,7 +117,9 @@ export class SectionService {
     }
 
     await tx.section.update({
-      where: { id: operation.id },
+      where: {
+        id: operation.id,
+      },
       data: {
         name: operation.update?.name,
         position: operation.update?.position,
@@ -120,7 +135,9 @@ export class SectionService {
     }
 
     const section = await tx.section.findUnique({
-      where: { id: operation.id },
+      where: {
+        id: operation.id,
+      },
     });
 
     if (!section) {
@@ -132,9 +149,14 @@ export class SectionService {
     }
 
     await tx.section.delete({
-      where: { id: operation.id },
+      where: {
+        id: operation.id,
+      },
     });
 
-    this.logger.log('Section deleted', { sectionId: operation.id, spaceId });
+    this.logger.log("Section deleted", {
+      sectionId: operation.id,
+      spaceId,
+    });
   }
 }
