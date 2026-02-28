@@ -1,12 +1,4 @@
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from '@jest/globals';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from '@jest/globals';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { prisma } from '@nucleus/database';
@@ -248,11 +240,9 @@ describe('Auth (e2e)', () => {
       // 3. Use a test database with known tokens
 
       // For demonstration, this test shows the expected behavior
-      const response = await request(app.getHttpServer())
-        .post('/auth/verify')
-        .send({
-          token: verificationToken,
-        });
+      const response = await request(app.getHttpServer()).post('/auth/verify').send({
+        token: verificationToken,
+      });
 
       // This will fail with current implementation as we don't have the raw token
       // In production tests, you'd capture it from the mocked email service
@@ -327,12 +317,8 @@ describe('Auth (e2e)', () => {
       // Check cookies are set
       const cookies = response.headers['set-cookie'];
       expect(cookies).toBeDefined();
-      expect(cookies.some((c: string) => c.startsWith('access_token='))).toBe(
-        true,
-      );
-      expect(cookies.some((c: string) => c.startsWith('refresh_token='))).toBe(
-        true,
-      );
+      expect(cookies.some((c: string) => c.startsWith('access_token='))).toBe(true);
+      expect(cookies.some((c: string) => c.startsWith('refresh_token='))).toBe(true);
     });
 
     it('should create refresh token in database on login', async () => {
@@ -426,20 +412,16 @@ describe('Auth (e2e)', () => {
 
     it('should not leak information about whether email exists', async () => {
       // Login with non-existent email
-      const response1 = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: 'nonexistent@example.com',
-          password: testPassword,
-        });
+      const response1 = await request(app.getHttpServer()).post('/auth/login').send({
+        email: 'nonexistent@example.com',
+        password: testPassword,
+      });
 
       // Login with existing email but wrong password
-      const response2 = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: testUserEmail,
-          password: 'WrongPassword123!',
-        });
+      const response2 = await request(app.getHttpServer()).post('/auth/login').send({
+        email: testUserEmail,
+        password: 'WrongPassword123!',
+      });
 
       // Both should return the same error message
       expect(response1.status).toBe(401);
@@ -502,12 +484,10 @@ describe('Auth (e2e)', () => {
         data: { isVerified: true },
       });
 
-      const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: testUserEmail,
-          password: testPassword,
-        });
+      const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+        email: testUserEmail,
+        password: testPassword,
+      });
 
       refreshToken = loginResponse.body.refreshToken;
     });
@@ -518,10 +498,7 @@ describe('Auth (e2e)', () => {
         .set('Cookie', [`refresh_token=${refreshToken}`])
         .expect(200);
 
-      expect(response.body).toHaveProperty(
-        'message',
-        'Token refreshed successfully',
-      );
+      expect(response.body).toHaveProperty('message', 'Token refreshed successfully');
       expect(response.body).toHaveProperty('accessToken');
       expect(response.body).toHaveProperty('refreshToken');
       expect(response.body.refreshToken).not.toBe(refreshToken); // Token should be rotated
@@ -561,9 +538,7 @@ describe('Auth (e2e)', () => {
     });
 
     it('should reject refresh without token', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .expect(401);
+      const response = await request(app.getHttpServer()).post('/auth/refresh').expect(401);
 
       expect(response.body.message).toContain('not provided');
     });
@@ -623,12 +598,10 @@ describe('Auth (e2e)', () => {
         data: { isVerified: true },
       });
 
-      const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: testUserEmail,
-          password: testPassword,
-        });
+      const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+        email: testUserEmail,
+        password: testPassword,
+      });
 
       refreshToken = loginResponse.body.refreshToken;
       accessToken = loginResponse.body.accessToken;
@@ -641,10 +614,7 @@ describe('Auth (e2e)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty(
-        'message',
-        'Logged out successfully',
-      );
+      expect(response.body).toHaveProperty('message', 'Logged out successfully');
       expect(response.body).toHaveProperty('clearCookies', true);
     });
 
@@ -674,9 +644,7 @@ describe('Auth (e2e)', () => {
       const cookies = response.headers['set-cookie'];
       if (cookies) {
         // Check that cookies are cleared (set to empty or expired)
-        expect(cookies.some((c: string) => c.includes('access_token'))).toBe(
-          true,
-        );
+        expect(cookies.some((c: string) => c.includes('access_token'))).toBe(true);
       }
     });
 
@@ -691,12 +659,10 @@ describe('Auth (e2e)', () => {
 
     it('should not affect other sessions on single logout', async () => {
       // Create second session
-      const loginResponse2 = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: testUserEmail,
-          password: testPassword,
-        });
+      const loginResponse2 = await request(app.getHttpServer()).post('/auth/login').send({
+        email: testUserEmail,
+        password: testPassword,
+      });
 
       const refreshToken2 = loginResponse2.body.refreshToken;
 
@@ -727,9 +693,7 @@ describe('Auth (e2e)', () => {
         })
         .expect(201);
 
-      expect(registerResponse.body.message).toContain(
-        'Registration successful',
-      );
+      expect(registerResponse.body.message).toContain('Registration successful');
 
       // Step 2: Manually verify (in real app, this would be done via email link)
       const user = await prisma.user.findUnique({
@@ -823,12 +787,10 @@ describe('Auth (e2e)', () => {
         data: { isVerified: true },
       });
 
-      const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: testUserEmail,
-          password: testPassword,
-        });
+      const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+        email: testUserEmail,
+        password: testPassword,
+      });
 
       const refreshToken = loginResponse.body.refreshToken;
       const accessToken = loginResponse.body.accessToken;
@@ -862,12 +824,10 @@ describe('Auth (e2e)', () => {
         data: { isVerified: true },
       });
 
-      const loginResponse = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          email: testUserEmail,
-          password: testPassword,
-        });
+      const loginResponse = await request(app.getHttpServer()).post('/auth/login').send({
+        email: testUserEmail,
+        password: testPassword,
+      });
 
       const refreshToken = loginResponse.body.refreshToken;
       const accessToken = loginResponse.body.accessToken;
