@@ -24,12 +24,7 @@ export class TokenService {
   async createRefreshToken(userId: string): Promise<string> {
     const rawToken = generateRandomToken();
     const tokenHash = hashToken(rawToken);
-    const expiresAt = new Date(
-      Date.now() +
-        parseDurationToMs(
-          this.configService.get('JWT_REFRESH_EXPIRATION', '7d'),
-        ),
-    );
+    const expiresAt = new Date(Date.now() + parseDurationToMs(this.configService.get('JWT_REFRESH_EXPIRATION', '7d')));
 
     await prisma.refreshToken.create({
       data: { userId, tokenHash, expiresAt },
@@ -40,9 +35,7 @@ export class TokenService {
     return rawToken;
   }
 
-  async validateRefreshToken(
-    rawToken: string,
-  ): Promise<{ userId: string; tokenId: string } | null> {
+  async validateRefreshToken(rawToken: string): Promise<{ userId: string; tokenId: string } | null> {
     const tokenHash = hashToken(rawToken);
     const record = await prisma.refreshToken.findFirst({
       where: {
@@ -60,10 +53,7 @@ export class TokenService {
     return { userId: record.userId, tokenId: record.id };
   }
 
-  async rotateRefreshToken(
-    oldTokenId: string,
-    userId: string,
-  ): Promise<string> {
+  async rotateRefreshToken(oldTokenId: string, userId: string): Promise<string> {
     // Revoke old token
     await prisma.refreshToken.update({
       where: { id: oldTokenId },
@@ -98,10 +88,7 @@ export class TokenService {
   async createVerificationToken(userId: string): Promise<string> {
     const rawToken = generateRandomToken();
     const tokenHash = hashToken(rawToken);
-    const hours = this.configService.get<number>(
-      'VERIFICATION_TOKEN_EXPIRATION_HOURS',
-      24,
-    );
+    const hours = this.configService.get<number>('VERIFICATION_TOKEN_EXPIRATION_HOURS', 24);
     const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
 
     await prisma.emailVerificationToken.create({
@@ -113,9 +100,7 @@ export class TokenService {
     return rawToken;
   }
 
-  async validateVerificationToken(
-    rawToken: string,
-  ): Promise<{ userId: string; tokenId: string } | null> {
+  async validateVerificationToken(rawToken: string): Promise<{ userId: string; tokenId: string } | null> {
     const tokenHash = hashToken(rawToken);
     const record = await prisma.emailVerificationToken.findFirst({
       where: {
