@@ -2,6 +2,7 @@
 
 import { Sidebar } from "@/components/home/sidebar/sidebar";
 import { useAppContext } from "@/context/app-context";
+import { SectionResponseDto } from "@nucleus/domain";
 import { useParams } from "next/navigation";
 
 export default function DatabasePage() {
@@ -10,7 +11,7 @@ export default function DatabasePage() {
 
   const allDatabases = [
     ...(space?.databases ?? []),
-    ...(space?.sections ?? []).flatMap((s) => s.databases ?? []),
+    ...(space?.sections ?? []).flatMap((s: SectionResponseDto) => s.databases ?? []),
   ];
 
   const db = allDatabases.find((d) => d.id === id);
