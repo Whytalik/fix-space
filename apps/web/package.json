@@ -12,7 +12,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "dependencies": {
-    "@nucleus/database": "workspace:^",
     "@nucleus/ui": "workspace:*",
     "geist": "^1.7.0",
     "lucide-react": "^0.575.0",
