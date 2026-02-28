@@ -13,6 +13,8 @@
   "dependencies": {
     "@nucleus/database": "workspace:^",
     "@nucleus/ui": "workspace:*",
+    "geist": "^1.7.0",
+    "lucide-react": "^0.575.0",
     "next": "16.0.10",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
@@ -21,10 +23,14 @@
     "@nucleus/domain": "workspace:*",
     "@nucleus/eslint-config": "workspace:*",
     "@nucleus/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^22.15.3",
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1",
     "eslint": "^9.31.0",
+    "prettier": "^3.2.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.2.1",
     "typescript": "5.8.2"
   }
 }
