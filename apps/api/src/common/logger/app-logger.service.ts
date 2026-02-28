@@ -31,8 +31,7 @@ export class AppLogger {
     const parts: string[] = [message];
 
     const contextParts: string[] = [];
-    if (ctx?.requestId)
-      contextParts.push(`reqId=${ctx.requestId.substring(0, 8)}`);
+    if (ctx?.requestId) contextParts.push(`reqId=${ctx.requestId.substring(0, 8)}`);
     if (ctx?.userId) contextParts.push(`userId=${ctx.userId}`);
 
     if (contextParts.length > 0) {
@@ -41,9 +40,7 @@ export class AppLogger {
 
     if (details && Object.keys(details).length > 0) {
       const detailStr = Object.entries(details)
-        .map(
-          ([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : v}`,
-        )
+        .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : v}`)
         .join(', ');
       parts.push(`| ${detailStr}`);
     }

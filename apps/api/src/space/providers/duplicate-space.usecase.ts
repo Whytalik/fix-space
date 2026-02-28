@@ -25,11 +25,7 @@ export class DuplicateSpaceUseCase {
     this.logger.setContext(DuplicateSpaceUseCase.name);
   }
 
-  async execute(
-    id: string,
-    ownerId: string,
-    options?: DuplicateSpaceOptions,
-  ): Promise<SpaceResponseDto> {
+  async execute(id: string, ownerId: string, options?: DuplicateSpaceOptions): Promise<SpaceResponseDto> {
     this.logger.debug('Duplicating space', { id, ownerId });
 
     const sourceSpace = await prisma.space.findUnique({
@@ -54,15 +50,9 @@ export class DuplicateSpaceUseCase {
       throw new NotFoundException(`Space with id ${id} not found`);
     }
 
-    const newName =
-      options?.newName ??
-      (await this.generateUniqueName(ownerId, sourceSpace.name));
+    const newName = options?.newName ?? (await this.generateUniqueName(ownerId, sourceSpace.name));
 
-    const spaceSettings = await this.settingsService.getSettings(
-      ownerId,
-      'space',
-      DEFAULT_SPACE_SETTINGS,
-    );
+    const spaceSettings = await this.settingsService.getSettings(ownerId, 'space', DEFAULT_SPACE_SETTINGS);
 
     return prisma.$transaction(async (tx) => {
       // Create new space
@@ -71,9 +61,7 @@ export class DuplicateSpaceUseCase {
           name: newName,
           icon: sourceSpace.icon,
           ownerId,
-          config:
-            sourceSpace.config ??
-            (spaceSettings as unknown as Prisma.JsonValue),
+          config: sourceSpace.config ?? (spaceSettings as unknown as Prisma.JsonValue),
         },
       });
 
@@ -105,9 +93,7 @@ export class DuplicateSpaceUseCase {
             title: database.title,
             icon: database.icon,
             spaceId: newSpace.id,
-            sectionId: database.sectionId
-              ? sectionIdMap.get(database.sectionId)
-              : null,
+            sectionId: database.sectionId ? sectionIdMap.get(database.sectionId) : null,
             config: database.config,
           },
         });
@@ -184,10 +170,7 @@ export class DuplicateSpaceUseCase {
     });
   }
 
-  private async generateUniqueName(
-    ownerId: string,
-    baseName: string,
-  ): Promise<string> {
+  private async generateUniqueName(ownerId: string, baseName: string): Promise<string> {
     const existingSpaces = await prisma.space.findMany({
       where: { ownerId },
       select: { name: true },

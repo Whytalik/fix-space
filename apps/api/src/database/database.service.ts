@@ -1,14 +1,6 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
-import {
-  CreateDatabaseDto,
-  DatabaseResponseDto,
-  UpdateDatabaseDto,
-} from '@nucleus/domain';
+import { CreateDatabaseDto, DatabaseResponseDto, UpdateDatabaseDto } from '@nucleus/domain';
 import { PropertyType } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
 import { defaultInitializationConfig } from '../config/initialization.config';
@@ -24,11 +16,7 @@ export class DatabaseService {
     this.logger.setContext(DatabaseService.name);
   }
 
-  async create(
-    spaceId: string,
-    createDatabaseDto: CreateDatabaseDto,
-    userId: string,
-  ): Promise<DatabaseResponseDto> {
+  async create(spaceId: string, createDatabaseDto: CreateDatabaseDto, userId: string): Promise<DatabaseResponseDto> {
     this.logger.debug('Creating database', {
       spaceId,
       name: createDatabaseDto.name,
@@ -54,9 +42,7 @@ export class DatabaseService {
         spaceId,
         name: createDatabaseDto.name,
       });
-      throw new ConflictException(
-        'Database name is already taken in this space.',
-      );
+      throw new ConflictException('Database name is already taken in this space.');
     }
 
     return await prisma.$transaction(async (tx) => {
@@ -75,9 +61,7 @@ export class DatabaseService {
       });
 
       for (const propertyDef of defaultInitializationConfig.defaultDatabaseProperties) {
-        const handler = this.typeRegistry.getHandler(
-          propertyDef.type as PropertyType,
-        );
+        const handler = this.typeRegistry.getHandler(propertyDef.type as PropertyType);
         const config = handler.getDefaultConfig();
 
         await tx.property.create({
@@ -95,8 +79,7 @@ export class DatabaseService {
       this.logger.log('Database created with default properties', {
         databaseId: database.id,
         spaceId,
-        propertyCount:
-          defaultInitializationConfig.defaultDatabaseProperties.length,
+        propertyCount: defaultInitializationConfig.defaultDatabaseProperties.length,
       });
 
       return new DatabaseResponseDto(database);
@@ -125,10 +108,7 @@ export class DatabaseService {
     return new DatabaseResponseDto(database);
   }
 
-  async update(
-    id: string,
-    updateDatabaseDto: UpdateDatabaseDto,
-  ): Promise<DatabaseResponseDto> {
+  async update(id: string, updateDatabaseDto: UpdateDatabaseDto): Promise<DatabaseResponseDto> {
     this.logger.debug('Updating database', { id });
 
     const existingDatabase = await prisma.database.findUnique({

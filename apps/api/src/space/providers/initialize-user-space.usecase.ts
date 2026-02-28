@@ -27,9 +27,7 @@ export class InitializeUserSpaceUseCase {
       name: spaceName,
     });
 
-    const sortedSections = [...config.sections].sort(
-      (a, b) => a.position - b.position,
-    );
+    const sortedSections = [...config.sections].sort((a, b) => a.position - b.position);
 
     for (const sectionDef of sortedSections) {
       await this.sectionService.create(space.id, {

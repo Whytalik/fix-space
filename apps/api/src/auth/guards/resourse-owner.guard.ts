@@ -1,16 +1,7 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { prisma } from '@nucleus/database';
-import {
-  REQUIRE_OWNERSHIP_KEY,
-  RequireOwnershipOptions,
-} from '../decorators/required-ownership.decoractor';
+import { REQUIRE_OWNERSHIP_KEY, RequireOwnershipOptions } from '../decorators/required-ownership.decoractor';
 
 @Injectable()
 export class ResourceOwnerGuard implements CanActivate {
@@ -19,10 +10,7 @@ export class ResourceOwnerGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const handler = context.getHandler();
 
-    const meta = this.reflector.get<RequireOwnershipOptions>(
-      REQUIRE_OWNERSHIP_KEY,
-      handler,
-    );
+    const meta = this.reflector.get<RequireOwnershipOptions>(REQUIRE_OWNERSHIP_KEY, handler);
 
     if (!meta) return true;
 

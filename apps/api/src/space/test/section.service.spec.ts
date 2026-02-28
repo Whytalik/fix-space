@@ -79,22 +79,16 @@ describe('SectionService', () => {
       });
       (prisma.section.create as jest.Mock).mockRejectedValue(prismaError);
 
-      await expect(
-        service.create('nonexistent', { name: 'Test' }),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.create('nonexistent', { name: 'Test' }),
-      ).rejects.toThrow('Space with id nonexistent not found');
+      await expect(service.create('nonexistent', { name: 'Test' })).rejects.toThrow(NotFoundException);
+      await expect(service.create('nonexistent', { name: 'Test' })).rejects.toThrow(
+        'Space with id nonexistent not found',
+      );
     });
 
     it('should rethrow unknown errors', async () => {
-      (prisma.section.create as jest.Mock).mockRejectedValue(
-        new Error('DB error'),
-      );
+      (prisma.section.create as jest.Mock).mockRejectedValue(new Error('DB error'));
 
-      await expect(
-        service.create('space-123', { name: 'Test' }),
-      ).rejects.toThrow('DB error');
+      await expect(service.create('space-123', { name: 'Test' })).rejects.toThrow('DB error');
     });
   });
 
@@ -137,9 +131,7 @@ describe('SectionService', () => {
 
       it('should throw BadRequestException when create field is missing', async () => {
         await expect(
-          service.processOperations(mockTx as any, 'space-123', [
-            { operation: SectionOperationType.CREATE },
-          ]),
+          service.processOperations(mockTx as any, 'space-123', [{ operation: SectionOperationType.CREATE }]),
         ).rejects.toThrow(BadRequestException);
       });
     });
@@ -174,9 +166,7 @@ describe('SectionService', () => {
 
       it('should throw BadRequestException when id is missing', async () => {
         await expect(
-          service.processOperations(mockTx as any, 'space-123', [
-            { operation: SectionOperationType.UPDATE },
-          ]),
+          service.processOperations(mockTx as any, 'space-123', [{ operation: SectionOperationType.UPDATE }]),
         ).rejects.toThrow('UPDATE operation requires "id" field');
       });
 
@@ -218,9 +208,7 @@ describe('SectionService', () => {
               update: { name: 'Duplicate' },
             },
           ]),
-        ).rejects.toThrow(
-          'Section with name "Duplicate" already exists in this space',
-        );
+        ).rejects.toThrow('Section with name "Duplicate" already exists in this space');
       });
     });
 
@@ -244,9 +232,7 @@ describe('SectionService', () => {
 
       it('should throw BadRequestException when id is missing', async () => {
         await expect(
-          service.processOperations(mockTx as any, 'space-123', [
-            { operation: SectionOperationType.DELETE },
-          ]),
+          service.processOperations(mockTx as any, 'space-123', [{ operation: SectionOperationType.DELETE }]),
         ).rejects.toThrow('DELETE operation requires "id" field');
       });
 

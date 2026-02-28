@@ -27,27 +27,16 @@ export class DateHandler implements PropertyTypeHandler {
       }
     }
 
-    if (
-      config.format !== undefined &&
-      !DATA_FORMATS_VALUES.includes(config.format as DataFormat)
-    ) {
+    if (config.format !== undefined && !DATA_FORMATS_VALUES.includes(config.format as DataFormat)) {
       errors.push(`format must be one of: ${DATA_FORMATS_VALUES.join(', ')}`);
     }
 
-    if (
-      config.includeTime !== undefined &&
-      typeof config.includeTime !== 'boolean'
-    ) {
+    if (config.includeTime !== undefined && typeof config.includeTime !== 'boolean') {
       errors.push('includeTime must be a boolean');
     }
 
-    if (
-      config.timeFormat !== undefined &&
-      !TIME_FORMATS_VALUES.includes(config.timeFormat as TimeFormat)
-    ) {
-      errors.push(
-        `timeFormat must be one of: ${TIME_FORMATS_VALUES.join(', ')}`,
-      );
+    if (config.timeFormat !== undefined && !TIME_FORMATS_VALUES.includes(config.timeFormat as TimeFormat)) {
+      errors.push(`timeFormat must be one of: ${TIME_FORMATS_VALUES.join(', ')}`);
     }
 
     return errors.length > 0 ? errors : null;

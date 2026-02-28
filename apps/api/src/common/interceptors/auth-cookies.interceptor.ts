@@ -1,9 +1,4 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -43,9 +38,7 @@ export class AuthCookiesInterceptor implements NestInterceptor {
           setAccessTokenCookie(
             response,
             data.accessToken,
-            parseDurationToMs(
-              this.configService.get('JWT_ACCESS_EXPIRATION', '15m'),
-            ),
+            parseDurationToMs(this.configService.get('JWT_ACCESS_EXPIRATION', '15m')),
             cookieOptions,
           );
         }
@@ -55,9 +48,7 @@ export class AuthCookiesInterceptor implements NestInterceptor {
           setRefreshTokenCookie(
             response,
             data.refreshToken,
-            parseDurationToMs(
-              this.configService.get('JWT_REFRESH_EXPIRATION', '7d'),
-            ),
+            parseDurationToMs(this.configService.get('JWT_REFRESH_EXPIRATION', '7d')),
             cookieOptions,
           );
         }

@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DEFAULT_FORMULA_PROPERTY,
-  FORMULA_OUTPUT_TYPE_VALUES,
-  FormulaOutputType,
-  PropertyType,
-} from '@nucleus/domain';
+import { DEFAULT_FORMULA_PROPERTY, FORMULA_OUTPUT_TYPE_VALUES, FormulaOutputType, PropertyType } from '@nucleus/domain';
 import { PropertyTypeHandler } from '../handler.interface';
 
 @Injectable()
@@ -28,26 +23,16 @@ export class FormulaHandler implements PropertyTypeHandler {
       } else {
         const output = config.output as Record<string, unknown>;
 
-        if (
-          !FORMULA_OUTPUT_TYPE_VALUES.includes(
-            output.type as FormulaOutputType,
-          )
-        ) {
-          errors.push(
-            `output.type must be one of: ${FORMULA_OUTPUT_TYPE_VALUES.join(', ')}`,
-          );
+        if (!FORMULA_OUTPUT_TYPE_VALUES.includes(output.type as FormulaOutputType)) {
+          errors.push(`output.type must be one of: ${FORMULA_OUTPUT_TYPE_VALUES.join(', ')}`);
         }
 
         if (output.type === 'relation') {
           if (typeof output.relatedEntityId !== 'string') {
-            errors.push(
-              'output.relatedEntityId must be a string for relation output',
-            );
+            errors.push('output.relatedEntityId must be a string for relation output');
           }
           if (typeof output.multiple !== 'boolean') {
-            errors.push(
-              'output.multiple must be a boolean for relation output',
-            );
+            errors.push('output.multiple must be a boolean for relation output');
           }
         }
       }

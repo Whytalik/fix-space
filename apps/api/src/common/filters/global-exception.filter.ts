@@ -1,11 +1,4 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import { getRequestContext } from '../context/request-context';
@@ -43,9 +36,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message =
         typeof exceptionResponse === 'string'
           ? exceptionResponse
-          : ((exceptionResponse as Record<string, unknown>).message as
-              | string
-              | string[]);
+          : ((exceptionResponse as Record<string, unknown>).message as string | string[]);
       errorType = 'HTTP';
 
       if (status >= 500) {

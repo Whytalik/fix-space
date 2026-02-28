@@ -33,10 +33,7 @@ describe('DatabaseController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DatabaseController],
-      providers: [
-        { provide: DatabaseService, useValue: mockDatabaseService },
-        Reflector,
-      ],
+      providers: [{ provide: DatabaseService, useValue: mockDatabaseService }, Reflector],
     }).compile();
 
     controller = module.get<DatabaseController>(DatabaseController);

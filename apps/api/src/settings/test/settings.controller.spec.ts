@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  DEFAULT_DATABASE_SETTINGS,
-  DEFAULT_SECTION_SETTINGS,
-  DEFAULT_SPACE_SETTINGS,
-  User,
-} from '@nucleus/domain';
+import { DEFAULT_DATABASE_SETTINGS, DEFAULT_SECTION_SETTINGS, DEFAULT_SPACE_SETTINGS, User } from '@nucleus/domain';
 import { SettingsController } from '../settings.controller';
 import { SettingsService } from '../settings.service';
 
@@ -42,11 +37,7 @@ describe('SettingsController', () => {
       const result = await controller.getSpaceSettings(mockUser);
 
       expect(result).toEqual(mockResult);
-      expect(mockSettingsService.getSettings).toHaveBeenCalledWith(
-        'user-123',
-        'space',
-        DEFAULT_SPACE_SETTINGS,
-      );
+      expect(mockSettingsService.getSettings).toHaveBeenCalledWith('user-123', 'space', DEFAULT_SPACE_SETTINGS);
       expect(mockSettingsService.getSettings).toHaveBeenCalledTimes(1);
     });
   });
@@ -60,12 +51,7 @@ describe('SettingsController', () => {
       const result = await controller.updateSpaceSettings(mockUser, dto);
 
       expect(result).toEqual(mockResult);
-      expect(mockSettingsService.updateSettings).toHaveBeenCalledWith(
-        'user-123',
-        'space',
-        dto,
-        DEFAULT_SPACE_SETTINGS,
-      );
+      expect(mockSettingsService.updateSettings).toHaveBeenCalledWith('user-123', 'space', dto, DEFAULT_SPACE_SETTINGS);
       expect(mockSettingsService.updateSettings).toHaveBeenCalledTimes(1);
     });
   });
@@ -78,11 +64,7 @@ describe('SettingsController', () => {
       const result = await controller.getDatabaseSettings(mockUser);
 
       expect(result).toEqual(mockResult);
-      expect(mockSettingsService.getSettings).toHaveBeenCalledWith(
-        'user-123',
-        'database',
-        DEFAULT_DATABASE_SETTINGS,
-      );
+      expect(mockSettingsService.getSettings).toHaveBeenCalledWith('user-123', 'database', DEFAULT_DATABASE_SETTINGS);
     });
   });
 
@@ -112,11 +94,7 @@ describe('SettingsController', () => {
       const result = await controller.getSectionSettings(mockUser);
 
       expect(result).toEqual(mockResult);
-      expect(mockSettingsService.getSettings).toHaveBeenCalledWith(
-        'user-123',
-        'section',
-        DEFAULT_SECTION_SETTINGS,
-      );
+      expect(mockSettingsService.getSettings).toHaveBeenCalledWith('user-123', 'section', DEFAULT_SECTION_SETTINGS);
     });
   });
 
