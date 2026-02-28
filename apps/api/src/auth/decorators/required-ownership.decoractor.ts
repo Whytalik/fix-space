@@ -1,6 +1,6 @@
-import { SetMetadata } from '@nestjs/common';
+import { SetMetadata } from "@nestjs/common";
 
-export const REQUIRE_OWNERSHIP_KEY = 'require_ownership';
+export const REQUIRE_OWNERSHIP_KEY = "require_ownership";
 
 export interface RequireOwnershipOptions {
   model: string;

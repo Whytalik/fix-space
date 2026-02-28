@@ -1,6 +1,6 @@
-import { Module } from '@nestjs/common';
-import { PropertyController } from './property.controller';
-import { PropertyService } from './property.service';
+import { Module } from "@nestjs/common";
+import { PropertyController } from "./property.controller";
+import { PropertyService } from "./property.service";
 import {
   CheckboxHandler,
   DateHandler,
@@ -12,7 +12,7 @@ import {
   SelectHandler,
   StatusHandler,
   TextHandler,
-} from './types';
+} from "./types";
 
 const handlers = [
   TextHandler,

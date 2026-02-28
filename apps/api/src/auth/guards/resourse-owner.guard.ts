@@ -1,7 +1,7 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { prisma } from '@nucleus/database';
-import { REQUIRE_OWNERSHIP_KEY, RequireOwnershipOptions } from '../decorators/required-ownership.decoractor';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { prisma } from "@nucleus/database";
+import { REQUIRE_OWNERSHIP_KEY, RequireOwnershipOptions } from "../decorators/required-ownership.decoractor";
 
 @Injectable()
 export class ResourceOwnerGuard implements CanActivate {
@@ -18,11 +18,11 @@ export class ResourceOwnerGuard implements CanActivate {
     const user = request.user;
 
     if (!user?.userId) {
-      throw new ForbiddenException('User not authenticated');
+      throw new ForbiddenException("User not authenticated");
     }
 
-    const paramName = meta.param ?? 'id';
-    const ownerField = meta.ownerField ?? 'ownerId';
+    const paramName = meta.param ?? "id";
+    const ownerField = meta.ownerField ?? "ownerId";
     const resourceId = request.params[paramName];
 
     if (!resourceId) {
@@ -44,7 +44,7 @@ export class ResourceOwnerGuard implements CanActivate {
     }
 
     if (entity[ownerField] !== user.userId) {
-      throw new ForbiddenException('You do not own this resource');
+      throw new ForbiddenException("You do not own this resource");
     }
 
     return true;

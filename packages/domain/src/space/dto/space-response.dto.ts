@@ -1,6 +1,6 @@
-import { Exclude, Expose, Type } from 'class-transformer';
-import { DatabaseResponseDto } from '../../database/dto/database-response.dto';
-import { SectionResponseDto } from '../../section/dto/section-response.dto';
+import { Exclude, Expose, Type } from "class-transformer";
+import { DatabaseResponseDto } from "../../database/dto/database-response.dto";
+import { SectionResponseDto } from "../../section/dto/section-response.dto";
 
 @Exclude()
 export class SpaceResponseDto {

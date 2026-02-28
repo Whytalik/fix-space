@@ -1,12 +1,12 @@
-import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from "@nestjs/common";
+import { Observable } from "rxjs";
+import { tap } from "rxjs/operators";
 
-import { getRequestContext } from '../context/request-context';
+import { getRequestContext } from "../context/request-context";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger('HTTP');
+  private readonly logger = new Logger("HTTP");
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest();
@@ -19,8 +19,8 @@ export class LoggingInterceptor implements NestInterceptor {
       reqContext.username = request.user.username;
     }
 
-    const requestId = reqContext?.requestId?.substring(0, 8) || 'no-id';
-    const userId = reqContext?.userId || 'anonymous';
+    const requestId = reqContext?.requestId?.substring(0, 8) || "no-id";
+    const userId = reqContext?.userId || "anonymous";
 
     this.logger.log(`>>> ${method} ${url} | reqId=${requestId}, userId=${userId}`);
 
