@@ -1,5 +1,5 @@
-import { Database } from '../../database/entities/database.entity';
-import { PropertyType } from '../dto/create-property.dto';
+import { Database } from "../../database/entities/database.entity";
+import { PropertyType } from "../dto/create-property.dto";
 
 export class Property {
   id: string;

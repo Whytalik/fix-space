@@ -1,8 +1,8 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, prisma } from '@nucleus/database';
-import { CreatePropertyDto, PropertyResponseDto, PropertyType, UpdatePropertyDto } from '@nucleus/domain';
-import { AppLogger } from '../common/logger/app-logger.service';
-import { PropertyTypeRegistry } from './types';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma, prisma } from "@nucleus/database";
+import { CreatePropertyDto, PropertyResponseDto, PropertyType, UpdatePropertyDto } from "@nucleus/domain";
+import { AppLogger } from "../common/logger/app-logger.service";
+import { PropertyTypeRegistry } from "./types";
 
 @Injectable()
 export class PropertyService {
@@ -14,13 +14,18 @@ export class PropertyService {
   }
 
   async create(databaseId: string, createPropertyDto: CreatePropertyDto, userId: string): Promise<PropertyResponseDto> {
-    this.logger.debug('Creating property', {
+    this.logger.debug("Creating property", {
       databaseId,
       name: createPropertyDto.name,
     });
 
     const database = await prisma.database.findFirst({
-      where: { id: databaseId, space: { ownerId: userId } },
+      where: {
+        id: databaseId,
+        space: {
+          ownerId: userId,
+        },
+      },
     });
 
     if (!database) {
@@ -35,20 +40,25 @@ export class PropertyService {
     });
 
     if (isPropertyNameTaken) {
-      this.logger.warn('Duplicate property name', {
+      this.logger.warn("Duplicate property name", {
         databaseId,
         name: createPropertyDto.name,
       });
-      throw new ConflictException('Property name is already taken in this database.');
+      throw new ConflictException("Property name is already taken in this database.");
     }
 
     const handler = this.typeRegistry.getHandler(createPropertyDto.type);
     const defaultConfig = handler.getDefaultConfig();
-    const mergedConfig = createPropertyDto.config ? { ...defaultConfig, ...createPropertyDto.config } : defaultConfig;
+    const mergedConfig = createPropertyDto.config
+      ? {
+          ...defaultConfig,
+          ...createPropertyDto.config,
+        }
+      : defaultConfig;
 
     const configErrors = handler.validateConfig(mergedConfig);
     if (configErrors) {
-      throw new BadRequestException(`Invalid config for ${createPropertyDto.type}: ${configErrors.join('; ')}`);
+      throw new BadRequestException(`Invalid config for ${createPropertyDto.type}: ${configErrors.join("; ")}`);
     }
 
     const [property] = await prisma.$transaction(async (tx) => {
@@ -67,8 +77,12 @@ export class PropertyService {
       });
 
       const existingRecords = await tx.record.findMany({
-        where: { databaseId },
-        select: { id: true },
+        where: {
+          databaseId,
+        },
+        select: {
+          id: true,
+        },
       });
 
       if (existingRecords.length > 0) {
@@ -85,7 +99,7 @@ export class PropertyService {
       return [created];
     });
 
-    this.logger.log('Property created', {
+    this.logger.log("Property created", {
       propertyId: property.id,
       databaseId,
     });
@@ -93,19 +107,35 @@ export class PropertyService {
   }
 
   async findAll(databaseId: string, userId: string): Promise<PropertyResponseDto[]> {
-    this.logger.debug('Finding all properties', { databaseId });
+    this.logger.debug("Finding all properties", { databaseId });
     const properties = await prisma.property.findMany({
-      where: { databaseId, database: { space: { ownerId: userId } } },
-      orderBy: { position: 'asc' },
+      where: {
+        databaseId,
+        database: {
+          space: {
+            ownerId: userId,
+          },
+        },
+      },
+      orderBy: {
+        position: "asc",
+      },
     });
     return properties.map((property) => new PropertyResponseDto(property));
   }
 
   async findOne(id: string, userId: string): Promise<PropertyResponseDto> {
-    this.logger.debug('Finding property', { id });
+    this.logger.debug("Finding property", { id });
 
     const property = await prisma.property.findFirst({
-      where: { id, database: { space: { ownerId: userId } } },
+      where: {
+        id,
+        database: {
+          space: {
+            ownerId: userId,
+          },
+        },
+      },
     });
 
     if (!property) {
@@ -116,10 +146,17 @@ export class PropertyService {
   }
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto, userId: string): Promise<PropertyResponseDto> {
-    this.logger.debug('Updating property', { id });
+    this.logger.debug("Updating property", { id });
 
     const existingProperty = await prisma.property.findFirst({
-      where: { id, database: { space: { ownerId: userId } } },
+      where: {
+        id,
+        database: {
+          space: {
+            ownerId: userId,
+          },
+        },
+      },
     });
 
     if (!existingProperty) {
@@ -136,11 +173,11 @@ export class PropertyService {
       });
 
       if (isPropertyNameTaken) {
-        this.logger.warn('Duplicate property name on update', {
+        this.logger.warn("Duplicate property name on update", {
           id,
           name: updatePropertyDto.name,
         });
-        throw new ConflictException('Property name is already taken in this database.');
+        throw new ConflictException("Property name is already taken in this database.");
       }
     }
 
@@ -154,10 +191,13 @@ export class PropertyService {
     if (updatePropertyDto.config) {
       const effectiveType = updatePropertyDto.type ?? (existingProperty.type as PropertyType);
       const handler = this.typeRegistry.getHandler(effectiveType);
-      const merged = { ...configToSave, ...updatePropertyDto.config };
+      const merged = {
+        ...configToSave,
+        ...updatePropertyDto.config,
+      };
       const configErrors = handler.validateConfig(merged);
       if (configErrors) {
-        throw new BadRequestException(`Invalid config for ${effectiveType}: ${configErrors.join('; ')}`);
+        throw new BadRequestException(`Invalid config for ${effectiveType}: ${configErrors.join("; ")}`);
       }
       configToSave = merged;
     }
@@ -178,15 +218,22 @@ export class PropertyService {
       },
     });
 
-    this.logger.log('Property updated', { id });
+    this.logger.log("Property updated", { id });
     return new PropertyResponseDto(property);
   }
 
   async remove(id: string, userId: string): Promise<PropertyResponseDto> {
-    this.logger.debug('Removing property', { id });
+    this.logger.debug("Removing property", { id });
 
     const existingProperty = await prisma.property.findFirst({
-      where: { id, database: { space: { ownerId: userId } } },
+      where: {
+        id,
+        database: {
+          space: {
+            ownerId: userId,
+          },
+        },
+      },
     });
 
     if (!existingProperty) {
@@ -197,7 +244,7 @@ export class PropertyService {
       where: { id },
     });
 
-    this.logger.log('Property removed', { id });
+    this.logger.log("Property removed", { id });
     return new PropertyResponseDto(property);
   }
 }

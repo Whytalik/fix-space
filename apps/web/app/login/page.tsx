@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { login } from '@/lib/api/auth';
-import { ApiError } from '@/lib/api/client';
-import { Button, Card } from '@nucleus/ui';
-import Link from 'next/link';
-import { useState } from 'react';
+import { login } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
+import { Button, Card } from "@nucleus/ui";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -18,11 +18,14 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const data = await login({ email, password });
-      localStorage.setItem('access_token', data.accessToken);
-      window.location.href = '/';
+      const data = await login({
+        email,
+        password,
+      });
+      localStorage.setItem("access_token", data.accessToken);
+      window.location.href = "/";
     } catch (err) {
-      setErrors(err instanceof ApiError ? err.messages : ['Unable to connect to the server. Please try again.']);
+      setErrors(err instanceof ApiError ? err.messages : ["Unable to connect to the server. Please try again."]);
     } finally {
       setLoading(false);
     }
@@ -81,13 +84,13 @@ export default function LoginPage() {
             )}
 
             <Button type="submit" loading={loading} className="mt-1">
-              {loading ? 'Signing in…' : 'Sign in'}
+              {loading ? "Signing in…" : "Sign in"}
             </Button>
           </form>
         </Card>
 
         <p className="text-center mt-5 text-[13.5px] text-ink-secondary">
-          Don&apos;t have an account?{' '}
+          Don&apos;t have an account?{" "}
           <Link href="/register" className="font-semibold text-accent">
             Sign up
           </Link>

@@ -8,12 +8,12 @@ export interface SpaceSettings {
     showRecentlyVisited: boolean;
   };
   dateFormat: string;
-  timeFormat: '12h' | '24h';
+  timeFormat: "12h" | "24h";
   startOfWeek: 0 | 1;
 }
 
 export const DEFAULT_SPACE_SETTINGS = {
-  defaultSpaceIcon: '📊',
+  defaultSpaceIcon: "📊",
   sidebarCollapsed: false,
   sidebarWidth: 280,
   sidebarDisplay: {
@@ -21,7 +21,7 @@ export const DEFAULT_SPACE_SETTINGS = {
     showDatabases: true,
     showRecentlyVisited: true,
   },
-  dateFormat: 'DD/MM/YYYY',
-  timeFormat: '24h',
+  dateFormat: "DD/MM/YYYY",
+  timeFormat: "24h",
   startOfWeek: 1,
 } satisfies SpaceSettings;

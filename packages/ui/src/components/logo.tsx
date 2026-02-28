@@ -5,7 +5,14 @@ interface LogoIconProps {
 
 export function LogoIcon({ size = 32, className }: LogoIconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 60 60"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
       <defs>
         <linearGradient id="iso-top" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#5865f2" />
@@ -44,9 +51,14 @@ interface LogoProps {
 
 export function Logo({ size = 28, className }: LogoProps) {
   return (
-    <div className={`flex items-center gap-2 ${className ?? ''}`}>
+    <div className={`flex items-center gap-2 ${className ?? ""}`}>
       <LogoIcon size={size} />
-      <span className="font-extrabold tracking-[-0.04em] leading-none" style={{ fontSize: size * 0.57 }}>
+      <span
+        className="font-extrabold tracking-[-0.04em] leading-none"
+        style={{
+          fontSize: size * 0.57,
+        }}
+      >
         Nucleus
       </span>
     </div>
