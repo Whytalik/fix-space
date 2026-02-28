@@ -4,6 +4,6 @@ export interface SectionSettings {
 }
 
 export const DEFAULT_SECTION_SETTINGS = {
-  defaultSectionIcon: '📁',
-  defaultSectionColor: 'transparent',
+  defaultSectionIcon: "📁",
+  defaultSectionColor: "transparent",
 } satisfies SectionSettings;

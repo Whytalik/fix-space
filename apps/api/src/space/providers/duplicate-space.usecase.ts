@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, prisma } from '@nucleus/database';
-import { DEFAULT_SPACE_SETTINGS, SpaceResponseDto } from '@nucleus/domain';
-import { AppLogger } from '../../common/logger/app-logger.service';
-import { SettingsService } from '../../settings/settings.service';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { Prisma, prisma } from "@nucleus/database";
+import { DEFAULT_SPACE_SETTINGS, SpaceResponseDto } from "@nucleus/domain";
+import { AppLogger } from "../../common/logger/app-logger.service";
+import { SettingsService } from "../../settings/settings.service";
 
 export interface DuplicateSpaceOptions {
   newName?: string;
@@ -11,7 +11,7 @@ export interface DuplicateSpaceOptions {
 const sectionsInclude = {
   sections: {
     orderBy: {
-      position: 'asc' as const,
+      position: "asc" as const,
     },
   },
 };
@@ -26,7 +26,7 @@ export class DuplicateSpaceUseCase {
   }
 
   async execute(id: string, ownerId: string, options?: DuplicateSpaceOptions): Promise<SpaceResponseDto> {
-    this.logger.debug('Duplicating space', { id, ownerId });
+    this.logger.debug("Duplicating space", { id, ownerId });
 
     const sourceSpace = await prisma.space.findUnique({
       where: { id },
@@ -52,7 +52,7 @@ export class DuplicateSpaceUseCase {
 
     const newName = options?.newName ?? (await this.generateUniqueName(ownerId, sourceSpace.name));
 
-    const spaceSettings = await this.settingsService.getSettings(ownerId, 'space', DEFAULT_SPACE_SETTINGS);
+    const spaceSettings = await this.settingsService.getSettings(ownerId, "space", DEFAULT_SPACE_SETTINGS);
 
     return prisma.$transaction(async (tx) => {
       // Create new space
@@ -154,7 +154,7 @@ export class DuplicateSpaceUseCase {
         }
       }
 
-      this.logger.log('Space duplicated', {
+      this.logger.log("Space duplicated", {
         sourceSpaceId: id,
         newSpaceId: newSpace.id,
         ownerId,
@@ -162,7 +162,9 @@ export class DuplicateSpaceUseCase {
 
       // Fetch the complete new space with sections
       const result = await tx.space.findUnique({
-        where: { id: newSpace.id },
+        where: {
+          id: newSpace.id,
+        },
         include: sectionsInclude,
       });
 
@@ -173,7 +175,9 @@ export class DuplicateSpaceUseCase {
   private async generateUniqueName(ownerId: string, baseName: string): Promise<string> {
     const existingSpaces = await prisma.space.findMany({
       where: { ownerId },
-      select: { name: true },
+      select: {
+        name: true,
+      },
     });
 
     const existingNames = new Set(existingSpaces.map((s) => s.name));

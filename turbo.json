@@ -41,7 +41,11 @@
       "outputs": []
     },
     "lint": {},
-    "format": {},
+    "format": {
+      "inputs": ["$TURBO_DEFAULT$", ".prettierrc*"],
+      "cache": false,
+      "outputs": []
+    },
     "test": {},
     "test:e2e": {}
   }
