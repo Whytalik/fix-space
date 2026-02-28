@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "exports": {
     ".": "./src/index.ts",
