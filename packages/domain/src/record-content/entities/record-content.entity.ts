@@ -1,4 +1,4 @@
-import { DatabaseRecord } from '../../record/entities/record.entity';
+import { DatabaseRecord } from "../../record/entities/record.entity";
 
 export class RecordContent {
   id: string;

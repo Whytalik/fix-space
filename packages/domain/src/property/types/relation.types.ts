@@ -4,6 +4,6 @@ export interface RelationProperty {
 }
 
 export const DEFAULT_RELATION_PROPERTY = {
-  relatedEntityId: '',
+  relatedEntityId: "",
   multiple: true,
 } satisfies RelationProperty;
