@@ -12,10 +12,7 @@ export class CheckboxHandler implements PropertyTypeHandler {
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (
-      config.defaultValue !== undefined &&
-      typeof config.defaultValue !== 'boolean'
-    ) {
+    if (config.defaultValue !== undefined && typeof config.defaultValue !== 'boolean') {
       errors.push('defaultValue must be a boolean');
     }
 

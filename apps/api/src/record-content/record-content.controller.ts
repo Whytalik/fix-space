@@ -5,13 +5,10 @@ import { RecordContentService } from './record-content.service';
 
 @Controller('records/:recordId/content')
 export class RecordContentController {
-  constructor(private readonly recordContentService: RecordContentService) { }
+  constructor(private readonly recordContentService: RecordContentService) {}
 
   @Get()
-  findOrCreate(
-    @Param('recordId') recordId: string,
-    @CurrentUser('userId') userId: string,
-  ) {
+  findOrCreate(@Param('recordId') recordId: string, @CurrentUser('userId') userId: string) {
     return this.recordContentService.findOrCreate(recordId, userId);
   }
 
@@ -25,10 +22,7 @@ export class RecordContentController {
   }
 
   @Delete()
-  remove(
-    @Param('recordId') recordId: string,
-    @CurrentUser('userId') userId: string,
-  ) {
+  remove(@Param('recordId') recordId: string, @CurrentUser('userId') userId: string) {
     return this.recordContentService.remove(recordId, userId);
   }
 }

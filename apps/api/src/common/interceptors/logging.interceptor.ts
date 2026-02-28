@@ -1,10 +1,4 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  Logger,
-  NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -28,9 +22,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const requestId = reqContext?.requestId?.substring(0, 8) || 'no-id';
     const userId = reqContext?.userId || 'anonymous';
 
-    this.logger.log(
-      `>>> ${method} ${url} | reqId=${requestId}, userId=${userId}`,
-    );
+    this.logger.log(`>>> ${method} ${url} | reqId=${requestId}, userId=${userId}`);
 
     if (Object.keys(body || {}).length > 0) {
       this.logger.debug(`Body: ${JSON.stringify(body)} | reqId=${requestId}`);

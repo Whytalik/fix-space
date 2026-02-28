@@ -67,10 +67,7 @@ describe('RecordService', () => {
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        RecordService,
-        { provide: AppLogger, useValue: mockLogger },
-      ],
+      providers: [RecordService, { provide: AppLogger, useValue: mockLogger }],
     }).compile();
 
     service = module.get<RecordService>(RecordService);
@@ -87,9 +84,7 @@ describe('RecordService', () => {
       const mockTx = {
         record: {
           create: jest.fn<() => Promise<typeof mockRecord>>().mockResolvedValue(mockRecord),
-          findUnique: jest
-            .fn<() => Promise<typeof mockRecordWithIncludes>>()
-            .mockResolvedValue(mockRecordWithIncludes),
+          findUnique: jest.fn<() => Promise<typeof mockRecordWithIncludes>>().mockResolvedValue(mockRecordWithIncludes),
         },
         propertyValue: {
           create: jest
@@ -99,8 +94,8 @@ describe('RecordService', () => {
         },
       };
 
-      (prisma.$transaction as jest.Mock).mockImplementation(
-        async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+      (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+        cb(mockTx),
       );
 
       const result = await service.create('db-123', { name: 'Test Record', icon: '📝' }, 'user-123');
@@ -137,17 +132,15 @@ describe('RecordService', () => {
       const mockTx = {
         record: {
           create: jest.fn<() => Promise<typeof mockRecord>>().mockResolvedValue(mockRecord),
-          findUnique: jest
-            .fn<() => Promise<typeof mockRecordWithIncludes>>()
-            .mockResolvedValue(mockRecordWithIncludes),
+          findUnique: jest.fn<() => Promise<typeof mockRecordWithIncludes>>().mockResolvedValue(mockRecordWithIncludes),
         },
         propertyValue: {
           create: jest.fn(),
         },
       };
 
-      (prisma.$transaction as jest.Mock).mockImplementation(
-        async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+      (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+        cb(mockTx),
       );
 
       await service.create('db-123', { name: 'Test Record' }, 'user-123');
@@ -158,21 +151,16 @@ describe('RecordService', () => {
     it('should throw NotFoundException when database not found or not owned by user', async () => {
       (prisma.database.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.create('db-nonexistent', { name: 'Test' }, 'user-123'),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.create('db-nonexistent', { name: 'Test' }, 'user-123'),
-      ).rejects.toThrow('Database with id db-nonexistent not found');
+      await expect(service.create('db-nonexistent', { name: 'Test' }, 'user-123')).rejects.toThrow(NotFoundException);
+      await expect(service.create('db-nonexistent', { name: 'Test' }, 'user-123')).rejects.toThrow(
+        'Database with id db-nonexistent not found',
+      );
     });
   });
 
   describe('findAll', () => {
     it('should return array of RecordResponseDto for the database', async () => {
-      const records = [
-        mockRecordWithIncludes,
-        { ...mockRecordWithIncludes, id: 'record-456', name: 'Record 2' },
-      ];
+      const records = [mockRecordWithIncludes, { ...mockRecordWithIncludes, id: 'record-456', name: 'Record 2' }];
       (prisma.record.findMany as jest.Mock).mockResolvedValue(records);
 
       const result = await service.findAll('db-123', 'user-123');
@@ -214,9 +202,7 @@ describe('RecordService', () => {
       (prisma.record.findFirst as jest.Mock).mockResolvedValue(null);
 
       await expect(service.findOne('nonexistent', 'user-123')).rejects.toThrow(NotFoundException);
-      await expect(service.findOne('nonexistent', 'user-123')).rejects.toThrow(
-        'Record with id nonexistent not found',
-      );
+      await expect(service.findOne('nonexistent', 'user-123')).rejects.toThrow('Record with id nonexistent not found');
     });
   });
 
@@ -244,12 +230,10 @@ describe('RecordService', () => {
     it('should throw NotFoundException when record not found', async () => {
       (prisma.record.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.update('nonexistent', { name: 'Updated' }, 'user-123'),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.update('nonexistent', { name: 'Updated' }, 'user-123'),
-      ).rejects.toThrow('Record with id nonexistent not found');
+      await expect(service.update('nonexistent', { name: 'Updated' }, 'user-123')).rejects.toThrow(NotFoundException);
+      await expect(service.update('nonexistent', { name: 'Updated' }, 'user-123')).rejects.toThrow(
+        'Record with id nonexistent not found',
+      );
     });
   });
 
@@ -272,9 +256,7 @@ describe('RecordService', () => {
       (prisma.record.findFirst as jest.Mock).mockResolvedValue(null);
 
       await expect(service.remove('nonexistent', 'user-123')).rejects.toThrow(NotFoundException);
-      await expect(service.remove('nonexistent', 'user-123')).rejects.toThrow(
-        'Record with id nonexistent not found',
-      );
+      await expect(service.remove('nonexistent', 'user-123')).rejects.toThrow('Record with id nonexistent not found');
     });
   });
 });

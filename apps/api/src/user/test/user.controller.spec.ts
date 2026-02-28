@@ -62,10 +62,7 @@ describe('UserController', () => {
       const result = await controller.updateCurrentUser('user-123', updateDto);
 
       expect(result).toEqual(updatedUser);
-      expect(mockUserService.update).toHaveBeenCalledWith(
-        'user-123',
-        updateDto,
-      );
+      expect(mockUserService.update).toHaveBeenCalledWith('user-123', updateDto);
       expect(mockUserService.update).toHaveBeenCalledTimes(1);
     });
   });
@@ -81,6 +78,4 @@ describe('UserController', () => {
       expect(mockUserService.remove).toHaveBeenCalledTimes(1);
     });
   });
-
 });
-

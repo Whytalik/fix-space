@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  DEFAULT_TEXT_PROPERTY,
-  PropertyType,
-  URL_HANDLING_VALUES,
-  UrlHandling,
-} from '@nucleus/domain';
+import { DEFAULT_TEXT_PROPERTY, PropertyType, URL_HANDLING_VALUES, UrlHandling } from '@nucleus/domain';
 import { PropertyTypeHandler } from '../handler.interface';
 
 @Injectable()
@@ -18,27 +13,16 @@ export class TextHandler implements PropertyTypeHandler {
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (
-      config.defaultValue !== undefined &&
-      typeof config.defaultValue !== 'string'
-    ) {
+    if (config.defaultValue !== undefined && typeof config.defaultValue !== 'string') {
       errors.push('defaultValue must be a string');
     }
 
-    if (
-      config.isRichText !== undefined &&
-      typeof config.isRichText !== 'boolean'
-    ) {
+    if (config.isRichText !== undefined && typeof config.isRichText !== 'boolean') {
       errors.push('isRichText must be a boolean');
     }
 
-    if (
-      config.urlHandling !== undefined &&
-      !URL_HANDLING_VALUES.includes(config.urlHandling as UrlHandling)
-    ) {
-      errors.push(
-        `urlHandling must be one of: ${URL_HANDLING_VALUES.join(', ')}`,
-      );
+    if (config.urlHandling !== undefined && !URL_HANDLING_VALUES.includes(config.urlHandling as UrlHandling)) {
+      errors.push(`urlHandling must be one of: ${URL_HANDLING_VALUES.join(', ')}`);
     }
 
     return errors.length > 0 ? errors : null;

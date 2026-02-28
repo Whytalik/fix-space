@@ -3,11 +3,7 @@ import { Prisma, prisma } from '@nucleus/database';
 
 @Injectable()
 export class SettingsService {
-  async getSettings<T extends object>(
-    userId: string,
-    category: string,
-    defaultValues: T,
-  ): Promise<T> {
+  async getSettings<T extends object>(userId: string, category: string, defaultValues: T): Promise<T> {
     const dbSettings = await prisma.settings.findMany({
       where: { userId, category },
     });

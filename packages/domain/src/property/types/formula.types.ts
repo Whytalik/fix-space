@@ -1,10 +1,4 @@
-export const FORMULA_OUTPUT_TYPE_VALUES = [
-  'text',
-  'number',
-  'checkbox',
-  'date',
-  'relation',
-] as const;
+export const FORMULA_OUTPUT_TYPE_VALUES = ['text', 'number', 'checkbox', 'date', 'relation'] as const;
 export type FormulaOutputType = (typeof FORMULA_OUTPUT_TYPE_VALUES)[number];
 
 export type FormulaOutput =

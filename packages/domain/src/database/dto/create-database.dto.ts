@@ -1,12 +1,4 @@
-import {
-  IsIn,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export type DatabaseType =
   | 'trading-journal'

@@ -8,5 +8,4 @@ export interface RequireOwnershipOptions {
   ownerField?: string;
 }
 
-export const RequireOwnership = (options: RequireOwnershipOptions) =>
-  SetMetadata(REQUIRE_OWNERSHIP_KEY, options);
+export const RequireOwnership = (options: RequireOwnershipOptions) => SetMetadata(REQUIRE_OWNERSHIP_KEY, options);

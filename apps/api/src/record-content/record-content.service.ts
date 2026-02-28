@@ -1,9 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
-import {
-  RecordContentResponseDto,
-  UpdateRecordContentDto,
-} from '@nucleus/domain';
+import { RecordContentResponseDto, UpdateRecordContentDto } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
 import { defaultRecordContentConfig } from './record-content.config';
 
@@ -94,9 +91,7 @@ export class RecordContentService {
     });
 
     if (!existingContent) {
-      throw new NotFoundException(
-        `RecordContent for record ${recordId} not found`,
-      );
+      throw new NotFoundException(`RecordContent for record ${recordId} not found`);
     }
 
     const content = await prisma.recordContent.delete({
