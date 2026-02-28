@@ -1,13 +1,13 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { TokenService } from '../token.service';
-import { AppLogger } from '../../common/logger/app-logger.service';
-import { prisma } from '@nucleus/database';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import { describe, it, expect, beforeEach, jest } from "@jest/globals";
+import { TokenService } from "../token.service";
+import { AppLogger } from "../../common/logger/app-logger.service";
+import { prisma } from "@nucleus/database";
 
 // Mock Prisma
-jest.mock('@nucleus/database', () => ({
+jest.mock("@nucleus/database", () => ({
   prisma: {
     refreshToken: {
       create: jest.fn(),
@@ -23,7 +23,7 @@ jest.mock('@nucleus/database', () => ({
   },
 }));
 
-describe('TokenService', () => {
+describe("TokenService", () => {
   let service: TokenService;
   let jwtService: JwtService;
   let configService: ConfigService;
@@ -73,11 +73,11 @@ describe('TokenService', () => {
     logger = module.get<AppLogger>(AppLogger);
   });
 
-  describe('generateAccessToken', () => {
-    it('should generate access token with correct payload', () => {
-      const userId = 'user-123';
-      const username = 'testuser';
-      const expectedToken = 'jwt-token-123';
+  describe("generateAccessToken", () => {
+    it("should generate access token with correct payload", () => {
+      const userId = "user-123";
+      const username = "testuser";
+      const expectedToken = "jwt-token-123";
 
       mockJwtService.sign.mockReturnValue(expectedToken);
 
@@ -91,20 +91,20 @@ describe('TokenService', () => {
       expect(mockJwtService.sign).toHaveBeenCalledTimes(1);
     });
 
-    it('should generate different tokens for different users', () => {
-      mockJwtService.sign.mockReturnValueOnce('token-1').mockReturnValueOnce('token-2');
+    it("should generate different tokens for different users", () => {
+      mockJwtService.sign.mockReturnValueOnce("token-1").mockReturnValueOnce("token-2");
 
-      const token1 = service.generateAccessToken('user-1', 'username1');
-      const token2 = service.generateAccessToken('user-2', 'username2');
+      const token1 = service.generateAccessToken("user-1", "username1");
+      const token2 = service.generateAccessToken("user-2", "username2");
 
       expect(token1).not.toBe(token2);
       expect(mockJwtService.sign).toHaveBeenCalledTimes(2);
     });
 
-    it('should handle special characters in username', () => {
-      const userId = 'user-123';
-      const username = 'test_user-123';
-      const expectedToken = 'jwt-token';
+    it("should handle special characters in username", () => {
+      const userId = "user-123";
+      const username = "test_user-123";
+      const expectedToken = "jwt-token";
 
       mockJwtService.sign.mockReturnValue(expectedToken);
 
@@ -118,58 +118,58 @@ describe('TokenService', () => {
     });
   });
 
-  describe('createRefreshToken', () => {
-    it('should create refresh token in database', async () => {
-      const userId = 'user-123';
+  describe("createRefreshToken", () => {
+    it("should create refresh token in database", async () => {
+      const userId = "user-123";
       const expectedTokenLength = 64; // 32 bytes in hex
 
-      mockConfigService.get.mockReturnValue('7d');
+      mockConfigService.get.mockReturnValue("7d");
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({
-        id: 'token-id',
+        id: "token-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
       const token = await service.createRefreshToken(userId);
 
       expect(token).toBeDefined();
-      expect(typeof token).toBe('string');
+      expect(typeof token).toBe("string");
       expect(token.length).toBe(expectedTokenLength);
       expect(prisma.refreshToken.create).toHaveBeenCalledTimes(1);
-      expect(mockLogger.debug).toHaveBeenCalledWith('Refresh token created', {
+      expect(mockLogger.debug).toHaveBeenCalledWith("Refresh token created", {
         userId,
       });
     });
 
-    it('should set expiration based on config', async () => {
-      const userId = 'user-123';
-      const expirationDays = '7d';
+    it("should set expiration based on config", async () => {
+      const userId = "user-123";
+      const expirationDays = "7d";
 
       mockConfigService.get.mockReturnValue(expirationDays);
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({
-        id: 'token-id',
+        id: "token-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
       await service.createRefreshToken(userId);
 
-      expect(mockConfigService.get).toHaveBeenCalledWith('JWT_REFRESH_EXPIRATION', '7d');
+      expect(mockConfigService.get).toHaveBeenCalledWith("JWT_REFRESH_EXPIRATION", "7d");
 
       const createCall = (prisma.refreshToken.create as jest.Mock).mock.calls[0][0];
       expect(createCall.data.expiresAt).toBeInstanceOf(Date);
     });
 
-    it('should generate unique tokens for same user', async () => {
-      const userId = 'user-123';
+    it("should generate unique tokens for same user", async () => {
+      const userId = "user-123";
 
-      mockConfigService.get.mockReturnValue('7d');
+      mockConfigService.get.mockReturnValue("7d");
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({
-        id: 'token-id',
+        id: "token-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
@@ -180,14 +180,14 @@ describe('TokenService', () => {
       expect(prisma.refreshToken.create).toHaveBeenCalledTimes(2);
     });
 
-    it('should store hashed token in database', async () => {
-      const userId = 'user-123';
+    it("should store hashed token in database", async () => {
+      const userId = "user-123";
 
-      mockConfigService.get.mockReturnValue('7d');
+      mockConfigService.get.mockReturnValue("7d");
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({
-        id: 'token-id',
+        id: "token-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
@@ -203,16 +203,16 @@ describe('TokenService', () => {
     });
   });
 
-  describe('validateRefreshToken', () => {
-    it('should validate correct refresh token', async () => {
-      const rawToken = 'a'.repeat(64);
-      const userId = 'user-123';
-      const tokenId = 'token-id';
+  describe("validateRefreshToken", () => {
+    it("should validate correct refresh token", async () => {
+      const rawToken = "a".repeat(64);
+      const userId = "user-123";
+      const tokenId = "token-id";
 
       (prisma.refreshToken.findFirst as jest.Mock).mockResolvedValue({
         id: tokenId,
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(Date.now() + 1000000),
         revokedAt: null,
       });
@@ -229,29 +229,19 @@ describe('TokenService', () => {
       });
     });
 
-    it('should return null for expired token', async () => {
-      const rawToken = 'a'.repeat(64);
+    it("should return null for expired token", async () => {
+      const rawToken = "a".repeat(64);
 
       (prisma.refreshToken.findFirst as jest.Mock).mockResolvedValue(null);
 
       const result = await service.validateRefreshToken(rawToken);
 
       expect(result).toBeNull();
-      expect(mockLogger.warn).toHaveBeenCalledWith('Invalid or expired refresh token');
+      expect(mockLogger.warn).toHaveBeenCalledWith("Invalid or expired refresh token");
     });
 
-    it('should return null for revoked token', async () => {
-      const rawToken = 'a'.repeat(64);
-
-      (prisma.refreshToken.findFirst as jest.Mock).mockResolvedValue(null);
-
-      const result = await service.validateRefreshToken(rawToken);
-
-      expect(result).toBeNull();
-    });
-
-    it('should return null for non-existent token', async () => {
-      const rawToken = 'invalid-token';
+    it("should return null for revoked token", async () => {
+      const rawToken = "a".repeat(64);
 
       (prisma.refreshToken.findFirst as jest.Mock).mockResolvedValue(null);
 
@@ -260,8 +250,18 @@ describe('TokenService', () => {
       expect(result).toBeNull();
     });
 
-    it('should check token is not revoked', async () => {
-      const rawToken = 'a'.repeat(64);
+    it("should return null for non-existent token", async () => {
+      const rawToken = "invalid-token";
+
+      (prisma.refreshToken.findFirst as jest.Mock).mockResolvedValue(null);
+
+      const result = await service.validateRefreshToken(rawToken);
+
+      expect(result).toBeNull();
+    });
+
+    it("should check token is not revoked", async () => {
+      const rawToken = "a".repeat(64);
 
       (prisma.refreshToken.findFirst as jest.Mock).mockResolvedValue(null);
 
@@ -277,48 +277,48 @@ describe('TokenService', () => {
     });
   });
 
-  describe('rotateRefreshToken', () => {
-    it('should revoke old token and create new one', async () => {
-      const oldTokenId = 'old-token-id';
-      const userId = 'user-123';
-      const newToken = 'new-token';
+  describe("rotateRefreshToken", () => {
+    it("should revoke old token and create new one", async () => {
+      const oldTokenId = "old-token-id";
+      const userId = "user-123";
+      const newToken = "new-token";
 
-      mockConfigService.get.mockReturnValue('7d');
+      mockConfigService.get.mockReturnValue("7d");
       (prisma.refreshToken.update as jest.Mock).mockResolvedValue({
         id: oldTokenId,
         revokedAt: new Date(),
       });
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({
-        id: 'new-token-id',
+        id: "new-token-id",
         userId,
-        tokenHash: 'new-hash',
+        tokenHash: "new-hash",
         expiresAt: new Date(),
       });
 
       const result = await service.rotateRefreshToken(oldTokenId, userId);
 
       expect(result).toBeDefined();
-      expect(typeof result).toBe('string');
+      expect(typeof result).toBe("string");
       expect(prisma.refreshToken.update).toHaveBeenCalledWith({
         where: { id: oldTokenId },
         data: { revokedAt: expect.any(Date) },
       });
       expect(prisma.refreshToken.create).toHaveBeenCalledTimes(1);
-      expect(mockLogger.debug).toHaveBeenCalledWith('Old refresh token revoked', {
+      expect(mockLogger.debug).toHaveBeenCalledWith("Old refresh token revoked", {
         tokenId: oldTokenId,
       });
     });
 
-    it('should generate new token different from any previous', async () => {
-      const oldTokenId = 'old-token-id';
-      const userId = 'user-123';
+    it("should generate new token different from any previous", async () => {
+      const oldTokenId = "old-token-id";
+      const userId = "user-123";
 
-      mockConfigService.get.mockReturnValue('7d');
+      mockConfigService.get.mockReturnValue("7d");
       (prisma.refreshToken.update as jest.Mock).mockResolvedValue({});
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({
-        id: 'new-token-id',
+        id: "new-token-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
@@ -328,16 +328,16 @@ describe('TokenService', () => {
       expect(token1).not.toBe(token2);
     });
 
-    it('should set revocation timestamp on old token', async () => {
-      const oldTokenId = 'old-token-id';
-      const userId = 'user-123';
+    it("should set revocation timestamp on old token", async () => {
+      const oldTokenId = "old-token-id";
+      const userId = "user-123";
 
-      mockConfigService.get.mockReturnValue('7d');
+      mockConfigService.get.mockReturnValue("7d");
       (prisma.refreshToken.update as jest.Mock).mockResolvedValue({});
       (prisma.refreshToken.create as jest.Mock).mockResolvedValue({
-        id: 'new-id',
+        id: "new-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
@@ -348,9 +348,9 @@ describe('TokenService', () => {
     });
   });
 
-  describe('revokeRefreshToken', () => {
-    it('should revoke refresh token by raw token', async () => {
-      const rawToken = 'a'.repeat(64);
+  describe("revokeRefreshToken", () => {
+    it("should revoke refresh token by raw token", async () => {
+      const rawToken = "a".repeat(64);
 
       (prisma.refreshToken.updateMany as jest.Mock).mockResolvedValue({
         count: 1,
@@ -365,11 +365,11 @@ describe('TokenService', () => {
         },
         data: { revokedAt: expect.any(Date) },
       });
-      expect(mockLogger.debug).toHaveBeenCalledWith('Refresh token revoked by hash');
+      expect(mockLogger.debug).toHaveBeenCalledWith("Refresh token revoked by hash");
     });
 
-    it('should only revoke non-revoked tokens', async () => {
-      const rawToken = 'token';
+    it("should only revoke non-revoked tokens", async () => {
+      const rawToken = "token";
 
       (prisma.refreshToken.updateMany as jest.Mock).mockResolvedValue({
         count: 1,
@@ -386,8 +386,8 @@ describe('TokenService', () => {
       );
     });
 
-    it('should handle token that does not exist', async () => {
-      const rawToken = 'non-existent-token';
+    it("should handle token that does not exist", async () => {
+      const rawToken = "non-existent-token";
 
       (prisma.refreshToken.updateMany as jest.Mock).mockResolvedValue({
         count: 0,
@@ -397,9 +397,9 @@ describe('TokenService', () => {
     });
   });
 
-  describe('revokeAllUserRefreshTokens', () => {
-    it('should revoke all refresh tokens for user', async () => {
-      const userId = 'user-123';
+  describe("revokeAllUserRefreshTokens", () => {
+    it("should revoke all refresh tokens for user", async () => {
+      const userId = "user-123";
 
       (prisma.refreshToken.updateMany as jest.Mock).mockResolvedValue({
         count: 3,
@@ -414,11 +414,11 @@ describe('TokenService', () => {
         },
         data: { revokedAt: expect.any(Date) },
       });
-      expect(mockLogger.log).toHaveBeenCalledWith('All refresh tokens revoked for user', { userId });
+      expect(mockLogger.log).toHaveBeenCalledWith("All refresh tokens revoked for user", { userId });
     });
 
-    it('should only revoke active tokens', async () => {
-      const userId = 'user-123';
+    it("should only revoke active tokens", async () => {
+      const userId = "user-123";
 
       (prisma.refreshToken.updateMany as jest.Mock).mockResolvedValue({
         count: 2,
@@ -430,8 +430,8 @@ describe('TokenService', () => {
       expect(call.where.revokedAt).toBeNull();
     });
 
-    it('should handle user with no tokens', async () => {
-      const userId = 'user-no-tokens';
+    it("should handle user with no tokens", async () => {
+      const userId = "user-no-tokens";
 
       (prisma.refreshToken.updateMany as jest.Mock).mockResolvedValue({
         count: 0,
@@ -441,52 +441,52 @@ describe('TokenService', () => {
     });
   });
 
-  describe('createVerificationToken', () => {
-    it('should create verification token', async () => {
-      const userId = 'user-123';
+  describe("createVerificationToken", () => {
+    it("should create verification token", async () => {
+      const userId = "user-123";
 
       mockConfigService.get.mockReturnValue(24);
       (prisma.emailVerificationToken.create as jest.Mock).mockResolvedValue({
-        id: 'token-id',
+        id: "token-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
       const token = await service.createVerificationToken(userId);
 
       expect(token).toBeDefined();
-      expect(typeof token).toBe('string');
+      expect(typeof token).toBe("string");
       expect(token.length).toBe(64);
       expect(prisma.emailVerificationToken.create).toHaveBeenCalledTimes(1);
-      expect(mockLogger.debug).toHaveBeenCalledWith('Verification token created', { userId });
+      expect(mockLogger.debug).toHaveBeenCalledWith("Verification token created", { userId });
     });
 
-    it('should set expiration based on config hours', async () => {
-      const userId = 'user-123';
+    it("should set expiration based on config hours", async () => {
+      const userId = "user-123";
       const hours = 48;
 
       mockConfigService.get.mockReturnValue(hours);
       (prisma.emailVerificationToken.create as jest.Mock).mockResolvedValue({
-        id: 'token-id',
+        id: "token-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
       await service.createVerificationToken(userId);
 
-      expect(mockConfigService.get).toHaveBeenCalledWith('VERIFICATION_TOKEN_EXPIRATION_HOURS', 24);
+      expect(mockConfigService.get).toHaveBeenCalledWith("VERIFICATION_TOKEN_EXPIRATION_HOURS", 24);
     });
 
-    it('should generate unique tokens', async () => {
-      const userId = 'user-123';
+    it("should generate unique tokens", async () => {
+      const userId = "user-123";
 
       mockConfigService.get.mockReturnValue(24);
       (prisma.emailVerificationToken.create as jest.Mock).mockResolvedValue({
-        id: 'token-id',
+        id: "token-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
@@ -496,14 +496,14 @@ describe('TokenService', () => {
       expect(token1).not.toBe(token2);
     });
 
-    it('should store hashed token', async () => {
-      const userId = 'user-123';
+    it("should store hashed token", async () => {
+      const userId = "user-123";
 
       mockConfigService.get.mockReturnValue(24);
       (prisma.emailVerificationToken.create as jest.Mock).mockResolvedValue({
-        id: 'token-id',
+        id: "token-id",
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(),
       });
 
@@ -517,16 +517,16 @@ describe('TokenService', () => {
     });
   });
 
-  describe('validateVerificationToken', () => {
-    it('should validate correct verification token', async () => {
-      const rawToken = 'a'.repeat(64);
-      const userId = 'user-123';
-      const tokenId = 'token-id';
+  describe("validateVerificationToken", () => {
+    it("should validate correct verification token", async () => {
+      const rawToken = "a".repeat(64);
+      const userId = "user-123";
+      const tokenId = "token-id";
 
       (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue({
         id: tokenId,
         userId,
-        tokenHash: 'hash',
+        tokenHash: "hash",
         expiresAt: new Date(Date.now() + 1000000),
         usedAt: null,
       });
@@ -543,19 +543,19 @@ describe('TokenService', () => {
       });
     });
 
-    it('should return null for expired token', async () => {
-      const rawToken = 'expired-token';
+    it("should return null for expired token", async () => {
+      const rawToken = "expired-token";
 
       (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(null);
 
       const result = await service.validateVerificationToken(rawToken);
 
       expect(result).toBeNull();
-      expect(mockLogger.warn).toHaveBeenCalledWith('Invalid or expired verification token');
+      expect(mockLogger.warn).toHaveBeenCalledWith("Invalid or expired verification token");
     });
 
-    it('should return null for already used token', async () => {
-      const rawToken = 'used-token';
+    it("should return null for already used token", async () => {
+      const rawToken = "used-token";
 
       (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(null);
 
@@ -564,8 +564,8 @@ describe('TokenService', () => {
       expect(result).toBeNull();
     });
 
-    it('should check token has not been used', async () => {
-      const rawToken = 'token';
+    it("should check token has not been used", async () => {
+      const rawToken = "token";
 
       (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(null);
 
@@ -581,9 +581,9 @@ describe('TokenService', () => {
     });
   });
 
-  describe('markVerificationTokenUsed', () => {
-    it('should mark verification token as used', async () => {
-      const tokenId = 'token-id';
+  describe("markVerificationTokenUsed", () => {
+    it("should mark verification token as used", async () => {
+      const tokenId = "token-id";
 
       (prisma.emailVerificationToken.update as jest.Mock).mockResolvedValue({
         id: tokenId,
@@ -596,11 +596,11 @@ describe('TokenService', () => {
         where: { id: tokenId },
         data: { usedAt: expect.any(Date) },
       });
-      expect(mockLogger.debug).toHaveBeenCalledWith('Verification token marked as used', { tokenId });
+      expect(mockLogger.debug).toHaveBeenCalledWith("Verification token marked as used", { tokenId });
     });
 
-    it('should set current timestamp when marking as used', async () => {
-      const tokenId = 'token-id';
+    it("should set current timestamp when marking as used", async () => {
+      const tokenId = "token-id";
 
       (prisma.emailVerificationToken.update as jest.Mock).mockResolvedValue({
         id: tokenId,

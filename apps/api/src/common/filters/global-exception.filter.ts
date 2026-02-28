@@ -1,20 +1,20 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from "@nestjs/common";
+import { Request, Response } from "express";
 
-import { getRequestContext } from '../context/request-context';
+import { getRequestContext } from "../context/request-context";
 
 const PRISMA_ERROR_MAP: Record<string, { status: number; message: string }> = {
-  P2002: { status: HttpStatus.CONFLICT, message: 'Resource already exists' },
+  P2002: { status: HttpStatus.CONFLICT, message: "Resource already exists" },
   P2003: {
     status: HttpStatus.BAD_REQUEST,
-    message: 'Referenced resource not found',
+    message: "Referenced resource not found",
   },
-  P2025: { status: HttpStatus.NOT_FOUND, message: 'Resource not found' },
+  P2025: { status: HttpStatus.NOT_FOUND, message: "Resource not found" },
 };
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger('ExceptionFilter');
+  private readonly logger = new Logger("ExceptionFilter");
 
   catch(exception: unknown, host: ArgumentsHost) {
     const httpCtx = host.switchToHttp();
@@ -22,8 +22,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = httpCtx.getResponse<Response>();
     const reqContext = getRequestContext();
 
-    const requestId = reqContext?.requestId?.substring(0, 8) || 'no-id';
-    const userId = reqContext?.userId || 'anonymous';
+    const requestId = reqContext?.requestId?.substring(0, 8) || "no-id";
+    const userId = reqContext?.userId || "anonymous";
     const { method, url } = request;
 
     let status: number;
@@ -34,10 +34,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
       message =
-        typeof exceptionResponse === 'string'
+        typeof exceptionResponse === "string"
           ? exceptionResponse
           : ((exceptionResponse as Record<string, unknown>).message as string | string[]);
-      errorType = 'HTTP';
+      errorType = "HTTP";
 
       if (status >= 500) {
         this.logger.error(
@@ -56,7 +56,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     } else if (this.isPrismaError(exception)) {
       const prismaCode = (exception as { code: string }).code;
       const mapped = PRISMA_ERROR_MAP[prismaCode];
-      errorType = 'DATABASE';
+      errorType = "DATABASE";
 
       if (mapped) {
         status = mapped.status;
@@ -66,7 +66,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         );
       } else {
         status = HttpStatus.INTERNAL_SERVER_ERROR;
-        message = 'Internal server error';
+        message = "Internal server error";
         this.logger.error(
           `${errorType} ${prismaCode} | ${method} ${url} | Unhandled Prisma error | reqId=${requestId}, userId=${userId}`,
           (exception as Error).stack,
@@ -74,11 +74,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
     } else {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
-      message = 'Internal server error';
-      errorType = 'UNKNOWN';
+      message = "Internal server error";
+      errorType = "UNKNOWN";
 
       this.logger.error(
-        `${errorType} | ${method} ${url} | ${(exception as Error)?.message || 'Unknown error'} | reqId=${requestId}, userId=${userId}`,
+        `${errorType} | ${method} ${url} | ${(exception as Error)?.message || "Unknown error"} | reqId=${requestId}, userId=${userId}`,
         (exception as Error)?.stack,
       );
     }
@@ -96,9 +96,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private isPrismaError(exception: unknown): boolean {
     return (
       exception instanceof Error &&
-      'code' in exception &&
-      typeof (exception as { code: unknown }).code === 'string' &&
-      (exception as { code: string }).code.startsWith('P')
+      "code" in exception &&
+      typeof (exception as { code: unknown }).code === "string" &&
+      (exception as { code: string }).code.startsWith("P")
     );
   }
 }

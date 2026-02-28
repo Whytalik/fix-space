@@ -3,10 +3,10 @@
  * @type {import("prettier").Config}
  */
 const config = {
-  singleQuote: true,
+  singleQuote: false,
   semi: true,
   trailingComma: 'all',
-  printWidth: 150,
+  printWidth: 120,
   tabWidth: 2,
   useTabs: false,
   bracketSpacing: true,

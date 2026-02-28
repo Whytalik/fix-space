@@ -6,7 +6,5 @@
     "emitDeclarationOnly": false,
     "noEmit": false
   },
-  "include": [
-    "src/client.ts"
-  ]
+  "include": ["src/client.ts"]
 }

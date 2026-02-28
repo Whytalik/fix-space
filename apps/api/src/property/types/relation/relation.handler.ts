@@ -1,24 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { DEFAULT_RELATION_PROPERTY, PropertyType } from '@nucleus/domain';
-import { PropertyTypeHandler } from '../handler.interface';
+import { Injectable } from "@nestjs/common";
+import { DEFAULT_RELATION_PROPERTY, PropertyType } from "@nucleus/domain";
+import { PropertyTypeHandler } from "../handler.interface";
 
 @Injectable()
 export class RelationHandler implements PropertyTypeHandler {
   readonly type = PropertyType.RELATION;
 
   getDefaultConfig(): Record<string, unknown> {
-    return { ...DEFAULT_RELATION_PROPERTY };
+    return {
+      ...DEFAULT_RELATION_PROPERTY,
+    };
   }
 
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (config.relatedEntityId !== undefined && typeof config.relatedEntityId !== 'string') {
-      errors.push('relatedEntityId must be a string');
+    if (config.relatedEntityId !== undefined && typeof config.relatedEntityId !== "string") {
+      errors.push("relatedEntityId must be a string");
     }
 
-    if (config.multiple !== undefined && typeof config.multiple !== 'boolean') {
-      errors.push('multiple must be a boolean');
+    if (config.multiple !== undefined && typeof config.multiple !== "boolean") {
+      errors.push("multiple must be a boolean");
     }
 
     return errors.length > 0 ? errors : null;
@@ -31,15 +33,15 @@ export class RelationHandler implements PropertyTypeHandler {
 
     if (isMultiple) {
       if (!Array.isArray(value)) {
-        return ['Relation value must be an array of ID strings or null'];
+        return ["Relation value must be an array of ID strings or null"];
       }
 
-      if ((value as unknown[]).some((v) => typeof v !== 'string')) {
-        return ['All relation IDs must be strings'];
+      if ((value as unknown[]).some((v) => typeof v !== "string")) {
+        return ["All relation IDs must be strings"];
       }
     } else {
-      if (typeof value !== 'string') {
-        return ['Relation value must be a string ID or null'];
+      if (typeof value !== "string") {
+        return ["Relation value must be a string ID or null"];
       }
     }
 

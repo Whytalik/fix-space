@@ -1,8 +1,8 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
-import { Transporter } from 'nodemailer';
-import { AppLogger } from '../common/logger/app-logger.service';
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import * as nodemailer from "nodemailer";
+import { Transporter } from "nodemailer";
+import { AppLogger } from "../common/logger/app-logger.service";
 
 @Injectable()
 export class MailService implements OnModuleInit {
@@ -20,15 +20,15 @@ export class MailService implements OnModuleInit {
   }
 
   private async createTransport() {
-    const smtpHost = this.configService.get<string>('SMTP_HOST');
+    const smtpHost = this.configService.get<string>("SMTP_HOST");
 
     if (!smtpHost) {
       // Development mode: use Ethereal test account
-      this.logger.log('No SMTP_HOST configured, creating Ethereal test account');
+      this.logger.log("No SMTP_HOST configured, creating Ethereal test account");
       const testAccount = await nodemailer.createTestAccount();
 
       this.transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
+        host: "smtp.ethereal.email",
         port: 587,
         secure: false,
         auth: {
@@ -44,11 +44,11 @@ export class MailService implements OnModuleInit {
       // Production mode: use real SMTP credentials
       this.transporter = nodemailer.createTransport({
         host: smtpHost,
-        port: this.configService.get<number>('SMTP_PORT', 587),
-        secure: this.configService.get<number>('SMTP_PORT', 587) === 465,
+        port: this.configService.get<number>("SMTP_PORT", 587),
+        secure: this.configService.get<number>("SMTP_PORT", 587) === 465,
         auth: {
-          user: this.configService.get<string>('SMTP_USER'),
-          pass: this.configService.get<string>('SMTP_PASS'),
+          user: this.configService.get<string>("SMTP_USER"),
+          pass: this.configService.get<string>("SMTP_PASS"),
         },
       });
 
@@ -57,14 +57,14 @@ export class MailService implements OnModuleInit {
   }
 
   async sendVerificationEmail(to: string, username: string, token: string): Promise<void> {
-    const appUrl = this.configService.get<string>('APP_URL', 'http://localhost:3001');
+    const appUrl = this.configService.get<string>("APP_URL", "http://localhost:3001");
     const verificationLink = `${appUrl}/auth/verify?token=${token}`;
-    const from = this.configService.get<string>('MAIL_FROM', 'noreply@nucleus.app');
+    const from = this.configService.get<string>("MAIL_FROM", "noreply@nucleus.app");
 
     const mailOptions = {
       from,
       to,
-      subject: 'Verify your Nucleus account',
+      subject: "Verify your Nucleus account",
       text: `Hello ${username},\n\nPlease verify your email address by clicking the link below:\n\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you did not create this account, you can safely ignore this email.\n\nBest regards,\nThe Nucleus Team`,
       html: `
         <!DOCTYPE html>
@@ -97,10 +97,10 @@ export class MailService implements OnModuleInit {
     this.logger.log(`Verification email sent to ${to}`);
 
     // In development with Ethereal, log the preview URL
-    const smtpHost = this.configService.get<string>('SMTP_HOST');
+    const smtpHost = this.configService.get<string>("SMTP_HOST");
     if (!smtpHost) {
       const previewUrl = nodemailer.getTestMessageUrl(info);
-      this.logger.log(`📧 Ethereal email preview: ${previewUrl || 'Preview URL not available'}`);
+      this.logger.log(`📧 Ethereal email preview: ${previewUrl || "Preview URL not available"}`);
     }
   }
 }
