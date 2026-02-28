@@ -1,0 +1,54 @@
+interface LogoIconProps {
+  size?: number;
+  className?: string;
+}
+
+export function LogoIcon({ size = 32, className }: LogoIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <linearGradient id="iso-top" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#5865f2" />
+          <stop offset="100%" stopColor="#7b5cf0" />
+        </linearGradient>
+        <linearGradient id="iso-left" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#4752c4" />
+          <stop offset="100%" stopColor="#2d1a8a" />
+        </linearGradient>
+        <linearGradient id="iso-right" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#7b5cf0" />
+          <stop offset="100%" stopColor="#a855f7" />
+        </linearGradient>
+      </defs>
+      <g opacity={0.35} transform="translate(0,10)">
+        <polygon points="30,8 52,20 30,32 8,20" fill="url(#iso-top)" />
+        <polygon points="8,20 30,32 30,44 8,32" fill="url(#iso-left)" />
+        <polygon points="52,20 30,32 30,44 52,32" fill="url(#iso-right)" />
+      </g>
+      <g opacity={0.6} transform="translate(0,3)">
+        <polygon points="30,8 52,20 30,32 8,20" fill="url(#iso-top)" />
+        <polygon points="8,20 30,32 30,44 8,32" fill="url(#iso-left)" />
+        <polygon points="52,20 30,32 30,44 52,32" fill="url(#iso-right)" />
+      </g>
+      <polygon points="30,8 52,20 30,32 8,20" fill="url(#iso-top)" />
+      <polygon points="8,20 30,32 30,44 8,32" fill="url(#iso-left)" />
+      <polygon points="52,20 30,32 30,44 52,32" fill="url(#iso-right)" />
+    </svg>
+  );
+}
+
+interface LogoProps {
+  size?: number;
+  className?: string;
+}
+
+export function Logo({ size = 28, className }: LogoProps) {
+  return (
+    <div className={`flex items-center gap-2 ${className ?? ''}`}>
+      <LogoIcon size={size} />
+      <span className="font-extrabold tracking-[-0.04em] leading-none" style={{ fontSize: size * 0.57 }}>
+        Nucleus
+      </span>
+    </div>
+  );
+}
