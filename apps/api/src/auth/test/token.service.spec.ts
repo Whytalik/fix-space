@@ -92,9 +92,7 @@ describe('TokenService', () => {
     });
 
     it('should generate different tokens for different users', () => {
-      mockJwtService.sign
-        .mockReturnValueOnce('token-1')
-        .mockReturnValueOnce('token-2');
+      mockJwtService.sign.mockReturnValueOnce('token-1').mockReturnValueOnce('token-2');
 
       const token1 = service.generateAccessToken('user-1', 'username1');
       const token2 = service.generateAccessToken('user-2', 'username2');
@@ -158,13 +156,9 @@ describe('TokenService', () => {
 
       await service.createRefreshToken(userId);
 
-      expect(mockConfigService.get).toHaveBeenCalledWith(
-        'JWT_REFRESH_EXPIRATION',
-        '7d',
-      );
+      expect(mockConfigService.get).toHaveBeenCalledWith('JWT_REFRESH_EXPIRATION', '7d');
 
-      const createCall = (prisma.refreshToken.create as jest.Mock).mock
-        .calls[0][0];
+      const createCall = (prisma.refreshToken.create as jest.Mock).mock.calls[0][0];
       expect(createCall.data.expiresAt).toBeInstanceOf(Date);
     });
 
@@ -199,8 +193,7 @@ describe('TokenService', () => {
 
       const rawToken = await service.createRefreshToken(userId);
 
-      const createCall = (prisma.refreshToken.create as jest.Mock).mock
-        .calls[0][0];
+      const createCall = (prisma.refreshToken.create as jest.Mock).mock.calls[0][0];
       const storedHash = createCall.data.tokenHash;
 
       // Raw token should not be stored
@@ -244,9 +237,7 @@ describe('TokenService', () => {
       const result = await service.validateRefreshToken(rawToken);
 
       expect(result).toBeNull();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Invalid or expired refresh token',
-      );
+      expect(mockLogger.warn).toHaveBeenCalledWith('Invalid or expired refresh token');
     });
 
     it('should return null for revoked token', async () => {
@@ -313,12 +304,9 @@ describe('TokenService', () => {
         data: { revokedAt: expect.any(Date) },
       });
       expect(prisma.refreshToken.create).toHaveBeenCalledTimes(1);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Old refresh token revoked',
-        {
-          tokenId: oldTokenId,
-        },
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('Old refresh token revoked', {
+        tokenId: oldTokenId,
+      });
     });
 
     it('should generate new token different from any previous', async () => {
@@ -355,8 +343,7 @@ describe('TokenService', () => {
 
       await service.rotateRefreshToken(oldTokenId, userId);
 
-      const updateCall = (prisma.refreshToken.update as jest.Mock).mock
-        .calls[0][0];
+      const updateCall = (prisma.refreshToken.update as jest.Mock).mock.calls[0][0];
       expect(updateCall.data.revokedAt).toBeInstanceOf(Date);
     });
   });
@@ -378,9 +365,7 @@ describe('TokenService', () => {
         },
         data: { revokedAt: expect.any(Date) },
       });
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Refresh token revoked by hash',
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('Refresh token revoked by hash');
     });
 
     it('should only revoke non-revoked tokens', async () => {
@@ -429,10 +414,7 @@ describe('TokenService', () => {
         },
         data: { revokedAt: expect.any(Date) },
       });
-      expect(mockLogger.log).toHaveBeenCalledWith(
-        'All refresh tokens revoked for user',
-        { userId },
-      );
+      expect(mockLogger.log).toHaveBeenCalledWith('All refresh tokens revoked for user', { userId });
     });
 
     it('should only revoke active tokens', async () => {
@@ -444,8 +426,7 @@ describe('TokenService', () => {
 
       await service.revokeAllUserRefreshTokens(userId);
 
-      const call = (prisma.refreshToken.updateMany as jest.Mock).mock
-        .calls[0][0];
+      const call = (prisma.refreshToken.updateMany as jest.Mock).mock.calls[0][0];
       expect(call.where.revokedAt).toBeNull();
     });
 
@@ -456,9 +437,7 @@ describe('TokenService', () => {
         count: 0,
       });
 
-      await expect(
-        service.revokeAllUserRefreshTokens(userId),
-      ).resolves.not.toThrow();
+      await expect(service.revokeAllUserRefreshTokens(userId)).resolves.not.toThrow();
     });
   });
 
@@ -480,10 +459,7 @@ describe('TokenService', () => {
       expect(typeof token).toBe('string');
       expect(token.length).toBe(64);
       expect(prisma.emailVerificationToken.create).toHaveBeenCalledTimes(1);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Verification token created',
-        { userId },
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('Verification token created', { userId });
     });
 
     it('should set expiration based on config hours', async () => {
@@ -500,10 +476,7 @@ describe('TokenService', () => {
 
       await service.createVerificationToken(userId);
 
-      expect(mockConfigService.get).toHaveBeenCalledWith(
-        'VERIFICATION_TOKEN_EXPIRATION_HOURS',
-        24,
-      );
+      expect(mockConfigService.get).toHaveBeenCalledWith('VERIFICATION_TOKEN_EXPIRATION_HOURS', 24);
     });
 
     it('should generate unique tokens', async () => {
@@ -536,8 +509,7 @@ describe('TokenService', () => {
 
       const rawToken = await service.createVerificationToken(userId);
 
-      const createCall = (prisma.emailVerificationToken.create as jest.Mock)
-        .mock.calls[0][0];
+      const createCall = (prisma.emailVerificationToken.create as jest.Mock).mock.calls[0][0];
       const storedHash = createCall.data.tokenHash;
 
       expect(storedHash).not.toBe(rawToken);
@@ -574,24 +546,18 @@ describe('TokenService', () => {
     it('should return null for expired token', async () => {
       const rawToken = 'expired-token';
 
-      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(
-        null,
-      );
+      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(null);
 
       const result = await service.validateVerificationToken(rawToken);
 
       expect(result).toBeNull();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Invalid or expired verification token',
-      );
+      expect(mockLogger.warn).toHaveBeenCalledWith('Invalid or expired verification token');
     });
 
     it('should return null for already used token', async () => {
       const rawToken = 'used-token';
 
-      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(
-        null,
-      );
+      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(null);
 
       const result = await service.validateVerificationToken(rawToken);
 
@@ -601,9 +567,7 @@ describe('TokenService', () => {
     it('should check token has not been used', async () => {
       const rawToken = 'token';
 
-      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(
-        null,
-      );
+      (prisma.emailVerificationToken.findFirst as jest.Mock).mockResolvedValue(null);
 
       await service.validateVerificationToken(rawToken);
 
@@ -632,10 +596,7 @@ describe('TokenService', () => {
         where: { id: tokenId },
         data: { usedAt: expect.any(Date) },
       });
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Verification token marked as used',
-        { tokenId },
-      );
+      expect(mockLogger.debug).toHaveBeenCalledWith('Verification token marked as used', { tokenId });
     });
 
     it('should set current timestamp when marking as used', async () => {
@@ -648,8 +609,7 @@ describe('TokenService', () => {
 
       await service.markVerificationTokenUsed(tokenId);
 
-      const updateCall = (prisma.emailVerificationToken.update as jest.Mock)
-        .mock.calls[0][0];
+      const updateCall = (prisma.emailVerificationToken.update as jest.Mock).mock.calls[0][0];
       expect(updateCall.data.usedAt).toBeInstanceOf(Date);
     });
   });
