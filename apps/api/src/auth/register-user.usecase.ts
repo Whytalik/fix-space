@@ -61,22 +61,13 @@ export class RegisterUserService {
       username: user.username,
     });
 
-    await this.initializeUserSpaceUseCase.initialize(
-      user.id,
-      registerUserDto.username,
-    );
+    await this.initializeUserSpaceUseCase.initialize(user.id, registerUserDto.username);
 
     // Generate verification token
-    const verificationToken = await this.tokenService.createVerificationToken(
-      user.id,
-    );
+    const verificationToken = await this.tokenService.createVerificationToken(user.id);
 
     // Send verification email
-    await this.mailService.sendVerificationEmail(
-      user.email,
-      user.username,
-      verificationToken,
-    );
+    await this.mailService.sendVerificationEmail(user.email, user.username, verificationToken);
 
     this.logger.log('Verification email sent', {
       userId: user.id,
@@ -84,8 +75,7 @@ export class RegisterUserService {
     });
 
     return {
-      message:
-        'Registration successful. Please check your email to verify your account.',
+      message: 'Registration successful. Please check your email to verify your account.',
     };
   }
 }
