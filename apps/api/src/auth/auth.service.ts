@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { prisma } from '@nucleus/database';
 import { LoginUserDto } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
@@ -35,10 +30,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await comparePassword(
-      loginUserDto.password,
-      user.passwordHash,
-    );
+    const isPasswordValid = await comparePassword(loginUserDto.password, user.passwordHash);
 
     if (!isPasswordValid) {
       this.logger.warn('Login failed: invalid password', {
@@ -53,16 +45,11 @@ export class AuthService {
         userId: user.id,
         email: user.email,
       });
-      throw new UnauthorizedException(
-        'Please verify your email before logging in',
-      );
+      throw new UnauthorizedException('Please verify your email before logging in');
     }
 
     // Generate tokens
-    const accessToken = this.tokenService.generateAccessToken(
-      user.id,
-      user.username,
-    );
+    const accessToken = this.tokenService.generateAccessToken(user.id, user.username);
     const refreshToken = await this.tokenService.createRefreshToken(user.id);
 
     this.logger.log('Login successful', {
@@ -83,8 +70,7 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token not provided');
     }
 
-    const validated =
-      await this.tokenService.validateRefreshToken(refreshTokenRaw);
+    const validated = await this.tokenService.validateRefreshToken(refreshTokenRaw);
 
     if (!validated) {
       throw new UnauthorizedException('Invalid or expired refresh token');
@@ -93,14 +79,8 @@ export class AuthService {
     const user = await this.userService.findById(validated.userId);
 
     // Rotate refresh token
-    const newRefreshToken = await this.tokenService.rotateRefreshToken(
-      validated.tokenId,
-      validated.userId,
-    );
-    const newAccessToken = this.tokenService.generateAccessToken(
-      user.id,
-      user.username,
-    );
+    const newRefreshToken = await this.tokenService.rotateRefreshToken(validated.tokenId, validated.userId);
+    const newAccessToken = this.tokenService.generateAccessToken(user.id, user.username);
 
     this.logger.log('Token refreshed successfully', { userId: user.id });
 
