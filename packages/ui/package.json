@@ -11,9 +11,6 @@
     ".": "./src/index.ts",
     "./*": "./src/*/index.ts"
   },
-  "dependencies": {
-    "react": "^19.1.0"
-  },
   "devDependencies": {
     "@nucleus/eslint-config": "workspace:*",
     "@nucleus/typescript-config": "workspace:*",
