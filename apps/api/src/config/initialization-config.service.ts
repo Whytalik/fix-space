@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  InitializationConfig,
-  defaultInitializationConfig,
-} from './initialization.config';
+import { InitializationConfig, defaultInitializationConfig } from './initialization.config';
 
 @Injectable()
 export class InitializationConfigService {

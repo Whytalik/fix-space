@@ -1,11 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, prisma } from '@nucleus/database';
-import {
-  CreateRecordDto,
-  DEFAULT_RECORD_SETTINGS,
-  RecordResponseDto,
-  UpdateRecordDto,
-} from '@nucleus/domain';
+import { CreateRecordDto, DEFAULT_RECORD_SETTINGS, RecordResponseDto, UpdateRecordDto } from '@nucleus/domain';
 import { AppLogger } from '../common/logger/app-logger.service';
 
 @Injectable()
@@ -14,11 +9,7 @@ export class RecordService {
     this.logger.setContext(RecordService.name);
   }
 
-  async create(
-    databaseId: string,
-    createRecordDto: CreateRecordDto,
-    userId: string,
-  ): Promise<RecordResponseDto> {
+  async create(databaseId: string, createRecordDto: CreateRecordDto, userId: string): Promise<RecordResponseDto> {
     this.logger.debug('Creating record', { databaseId });
 
     const database = await prisma.database.findFirst({
@@ -94,11 +85,7 @@ export class RecordService {
     return new RecordResponseDto(record);
   }
 
-  async update(
-    id: string,
-    updateRecordDto: UpdateRecordDto,
-    userId: string,
-  ): Promise<RecordResponseDto> {
+  async update(id: string, updateRecordDto: UpdateRecordDto, userId: string): Promise<RecordResponseDto> {
     this.logger.debug('Updating record', { id });
 
     const existingRecord = await prisma.record.findFirst({

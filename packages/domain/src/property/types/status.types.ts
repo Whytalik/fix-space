@@ -1,8 +1,4 @@
-export const STATUS_CATEGORY_VALUES = [
-  'todo',
-  'in_progress',
-  'complete',
-] as const;
+export const STATUS_CATEGORY_VALUES = ['todo', 'in_progress', 'complete'] as const;
 export type StatusCategory = (typeof STATUS_CATEGORY_VALUES)[number];
 
 export const STATUS_OPTION_COLOR_VALUES = [

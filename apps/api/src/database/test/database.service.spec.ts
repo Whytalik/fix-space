@@ -90,15 +90,11 @@ describe('DatabaseService', () => {
           create: jest.fn().mockResolvedValue({}),
         },
       };
-      (prisma.$transaction as jest.Mock).mockImplementation(
-        async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+      (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+        cb(mockTx),
       );
 
-      const result = await service.create(
-        'space-123',
-        { name: 'Test DB', title: 'Test Database' },
-        'user-123',
-      );
+      const result = await service.create('space-123', { name: 'Test DB', title: 'Test Database' }, 'user-123');
 
       expect(result.id).toBe('db-123');
       expect(result.name).toBe('Test DB');
@@ -138,33 +134,28 @@ describe('DatabaseService', () => {
     it('should throw NotFoundException when space not found or not owned by user', async () => {
       (prisma.space.findFirst as jest.Mock).mockResolvedValue(null);
 
-      await expect(
-        service.create('space-nonexistent', { name: 'Test DB' }, 'user-123'),
-      ).rejects.toThrow(NotFoundException);
-      await expect(
-        service.create('space-nonexistent', { name: 'Test DB' }, 'user-123'),
-      ).rejects.toThrow('Space not found');
+      await expect(service.create('space-nonexistent', { name: 'Test DB' }, 'user-123')).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.create('space-nonexistent', { name: 'Test DB' }, 'user-123')).rejects.toThrow(
+        'Space not found',
+      );
     });
 
     it('should throw ConflictException when database name already taken in space', async () => {
       (prisma.space.findFirst as jest.Mock).mockResolvedValue(mockSpace);
       (prisma.database.findFirst as jest.Mock).mockResolvedValue(mockDatabase);
 
-      await expect(
-        service.create('space-123', { name: 'Test DB' }, 'user-123'),
-      ).rejects.toThrow(ConflictException);
-      await expect(
-        service.create('space-123', { name: 'Test DB' }, 'user-123'),
-      ).rejects.toThrow('Database name is already taken in this space.');
+      await expect(service.create('space-123', { name: 'Test DB' }, 'user-123')).rejects.toThrow(ConflictException);
+      await expect(service.create('space-123', { name: 'Test DB' }, 'user-123')).rejects.toThrow(
+        'Database name is already taken in this space.',
+      );
     });
   });
 
   describe('findAll', () => {
     it('should return array of DatabaseResponseDto for the space', async () => {
-      const databases = [
-        mockDatabase,
-        { ...mockDatabase, id: 'db-456', name: 'DB 2' },
-      ];
+      const databases = [mockDatabase, { ...mockDatabase, id: 'db-456', name: 'DB 2' }];
       (prisma.database.findMany as jest.Mock).mockResolvedValue(databases);
 
       const result = await service.findAll('space-123', 'user-123');
@@ -203,9 +194,7 @@ describe('DatabaseService', () => {
       (prisma.database.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
-        'Database with id nonexistent not found',
-      );
+      await expect(service.findOne('nonexistent')).rejects.toThrow('Database with id nonexistent not found');
     });
   });
 
@@ -254,9 +243,7 @@ describe('DatabaseService', () => {
       (prisma.database.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(service.remove('nonexistent')).rejects.toThrow(NotFoundException);
-      await expect(service.remove('nonexistent')).rejects.toThrow(
-        'Database with id nonexistent not found',
-      );
+      await expect(service.remove('nonexistent')).rejects.toThrow('Database with id nonexistent not found');
     });
   });
 });

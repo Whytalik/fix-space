@@ -42,9 +42,7 @@ describe('DuplicateSpaceUseCase', () => {
     name: 'Original Space',
     icon: '🚀',
     config: { some: 'config' },
-    sections: [
-      { id: 'sec-1', name: 'Section 1', position: 0, icon: '📁', color: null },
-    ],
+    sections: [{ id: 'sec-1', name: 'Section 1', position: 0, icon: '📁', color: null }],
     databases: [
       {
         id: 'db-1',
@@ -97,12 +95,8 @@ describe('DuplicateSpaceUseCase', () => {
   it('should throw NotFoundException when source space not found', async () => {
     (prisma.space.findUnique as jest.Mock).mockResolvedValue(null);
 
-    await expect(useCase.execute('nonexistent', 'user-123')).rejects.toThrow(
-      NotFoundException,
-    );
-    await expect(useCase.execute('nonexistent', 'user-123')).rejects.toThrow(
-      'Space with id nonexistent not found',
-    );
+    await expect(useCase.execute('nonexistent', 'user-123')).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute('nonexistent', 'user-123')).rejects.toThrow('Space with id nonexistent not found');
   });
 
   it('should duplicate space with custom name', async () => {
@@ -137,8 +131,8 @@ describe('DuplicateSpaceUseCase', () => {
       recordContent: { create: jest.fn().mockResolvedValue({}) },
     };
 
-    (prisma.$transaction as jest.Mock).mockImplementation(
-      async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+    (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+      cb(mockTx),
     );
 
     const result = await useCase.execute('space-123', 'user-123', {
@@ -164,9 +158,7 @@ describe('DuplicateSpaceUseCase', () => {
 
   it('should generate unique name when no custom name provided', async () => {
     (prisma.space.findUnique as jest.Mock).mockResolvedValue(mockSourceSpace);
-    (prisma.space.findMany as jest.Mock).mockResolvedValue([
-      { name: 'Original Space' },
-    ]);
+    (prisma.space.findMany as jest.Mock).mockResolvedValue([{ name: 'Original Space' }]);
     mockSettingsService.getSettings.mockResolvedValue(mockSpaceSettings);
 
     const newSpace = {
@@ -189,8 +181,8 @@ describe('DuplicateSpaceUseCase', () => {
       recordContent: { create: jest.fn().mockResolvedValue({}) },
     };
 
-    (prisma.$transaction as jest.Mock).mockImplementation(
-      async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+    (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+      cb(mockTx),
     );
 
     await useCase.execute('space-123', 'user-123');
@@ -230,8 +222,8 @@ describe('DuplicateSpaceUseCase', () => {
       recordContent: { create: jest.fn().mockResolvedValue({}) },
     };
 
-    (prisma.$transaction as jest.Mock).mockImplementation(
-      async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+    (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+      cb(mockTx),
     );
 
     await useCase.execute('space-123', 'user-123');
@@ -250,9 +242,7 @@ describe('DuplicateSpaceUseCase', () => {
       sections: [],
       databases: [],
     };
-    (prisma.space.findUnique as jest.Mock).mockResolvedValue(
-      spaceWithoutConfig,
-    );
+    (prisma.space.findUnique as jest.Mock).mockResolvedValue(spaceWithoutConfig);
     mockSettingsService.getSettings.mockResolvedValue(mockSpaceSettings);
 
     const newSpace = {
@@ -275,8 +265,8 @@ describe('DuplicateSpaceUseCase', () => {
       recordContent: { create: jest.fn() },
     };
 
-    (prisma.$transaction as jest.Mock).mockImplementation(
-      async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+    (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+      cb(mockTx),
     );
 
     await useCase.execute('space-123', 'user-123', { newName: 'Copy' });
@@ -308,8 +298,8 @@ describe('DuplicateSpaceUseCase', () => {
       recordContent: { create: jest.fn().mockResolvedValue({}) },
     };
 
-    (prisma.$transaction as jest.Mock).mockImplementation(
-      async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+    (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+      cb(mockTx),
     );
 
     await useCase.execute('space-123', 'user-123', { newName: 'Copy' });
@@ -343,8 +333,8 @@ describe('DuplicateSpaceUseCase', () => {
       recordContent: { create: jest.fn() },
     };
 
-    (prisma.$transaction as jest.Mock).mockImplementation(
-      async (cb: (tx: typeof mockTx) => Promise<unknown>) => cb(mockTx),
+    (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+      cb(mockTx),
     );
 
     await useCase.execute('space-123', 'user-123', { newName: 'Copy' });

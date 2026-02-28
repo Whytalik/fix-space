@@ -13,19 +13,14 @@ export class SelectHandler implements PropertyTypeHandler {
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (
-      config.isMultiSelect !== undefined &&
-      typeof config.isMultiSelect !== 'boolean'
-    ) {
+    if (config.isMultiSelect !== undefined && typeof config.isMultiSelect !== 'boolean') {
       errors.push('isMultiSelect must be a boolean');
     }
 
     if (config.options !== undefined) {
       if (!Array.isArray(config.options)) {
         errors.push('options must be an array of strings');
-      } else if (
-        (config.options as unknown[]).some((o) => typeof o !== 'string')
-      ) {
+      } else if ((config.options as unknown[]).some((o) => typeof o !== 'string')) {
         errors.push('each option must be a string');
       }
     }
@@ -33,10 +28,7 @@ export class SelectHandler implements PropertyTypeHandler {
     return errors.length > 0 ? errors : null;
   }
 
-  validateValue(
-    value: unknown,
-    config: Record<string, unknown>,
-  ): string[] | null {
+  validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
     if (value === null) return null;
 
     const options = config.options as string[] | undefined;
@@ -56,9 +48,7 @@ export class SelectHandler implements PropertyTypeHandler {
       if (options) {
         const invalid = (arr as string[]).filter((v) => !options.includes(v));
         if (invalid.length > 0) {
-          return [
-            `Invalid options: ${invalid.join(', ')}. Must be one of: ${options.join(', ')}`,
-          ];
+          return [`Invalid options: ${invalid.join(', ')}. Must be one of: ${options.join(', ')}`];
         }
       }
     } else {
@@ -67,9 +57,7 @@ export class SelectHandler implements PropertyTypeHandler {
       }
 
       if (options && !options.includes(value)) {
-        return [
-          `Value must be one of the defined options: ${options.join(', ')}`,
-        ];
+        return [`Value must be one of the defined options: ${options.join(', ')}`];
       }
     }
 

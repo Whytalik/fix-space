@@ -15,9 +15,7 @@ export class PropertyTypeRegistry implements OnModuleInit {
   onModuleInit(): void {
     for (const handler of this.handlerList) {
       if (this.handlers.has(handler.type)) {
-        throw new Error(
-          `Duplicate PropertyTypeHandler registered for type: ${handler.type}`,
-        );
+        throw new Error(`Duplicate PropertyTypeHandler registered for type: ${handler.type}`);
       }
       this.handlers.set(handler.type, handler);
     }

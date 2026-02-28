@@ -105,13 +105,9 @@ describe('UserService', () => {
     });
 
     it('should throw when user not found', async () => {
-      (prisma.user.findUniqueOrThrow as jest.Mock).mockRejectedValue(
-        new Error('No User found'),
-      );
+      (prisma.user.findUniqueOrThrow as jest.Mock).mockRejectedValue(new Error('No User found'));
 
-      await expect(service.findById('nonexistent')).rejects.toThrow(
-        'No User found',
-      );
+      await expect(service.findById('nonexistent')).rejects.toThrow('No User found');
     });
   });
 
@@ -129,13 +125,9 @@ describe('UserService', () => {
     });
 
     it('should throw when email not found', async () => {
-      (prisma.user.findUniqueOrThrow as jest.Mock).mockRejectedValue(
-        new Error('No User found'),
-      );
+      (prisma.user.findUniqueOrThrow as jest.Mock).mockRejectedValue(new Error('No User found'));
 
-      await expect(
-        service.findByEmail('nonexistent@example.com'),
-      ).rejects.toThrow('No User found');
+      await expect(service.findByEmail('nonexistent@example.com')).rejects.toThrow('No User found');
     });
   });
 
@@ -176,13 +168,9 @@ describe('UserService', () => {
     });
 
     it('should throw when username not found', async () => {
-      (prisma.user.findUniqueOrThrow as jest.Mock).mockRejectedValue(
-        new Error('No User found'),
-      );
+      (prisma.user.findUniqueOrThrow as jest.Mock).mockRejectedValue(new Error('No User found'));
 
-      await expect(service.findByUsername('nonexistent')).rejects.toThrow(
-        'No User found',
-      );
+      await expect(service.findByUsername('nonexistent')).rejects.toThrow('No User found');
     });
   });
 
@@ -206,16 +194,12 @@ describe('UserService', () => {
     });
 
     it('should hash password when password is provided', async () => {
-      (passwordUtils.hashPassword as jest.Mock).mockResolvedValue(
-        'new-hashed-password',
-      );
+      (passwordUtils.hashPassword as jest.Mock).mockResolvedValue('new-hashed-password');
       (prisma.user.update as jest.Mock).mockResolvedValue(mockUser);
 
       await service.update('user-123', { password: 'NewPassword123!' });
 
-      expect(passwordUtils.hashPassword).toHaveBeenCalledWith(
-        'NewPassword123!',
-      );
+      expect(passwordUtils.hashPassword).toHaveBeenCalledWith('NewPassword123!');
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'user-123' },
         data: { passwordHash: 'new-hashed-password' },
@@ -264,13 +248,9 @@ describe('UserService', () => {
     });
 
     it('should throw when user not found', async () => {
-      (prisma.user.delete as jest.Mock).mockRejectedValue(
-        new Error('Record to delete does not exist'),
-      );
+      (prisma.user.delete as jest.Mock).mockRejectedValue(new Error('Record to delete does not exist'));
 
-      await expect(service.remove('nonexistent')).rejects.toThrow(
-        'Record to delete does not exist',
-      );
+      await expect(service.remove('nonexistent')).rejects.toThrow('Record to delete does not exist');
     });
   });
 });

@@ -47,7 +47,5 @@ export const defaultInitializationConfig: InitializationConfig = {
     { name: '[DB] Mistakes', title: 'Mistakes', type: 'mistakes' },
     { name: '[DB] Accounts', title: 'Accounts', type: 'accounts' },
   ],
-  defaultDatabaseProperties: [
-    { name: 'Name', type: 'TEXT', position: 0, isRequired: true },
-  ],
+  defaultDatabaseProperties: [{ name: 'Name', type: 'TEXT', position: 0, isRequired: true }],
 };

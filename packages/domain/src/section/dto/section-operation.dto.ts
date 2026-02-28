@@ -1,11 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsOptional,
-  IsUUID,
-  ValidateIf,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsOptional, IsUUID, ValidateIf, ValidateNested } from 'class-validator';
 import { CreateSectionDto } from './create-section.dto';
 import { UpdateSectionDto } from './update-section.dto';
 
@@ -21,11 +15,7 @@ export class SectionOperationDto {
   })
   operation: SectionOperationType;
 
-  @ValidateIf(
-    (o) =>
-      o.operation === SectionOperationType.UPDATE ||
-      o.operation === SectionOperationType.DELETE,
-  )
+  @ValidateIf((o) => o.operation === SectionOperationType.UPDATE || o.operation === SectionOperationType.DELETE)
   @IsUUID('4', { message: 'id must be a valid UUID' })
   id?: string;
 

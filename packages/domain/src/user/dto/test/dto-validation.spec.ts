@@ -582,9 +582,7 @@ describe('DTO Validation', () => {
       registerDto.password = weakPassword;
 
       const registerErrors = await validate(registerDto);
-      const registerPasswordErrors = registerErrors.filter(
-        (e) => e.property === 'password',
-      );
+      const registerPasswordErrors = registerErrors.filter((e) => e.property === 'password');
 
       expect(registerPasswordErrors.length).toBeGreaterThan(0);
 
@@ -594,9 +592,7 @@ describe('DTO Validation', () => {
       loginDto.password = weakPassword;
 
       const loginErrors = await validate(loginDto);
-      const loginPasswordErrors = loginErrors.filter(
-        (e) => e.property === 'password',
-      );
+      const loginPasswordErrors = loginErrors.filter((e) => e.property === 'password');
 
       expect(loginPasswordErrors).toHaveLength(0);
     });
