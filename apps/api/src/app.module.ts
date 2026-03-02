@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
-import { ThrottlerGuard } from "@nestjs/throttler";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
@@ -27,6 +27,7 @@ import { SettingsModule } from "./settings/settings.module";
       envFilePath: [`../../.env.${process.env.NODE_ENV || "development"}`, "../../.env"],
       validate,
     }),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 200 }]),
     LoggerModule,
     UserModule,
     AuthModule,

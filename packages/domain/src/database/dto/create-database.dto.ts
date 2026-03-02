@@ -1,8 +1,9 @@
 import { IsIn, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, MinLength } from "class-validator";
+import { CreatePropertyDto } from "../../property/dto/create-property.dto";
 
-export type DatabaseType = "trading-journal" | "daily-routine" | "notes" | "mistakes" | "accounts" | "trading-system" | "custom";
+export type DatabaseType = "trading-journal" | "daily-routine" | "notes" | "mistakes" | "accounts" | "payouts" | "trading-system" | "custom";
 
-export const DATABASE_TYPES: DatabaseType[] = ["trading-journal", "daily-routine", "notes", "mistakes", "accounts", "trading-system", "custom"];
+export const DATABASE_TYPES: DatabaseType[] = ["trading-journal", "daily-routine", "notes", "mistakes", "accounts", "payouts", "trading-system", "custom"];
 
 export class CreateDatabaseDto {
   @IsString()
@@ -50,5 +51,5 @@ export class CreateDatabaseDto {
   icon?: string;
 
   @IsOptional()
-  properties?: Record<string, any>;
+  properties?: CreatePropertyDto[];
 }
