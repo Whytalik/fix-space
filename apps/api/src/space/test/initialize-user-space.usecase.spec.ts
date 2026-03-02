@@ -3,6 +3,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { InitializationConfigService } from "../../config/initialization-config.service";
 import { DatabaseService } from "../../database/database.service";
+import { PropertyService } from "../../property/property.service";
 import { SectionService } from "../providers/section.service";
 import { InitializeUserSpaceUseCase } from "../providers/initialize-user-space.usecase";
 import { SpaceService } from "../space.service";
@@ -30,16 +31,22 @@ describe("InitializeUserSpaceUseCase", () => {
     create: jest.fn(),
   };
 
+  const mockPropertyService = {
+    create: jest.fn(),
+  };
+
   const mockConfig = {
     space: {
       name: "{{username}}'s Space",
     },
     sections: [
       {
+        key: "b",
         name: "Section B",
         position: 2,
       },
       {
+        key: "a",
         name: "Section A",
         position: 1,
       },
@@ -48,7 +55,9 @@ describe("InitializeUserSpaceUseCase", () => {
       {
         name: "db-1",
         title: "Tasks",
-        type: "table",
+        type: "custom",
+        sectionKey: "a",
+        properties: [],
       },
     ],
   };
@@ -84,6 +93,10 @@ describe("InitializeUserSpaceUseCase", () => {
           useValue: mockDatabaseService,
         },
         {
+          provide: PropertyService,
+          useValue: mockPropertyService,
+        },
+        {
           provide: InitializationConfigService,
           useValue: mockConfigService,
         },
@@ -99,8 +112,8 @@ describe("InitializeUserSpaceUseCase", () => {
 
   it("should create space with interpolated name", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
-    mockSectionService.create.mockResolvedValue({});
-    mockDatabaseService.create.mockResolvedValue({});
+    mockSectionService.create.mockResolvedValue({ id: "section-a-id" });
+    mockDatabaseService.create.mockResolvedValue({ id: "db-1-id" });
 
     await useCase.initialize("user-123", "testuser");
 
@@ -112,8 +125,8 @@ describe("InitializeUserSpaceUseCase", () => {
 
   it("should create sections sorted by position", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
-    mockSectionService.create.mockResolvedValue({});
-    mockDatabaseService.create.mockResolvedValue({});
+    mockSectionService.create.mockResolvedValue({ id: "section-id" });
+    mockDatabaseService.create.mockResolvedValue({ id: "db-id" });
 
     await useCase.initialize("user-123", "testuser");
 
@@ -129,10 +142,10 @@ describe("InitializeUserSpaceUseCase", () => {
     });
   });
 
-  it("should create databases from config", async () => {
+  it("should create databases from config with sectionId and empty properties", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
-    mockSectionService.create.mockResolvedValue({});
-    mockDatabaseService.create.mockResolvedValue({});
+    mockSectionService.create.mockResolvedValue({ id: "section-a-id" });
+    mockDatabaseService.create.mockResolvedValue({ id: "db-1-id" });
 
     await useCase.initialize("user-123", "testuser");
 
@@ -141,7 +154,9 @@ describe("InitializeUserSpaceUseCase", () => {
       {
         name: "db-1",
         title: "Tasks",
-        type: "table",
+        type: "custom",
+        sectionId: "section-a-id",
+        properties: [],
       },
       "user-123",
     );
@@ -149,8 +164,8 @@ describe("InitializeUserSpaceUseCase", () => {
 
   it("should return the created space", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
-    mockSectionService.create.mockResolvedValue({});
-    mockDatabaseService.create.mockResolvedValue({});
+    mockSectionService.create.mockResolvedValue({ id: "section-id" });
+    mockDatabaseService.create.mockResolvedValue({ id: "db-id" });
 
     const result = await useCase.initialize("user-123", "testuser");
 
@@ -159,8 +174,8 @@ describe("InitializeUserSpaceUseCase", () => {
 
   it("should log initialization summary", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
-    mockSectionService.create.mockResolvedValue({});
-    mockDatabaseService.create.mockResolvedValue({});
+    mockSectionService.create.mockResolvedValue({ id: "section-id" });
+    mockDatabaseService.create.mockResolvedValue({ id: "db-id" });
 
     await useCase.initialize("user-123", "testuser");
 
