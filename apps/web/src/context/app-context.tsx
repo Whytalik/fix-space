@@ -4,7 +4,7 @@ import { ApiError } from "@/lib/api/client";
 import { getSpaces } from "@/lib/api/space";
 import { getMe } from "@/lib/api/user";
 import { clearCached, getCached, setCached } from "@/lib/cache";
-import type { SpaceResponseDto, UserResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto, SpaceResponseDto, UserResponseDto } from "@nucleus/domain";
 import { createContext, useContext, useEffect, useState } from "react";
 
 const CACHE_KEY_USER = "me";
@@ -15,6 +15,7 @@ interface AppContextValue {
   space: SpaceResponseDto | null;
   spaces: SpaceResponseDto[];
   setSpace: (space: SpaceResponseDto) => void;
+  updateDatabaseInSpace: (updated: DatabaseResponseDto) => void;
   clearSession: () => void;
   isLoading: boolean;
 }
@@ -24,6 +25,7 @@ const AppContext = createContext<AppContextValue>({
   space: null,
   spaces: [],
   setSpace: () => {},
+  updateDatabaseInSpace: () => {},
   clearSession: () => {},
   isLoading: true,
 });
@@ -66,10 +68,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem("access_token");
           localStorage.removeItem("username");
           clearCached(CACHE_KEY_USER, CACHE_KEY_SPACES);
+          if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+            window.location.href = "/login";
+          }
         }
       })
       .finally(() => setIsLoading(false));
   }, []);
+
+  function updateDatabaseInSpace(updated: DatabaseResponseDto) {
+    const patch = (prev: SpaceResponseDto | null) => {
+      if (!prev) return prev;
+      const replaceDb = (db: DatabaseResponseDto) => (db.id === updated.id ? updated : db);
+      return {
+        ...prev,
+        databases: prev.databases?.map(replaceDb) ?? [],
+        sections: prev.sections?.map((s) => ({ ...s, databases: s.databases?.map(replaceDb) ?? [] })) ?? [],
+      };
+    };
+    setSpace((prev) => patch(prev));
+    setSpaces((prev) => prev.map((s) => patch(s) ?? s));
+  }
 
   function clearSession() {
     localStorage.removeItem("access_token");
@@ -87,6 +106,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         space,
         spaces,
         setSpace,
+        updateDatabaseInSpace,
         clearSession,
         isLoading,
       }}
