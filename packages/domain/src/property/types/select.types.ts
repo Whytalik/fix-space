@@ -1,9 +1,14 @@
+export interface SelectCategory {
+  label: string;
+  options: string[];
+}
+
 export interface SelectProperty {
   isMultiSelect: boolean;
-  options: string[];
+  categories: SelectCategory[];
 }
 
 export const DEFAULT_SELECT_PROPERTY = {
   isMultiSelect: false,
-  options: [],
+  categories: [],
 } satisfies SelectProperty;
