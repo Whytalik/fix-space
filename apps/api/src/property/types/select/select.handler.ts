@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_SELECT_PROPERTY, PropertyType } from "@nucleus/domain";
+import { DEFAULT_SELECT_PROPERTY, SelectCategory, PropertyType } from "@nucleus/domain";
 import { PropertyTypeHandler } from "../handler.interface";
 
 @Injectable()
@@ -7,10 +7,7 @@ export class SelectHandler implements PropertyTypeHandler {
   readonly type = PropertyType.SELECT;
 
   getDefaultConfig(): Record<string, unknown> {
-    return {
-      ...DEFAULT_SELECT_PROPERTY,
-      options: [],
-    };
+    return { ...DEFAULT_SELECT_PROPERTY };
   }
 
   validateConfig(config: Record<string, unknown>): string[] | null {
@@ -20,11 +17,21 @@ export class SelectHandler implements PropertyTypeHandler {
       errors.push("isMultiSelect must be a boolean");
     }
 
-    if (config.options !== undefined) {
-      if (!Array.isArray(config.options)) {
-        errors.push("options must be an array of strings");
-      } else if ((config.options as unknown[]).some((o) => typeof o !== "string")) {
-        errors.push("each option must be a string");
+    if (config.categories !== undefined) {
+      if (!Array.isArray(config.categories)) {
+        errors.push("categories must be an array");
+      } else {
+        for (const cat of config.categories as unknown[]) {
+          const c = cat as SelectCategory;
+          if (typeof c.label !== "string") {
+            errors.push("each category must have a string label");
+          }
+          if (!Array.isArray(c.options)) {
+            errors.push("each category must have an options array");
+          } else if ((c.options as unknown[]).some((o) => typeof o !== "string")) {
+            errors.push("each option must be a string");
+          }
+        }
       }
     }
 
@@ -34,8 +41,10 @@ export class SelectHandler implements PropertyTypeHandler {
   validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
     if (value === null) return null;
 
-    const options = config.options as string[] | undefined;
+    const categories = config.categories as SelectCategory[] | undefined;
     const isMulti = config.isMultiSelect as boolean | undefined;
+
+    const allOptions = categories ? categories.flatMap((c) => c.options) : [];
 
     if (isMulti) {
       if (!Array.isArray(value)) {
@@ -48,10 +57,10 @@ export class SelectHandler implements PropertyTypeHandler {
         return ["Multi-select values must be strings"];
       }
 
-      if (options) {
-        const invalid = (arr as string[]).filter((v) => !options.includes(v));
+      if (allOptions.length > 0) {
+        const invalid = (arr as string[]).filter((v) => !allOptions.includes(v));
         if (invalid.length > 0) {
-          return [`Invalid options: ${invalid.join(", ")}. Must be one of: ${options.join(", ")}`];
+          return [`Invalid options: ${invalid.join(", ")}. Must be one of: ${allOptions.join(", ")}`];
         }
       }
     } else {
@@ -59,8 +68,8 @@ export class SelectHandler implements PropertyTypeHandler {
         return ["Select value must be a string or null"];
       }
 
-      if (options && !options.includes(value)) {
-        return [`Value must be one of the defined options: ${options.join(", ")}`];
+      if (allOptions.length > 0 && !allOptions.includes(value)) {
+        return [`Value must be one of the defined options: ${allOptions.join(", ")}`];
       }
     }
 

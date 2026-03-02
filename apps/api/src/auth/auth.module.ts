@@ -1,5 +1,4 @@
 import { forwardRef, Module } from "@nestjs/common";
-import { ThrottlerModule } from "@nestjs/throttler";
 import { InitializationConfigModule } from "../config/config.module";
 import { JwtModule } from "../jwt/jwt.module";
 import { MailModule } from "../mail/mail.module";
@@ -17,12 +16,6 @@ import { TokenService } from "./token.service";
     MailModule,
     SpaceModule,
     InitializationConfigModule,
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000,
-        limit: 10,
-      },
-    ]),
   ],
   controllers: [AuthController],
   providers: [AuthService, RegisterUserService, TokenService],
