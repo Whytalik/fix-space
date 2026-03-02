@@ -63,26 +63,37 @@ export class DatabaseService {
         },
       });
 
-      for (const propertyDef of defaultInitializationConfig.defaultDatabaseProperties) {
+      const propertiesToCreate =
+        createDatabaseDto.properties !== undefined
+          ? createDatabaseDto.properties
+          : defaultInitializationConfig.defaultDatabaseProperties;
+
+      for (const propertyDef of propertiesToCreate) {
         const handler = this.typeRegistry.getHandler(propertyDef.type as PropertyType);
-        const config = handler.getDefaultConfig();
+        const defaultConfig = handler.getDefaultConfig();
+        const mergedConfig = propertyDef.config
+          ? { ...defaultConfig, ...propertyDef.config }
+          : defaultConfig;
 
         await tx.property.create({
           data: {
             name: propertyDef.name,
             type: propertyDef.type,
             position: propertyDef.position,
+            icon: propertyDef.icon,
+            color: propertyDef.color,
             isRequired: propertyDef.isRequired ?? false,
+            isPrimary: propertyDef.isPrimary ?? false,
             databaseId: database.id,
-            config: config as Prisma.JsonValue,
+            config: mergedConfig as Prisma.JsonValue,
           },
         });
       }
 
-      this.logger.log("Database created with default properties", {
+      this.logger.log("Database created with properties", {
         databaseId: database.id,
         spaceId,
-        propertyCount: defaultInitializationConfig.defaultDatabaseProperties.length,
+        propertyCount: propertiesToCreate.length,
       });
 
       return new DatabaseResponseDto(database);
