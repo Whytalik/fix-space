@@ -25,17 +25,17 @@ export function HeaderActions() {
   }, [isOpen]);
 
   if (AUTH_PAGES.includes(pathname)) return null;
-  if (isLoading) return <div className="w-24 h-7 rounded-lg bg-surface animate-pulse" />;
+  if (isLoading) return null;
 
   async function handleLogout() {
     setIsOpen(false);
     await logout().catch(() => {});
     clearSession();
-    router.push("/login");
+    router.push("/");
   }
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-2">
       {user ? (
         <>
           {isOpen && <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />}

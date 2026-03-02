@@ -90,7 +90,7 @@ export default function RegisterPage() {
               <input
                 id="email"
                 type="email"
-                autoComplete="username email"
+                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -112,7 +112,7 @@ export default function RegisterPage() {
                 maxLength={50}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="your_handle"
+                placeholder="your_username"
                 className="bg-elevated border border-stroke rounded-lg px-3 py-2.5 text-sm text-ink outline-none w-full transition-colors duration-150 focus:border-accent"
               />
               <span className="text-xs text-ink-muted">Letters, numbers, underscores and hyphens only</span>
