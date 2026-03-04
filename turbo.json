@@ -37,9 +37,6 @@
       "dependsOn": ["^db:generate"],
       "cache": false
     },
-    "@nucleus/ui#build": {
-      "outputs": []
-    },
     "lint": {},
     "format": {
       "inputs": ["$TURBO_DEFAULT$", ".prettierrc*"],
