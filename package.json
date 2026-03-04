@@ -23,7 +23,8 @@
     "db:push": "turbo run db:push",
     "db:seed": "turbo run db:seed",
     "db:generate": "turbo run db:generate",
-    "db:reset": "docker-compose down -v && docker-compose up -d && turbo db:migrate:dev"
+    "db:reset": "docker-compose down -v && docker-compose up -d && turbo db:migrate:dev",
+    "setup:hooks": "git config core.hooksPath .githooks && chmod +x .githooks/pre-push scripts/update-changelog.sh && echo \"Git hooks configured.\""
   },
   "devDependencies": {
     "@nucleus/eslint-config": "workspace:*",
