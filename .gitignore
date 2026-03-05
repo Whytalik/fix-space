@@ -49,6 +49,7 @@ CLAUDE.md
 *.swp
 *.swo
 *~
+scripts/
 
 # OS
 .DS_Store
