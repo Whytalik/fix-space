@@ -1,6 +1,16 @@
 # Changelog
 
-> Auto-generated from git history. Last updated: 2026-03-05 21:45
+> Auto-generated from git history. Last updated: 2026-03-05 21:57
+
+## 2026-03-05
+
+### Bug Fixes
+
+- fix(web): remove @nucleus/ui package, inline styles and migrate components to local [`7961e17`](https://github.com/Whytalik/nucleus/commit/7961e176fc43c308751e03c51d7fec322110e0e7)
+
+### Chores
+
+- chore: update changelog and stats [`034007b`](https://github.com/Whytalik/nucleus/commit/034007be3e8c16b0731a515a914e1d8b8be73ae9)
 
 ## 2026-03-04
 
