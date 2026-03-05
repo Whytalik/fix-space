@@ -1,20 +1,13 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { Prisma, prisma } from "@nucleus/database";
 import { DEFAULT_SPACE_SETTINGS, SpaceResponseDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { SettingsService } from "../../settings/settings.service";
+import { sectionsInclude } from "../space.constants";
 
 export interface DuplicateSpaceOptions {
   newName?: string;
 }
-
-const sectionsInclude = {
-  sections: {
-    orderBy: {
-      position: "asc" as const,
-    },
-  },
-};
 
 @Injectable()
 export class DuplicateSpaceUseCase {
@@ -50,7 +43,7 @@ export class DuplicateSpaceUseCase {
       throw new NotFoundException(`Space with id ${id} not found`);
     }
 
-    const newName = options?.newName ?? (await this.generateUniqueName(ownerId, sourceSpace.name));
+    const newName = options?.newName ?? this.generateUniqueName(sourceSpace.name);
 
     const spaceSettings = await this.settingsService.getSettings(ownerId, "space", DEFAULT_SPACE_SETTINGS);
 
@@ -93,7 +86,18 @@ export class DuplicateSpaceUseCase {
             title: database.title,
             icon: database.icon,
             spaceId: newSpace.id,
-            sectionId: database.sectionId ? sectionIdMap.get(database.sectionId) : null,
+            sectionId: (() => {
+              if (!database.sectionId) return null;
+              const mapped = sectionIdMap.get(database.sectionId);
+              if (mapped === undefined) {
+                this.logger.warn("Section ID not found in sectionIdMap during duplication", {
+                  databaseId: database.id,
+                  originalSectionId: database.sectionId,
+                });
+                return null;
+              }
+              return mapped;
+            })(),
             config: database.config,
           },
         });
@@ -168,27 +172,14 @@ export class DuplicateSpaceUseCase {
         include: sectionsInclude,
       });
 
-      return new SpaceResponseDto(result!);
+      if (!result) {
+        throw new InternalServerErrorException(`Failed to fetch duplicated space ${newSpace.id}`);
+      }
+      return new SpaceResponseDto(result);
     });
   }
 
-  private async generateUniqueName(ownerId: string, baseName: string): Promise<string> {
-    const existingSpaces = await prisma.space.findMany({
-      where: { ownerId },
-      select: {
-        name: true,
-      },
-    });
-
-    const existingNames = new Set(existingSpaces.map((s) => s.name));
-    let newName = `${baseName} (Copy)`;
-    let counter = 2;
-
-    while (existingNames.has(newName)) {
-      newName = `${baseName} (Copy ${counter})`;
-      counter++;
-    }
-
-    return newName;
+  private generateUniqueName(baseName: string): string {
+    return `${baseName} (Copy)`;
   }
 }

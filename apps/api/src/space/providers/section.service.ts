@@ -15,34 +15,11 @@ export class SectionService {
       name: dto.name,
     });
 
-    try {
-      const section = await prisma.section.create({
-        data: {
-          name: dto.name,
-          position: dto.position,
-          icon: dto.icon,
-          color: dto.color,
-          spaceId,
-        },
-      });
-
-      this.logger.log("Section created", {
-        sectionId: section.id,
-        spaceId,
-      });
-      return new SectionResponseDto(section);
-    } catch (e: unknown) {
-      if (
-        (
-          e as {
-            code?: string;
-          }
-        )?.code === "P2003"
-      ) {
-        throw new NotFoundException(`Space with id ${spaceId} not found`);
-      }
-      throw e;
-    }
+    const section = await prisma.section.create({
+      data: { name: dto.name, position: dto.position, icon: dto.icon, color: dto.color, spaceId },
+    });
+    this.logger.log("Section created", { sectionId: section.id, spaceId });
+    return new SectionResponseDto(section);
   }
 
   async processOperations(tx: Prisma.TransactionClient, spaceId: string, operations: SectionOperationDto[]) {
@@ -66,10 +43,20 @@ export class SectionService {
       throw new BadRequestException('CREATE operation requires "create" field with section data');
     }
 
+    let position = operation.create.position;
+    if (position === undefined) {
+      const last = await tx.section.findFirst({
+        where: { spaceId },
+        orderBy: { position: "desc" },
+        select: { position: true },
+      });
+      position = last?.position != null ? last.position + 1 : 0;
+    }
+
     await tx.section.create({
       data: {
         name: operation.create.name,
-        position: operation.create.position,
+        position,
         icon: operation.create.icon,
         color: operation.create.color,
         spaceId,
