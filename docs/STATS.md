@@ -1,8 +1,8 @@
 # Project Statistics
 
-> Auto-generated from git history. Last updated: 2026-03-05 17:11
+> Auto-generated from git history. Last updated: 2026-03-05 21:45
 
-**Total commits (no merges):** 146
+**Total commits (no merges):** 150
 
 ---
 
@@ -13,9 +13,9 @@ pie showData
     title Commits by Type
     "feat" : 89
     "refactor" : 24
+    "chore" : 15
     "fix" : 14
-    "chore" : 12
-    "docs" : 2
+    "docs" : 3
     "test" : 1
     "style" : 1
 ```
@@ -42,7 +42,7 @@ xychart-beta
     title "Commits per Week"
     x-axis ["2026-W05", "2026-W06", "2026-W07", "2026-W08", "2026-W09", "2026-W10"]
     y-axis "Commits" 0 --> 50
-    bar [38, 5, 16, 28, 43, 17]
+    bar [38, 5, 16, 28, 43, 21]
 ```
 
 ## Most Changed Files
@@ -55,10 +55,10 @@ xychart-beta
 | 12      | `apps/api/src/space/space.module.ts` |
 | 11      | `apps/api/src/space/space.controller.ts` |
 | 11      | `apps/api/src/property/property.service.ts` |
+| 10      | `pnpm-lock.yaml` |
 | 10      | `apps/api/src/user/user.controller.ts` |
 | 10      | `apps/api/src/space/space.service.ts` |
 | 10      | `apps/api/src/auth/register-user.usecase.ts` |
-| 10      | `apps/api/src/auth/auth.controller.ts` |
 
 ## Most Active Days
 
