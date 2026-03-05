@@ -8,7 +8,7 @@ import { DatabaseItem } from "../database-item/database-item";
 import { SectionItem } from "../section-item/section-item";
 
 export function Sidebar() {
-  const { space, isLoading } = useAppContext();
+  const { space } = useAppContext();
   const pathname = usePathname();
 
   const sections = space?.sections ?? [];
@@ -20,22 +20,12 @@ export function Sidebar() {
   return (
     <aside className="w-60 shrink-0 border-r border-stroke px-3 py-6 flex flex-col gap-4 overflow-y-auto">
       <div className="flex flex-col gap-4 flex-1">
-        {isLoading ? (
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-4 rounded bg-surface animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <>
-            {sections.map((section) => (
-              <SectionItem key={section.id} section={section} />
-            ))}
-            {unsectioned.map((db) => (
-              <DatabaseItem key={db.id} db={db} />
-            ))}
-          </>
-        )}
+        {sections.map((section) => (
+          <SectionItem key={section.id} section={section} />
+        ))}
+        {unsectioned.map((db) => (
+          <DatabaseItem key={db.id} db={db} />
+        ))}
       </div>
 
       <div className="mt-auto pt-3 border-t border-stroke">
