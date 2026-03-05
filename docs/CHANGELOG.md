@@ -1,6 +1,18 @@
 # Changelog
 
-> Auto-generated from git history. Last updated: 2026-03-05 17:07
+> Auto-generated from git history. Last updated: 2026-03-05 21:45
+
+## 2026-03-04
+
+### Documentation
+
+- docs: replace stale app readmes with centralized project documentation [`87f450f`](https://github.com/Whytalik/nucleus/commit/87f450fff48d9b14b15413adab4691830f264e60)
+
+### Chores
+
+- chore: update pnpm lockfile [`b0ca5ee`](https://github.com/Whytalik/nucleus/commit/b0ca5ee1a6484ed7f2cc4b715469ab73b7412393)
+- chore: add pre-push hook for automated changelog and stats [`8870287`](https://github.com/Whytalik/nucleus/commit/88702871b9e7b5bd42ec0683e5599416acb8cb16)
+- chore: update monorepo config and remove legacy files [`aebdfb3`](https://github.com/Whytalik/nucleus/commit/aebdfb3dc817aaba4c609aacb47bc40ea46cca21)
 
 ## 2026-03-02
 
