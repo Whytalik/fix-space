@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppContext } from "@/context/app-context";
-import { LogoIcon } from "@nucleus/ui";
+import { LogoIcon } from "@/components/ui/brand/logo-icon";
 
 export function Footer() {
   const { user, isLoading } = useAppContext();
