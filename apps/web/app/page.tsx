@@ -2,7 +2,7 @@
 
 import { Sidebar } from "@/components/home/sidebar/sidebar";
 import { useAppContext } from "@/context/app-context";
-import { LogoIcon } from "@nucleus/ui";
+import { LogoIcon } from "@/components/ui/brand/logo-icon";
 
 export default function Home() {
   const { user, isLoading } = useAppContext();
