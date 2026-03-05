@@ -20,25 +20,80 @@ interface FetchOptions {
   headers?: Record<string, string>;
 }
 
+let refreshPromise: Promise<string | null> | null = null;
+
+async function tryRefreshToken(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  })
+    .then(async (res) => {
+      if (!res.ok) return null;
+      const data = await res.json();
+      const newToken = data.accessToken as string;
+      localStorage.setItem("access_token", newToken);
+      return newToken;
+    })
+    .catch(() => null)
+    .finally(() => {
+      refreshPromise = null;
+    });
+
+  return refreshPromise;
+}
+
+function redirectToLogin() {
+  if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("username");
+    window.location.href = "/login";
+  }
+}
+
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const { method = "GET", body, headers = {} } = options;
 
   const accessToken = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
+  const buildHeaders = (token: string | null): Record<string, string> => ({
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...headers,
+  });
+
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method,
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(accessToken
-        ? {
-            Authorization: `Bearer ${accessToken}`,
-          }
-        : {}),
-      ...headers,
-    },
+    headers: buildHeaders(accessToken),
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
+
+  if (res.status === 401 && path !== "/auth/refresh" && path !== "/auth/login") {
+    const newToken = await tryRefreshToken();
+
+    if (newToken) {
+      const retryRes = await fetch(`${API_BASE_URL}${path}`, {
+        method,
+        credentials: "include",
+        headers: buildHeaders(newToken),
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+      });
+      const retryData = await retryRes.json().catch(() => ({}));
+      if (!retryRes.ok) {
+        const messages = Array.isArray(retryData.message)
+          ? retryData.message
+          : [retryData.message ?? "Something went wrong"];
+        throw new ApiError(retryRes.status, messages);
+      }
+      return retryData as T;
+    }
+
+    redirectToLogin();
+    throw new ApiError(401, "Session expired. Please log in again.");
+  }
 
   const data = await res.json().catch(() => ({}));
 

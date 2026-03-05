@@ -4,8 +4,6 @@
 
 Nucleus is a comprehensive platform that helps traders of all levels structure their knowledge, manage statistics, and organize their daily trading activities.
 
-This project was developed as a diploma thesis, and this repository contains the full source code for the platform. ✨
-
 ## 🎯 The Problem
 
 Traders often struggle with fragmented data and a lack of centralized, specialized tools. Existing solutions like Notion require extensive manual setup, and trading journals often focus solely on trade logging, neglecting detailed statistics, knowledge management, and process analysis.
@@ -78,7 +76,13 @@ Traders often struggle with fragmented data and a lack of centralized, specializ
    pnpm install
    ```
 
-3. **Set up environment variables:**
+3. **Configure git hooks:**
+
+   ```bash
+   pnpm setup:hooks
+   ```
+
+4. **Set up environment variables:**
 
    Copy `.env.example` to `.env.development` in `apps/api/` and fill in the required values (see [Environment Variables](#environment-variables) below).
 
@@ -86,20 +90,20 @@ Traders often struggle with fragmented data and a lack of centralized, specializ
    cp apps/api/.env.example apps/api/.env.development
    ```
 
-4. **Start the database:**
+5. **Start the database:**
 
    ```bash
    docker-compose up -d
    ```
 
-5. **Generate Prisma client and apply migrations:**
+6. **Generate Prisma client and apply migrations:**
 
    ```bash
    turbo db:generate
    turbo db:migrate:dev
    ```
 
-6. **Run the development servers:**
+7. **Run the development servers:**
 
    ```bash
    turbo dev
