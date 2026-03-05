@@ -58,7 +58,7 @@ export class RecordService {
         propertyCount: properties.length,
       });
 
-      const createdRecord = await tx.record.findUnique({
+      const createdRecord = await tx.record.findUniqueOrThrow({
         where: {
           id: record.id,
         },
@@ -68,7 +68,7 @@ export class RecordService {
         },
       });
 
-      return new RecordResponseDto(createdRecord!);
+      return new RecordResponseDto(createdRecord);
     });
   }
 
