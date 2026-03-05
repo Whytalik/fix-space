@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { InitializationConfigModule } from "../config/config.module";
+import { InitializationConfigModule } from "../config/initialization-config.module";
 import { DatabaseModule } from "../database/database.module";
 import { PropertyModule } from "../property/property.module";
 import { SettingsModule } from "../settings/settings.module";
