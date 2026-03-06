@@ -1,4 +1,5 @@
 import { Exclude, Expose } from "class-transformer";
+import { PropertyType } from "./create-property.dto";
 
 @Exclude()
 export class PropertyResponseDto {
@@ -12,7 +13,7 @@ export class PropertyResponseDto {
   name: string;
 
   @Expose()
-  type: string;
+  type: PropertyType;
 
   @Expose()
   position: number;
@@ -22,6 +23,12 @@ export class PropertyResponseDto {
 
   @Expose()
   color?: string;
+
+  @Expose()
+  hint?: string;
+
+  @Expose()
+  group?: string;
 
   @Expose()
   isRequired: boolean;
