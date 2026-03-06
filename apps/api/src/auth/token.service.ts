@@ -54,7 +54,6 @@ export class TokenService {
   }
 
   async rotateRefreshToken(oldTokenId: string, userId: string): Promise<string> {
-    // Revoke old token
     await prisma.refreshToken.update({
       where: { id: oldTokenId },
       data: { revokedAt: new Date() },
@@ -62,7 +61,6 @@ export class TokenService {
 
     this.logger.debug("Old refresh token revoked", { tokenId: oldTokenId });
 
-    // Create new one
     return this.createRefreshToken(userId);
   }
 
@@ -125,5 +123,46 @@ export class TokenService {
     });
 
     this.logger.debug("Verification token marked as used", { tokenId });
+  }
+
+  async createPasswordResetToken(userId: string): Promise<string> {
+    const rawToken = generateRandomToken();
+    const tokenHash = hashToken(rawToken);
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.passwordResetToken.create({
+      data: { userId, tokenHash, expiresAt },
+    });
+
+    this.logger.debug("Password reset token created", { userId });
+
+    return rawToken;
+  }
+
+  async validatePasswordResetToken(rawToken: string): Promise<{ userId: string; tokenId: string } | null> {
+    const tokenHash = hashToken(rawToken);
+    const record = await prisma.passwordResetToken.findFirst({
+      where: {
+        tokenHash,
+        usedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!record) {
+      this.logger.warn("Invalid or expired password reset token");
+      return null;
+    }
+
+    return { userId: record.userId, tokenId: record.id };
+  }
+
+  async markPasswordResetTokenUsed(tokenId: string): Promise<void> {
+    await prisma.passwordResetToken.update({
+      where: { id: tokenId },
+      data: { usedAt: new Date() },
+    });
+
+    this.logger.debug("Password reset token marked as used", { tokenId });
   }
 }
