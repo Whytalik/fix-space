@@ -5,17 +5,21 @@ import {
   STATUS_CATEGORY_VALUES,
   STATUS_OPTION_COLOR_VALUES,
   StatusCategory,
-  StatusCategoryConfig,
   StatusOptionColor,
+  StatusProperty,
 } from "@nucleus/domain";
-import { PropertyTypeHandler } from "../handler.interface";
+import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
-export class StatusHandler implements PropertyTypeHandler {
+export class StatusHandler implements PropertyConfigHandler, PropertyValueHandler {
   readonly type = PropertyType.STATUS;
 
+  private parseConfig(config: Record<string, unknown>): StatusProperty {
+    return config as unknown as StatusProperty;
+  }
+
   getDefaultConfig(): Record<string, unknown> {
-    return JSON.parse(JSON.stringify(DEFAULT_STATUS_PROPERTY)) as Record<string, unknown>;
+    return structuredClone(DEFAULT_STATUS_PROPERTY) as Record<string, unknown>;
   }
 
   validateConfig(config: Record<string, unknown>): string[] | null {
@@ -79,7 +83,7 @@ export class StatusHandler implements PropertyTypeHandler {
       return ["Status value must be a string or null"];
     }
 
-    const categories = config.categories as StatusCategoryConfig[] | undefined;
+    const { categories } = this.parseConfig(config);
     if (categories) {
       const allOptions = categories.flatMap((c) => c.options.map((o) => o.name));
       if (!allOptions.includes(value)) {
@@ -96,6 +100,6 @@ export class StatusHandler implements PropertyTypeHandler {
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (config.defaultOption as string | undefined) ?? DEFAULT_STATUS_PROPERTY.defaultOption;
+    return this.parseConfig(config).defaultOption ?? DEFAULT_STATUS_PROPERTY.defaultOption;
   }
 }
