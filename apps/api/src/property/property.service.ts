@@ -47,7 +47,7 @@ export class PropertyService {
       throw new ConflictException("Property name is already taken in this database.");
     }
 
-    const handler = this.typeRegistry.getHandler(createPropertyDto.type);
+    const handler = this.typeRegistry.getConfigHandler(createPropertyDto.type);
     const defaultConfig = handler.getDefaultConfig();
     const mergedConfig = createPropertyDto.config
       ? {
@@ -69,6 +69,8 @@ export class PropertyService {
           position: createPropertyDto.position,
           icon: createPropertyDto.icon,
           color: createPropertyDto.color,
+          hint: createPropertyDto.hint,
+          group: createPropertyDto.group,
           isRequired: createPropertyDto.isRequired ?? false,
           isPrimary: createPropertyDto.isPrimary ?? false,
           databaseId,
@@ -103,7 +105,7 @@ export class PropertyService {
       propertyId: property.id,
       databaseId,
     });
-    return new PropertyResponseDto(property);
+    return new PropertyResponseDto({ ...property, type: property.type as PropertyType });
   }
 
   async findAll(databaseId: string, userId: string): Promise<PropertyResponseDto[]> {
@@ -121,7 +123,7 @@ export class PropertyService {
         position: "asc",
       },
     });
-    return properties.map((property) => new PropertyResponseDto(property));
+    return properties.map((property) => new PropertyResponseDto({ ...property, type: property.type as PropertyType }));
   }
 
   async findOne(id: string, userId: string): Promise<PropertyResponseDto> {
@@ -142,7 +144,7 @@ export class PropertyService {
       throw new NotFoundException(`Property with id ${id} not found`);
     }
 
-    return new PropertyResponseDto(property);
+    return new PropertyResponseDto({ ...property, type: property.type as PropertyType });
   }
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto, userId: string): Promise<PropertyResponseDto> {
@@ -184,13 +186,13 @@ export class PropertyService {
     let configToSave = existingProperty.config as Record<string, unknown> | undefined;
 
     if (updatePropertyDto.type && updatePropertyDto.type !== existingProperty.type) {
-      const handler = this.typeRegistry.getHandler(updatePropertyDto.type);
+      const handler = this.typeRegistry.getConfigHandler(updatePropertyDto.type);
       configToSave = handler.getDefaultConfig();
     }
 
     if (updatePropertyDto.config) {
       const effectiveType = updatePropertyDto.type ?? (existingProperty.type as PropertyType);
-      const handler = this.typeRegistry.getHandler(effectiveType);
+      const handler = this.typeRegistry.getConfigHandler(effectiveType);
       const merged = {
         ...configToSave,
         ...updatePropertyDto.config,
@@ -205,21 +207,21 @@ export class PropertyService {
     const property = await prisma.property.update({
       where: { id },
       data: {
-        name: updatePropertyDto.name,
-        type: updatePropertyDto.type,
-        position: updatePropertyDto.position,
-        icon: updatePropertyDto.icon,
-        color: updatePropertyDto.color,
-        isRequired: updatePropertyDto.isRequired,
-        isPrimary: updatePropertyDto.isPrimary,
-        ...(configToSave !== undefined && {
-          config: configToSave as Prisma.JsonValue,
-        }),
+        ...(updatePropertyDto.name !== undefined && { name: updatePropertyDto.name }),
+        ...(updatePropertyDto.type !== undefined && { type: updatePropertyDto.type }),
+        ...(updatePropertyDto.position !== undefined && { position: updatePropertyDto.position }),
+        ...(updatePropertyDto.icon !== undefined && { icon: updatePropertyDto.icon }),
+        ...(updatePropertyDto.color !== undefined && { color: updatePropertyDto.color }),
+        ...(updatePropertyDto.hint !== undefined && { hint: updatePropertyDto.hint }),
+        ...(updatePropertyDto.group !== undefined && { group: updatePropertyDto.group }),
+        ...(updatePropertyDto.isRequired !== undefined && { isRequired: updatePropertyDto.isRequired }),
+        ...(updatePropertyDto.isPrimary !== undefined && { isPrimary: updatePropertyDto.isPrimary }),
+        ...(configToSave !== undefined && { config: configToSave as Prisma.JsonValue }),
       },
     });
 
     this.logger.log("Property updated", { id });
-    return new PropertyResponseDto(property);
+    return new PropertyResponseDto({ ...property, type: property.type as PropertyType });
   }
 
   async remove(id: string, userId: string): Promise<PropertyResponseDto> {
@@ -245,6 +247,6 @@ export class PropertyService {
     });
 
     this.logger.log("Property removed", { id });
-    return new PropertyResponseDto(property);
+    return new PropertyResponseDto({ ...property, type: property.type as PropertyType });
   }
 }

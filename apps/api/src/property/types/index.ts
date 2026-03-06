@@ -1,11 +1,11 @@
-export type { PropertyTypeHandler } from "./handler.interface";
-export { PROPERTY_TYPE_HANDLERS } from "./property-type.tokens";
-export { PropertyTypeRegistry } from "./property-type.registry";
-export { TextHandler } from "./text/text.handler";
-export { NumberHandler } from "./number/number.handler";
 export { CheckboxHandler } from "./checkbox/checkbox.handler";
 export { DateHandler } from "./date/date.handler";
+export { FormulaHandler } from "./formula/formula.handler";
+export type { PropertyConfigHandler, PropertyValueHandler } from "./handler.interface";
+export { NumberHandler } from "./number/number.handler";
+export { PropertyTypeRegistry } from "./property-type.registry";
+export { PROPERTY_TYPE_HANDLERS } from "./property-type.tokens";
+export { RelationHandler } from "./relation/relation.handler";
 export { SelectHandler } from "./select/select.handler";
 export { StatusHandler } from "./status/status.handler";
-export { RelationHandler } from "./relation/relation.handler";
-export { FormulaHandler } from "./formula/formula.handler";
+export { TextHandler } from "./text/text.handler";
