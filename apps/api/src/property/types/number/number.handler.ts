@@ -1,10 +1,20 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_NUMBER_PROPERTY, NUMBER_FORMAT_VALUES, NumberFormat, PropertyType } from "@nucleus/domain";
-import { PropertyTypeHandler } from "../handler.interface";
+import {
+  DEFAULT_NUMBER_PROPERTY,
+  NUMBER_FORMAT_VALUES,
+  NumberFormat,
+  NumberProperty,
+  PropertyType,
+} from "@nucleus/domain";
+import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
-export class NumberHandler implements PropertyTypeHandler {
+export class NumberHandler implements PropertyConfigHandler, PropertyValueHandler {
   readonly type = PropertyType.NUMBER;
+
+  private parseConfig(config: Record<string, unknown>): NumberProperty {
+    return config as unknown as NumberProperty;
+  }
 
   getDefaultConfig(): Record<string, unknown> {
     return {
@@ -43,7 +53,8 @@ export class NumberHandler implements PropertyTypeHandler {
       return ["Number value must be a number or null"];
     }
 
-    if ((config.format as NumberFormat | undefined) === "integer" && !Number.isInteger(value)) {
+    const { format } = this.parseConfig(config);
+    if ((format as NumberFormat | undefined) === "integer" && !Number.isInteger(value)) {
       return ["Value must be an integer for integer format"];
     }
 
@@ -56,8 +67,7 @@ export class NumberHandler implements PropertyTypeHandler {
     const num = Number(value);
     if (Number.isNaN(num)) return 0;
 
-    const format = config.format as NumberFormat | undefined;
-    const decimalPlaces = config.decimalPlaces as number | undefined;
+    const { format, decimalPlaces } = this.parseConfig(config);
 
     if (format === "integer") return Math.round(num);
     if (decimalPlaces !== undefined) return parseFloat(num.toFixed(decimalPlaces));
@@ -66,6 +76,6 @@ export class NumberHandler implements PropertyTypeHandler {
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (config.defaultValue as number | undefined) ?? 0;
+    return this.parseConfig(config).defaultValue ?? 0;
   }
 }

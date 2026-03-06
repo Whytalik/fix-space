@@ -7,10 +7,10 @@ import {
   TIME_FORMATS_VALUES,
   TimeFormat,
 } from "@nucleus/domain";
-import { PropertyTypeHandler } from "../handler.interface";
+import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
-export class DateHandler implements PropertyTypeHandler {
+export class DateHandler implements PropertyConfigHandler, PropertyValueHandler {
   readonly type = PropertyType.DATE;
 
   getDefaultConfig(): Record<string, unknown> {
