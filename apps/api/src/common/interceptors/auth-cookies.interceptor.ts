@@ -1,5 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { Response } from "express";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import {
@@ -19,43 +20,41 @@ export interface AuthCookieData {
 export class AuthCookiesInterceptor implements NestInterceptor {
   constructor(private readonly configService: ConfigService) {}
 
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     return next.handle().pipe(
-      map((data) => {
-        const response = context.switchToHttp().getResponse();
+      map((data: unknown) => {
+        const cookieData = (data ?? {}) as AuthCookieData & Record<string, unknown>;
+        const response = context.switchToHttp().getResponse<Response>();
         const cookieOptions = {
           domain: this.configService.get("COOKIE_DOMAIN", "localhost"),
           secure: this.configService.get("NODE_ENV") === "production",
         };
 
-        // Clear cookies if requested
-        if (data?.clearCookies) {
+        if (cookieData.clearCookies) {
           clearAuthCookies(response, cookieOptions);
         }
 
-        // Set access token cookie
-        if (data?.accessToken) {
+        if (cookieData.accessToken) {
           setAccessTokenCookie(
             response,
-            data.accessToken,
+            cookieData.accessToken,
             parseDurationToMs(this.configService.get("JWT_ACCESS_EXPIRATION", "15m")),
             cookieOptions,
           );
         }
 
-        // Set refresh token cookie
-        if (data?.refreshToken) {
+        if (cookieData.refreshToken) {
           setRefreshTokenCookie(
             response,
-            data.refreshToken,
+            cookieData.refreshToken,
             parseDurationToMs(this.configService.get("JWT_REFRESH_EXPIRATION", "7d")),
             cookieOptions,
           );
         }
 
-        // Return response with accessToken in body for API clients (e.g. Postman)
-        // refreshToken stays cookie-only (httpOnly)
-        const { refreshToken, clearCookies, ...rest } = data || {};
+        const rest: Record<string, unknown> = { ...cookieData };
+        delete rest["refreshToken"];
+        delete rest["clearCookies"];
         return rest;
       }),
     );
