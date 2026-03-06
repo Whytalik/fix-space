@@ -1,10 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_SELECT_PROPERTY, SelectCategory, PropertyType } from "@nucleus/domain";
-import { PropertyTypeHandler } from "../handler.interface";
+import { DEFAULT_SELECT_PROPERTY, SelectCategory, SelectProperty, PropertyType } from "@nucleus/domain";
+import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
-export class SelectHandler implements PropertyTypeHandler {
+export class SelectHandler implements PropertyConfigHandler, PropertyValueHandler {
   readonly type = PropertyType.SELECT;
+
+  private parseConfig(config: Record<string, unknown>): SelectProperty {
+    return config as unknown as SelectProperty;
+  }
 
   getDefaultConfig(): Record<string, unknown> {
     return { ...DEFAULT_SELECT_PROPERTY };
@@ -41,8 +45,7 @@ export class SelectHandler implements PropertyTypeHandler {
   validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
     if (value === null) return null;
 
-    const categories = config.categories as SelectCategory[] | undefined;
-    const isMulti = config.isMultiSelect as boolean | undefined;
+    const { categories, isMultiSelect: isMulti } = this.parseConfig(config);
 
     const allOptions = categories ? categories.flatMap((c) => c.options) : [];
 
@@ -78,12 +81,12 @@ export class SelectHandler implements PropertyTypeHandler {
 
   formatValue(value: unknown, config: Record<string, unknown>): unknown {
     if (value === null || value === undefined) {
-      return (config.isMultiSelect as boolean | undefined) ? [] : null;
+      return this.parseConfig(config).isMultiSelect ? [] : null;
     }
     return value;
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (config.isMultiSelect as boolean | undefined) ? [] : null;
+    return this.parseConfig(config).isMultiSelect ? [] : null;
   }
 }
