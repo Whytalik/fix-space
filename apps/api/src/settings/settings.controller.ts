@@ -15,7 +15,7 @@ export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @Get("space")
-  async getSpaceSettings(
+  getSpaceSettings(
     @CurrentUser("userId")
     userId: string,
   ) {
@@ -23,7 +23,7 @@ export class SettingsController {
   }
 
   @Patch("space")
-  async updateSpaceSettings(
+  updateSpaceSettings(
     @CurrentUser("userId")
     userId: string,
     @Body()
@@ -33,7 +33,7 @@ export class SettingsController {
   }
 
   @Get("database")
-  async getDatabaseSettings(
+  getDatabaseSettings(
     @CurrentUser("userId")
     userId: string,
   ) {
@@ -41,7 +41,7 @@ export class SettingsController {
   }
 
   @Patch("database")
-  async updateDatabaseSettings(
+  updateDatabaseSettings(
     @CurrentUser("userId")
     userId: string,
     @Body()
@@ -51,7 +51,7 @@ export class SettingsController {
   }
 
   @Get("section")
-  async getSectionSettings(
+  getSectionSettings(
     @CurrentUser("userId")
     userId: string,
   ) {
@@ -59,7 +59,7 @@ export class SettingsController {
   }
 
   @Patch("section")
-  async updateSectionSettings(
+  updateSectionSettings(
     @CurrentUser("userId")
     userId: string,
     @Body()
