@@ -10,18 +10,19 @@ import { PropertyValueService } from "../property-value.service";
 jest.mock("@nucleus/database", () => ({
   prisma: {
     record: {
-      findFirst: jest.fn(),
+      findFirst: jest.fn<any>(),
     },
     property: {
-      findUnique: jest.fn(),
+      findUnique: jest.fn<any>(),
     },
     propertyValue: {
-      findUnique: jest.fn(),
-      findFirst: jest.fn(),
-      findMany: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+      findUnique: jest.fn<any>(),
+      findFirst: jest.fn<any>(),
+      findMany: jest.fn<any>(),
+      create: jest.fn<any>(),
+      upsert: jest.fn<any>(),
+      update: jest.fn<any>(),
+      delete: jest.fn<any>(),
     },
   },
 }));
@@ -30,27 +31,28 @@ describe("PropertyValueService", () => {
   let service: PropertyValueService;
 
   const mockLogger = {
-    setContext: jest.fn(),
-    debug: jest.fn(),
-    log: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    setContext: jest.fn<any>(),
+    debug: jest.fn<any>(),
+    log: jest.fn<any>(),
+    warn: jest.fn<any>(),
+    error: jest.fn<any>(),
   };
 
   const mockHandler = {
     type: PropertyType.TEXT,
-    getDefaultConfig: jest.fn().mockReturnValue({
+    getDefaultConfig: jest.fn<any>().mockReturnValue({
       defaultValue: "",
       isRichText: false,
     }),
-    validateConfig: jest.fn().mockReturnValue(null),
-    validateValue: jest.fn().mockReturnValue(null),
+    validateConfig: jest.fn<any>().mockReturnValue(null),
+    validateValue: jest.fn<any>().mockReturnValue(null),
     formatValue: jest.fn((v: unknown) => v),
-    getDefaultValue: jest.fn().mockReturnValue(""),
+    getDefaultValue: jest.fn<any>().mockReturnValue(""),
   };
 
   const mockTypeRegistry = {
-    getHandler: jest.fn().mockReturnValue(mockHandler),
+    getConfigHandler: jest.fn<any>().mockReturnValue(mockHandler),
+    getValueHandler: jest.fn<any>().mockReturnValue(mockHandler),
   };
 
   const mockRecord = {
@@ -104,15 +106,15 @@ describe("PropertyValueService", () => {
   });
 
   describe("create", () => {
-    it("should create a property value and return PropertyValueResponseDto", async () => {
-      (prisma.record.findFirst as jest.Mock).mockResolvedValue(mockRecord);
-      (prisma.property.findUnique as jest.Mock).mockResolvedValue(mockProperty);
-      (prisma.propertyValue.findUnique as jest.Mock).mockResolvedValue(null);
-      (prisma.propertyValue.create as jest.Mock).mockResolvedValue(mockPropertyValue);
+    it("should upsert a property value and return PropertyValueResponseDto", async () => {
+      (prisma.record.findFirst as jest.Mock<any>).mockResolvedValue(mockRecord);
+      (prisma.property.findUnique as jest.Mock<any>).mockResolvedValue(mockProperty);
+      (prisma.propertyValue.upsert as jest.Mock<any>).mockResolvedValue(mockPropertyValue);
 
       const result = await service.create(
         "record-123",
         {
+          recordId: "record-123",
           propertyId: "prop-123",
           value: "Hello",
         },
@@ -136,18 +138,20 @@ describe("PropertyValueService", () => {
           id: "prop-123",
         },
       });
-      expect(prisma.propertyValue.findUnique).toHaveBeenCalledWith({
+      expect(mockHandler.validateValue).toHaveBeenCalledWith("Hello", mockProperty.config);
+      expect(mockHandler.formatValue).toHaveBeenCalledWith("Hello", mockProperty.config);
+      expect(prisma.propertyValue.upsert).toHaveBeenCalledWith({
         where: {
           recordId_propertyId: {
             recordId: "record-123",
             propertyId: "prop-123",
           },
         },
-      });
-      expect(mockHandler.validateValue).toHaveBeenCalledWith("Hello", mockProperty.config);
-      expect(mockHandler.formatValue).toHaveBeenCalledWith("Hello", mockProperty.config);
-      expect(prisma.propertyValue.create).toHaveBeenCalledWith({
-        data: {
+        update: {
+          value: "Hello",
+          computed: false,
+        },
+        create: {
           recordId: "record-123",
           propertyId: "prop-123",
           value: "Hello",
@@ -160,11 +164,33 @@ describe("PropertyValueService", () => {
       });
     });
 
+    it("should update existing pre-seeded null row when property value already exists", async () => {
+      (prisma.record.findFirst as jest.Mock<any>).mockResolvedValue(mockRecord);
+      (prisma.property.findUnique as jest.Mock<any>).mockResolvedValue(mockProperty);
+      (prisma.propertyValue.upsert as jest.Mock<any>).mockResolvedValue({ ...mockPropertyValue, value: "New" });
+
+      const result = await service.create(
+        "record-123",
+        {
+          recordId: "record-123",
+          propertyId: "prop-123",
+          value: "New",
+        },
+        "user-123",
+      );
+
+      expect(result.value).toBe("New");
+      expect(prisma.propertyValue.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          update: expect.objectContaining({ value: "New" }),
+        }),
+      );
+    });
+
     it("should use handler.getDefaultValue when dto.value is undefined", async () => {
-      (prisma.record.findFirst as jest.Mock).mockResolvedValue(mockRecord);
-      (prisma.property.findUnique as jest.Mock).mockResolvedValue(mockProperty);
-      (prisma.propertyValue.findUnique as jest.Mock).mockResolvedValue(null);
-      (prisma.propertyValue.create as jest.Mock).mockResolvedValue({
+      (prisma.record.findFirst as jest.Mock<any>).mockResolvedValue(mockRecord);
+      (prisma.property.findUnique as jest.Mock<any>).mockResolvedValue(mockProperty);
+      (prisma.propertyValue.upsert as jest.Mock<any>).mockResolvedValue({
         ...mockPropertyValue,
         value: "",
       });
@@ -172,6 +198,7 @@ describe("PropertyValueService", () => {
       await service.create(
         "record-123",
         {
+          recordId: "record-123",
           propertyId: "prop-123",
         },
         "user-123",
@@ -182,12 +209,13 @@ describe("PropertyValueService", () => {
     });
 
     it("should throw NotFoundException when record not found", async () => {
-      (prisma.record.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.record.findFirst as jest.Mock<any>).mockResolvedValue(null);
 
       await expect(
         service.create(
           "record-nonexistent",
           {
+            recordId: "record-nonexistent",
             propertyId: "prop-123",
           },
           "user-123",
@@ -197,6 +225,7 @@ describe("PropertyValueService", () => {
         service.create(
           "record-nonexistent",
           {
+            recordId: "record-nonexistent",
             propertyId: "prop-123",
           },
           "user-123",
@@ -205,13 +234,14 @@ describe("PropertyValueService", () => {
     });
 
     it("should throw NotFoundException when property not found", async () => {
-      (prisma.record.findFirst as jest.Mock).mockResolvedValue(mockRecord);
-      (prisma.property.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.record.findFirst as jest.Mock<any>).mockResolvedValue(mockRecord);
+      (prisma.property.findUnique as jest.Mock<any>).mockResolvedValue(null);
 
       await expect(
         service.create(
           "record-123",
           {
+            recordId: "record-123",
             propertyId: "prop-nonexistent",
           },
           "user-123",
@@ -221,6 +251,7 @@ describe("PropertyValueService", () => {
         service.create(
           "record-123",
           {
+            recordId: "record-123",
             propertyId: "prop-nonexistent",
           },
           "user-123",
@@ -233,13 +264,14 @@ describe("PropertyValueService", () => {
         ...mockProperty,
         databaseId: "db-other",
       };
-      (prisma.record.findFirst as jest.Mock).mockResolvedValue(mockRecord);
-      (prisma.property.findUnique as jest.Mock).mockResolvedValue(propertyOtherDb);
+      (prisma.record.findFirst as jest.Mock<any>).mockResolvedValue(mockRecord);
+      (prisma.property.findUnique as jest.Mock<any>).mockResolvedValue(propertyOtherDb);
 
       await expect(
         service.create(
           "record-123",
           {
+            recordId: "record-123",
             propertyId: "prop-123",
           },
           "user-123",
@@ -249,6 +281,7 @@ describe("PropertyValueService", () => {
         service.create(
           "record-123",
           {
+            recordId: "record-123",
             propertyId: "prop-123",
           },
           "user-123",
@@ -256,35 +289,9 @@ describe("PropertyValueService", () => {
       ).rejects.toThrow("Property does not belong to the same database as the record");
     });
 
-    it("should throw ConflictException when property value already exists", async () => {
-      (prisma.record.findFirst as jest.Mock).mockResolvedValue(mockRecord);
-      (prisma.property.findUnique as jest.Mock).mockResolvedValue(mockProperty);
-      (prisma.propertyValue.findUnique as jest.Mock).mockResolvedValue(mockPropertyValue);
-
-      await expect(
-        service.create(
-          "record-123",
-          {
-            propertyId: "prop-123",
-          },
-          "user-123",
-        ),
-      ).rejects.toThrow(ConflictException);
-      await expect(
-        service.create(
-          "record-123",
-          {
-            propertyId: "prop-123",
-          },
-          "user-123",
-        ),
-      ).rejects.toThrow("A value for this property already exists on this record");
-    });
-
     it("should throw BadRequestException when value validation fails", async () => {
-      (prisma.record.findFirst as jest.Mock).mockResolvedValue(mockRecord);
-      (prisma.property.findUnique as jest.Mock).mockResolvedValue(mockProperty);
-      (prisma.propertyValue.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.record.findFirst as jest.Mock<any>).mockResolvedValue(mockRecord);
+      (prisma.property.findUnique as jest.Mock<any>).mockResolvedValue(mockProperty);
       mockHandler.validateValue
         .mockReturnValueOnce(["Text value must be a string or null"])
         .mockReturnValueOnce(["Text value must be a string or null"]);
@@ -293,6 +300,7 @@ describe("PropertyValueService", () => {
         service.create(
           "record-123",
           {
+            recordId: "record-123",
             propertyId: "prop-123",
             value: 123,
           },
@@ -303,6 +311,7 @@ describe("PropertyValueService", () => {
         service.create(
           "record-123",
           {
+            recordId: "record-123",
             propertyId: "prop-123",
             value: 123,
           },
@@ -322,7 +331,7 @@ describe("PropertyValueService", () => {
           value: "World",
         },
       ];
-      (prisma.propertyValue.findMany as jest.Mock).mockResolvedValue(values);
+      (prisma.propertyValue.findMany as jest.Mock<any>).mockResolvedValue(values);
 
       const result = await service.findAll("record-123", "user-123");
 
@@ -347,7 +356,7 @@ describe("PropertyValueService", () => {
     });
 
     it("should return empty array when no property values", async () => {
-      (prisma.propertyValue.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.propertyValue.findMany as jest.Mock<any>).mockResolvedValue([]);
 
       const result = await service.findAll("record-123", "user-123");
 
@@ -357,7 +366,7 @@ describe("PropertyValueService", () => {
 
   describe("findOne", () => {
     it("should return PropertyValueResponseDto for valid id", async () => {
-      (prisma.propertyValue.findFirst as jest.Mock).mockResolvedValue(mockPropertyValueWithProperty);
+      (prisma.propertyValue.findFirst as jest.Mock<any>).mockResolvedValue(mockPropertyValueWithProperty);
 
       const result = await service.findOne("pv-123", "user-123");
 
@@ -381,7 +390,7 @@ describe("PropertyValueService", () => {
     });
 
     it("should throw NotFoundException when property value not found", async () => {
-      (prisma.propertyValue.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.propertyValue.findFirst as jest.Mock<any>).mockResolvedValue(null);
 
       await expect(service.findOne("nonexistent", "user-123")).rejects.toThrow(NotFoundException);
       await expect(service.findOne("nonexistent", "user-123")).rejects.toThrow(
@@ -396,8 +405,8 @@ describe("PropertyValueService", () => {
         ...mockPropertyValue,
         value: "Updated",
       };
-      (prisma.propertyValue.findFirst as jest.Mock).mockResolvedValue(mockPropertyValueWithProperty);
-      (prisma.propertyValue.update as jest.Mock).mockResolvedValue(updatedValue);
+      (prisma.propertyValue.findFirst as jest.Mock<any>).mockResolvedValue(mockPropertyValueWithProperty);
+      (prisma.propertyValue.update as jest.Mock<any>).mockResolvedValue(updatedValue);
 
       const result = await service.update(
         "pv-123",
@@ -437,8 +446,8 @@ describe("PropertyValueService", () => {
     });
 
     it("should update only computed flag without value validation when value is undefined", async () => {
-      (prisma.propertyValue.findFirst as jest.Mock).mockResolvedValue(mockPropertyValueWithProperty);
-      (prisma.propertyValue.update as jest.Mock).mockResolvedValue({
+      (prisma.propertyValue.findFirst as jest.Mock<any>).mockResolvedValue(mockPropertyValueWithProperty);
+      (prisma.propertyValue.update as jest.Mock<any>).mockResolvedValue({
         ...mockPropertyValue,
         computed: true,
       });
@@ -457,8 +466,20 @@ describe("PropertyValueService", () => {
       });
     });
 
+    it("should not include computed in Prisma data when not provided in DTO", async () => {
+      (prisma.propertyValue.findFirst as jest.Mock<any>).mockResolvedValue(mockPropertyValueWithProperty);
+      (prisma.propertyValue.update as jest.Mock<any>).mockResolvedValue({ ...mockPropertyValue, value: "Updated" });
+
+      await service.update("pv-123", { value: "Updated" }, "user-123");
+
+      const updateCall = (prisma.propertyValue.update as jest.Mock<any>).mock.calls[0][0] as {
+        data: Record<string, unknown>;
+      };
+      expect(updateCall.data).not.toHaveProperty("computed");
+    });
+
     it("should throw NotFoundException when property value not found", async () => {
-      (prisma.propertyValue.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.propertyValue.findFirst as jest.Mock<any>).mockResolvedValue(null);
 
       await expect(
         service.update(
@@ -481,7 +502,7 @@ describe("PropertyValueService", () => {
     });
 
     it("should throw BadRequestException when updated value is invalid", async () => {
-      (prisma.propertyValue.findFirst as jest.Mock).mockResolvedValue(mockPropertyValueWithProperty);
+      (prisma.propertyValue.findFirst as jest.Mock<any>).mockResolvedValue(mockPropertyValueWithProperty);
       mockHandler.validateValue
         .mockReturnValueOnce(["Text value must be a string or null"])
         .mockReturnValueOnce(["Text value must be a string or null"]);
@@ -495,8 +516,8 @@ describe("PropertyValueService", () => {
 
   describe("remove", () => {
     it("should delete property value and return PropertyValueResponseDto", async () => {
-      (prisma.propertyValue.findFirst as jest.Mock).mockResolvedValue(mockPropertyValue);
-      (prisma.propertyValue.delete as jest.Mock).mockResolvedValue(mockPropertyValue);
+      (prisma.propertyValue.findFirst as jest.Mock<any>).mockResolvedValue(mockPropertyValue);
+      (prisma.propertyValue.delete as jest.Mock<any>).mockResolvedValue(mockPropertyValue);
 
       const result = await service.remove("pv-123", "user-123");
 
@@ -522,7 +543,7 @@ describe("PropertyValueService", () => {
     });
 
     it("should throw NotFoundException when property value not found", async () => {
-      (prisma.propertyValue.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.propertyValue.findFirst as jest.Mock<any>).mockResolvedValue(null);
 
       await expect(service.remove("nonexistent", "user-123")).rejects.toThrow(NotFoundException);
       await expect(service.remove("nonexistent", "user-123")).rejects.toThrow(
