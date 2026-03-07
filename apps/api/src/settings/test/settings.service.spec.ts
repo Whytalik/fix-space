@@ -1,17 +1,26 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { Test, TestingModule } from "@nestjs/testing";
 import { prisma } from "@nucleus/database";
+import { AppLogger } from "../../common/logger/app-logger.service";
 import { SettingsService } from "../settings.service";
 
 jest.mock("@nucleus/database", () => ({
   prisma: {
     settings: {
-      findMany: jest.fn(),
-      deleteMany: jest.fn(),
-      upsert: jest.fn(),
+      findMany: jest.fn<any>(),
+      deleteMany: jest.fn<any>(),
+      upsert: jest.fn<any>(),
     },
   },
 }));
+
+const mockLogger = {
+  setContext: jest.fn<any>(),
+  debug: jest.fn<any>(),
+  log: jest.fn<any>(),
+  warn: jest.fn<any>(),
+  error: jest.fn<any>(),
+};
 
 describe("SettingsService", () => {
   let service: SettingsService;
@@ -26,7 +35,7 @@ describe("SettingsService", () => {
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SettingsService],
+      providers: [SettingsService, { provide: AppLogger, useValue: mockLogger }],
     }).compile();
 
     service = module.get<SettingsService>(SettingsService);
@@ -34,7 +43,7 @@ describe("SettingsService", () => {
 
   describe("getSettings", () => {
     it("should return defaults when no settings exist in database", async () => {
-      (prisma.settings.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.settings.findMany as jest.Mock<any>).mockResolvedValue([]);
 
       const result = await service.getSettings("user-123", "space", defaultValues);
 
@@ -48,7 +57,7 @@ describe("SettingsService", () => {
     });
 
     it("should override defaults with values from database", async () => {
-      (prisma.settings.findMany as jest.Mock).mockResolvedValue([
+      (prisma.settings.findMany as jest.Mock<any>).mockResolvedValue([
         {
           key: "theme",
           value: "dark",
@@ -69,7 +78,7 @@ describe("SettingsService", () => {
     });
 
     it("should ignore unknown keys from database", async () => {
-      (prisma.settings.findMany as jest.Mock).mockResolvedValue([
+      (prisma.settings.findMany as jest.Mock<any>).mockResolvedValue([
         {
           key: "unknownKey",
           value: "some-value",
@@ -91,7 +100,7 @@ describe("SettingsService", () => {
     });
 
     it("should return partial override when only some keys differ", async () => {
-      (prisma.settings.findMany as jest.Mock).mockResolvedValue([
+      (prisma.settings.findMany as jest.Mock<any>).mockResolvedValue([
         {
           key: "sidebarWidth",
           value: 320,
@@ -108,8 +117,8 @@ describe("SettingsService", () => {
 
   describe("updateSettings", () => {
     it("should upsert values that differ from defaults", async () => {
-      (prisma.settings.upsert as jest.Mock).mockResolvedValue({});
-      (prisma.settings.findMany as jest.Mock).mockResolvedValue([
+      (prisma.settings.upsert as jest.Mock<any>).mockResolvedValue({});
+      (prisma.settings.findMany as jest.Mock<any>).mockResolvedValue([
         {
           key: "theme",
           value: "dark",
@@ -139,10 +148,10 @@ describe("SettingsService", () => {
     });
 
     it("should delete settings when value equals default", async () => {
-      (prisma.settings.deleteMany as jest.Mock).mockResolvedValue({
+      (prisma.settings.deleteMany as jest.Mock<any>).mockResolvedValue({
         count: 1,
       });
-      (prisma.settings.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.settings.findMany as jest.Mock<any>).mockResolvedValue([]);
 
       await service.updateSettings("user-123", "space", { theme: "light" }, defaultValues);
 
@@ -157,11 +166,11 @@ describe("SettingsService", () => {
     });
 
     it("should handle mixed updates: upsert non-defaults and delete defaults", async () => {
-      (prisma.settings.upsert as jest.Mock).mockResolvedValue({});
-      (prisma.settings.deleteMany as jest.Mock).mockResolvedValue({
+      (prisma.settings.upsert as jest.Mock<any>).mockResolvedValue({});
+      (prisma.settings.deleteMany as jest.Mock<any>).mockResolvedValue({
         count: 0,
       });
-      (prisma.settings.findMany as jest.Mock).mockResolvedValue([
+      (prisma.settings.findMany as jest.Mock<any>).mockResolvedValue([
         {
           key: "sidebarCollapsed",
           value: true,
@@ -200,8 +209,8 @@ describe("SettingsService", () => {
     });
 
     it("should return merged settings after update", async () => {
-      (prisma.settings.upsert as jest.Mock).mockResolvedValue({});
-      (prisma.settings.findMany as jest.Mock).mockResolvedValue([
+      (prisma.settings.upsert as jest.Mock<any>).mockResolvedValue({});
+      (prisma.settings.findMany as jest.Mock<any>).mockResolvedValue([
         {
           key: "sidebarWidth",
           value: 400,
