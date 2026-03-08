@@ -1,43 +1,129 @@
 "use client";
 
+import "reflect-metadata";
+import { useDatabaseMutations } from "@/hooks/useDatabaseMutations";
+import { useSectionMutations } from "@/hooks/useSectionMutations";
+import { useSpaceMutations } from "@/hooks/useSpaceMutations";
 import { ApiError } from "@/lib/api/client";
 import { getSpaces } from "@/lib/api/space";
 import { getMe } from "@/lib/api/user";
 import { clearCached, getCached, setCached } from "@/lib/cache";
-import type { DatabaseResponseDto, SpaceResponseDto, UserResponseDto } from "@nucleus/domain";
-import { createContext, useContext, useEffect, useState } from "react";
+import { storage } from "@/lib/storage";
+import type { SpaceAction, SpaceState } from "@/types/space";
+import { CACHE_KEY_SPACES, CACHE_KEY_USER } from "@/utils/constants";
+import type { DatabaseResponseDto, SectionResponseDto, SpaceResponseDto, UserResponseDto } from "@nucleus/domain";
+import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
 
-const CACHE_KEY_USER = "me";
-const CACHE_KEY_SPACES = "spaces";
+function spaceReducer(state: SpaceState, action: SpaceAction): SpaceState {
+  switch (action.type) {
+    case "INITIALIZE":
+      return { spaces: action.spaces, currentSpaceId: action.currentSpaceId };
+    case "SET_CURRENT":
+      return { ...state, currentSpaceId: action.spaceId };
+    case "ADD":
+      return { spaces: [...state.spaces, action.space], currentSpaceId: action.space.id };
+    case "REMOVE": {
+      const spaces = state.spaces.filter((s) => s.id !== action.spaceId);
+      const currentSpaceId = state.currentSpaceId === action.spaceId ? action.fallbackId : state.currentSpaceId;
+      return { spaces, currentSpaceId };
+    }
+    case "UPDATE_IN_LIST":
+      return { ...state, spaces: state.spaces.map((s) => (s.id === action.space.id ? action.space : s)) };
+    case "PATCH":
+      return { ...state, spaces: state.spaces.map((s) => action.fn(s)) };
+    case "RESET":
+      return { spaces: [], currentSpaceId: null };
+  }
+}
 
 interface AppContextValue {
   user: UserResponseDto | null;
   space: SpaceResponseDto | null;
   spaces: SpaceResponseDto[];
+  databases: DatabaseResponseDto[];
   setSpace: (space: SpaceResponseDto) => void;
+  addSpace: (space: SpaceResponseDto) => void;
+  removeSpace: (spaceId: string) => void;
+  updateSpaceInList: (updated: SpaceResponseDto) => void;
   updateDatabaseInSpace: (updated: DatabaseResponseDto) => void;
+  reorderSections: (reordered: SectionResponseDto[]) => void;
+  reorderDatabasesInSection: (sectionId: string | null, reordered: DatabaseResponseDto[]) => void;
+  moveDatabaseToSection: (dbId: string, targetSectionId: string | null) => void;
+  removeSectionFromSpace: (sectionId: string) => void;
+  renameSectionInSpace: (sectionId: string, name: string) => void;
+  removeDatabaseFromSpace: (databaseId: string) => string | null;
+  addDatabaseToSpace: (db: DatabaseResponseDto) => void;
+  updateUser: (updated: UserResponseDto) => void;
   clearSession: () => void;
   isLoading: boolean;
+  currentDatabaseId: string | null;
+  setCurrentDatabaseId: (id: string | null) => void;
+  currentRecordName: string | null;
+  setCurrentRecordName: (name: string | null) => void;
 }
 
 const AppContext = createContext<AppContextValue>({
   user: null,
   space: null,
   spaces: [],
+  databases: [],
   setSpace: () => {},
+  addSpace: () => {},
+  removeSpace: () => {},
+  updateSpaceInList: () => {},
   updateDatabaseInSpace: () => {},
+  reorderSections: () => {},
+  reorderDatabasesInSection: () => {},
+  moveDatabaseToSection: () => {},
+  removeSectionFromSpace: () => {},
+  renameSectionInSpace: () => {},
+  removeDatabaseFromSpace: () => null,
+  addDatabaseToSpace: () => {},
+  updateUser: () => {},
   clearSession: () => {},
   isLoading: true,
+  currentDatabaseId: null,
+  setCurrentDatabaseId: () => {},
+  currentRecordName: null,
+  setCurrentRecordName: () => {},
 });
+
+function resolveInitialSpaceId(list: SpaceResponseDto[]): string | null {
+  const lastId = storage.getLastSpaceId();
+  return (lastId && list.some((s) => s.id === lastId) ? lastId : null) ?? list[0]?.id ?? null;
+}
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserResponseDto | null>(null);
-  const [space, setSpace] = useState<SpaceResponseDto | null>(null);
-  const [spaces, setSpaces] = useState<SpaceResponseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentDatabaseId, setCurrentDatabaseId] = useState<string | null>(null);
+  const [currentRecordName, setCurrentRecordName] = useState<string | null>(null);
+  const [{ spaces, currentSpaceId }, dispatch] = useReducer(spaceReducer, {
+    spaces: [],
+    currentSpaceId: null,
+  });
+
+  const space = useMemo(() => spaces.find((s) => s.id === currentSpaceId) ?? null, [spaces, currentSpaceId]);
+  const databases = useMemo(
+    () => [...(space?.databases ?? []), ...(space?.sections ?? []).flatMap((s) => s.databases ?? [])],
+    [space],
+  );
+
+  function applyPatch(fn: (s: SpaceResponseDto) => SpaceResponseDto) {
+    dispatch({ type: "PATCH", fn });
+  }
+
+  const { setSpace, addSpace, removeSpace, updateSpaceInList } = useSpaceMutations(dispatch, spaces, currentSpaceId);
+  const { updateDatabaseInSpace, reorderDatabasesInSection, moveDatabaseToSection, removeDatabaseFromSpace } =
+    useDatabaseMutations(applyPatch, space);
+  const { reorderSections, removeSectionFromSpace, renameSectionInSpace } = useSectionMutations(applyPatch);
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    if (spaces.length > 0) setCached(CACHE_KEY_SPACES, spaces);
+  }, [spaces]);
+
+  useEffect(() => {
+    const token = storage.getToken();
     if (!token) {
       setIsLoading(false);
       return;
@@ -48,8 +134,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (cachedUser && cachedSpaces) {
       setUser(cachedUser);
-      setSpaces(cachedSpaces);
-      setSpace(cachedSpaces[0] ?? null);
+      dispatch({ type: "INITIALIZE", spaces: cachedSpaces, currentSpaceId: resolveInitialSpaceId(cachedSpaces) });
       setIsLoading(false);
       return;
     }
@@ -57,16 +142,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     Promise.all([getMe(), getSpaces()])
       .then(([userData, fetchedSpaces]) => {
         setUser(userData);
-        setSpaces(fetchedSpaces);
-        setSpace(fetchedSpaces[0] ?? null);
-        localStorage.setItem("username", userData.username);
+        dispatch({ type: "INITIALIZE", spaces: fetchedSpaces, currentSpaceId: resolveInitialSpaceId(fetchedSpaces) });
+        storage.setUsername(userData.username);
         setCached(CACHE_KEY_USER, userData);
         setCached(CACHE_KEY_SPACES, fetchedSpaces);
       })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("username");
+          storage.clearAuth();
           clearCached(CACHE_KEY_USER, CACHE_KEY_SPACES);
           if (typeof window !== "undefined" && window.location.pathname !== "/login") {
             window.location.href = "/login";
@@ -76,27 +159,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  function updateDatabaseInSpace(updated: DatabaseResponseDto) {
-    const patch = (prev: SpaceResponseDto | null) => {
-      if (!prev) return prev;
-      const replaceDb = (db: DatabaseResponseDto) => (db.id === updated.id ? updated : db);
-      return {
-        ...prev,
-        databases: prev.databases?.map(replaceDb) ?? [],
-        sections: prev.sections?.map((s) => ({ ...s, databases: s.databases?.map(replaceDb) ?? [] })) ?? [],
-      };
-    };
-    setSpace((prev) => patch(prev));
-    setSpaces((prev) => prev.map((s) => patch(s) ?? s));
+  function addDatabaseToSpace(db: DatabaseResponseDto) {
+    applyPatch((s) => {
+      if (db.sectionId) {
+        return {
+          ...s,
+          sections: (s.sections ?? []).map((sec) =>
+            sec.id === db.sectionId ? { ...sec, databases: [...(sec.databases ?? []), db] } : sec,
+          ),
+        };
+      }
+      return { ...s, databases: [...(s.databases ?? []), db] };
+    });
+  }
+
+  function updateUser(updated: UserResponseDto) {
+    setUser(updated);
+    setCached(CACHE_KEY_USER, updated);
+    storage.setUsername(updated.username);
   }
 
   function clearSession() {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("username");
+    storage.clearAuth();
+    storage.clearLastSpaceId();
     clearCached(CACHE_KEY_USER, CACHE_KEY_SPACES);
     setUser(null);
-    setSpace(null);
-    setSpaces([]);
+    dispatch({ type: "RESET" });
   }
 
   return (
@@ -105,10 +193,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         user,
         space,
         spaces,
+        databases,
         setSpace,
+        addSpace,
+        removeSpace,
+        updateSpaceInList,
         updateDatabaseInSpace,
+        reorderSections,
+        reorderDatabasesInSection,
+        moveDatabaseToSection,
+        removeSectionFromSpace,
+        renameSectionInSpace,
+        removeDatabaseFromSpace,
+        addDatabaseToSpace,
+        updateUser,
         clearSession,
         isLoading,
+        currentDatabaseId,
+        setCurrentDatabaseId,
+        currentRecordName,
+        setCurrentRecordName,
       }}
     >
       {children}
