@@ -1,3 +1,4 @@
+import { storage } from "@/lib/storage";
 import { API_BASE_URL } from "@/utils/constants";
 
 export class ApiError extends Error {
@@ -34,7 +35,7 @@ async function tryRefreshToken(): Promise<string | null> {
       if (!res.ok) return null;
       const data = await res.json();
       const newToken = data.accessToken as string;
-      localStorage.setItem("access_token", newToken);
+      storage.setToken(newToken);
       return newToken;
     })
     .catch(() => null)
@@ -47,8 +48,7 @@ async function tryRefreshToken(): Promise<string | null> {
 
 function redirectToLogin() {
   if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("username");
+    storage.clearAuth();
     window.location.href = "/login";
   }
 }
@@ -56,7 +56,7 @@ function redirectToLogin() {
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const { method = "GET", body, headers = {} } = options;
 
-  const accessToken = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+  const accessToken = storage.getToken();
 
   const buildHeaders = (token: string | null): Record<string, string> => ({
     "Content-Type": "application/json",
@@ -103,4 +103,14 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
   }
 
   return data as T;
+}
+
+export function parseApiError(err: unknown): string {
+  if (err instanceof ApiError) return err.messages[0] ?? "Something went wrong. Please try again.";
+  return "Something went wrong. Please try again.";
+}
+
+export function parseApiErrors(err: unknown): string[] {
+  if (err instanceof ApiError) return err.messages;
+  return ["Something went wrong. Please try again."];
 }
