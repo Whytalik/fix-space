@@ -1,6 +1,9 @@
 import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
+import { Header } from "@/components/layout/header/header";
+import { SettingsShell } from "@/components/settings/settings-shell";
+import { ErrorModalShell } from "@/components/ui/primitives/error-modal-shell";
 import { AppProvider } from "@/context/app-context";
+import { UIProvider } from "@/context/ui-context";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
@@ -21,11 +24,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
-      <body className={`${GeistSans.className} min-h-screen flex flex-col`}>
+      <body className={`${GeistSans.className} h-screen flex flex-col`}>
         <AppProvider>
-          <Header />
-          <main className="flex flex-col flex-1">{children}</main>
-          <Footer />
+          <UIProvider>
+            <Header />
+            <main className="flex flex-col flex-1 min-h-0 overflow-y-auto scrollbar">{children}</main>
+            <Footer />
+            <SettingsShell />
+            <ErrorModalShell />
+          </UIProvider>
         </AppProvider>
       </body>
     </html>
