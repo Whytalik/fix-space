@@ -1,7 +1,12 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { prisma } from "@nucleus/database";
-import { REQUIRE_OWNERSHIP_KEY, RequireOwnershipOptions } from "../decorators/required-ownership.decoractor";
+import {
+  PRISMA_MODEL_NAMES,
+  PrismaModelKey,
+  REQUIRE_OWNERSHIP_KEY,
+  RequireOwnershipOptions,
+} from "../decorators/required-ownership.decorator";
 
 @Injectable()
 export class ResourceOwnerGuard implements CanActivate {
@@ -29,10 +34,11 @@ export class ResourceOwnerGuard implements CanActivate {
       throw new ForbiddenException(`Missing route param: ${paramName}`);
     }
 
-    const model = (prisma as any)[meta.model];
-    if (!model) {
-      throw new Error(`Prisma model "${meta.model}" not found`);
+    if (!PRISMA_MODEL_NAMES.has(meta.model)) {
+      throw new Error(`Prisma model "${meta.model}" is not a known model name`);
     }
+    type ModelDelegate = { findUnique: (args: unknown) => Promise<Record<string, unknown> | null> };
+    const model = (prisma as unknown as Record<PrismaModelKey, ModelDelegate>)[meta.model];
 
     const entity = await model.findUnique({
       where: { id: resourceId },
