@@ -43,24 +43,3 @@ export function LogoIcon({ size = 32, className }: LogoIconProps) {
     </svg>
   );
 }
-
-interface LogoProps {
-  size?: number;
-  className?: string;
-}
-
-export function Logo({ size = 28, className }: LogoProps) {
-  return (
-    <div className={`flex items-center gap-2 ${className ?? ""}`}>
-      <LogoIcon size={size} />
-      <span
-        className="font-extrabold tracking-[-0.04em] leading-none"
-        style={{
-          fontSize: size * 0.57,
-        }}
-      >
-        Nucleus
-      </span>
-    </div>
-  );
-}

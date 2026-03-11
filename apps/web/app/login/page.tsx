@@ -2,7 +2,8 @@
 
 import { login } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-import { Button, Card } from "@nucleus/ui";
+import { Button } from "@/components/ui/primitives/button";
+import { Card } from "@/components/ui/primitives/card";
 import Link from "next/link";
 import { useState } from "react";
 
