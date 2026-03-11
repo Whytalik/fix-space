@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { Test, TestingModule } from "@nestjs/testing";
-import { PropertyResponseDto } from "@nucleus/domain";
+import { PropertyResponseDto, PropertyType } from "@nucleus/domain";
 import { PropertyController } from "../property.controller";
 import { PropertyService } from "../property.service";
 
@@ -35,26 +35,18 @@ describe("PropertyController", () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PropertyController],
-      providers: [
-        {
-          provide: PropertyService,
-          useValue: mockPropertyService,
-        },
-      ],
+      providers: [{ provide: PropertyService, useValue: mockPropertyService }],
     }).compile();
 
     controller = module.get<PropertyController>(PropertyController);
   });
 
   describe("create", () => {
-    it("should call propertyService.create with databaseId, dto and userId", async () => {
-      const dto = {
-        name: "Title",
-        type: "text" as any,
-      };
+    it("should call propertyService.create with dto.databaseId, dto and userId", async () => {
+      const dto = { name: "Title", type: PropertyType.TEXT, position: 0, databaseId: "db-123" };
       mockPropertyService.create.mockResolvedValue(mockPropertyResponse);
 
-      const result = await controller.create("db-123", "user-123", dto);
+      const result = await controller.create("user-123", dto);
 
       expect(result).toEqual(mockPropertyResponse);
       expect(mockPropertyService.create).toHaveBeenCalledWith("db-123", dto, "user-123");
@@ -63,7 +55,7 @@ describe("PropertyController", () => {
   });
 
   describe("findAll", () => {
-    it("should call propertyService.findAll with databaseId and userId", async () => {
+    it("should call propertyService.findAll with databaseId query param and userId", async () => {
       mockPropertyService.findAll.mockResolvedValue([mockPropertyResponse]);
 
       const result = await controller.findAll("db-123", "user-123");
@@ -88,13 +80,8 @@ describe("PropertyController", () => {
 
   describe("update", () => {
     it("should call propertyService.update with id, dto and userId", async () => {
-      const dto = {
-        name: "Updated Title",
-      };
-      const updatedResponse = {
-        ...mockPropertyResponse,
-        name: "Updated Title",
-      } as unknown as PropertyResponseDto;
+      const dto = { name: "Updated Title" };
+      const updatedResponse = { ...mockPropertyResponse, name: "Updated Title" } as unknown as PropertyResponseDto;
       mockPropertyService.update.mockResolvedValue(updatedResponse);
 
       const result = await controller.update("prop-123", "user-123", dto);

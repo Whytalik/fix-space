@@ -62,9 +62,7 @@ describe("SpaceController", () => {
       const result = await controller.create("user-123", dto);
 
       expect(result).toEqual(mockSpaceResponse);
-      expect(mockSpaceService.create).toHaveBeenCalledWith("user-123", {
-        ...dto,
-      });
+      expect(mockSpaceService.create).toHaveBeenCalledWith("user-123", { ...dto });
     });
   });
 

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { PropertyType } from "@nucleus/domain";
 import { Test, TestingModule } from "@nestjs/testing";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { InitializationConfigService } from "../../config/initialization-config.service";
@@ -12,27 +13,28 @@ describe("InitializeUserSpaceUseCase", () => {
   let useCase: InitializeUserSpaceUseCase;
 
   const mockLogger = {
-    setContext: jest.fn(),
-    debug: jest.fn(),
-    log: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    setContext: jest.fn<any>(),
+    debug: jest.fn<any>(),
+    log: jest.fn<any>(),
+    warn: jest.fn<any>(),
+    error: jest.fn<any>(),
   };
 
   const mockSpaceService = {
-    create: jest.fn(),
+    create: jest.fn<any>(),
+    findOne: jest.fn<any>(),
   };
 
   const mockSectionService = {
-    create: jest.fn(),
+    create: jest.fn<any>(),
   };
 
   const mockDatabaseService = {
-    create: jest.fn(),
+    create: jest.fn<any>(),
   };
 
   const mockPropertyService = {
-    create: jest.fn(),
+    create: jest.fn<any>(),
   };
 
   const mockConfig = {
@@ -63,8 +65,8 @@ describe("InitializeUserSpaceUseCase", () => {
   };
 
   const mockConfigService = {
-    getConfig: jest.fn().mockReturnValue(mockConfig),
-    interpolateSpaceName: jest.fn().mockReturnValue("testuser's Space"),
+    getConfig: jest.fn<any>().mockReturnValue(mockConfig),
+    interpolateSpaceName: jest.fn<any>().mockReturnValue("testuser's Space"),
   };
 
   const mockSpaceResponse = {
@@ -112,6 +114,7 @@ describe("InitializeUserSpaceUseCase", () => {
 
   it("should create space with interpolated name", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+    mockSpaceService.findOne.mockResolvedValue(mockSpaceResponse);
     mockSectionService.create.mockResolvedValue({ id: "section-a-id" });
     mockDatabaseService.create.mockResolvedValue({ id: "db-1-id" });
 
@@ -120,11 +123,13 @@ describe("InitializeUserSpaceUseCase", () => {
     expect(mockConfigService.interpolateSpaceName).toHaveBeenCalledWith("testuser");
     expect(mockSpaceService.create).toHaveBeenCalledWith("user-123", {
       name: "testuser's Space",
+      isDefault: true,
     });
   });
 
   it("should create sections sorted by position", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+    mockSpaceService.findOne.mockResolvedValue(mockSpaceResponse);
     mockSectionService.create.mockResolvedValue({ id: "section-id" });
     mockDatabaseService.create.mockResolvedValue({ id: "db-id" });
 
@@ -144,6 +149,7 @@ describe("InitializeUserSpaceUseCase", () => {
 
   it("should create databases from config with sectionId and empty properties", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+    mockSpaceService.findOne.mockResolvedValue(mockSpaceResponse);
     mockSectionService.create.mockResolvedValue({ id: "section-a-id" });
     mockDatabaseService.create.mockResolvedValue({ id: "db-1-id" });
 
@@ -152,6 +158,7 @@ describe("InitializeUserSpaceUseCase", () => {
     expect(mockDatabaseService.create).toHaveBeenCalledWith(
       "space-123",
       {
+        spaceId: "space-123",
         name: "db-1",
         title: "Tasks",
         type: "custom",
@@ -164,6 +171,7 @@ describe("InitializeUserSpaceUseCase", () => {
 
   it("should return the created space", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+    mockSpaceService.findOne.mockResolvedValue(mockSpaceResponse);
     mockSectionService.create.mockResolvedValue({ id: "section-id" });
     mockDatabaseService.create.mockResolvedValue({ id: "db-id" });
 
@@ -172,18 +180,110 @@ describe("InitializeUserSpaceUseCase", () => {
     expect(result).toEqual(mockSpaceResponse);
   });
 
+  it("should resolve RELATION sourceDatabaseType to the created database id", async () => {
+    const configWithRelation = {
+      ...mockConfig,
+      databases: [
+        {
+          name: "db-source",
+          title: "Source DB",
+          type: "source-type",
+          sectionKey: "a",
+          properties: [],
+        },
+        {
+          name: "db-with-relation",
+          title: "Relation DB",
+          type: "relation-type",
+          sectionKey: "a",
+          properties: [
+            {
+              name: "Linked",
+              type: PropertyType.RELATION,
+              config: { sourceDatabaseType: "source-type", multiple: false },
+            },
+          ],
+        },
+      ],
+    };
+    mockConfigService.getConfig.mockReturnValueOnce(configWithRelation);
+    mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+    mockSpaceService.findOne.mockResolvedValue(mockSpaceResponse);
+    mockSectionService.create.mockResolvedValue({ id: "section-a-id" });
+    mockDatabaseService.create
+      .mockResolvedValueOnce({ id: "source-db-id" })
+      .mockResolvedValueOnce({ id: "relation-db-id" });
+    mockPropertyService.create.mockResolvedValue({ id: "prop-id" });
+
+    await useCase.initialize("user-123", "testuser");
+
+    expect(mockPropertyService.create).toHaveBeenCalledWith(
+      "relation-db-id",
+      expect.objectContaining({
+        config: expect.objectContaining({ relatedEntityId: "source-db-id" }),
+      }),
+      "user-123",
+    );
+  });
+
+  it("should throw Error when database type is unknown in Pass 3", async () => {
+    const configWithNoType = {
+      ...mockConfig,
+      databases: [{ name: "db-no-type", title: "No Type DB", sectionKey: "a", properties: [] }],
+    };
+    mockConfigService.getConfig.mockReturnValueOnce(configWithNoType);
+    mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+    mockSectionService.create.mockResolvedValue({ id: "section-id" });
+    mockDatabaseService.create.mockResolvedValue({ id: "db-id" });
+
+    await expect(useCase.initialize("user-123", "testuser")).rejects.toThrow("Space initialization failed");
+  });
+
+  it("should throw Error when RELATION sourceDatabaseType is unknown", async () => {
+    const configWithBadRelation = {
+      ...mockConfig,
+      databases: [
+        {
+          name: "db-1",
+          title: "Tasks",
+          type: "custom",
+          sectionKey: "a",
+          properties: [
+            {
+              name: "BadRel",
+              type: PropertyType.RELATION,
+              config: { sourceDatabaseType: "unknown-type", multiple: false },
+            },
+          ],
+        },
+      ],
+    };
+    mockConfigService.getConfig.mockReturnValueOnce(configWithBadRelation);
+    mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+    mockSectionService.create.mockResolvedValue({ id: "section-id" });
+    mockDatabaseService.create.mockResolvedValue({ id: "db-1-id" });
+
+    await expect(useCase.initialize("user-123", "testuser")).rejects.toThrow(
+      'RELATION property "BadRel" references unknown sourceDatabaseType "unknown-type"',
+    );
+  });
+
   it("should log initialization summary", async () => {
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+    mockSpaceService.findOne.mockResolvedValue(mockSpaceResponse);
     mockSectionService.create.mockResolvedValue({ id: "section-id" });
     mockDatabaseService.create.mockResolvedValue({ id: "db-id" });
 
     await useCase.initialize("user-123", "testuser");
 
-    expect(mockLogger.log).toHaveBeenCalledWith("User space initialized", {
-      userId: "user-123",
+    expect(mockLogger.log).toHaveBeenCalledWith("Space content seeded", {
       spaceId: "space-123",
       sections: 2,
       databases: 1,
+    });
+    expect(mockLogger.log).toHaveBeenCalledWith("User space initialized", {
+      userId: "user-123",
+      spaceId: "space-123",
     });
   });
 });
