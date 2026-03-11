@@ -1,6 +1,6 @@
 "use client";
 
-import { LogoIcon } from "@nucleus/ui";
+import { LogoIcon } from "@/components/ui/brand/logo-icon";
 import Link from "next/link";
 import { HeaderActions } from "./header-actions";
 import { HeaderDatabase } from "./header-database";
