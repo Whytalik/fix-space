@@ -1,9 +1,15 @@
 "use client";
 
+import { PropertyType } from "@nucleus/domain";
 import type { PropertyResponseDto, RecordResponseDto } from "@nucleus/domain";
-import { useState } from "react";
-import { PropertyIcon } from "./property-icon";
-import { RecordModal } from "./record-modal";
+import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { CellValue } from "./cell-value";
+import { PropertyHint } from "@/components/property/property-hint";
+import { PropertyIcon } from "@/components/property/property-icon";
+import { Button } from "@/components/ui/primitives/button";
+import { ExternalLink } from "lucide-react";
+import { useDatabaseContext } from "@/context/database-context";
 
 interface DatabaseTableProps {
   databaseId: string;
@@ -12,73 +18,15 @@ interface DatabaseTableProps {
   onRefresh: () => void;
 }
 
-function CellValue({ value, type }: { value: unknown; type: string }) {
-  if (value === null || value === undefined || value === "") {
-    return <span className="text-ink-muted">—</span>;
-  }
-
-  switch (type) {
-    case "CHECKBOX":
-      return (
-        <span
-          className={`inline-block w-4 h-4 rounded border ${
-            value ? "bg-accent border-accent" : "border-stroke"
-          }`}
-        />
-      );
-
-    case "DATE": {
-      const date = new Date(value as string);
-      if (isNaN(date.getTime())) return <span className="text-ink-muted">—</span>;
-      return (
-        <span className="text-ink-secondary text-sm">
-          {date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-        </span>
-      );
-    }
-
-    case "SELECT":
-    case "STATUS": {
-      const label =
-        typeof value === "object" && value !== null
-          ? ((value as Record<string, unknown>).label ?? String(value))
-          : String(value);
-      const color =
-        typeof value === "object" && value !== null
-          ? ((value as Record<string, unknown>).color as string | undefined)
-          : undefined;
-      return (
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-            color ? "" : "bg-elevated text-ink-secondary"
-          }`}
-          style={color ? { backgroundColor: `${color}20`, color } : undefined}
-        >
-          {String(label)}
-        </span>
-      );
-    }
-
-    case "NUMBER":
-      return (
-        <span className="text-ink tabular-nums text-sm">
-          {typeof value === "number" ? value.toLocaleString() : String(value)}
-        </span>
-      );
-
-    default:
-      return <span className="text-ink text-sm truncate max-w-50">{String(value)}</span>;
-  }
-}
-
 export function DatabaseTable({ databaseId, properties, records, onRefresh }: DatabaseTableProps) {
-  const [modal, setModal] = useState<{ open: boolean; record?: RecordResponseDto }>({ open: false });
+  const { relatedRecordsMap } = useDatabaseContext();
+  const router = useRouter();
 
-  const sorted = [...properties].sort((a, b) => a.position - b.position);
+  const sorted = useMemo(() => [...properties].sort((a, b) => a.position - b.position), [properties]);
 
-  function handleSaved() {
-    setModal({ open: false });
-    onRefresh();
+  function handleOpen(e: React.MouseEvent, recordId: string) {
+    e.stopPropagation();
+    router.push(`/record/${recordId}`);
   }
 
   if (sorted.length === 0) {
@@ -91,7 +39,7 @@ export function DatabaseTable({ databaseId, properties, records, onRefresh }: Da
 
   return (
     <>
-      <div className="rounded-lg border border-stroke overflow-hidden">
+      <div className="scrollbar rounded-lg border border-stroke overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
             <thead>
@@ -108,15 +56,17 @@ export function DatabaseTable({ databaseId, properties, records, onRefresh }: Da
                       </span>
                       {prop.name}
                       {prop.isPrimary && <span className="ml-1 text-xs text-accent">●</span>}
+                      {prop.hint && <PropertyHint hint={prop.hint} />}
                     </span>
                   </th>
                 ))}
+                <th className="sticky right-0 bg-surface w-0 p-0 border-l-0" />
               </tr>
             </thead>
             <tbody>
               {records.length === 0 ? (
                 <tr>
-                  <td colSpan={sorted.length} className="px-3 py-8 text-center text-ink-secondary">
+                  <td colSpan={sorted.length + 1} className="px-3 py-8 text-center text-ink-secondary">
                     No records yet.
                   </td>
                 </tr>
@@ -124,22 +74,40 @@ export function DatabaseTable({ databaseId, properties, records, onRefresh }: Da
                 records.map((record, rowIdx) => (
                   <tr
                     key={record.id}
-                    onClick={() => setModal({ open: true, record })}
-                    className={`cursor-pointer border-b border-stroke last:border-b-0 transition-colors duration-100 hover:bg-hover ${
+                    className={`group relative border-b border-stroke last:border-b-0 transition-colors duration-100 hover:bg-hover ${
                       rowIdx % 2 === 1 ? "bg-surface/30" : ""
                     }`}
                   >
                     {sorted.map((prop) => {
                       const pv = record.values?.find((v) => v.propertyId === prop.id);
+                      const relatedDbId =
+                        prop.type === PropertyType.RELATION
+                          ? (prop.config as { relatedEntityId?: string } | null)?.relatedEntityId
+                          : undefined;
                       return (
-                        <td
-                          key={prop.id}
-                          className="px-3 py-2.5 border-r border-stroke last:border-r-0 align-middle"
-                        >
-                          <CellValue value={pv?.value} type={prop.type} />
+                        <td key={prop.id} className="px-3 py-2.5 border-r border-stroke last:border-r-0 align-middle">
+                          <CellValue
+                            value={pv?.value}
+                            type={prop.type}
+                            relatedRecords={relatedDbId ? relatedRecordsMap[relatedDbId] : undefined}
+                          />
                         </td>
                       );
                     })}
+                    <td className="sticky right-0 w-0 p-0 align-middle">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-2">
+                        <div className="w-8 h-8 bg-gradient-to-l from-hover to-transparent -ml-8 pointer-events-none" />
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={(e) => handleOpen(e, record.id)}
+                          className="flex items-center gap-1.5 shadow-sm"
+                        >
+                          <ExternalLink size={13} />
+                          Open
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}
@@ -147,16 +115,6 @@ export function DatabaseTable({ databaseId, properties, records, onRefresh }: Da
           </table>
         </div>
       </div>
-
-      {modal.open && (
-        <RecordModal
-          databaseId={databaseId}
-          properties={properties}
-          record={modal.record}
-          onClose={() => setModal({ open: false })}
-          onSaved={handleSaved}
-        />
-      )}
     </>
   );
 }
