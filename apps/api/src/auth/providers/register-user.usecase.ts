@@ -1,21 +1,21 @@
 import { ConflictException, Injectable } from "@nestjs/common";
 import { prisma } from "@nucleus/database";
 import { RegisterUserDto } from "@nucleus/domain";
-import { AppLogger } from "../common/logger/app-logger.service";
-import { hashPassword } from "../common/utils/password";
-import { MailService } from "../mail/mail.service";
-import { InitializeUserSpaceUseCase } from "../space/providers/initialize-user-space.usecase";
-import { TokenService } from "./token.service";
+import { AppLogger } from "../../common/logger/app-logger.service";
+import { hashPassword } from "../../common/utils/password";
+import { MailService } from "../../mail/mail.service";
+import { InitializeUserSpaceUseCase } from "../../space/providers/initialize-user-space.usecase";
+import { TokenService } from "../token.service";
 
 @Injectable()
-export class RegisterUserService {
+export class RegisterUserUseCase {
   constructor(
     private readonly initializeUserSpaceUseCase: InitializeUserSpaceUseCase,
     private readonly tokenService: TokenService,
     private readonly mailService: MailService,
     private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(RegisterUserService.name);
+    this.logger.setContext(RegisterUserUseCase.name);
   }
 
   async register(registerUserDto: RegisterUserDto) {
@@ -63,10 +63,7 @@ export class RegisterUserService {
 
     await this.initializeUserSpaceUseCase.initialize(user.id, registerUserDto.username);
 
-    // Generate verification token
     const verificationToken = await this.tokenService.createVerificationToken(user.id);
-
-    // Send verification email
     await this.mailService.sendVerificationEmail(user.email, user.username, verificationToken);
 
     this.logger.log("Verification email sent", {
