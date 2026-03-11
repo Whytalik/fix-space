@@ -14,8 +14,10 @@ changed=false
 for f in docs/CHANGELOG.md docs/STATS.md; do
   if ! git -C "$REPO_ROOT" diff --quiet "$f" 2>/dev/null || \
      git -C "$REPO_ROOT" ls-files --others --exclude-standard -- "$f" | grep -q .; then
-    git -C "$REPO_ROOT" add "$f"
-    changed=true
+    if [ -f "$REPO_ROOT/$f" ]; then
+      git -C "$REPO_ROOT" add "$f"
+      changed=true
+    fi
   fi
 done
 
