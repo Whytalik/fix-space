@@ -1,4 +1,4 @@
-import type { UpdateUserDto, UserResponseDto } from "@nucleus/domain";
+import type { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@nucleus/domain";
 import { apiFetch } from "./client";
 
 export function getMe() {
@@ -15,5 +15,12 @@ export function updateMe(payload: UpdateUserDto) {
 export function deleteMe() {
   return apiFetch<void>("/users/me", {
     method: "DELETE",
+  });
+}
+
+export function changePassword(payload: ChangePasswordDto) {
+  return apiFetch<{ message: string }>("/users/me/password", {
+    method: "PATCH",
+    body: payload,
   });
 }
