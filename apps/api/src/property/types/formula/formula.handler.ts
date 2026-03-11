@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { DEFAULT_FORMULA_PROPERTY, FORMULA_OUTPUT_TYPE_VALUES, FormulaOutputType, PropertyType } from "@nucleus/domain";
-import { PropertyTypeHandler } from "../handler.interface";
+import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
-export class FormulaHandler implements PropertyTypeHandler {
+export class FormulaHandler implements PropertyConfigHandler, PropertyValueHandler {
   readonly type = PropertyType.FORMULA;
 
   getDefaultConfig(): Record<string, unknown> {

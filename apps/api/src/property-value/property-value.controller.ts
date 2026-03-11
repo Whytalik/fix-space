@@ -1,27 +1,25 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { CreatePropertyValueDto, UpdatePropertyValueDto } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { PropertyValueService } from "./property-value.service";
 
-@Controller("records/:recordId/values")
+@Controller("values")
 export class PropertyValueController {
   constructor(private readonly propertyValueService: PropertyValueService) {}
 
   @Post()
   create(
-    @Param("recordId")
-    recordId: string,
     @CurrentUser("userId")
     userId: string,
     @Body()
     createPropertyValueDto: CreatePropertyValueDto,
   ) {
-    return this.propertyValueService.create(recordId, createPropertyValueDto, userId);
+    return this.propertyValueService.create(createPropertyValueDto.recordId, createPropertyValueDto, userId);
   }
 
   @Get()
   findAll(
-    @Param("recordId")
+    @Query("recordId")
     recordId: string,
     @CurrentUser("userId")
     userId: string,
