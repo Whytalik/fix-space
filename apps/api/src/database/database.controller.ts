@@ -1,29 +1,29 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { CreateDatabaseDto, UpdateDatabaseDto } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { RequireOwnership } from "../auth/decorators/required-ownership.decoractor";
-import { ResourceOwnerGuard } from "../auth/guards/resourse-owner.guard";
 import { DatabaseService } from "./database.service";
+import { DuplicateDatabaseUseCase } from "./providers/duplicate-database.usecase";
 
-@Controller("spaces/:spaceId/databases")
+@Controller("databases")
 export class DatabaseController {
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly databaseService: DatabaseService,
+    private readonly duplicateDatabaseUseCase: DuplicateDatabaseUseCase,
+  ) {}
 
   @Post()
   create(
-    @Param("spaceId")
-    spaceId: string,
     @CurrentUser("userId")
     userId: string,
     @Body()
     createDatabaseDto: CreateDatabaseDto,
   ) {
-    return this.databaseService.create(spaceId, createDatabaseDto, userId);
+    return this.databaseService.create(createDatabaseDto.spaceId, createDatabaseDto, userId);
   }
 
   @Get()
   findAll(
-    @Param("spaceId")
+    @Query("spaceId")
     spaceId: string,
     @CurrentUser("userId")
     userId: string,
@@ -32,23 +32,11 @@ export class DatabaseController {
   }
 
   @Get(":id")
-  @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({
-    model: "space",
-    param: "spaceId",
-    ownerField: "ownerId",
-  })
   findOne(@Param("id") id: string) {
     return this.databaseService.findOne(id);
   }
 
   @Patch(":id")
-  @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({
-    model: "space",
-    param: "spaceId",
-    ownerField: "ownerId",
-  })
   update(
     @Param("id") id: string,
     @Body()
@@ -57,13 +45,12 @@ export class DatabaseController {
     return this.databaseService.update(id, updateDatabaseDto);
   }
 
+  @Post(":id/duplicate")
+  duplicate(@Param("id") id: string) {
+    return this.duplicateDatabaseUseCase.execute(id);
+  }
+
   @Delete(":id")
-  @UseGuards(ResourceOwnerGuard)
-  @RequireOwnership({
-    model: "space",
-    param: "spaceId",
-    ownerField: "ownerId",
-  })
   remove(@Param("id") id: string) {
     return this.databaseService.remove(id);
   }
