@@ -19,6 +19,7 @@ blob-report/
 test-results/
 playwright/.cache/
 playwright-report/
+.history/
 
 # Misc
 .DS_Store
