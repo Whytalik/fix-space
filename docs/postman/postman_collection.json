@@ -221,8 +221,14 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/auth/dev/reset",
-              "host": ["{{BASE_URL}}"],
-              "path": ["auth", "dev", "reset"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "dev",
+                "reset"
+              ]
             }
           }
         }
@@ -241,8 +247,12 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/",
-              "host": ["{{BASE_URL}}"],
-              "path": [""]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                ""
+              ]
             }
           }
         }
@@ -287,8 +297,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/auth/register",
-              "host": ["{{BASE_URL}}"],
-              "path": ["auth", "register"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
             }
           }
         },
@@ -328,8 +343,14 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/auth/dev/verify-user",
-              "host": ["{{BASE_URL}}"],
-              "path": ["auth", "dev", "verify-user"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "dev",
+                "verify-user"
+              ]
             }
           }
         },
@@ -357,8 +378,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/auth/verify",
-              "host": ["{{BASE_URL}}"],
-              "path": ["auth", "verify"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "verify"
+              ]
             }
           }
         },
@@ -408,8 +434,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/auth/login",
-              "host": ["{{BASE_URL}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             }
           }
         },
@@ -442,8 +473,13 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/auth/refresh",
-              "host": ["{{BASE_URL}}"],
-              "path": ["auth", "refresh"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
             }
           }
         }
@@ -459,8 +495,13 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/users/me",
-              "host": ["{{BASE_URL}}"],
-              "path": ["users", "me"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
             }
           }
         },
@@ -485,8 +526,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/users/me",
-              "host": ["{{BASE_URL}}"],
-              "path": ["users", "me"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
             }
           }
         }
@@ -551,8 +597,12 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/spaces",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "spaces"
+              ]
             }
           }
         },
@@ -582,8 +632,12 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/spaces",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "spaces"
+              ]
             }
           }
         },
@@ -594,8 +648,13 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/spaces/{{spaceId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "spaces",
+                "{{spaceId}}"
+              ]
             }
           }
         },
@@ -620,8 +679,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/spaces/{{spaceId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "spaces",
+                "{{spaceId}}"
+              ]
             }
           }
         },
@@ -646,8 +710,14 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/spaces/{{spaceId}}/duplicate",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}", "duplicate"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "spaces",
+                "{{spaceId}}",
+                "duplicate"
+              ]
             }
           }
         },
@@ -691,8 +761,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/spaces/{{spaceId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "spaces",
+                "{{spaceId}}"
+              ]
             }
           }
         },
@@ -717,8 +792,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/spaces/{{spaceId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "spaces",
+                "{{spaceId}}"
+              ]
             }
           }
         },
@@ -743,8 +823,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/spaces/{{spaceId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "spaces",
+                "{{spaceId}}"
+              ]
             }
           }
         }
@@ -800,7 +885,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"my-journal\",\n  \"title\": \"Daily Trading Journal\",\n  \"type\": \"trading-journal\",\n  \"icon\": \"📈\"\n}",
+              "raw": "{\n  \"name\": \"my-journal\",\n  \"title\": \"Daily Trading Journal\",\n  \"type\": \"trading-journal\",\n  \"icon\": \"📈\",\n  \"spaceId\": \"{{spaceId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -808,9 +893,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/spaces/{{spaceId}}/databases",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}", "databases"]
+              "raw": "{{BASE_URL}}/databases",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "databases"
+              ]
             }
           }
         },
@@ -839,9 +928,20 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/spaces/{{spaceId}}/databases",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}", "databases"]
+              "raw": "{{BASE_URL}}/databases?spaceId={{spaceId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "databases"
+              ],
+              "query": [
+                {
+                  "key": "spaceId",
+                  "value": "{{spaceId}}",
+                  "description": ""
+                }
+              ]
             }
           }
         },
@@ -851,9 +951,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/spaces/{{spaceId}}/databases/{{databaseId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}", "databases", "{{databaseId}}"]
+              "raw": "{{BASE_URL}}/databases/{{databaseId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "databases",
+                "{{databaseId}}"
+              ]
             }
           }
         },
@@ -877,9 +982,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/spaces/{{spaceId}}/databases/{{databaseId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}", "databases", "{{databaseId}}"]
+              "raw": "{{BASE_URL}}/databases/{{databaseId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "databases",
+                "{{databaseId}}"
+              ]
             }
           }
         }
@@ -922,7 +1032,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Title\",\n  \"type\": \"TEXT\",\n  \"position\": 0,\n  \"isPrimary\": true,\n  \"isRequired\": true,\n  \"icon\": \"📝\",\n  \"color\": \"#4CAF50\"\n}",
+              "raw": "{\n  \"name\": \"Title\",\n  \"type\": \"TEXT\",\n  \"position\": 0,\n  \"isPrimary\": true,\n  \"isRequired\": true,\n  \"icon\": \"📝\",\n  \"color\": \"#4CAF50\",\n  \"databaseId\": \"{{databaseId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -930,9 +1040,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties"]
+              "raw": "{{BASE_URL}}/properties",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties"
+              ]
             }
           }
         },
@@ -948,7 +1062,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Price\",\n  \"type\": \"NUMBER\",\n  \"position\": 1,\n  \"config\": {\n    \"defaultValue\": 0,\n    \"format\": \"currency\",\n    \"decimalPlaces\": 2,\n    \"currencySymbol\": \"$\"\n  }\n}",
+              "raw": "{\n  \"name\": \"Price\",\n  \"type\": \"NUMBER\",\n  \"position\": 1,\n  \"config\": {\n    \"defaultValue\": 0,\n    \"format\": \"currency\",\n    \"decimalPlaces\": 2,\n    \"currencySymbol\": \"$\"\n  },\n  \"databaseId\": \"{{databaseId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -956,9 +1070,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties"]
+              "raw": "{{BASE_URL}}/properties",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties"
+              ]
             }
           },
           "event": [
@@ -996,7 +1114,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Entry Date\",\n  \"type\": \"DATE\",\n  \"position\": 2,\n  \"isRequired\": true,\n  \"config\": {\n    \"includeTime\": false,\n    \"dateFormat\": \"DD/MM/YYYY\"\n  }\n}",
+              "raw": "{\n  \"name\": \"Entry Date\",\n  \"type\": \"DATE\",\n  \"position\": 2,\n  \"isRequired\": true,\n  \"config\": {\n    \"includeTime\": false,\n    \"dateFormat\": \"DD/MM/YYYY\"\n  },\n  \"databaseId\": \"{{databaseId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1004,9 +1122,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties"]
+              "raw": "{{BASE_URL}}/properties",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties"
+              ]
             }
           },
           "event": [
@@ -1044,7 +1166,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Completed\",\n  \"type\": \"CHECKBOX\",\n  \"position\": 3,\n  \"config\": {\n    \"defaultValue\": false\n  }\n}",
+              "raw": "{\n  \"name\": \"Completed\",\n  \"type\": \"CHECKBOX\",\n  \"position\": 3,\n  \"config\": {\n    \"defaultValue\": false\n  },\n  \"databaseId\": \"{{databaseId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1052,9 +1174,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties"]
+              "raw": "{{BASE_URL}}/properties",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties"
+              ]
             }
           },
           "event": [
@@ -1092,7 +1218,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Category\",\n  \"type\": \"SELECT\",\n  \"position\": 4,\n  \"config\": {\n    \"isMultiSelect\": false,\n    \"categories\": [\n      { \"label\": \"Category\", \"options\": [\"Buy\", \"Sell\", \"Hold\"] }\n    ]\n  }\n}",
+              "raw": "{\n  \"name\": \"Category\",\n  \"type\": \"SELECT\",\n  \"position\": 4,\n  \"config\": {\n    \"isMultiSelect\": false,\n    \"categories\": [\n      {\n        \"label\": \"Category\",\n        \"options\": [\n          \"Buy\",\n          \"Sell\",\n          \"Hold\"\n        ]\n      }\n    ]\n  },\n  \"databaseId\": \"{{databaseId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1100,9 +1226,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties"]
+              "raw": "{{BASE_URL}}/properties",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties"
+              ]
             }
           },
           "event": [
@@ -1140,7 +1270,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Status\",\n  \"type\": \"STATUS\",\n  \"position\": 5,\n  \"config\": {\n    \"defaultOption\": \"Not started\",\n    \"categories\": [\n      {\n        \"category\": \"todo\",\n        \"defaultOption\": \"Not started\",\n        \"options\": [\n          { \"name\": \"Not started\", \"color\": \"#6B7280\" },\n          { \"name\": \"Blocked\", \"color\": \"#DC2626\" }\n        ]\n      },\n      {\n        \"category\": \"in_progress\",\n        \"defaultOption\": \"In progress\",\n        \"options\": [\n          { \"name\": \"In progress\", \"color\": \"#2563EB\" },\n          { \"name\": \"In review\", \"color\": \"#D97706\" }\n        ]\n      },\n      {\n        \"category\": \"complete\",\n        \"defaultOption\": \"Done\",\n        \"options\": [\n          { \"name\": \"Done\", \"color\": \"#16A34A\" },\n          { \"name\": \"Cancelled\", \"color\": \"#92400E\" }\n        ]\n      }\n    ]\n  }\n}",
+              "raw": "{\n  \"name\": \"Status\",\n  \"type\": \"STATUS\",\n  \"position\": 5,\n  \"config\": {\n    \"defaultOption\": \"Not started\",\n    \"categories\": [\n      {\n        \"category\": \"todo\",\n        \"defaultOption\": \"Not started\",\n        \"options\": [\n          {\n            \"name\": \"Not started\",\n            \"color\": \"#6B7280\"\n          },\n          {\n            \"name\": \"Blocked\",\n            \"color\": \"#DC2626\"\n          }\n        ]\n      },\n      {\n        \"category\": \"in_progress\",\n        \"defaultOption\": \"In progress\",\n        \"options\": [\n          {\n            \"name\": \"In progress\",\n            \"color\": \"#2563EB\"\n          },\n          {\n            \"name\": \"In review\",\n            \"color\": \"#D97706\"\n          }\n        ]\n      },\n      {\n        \"category\": \"complete\",\n        \"defaultOption\": \"Done\",\n        \"options\": [\n          {\n            \"name\": \"Done\",\n            \"color\": \"#16A34A\"\n          },\n          {\n            \"name\": \"Cancelled\",\n            \"color\": \"#92400E\"\n          }\n        ]\n      }\n    ]\n  },\n  \"databaseId\": \"{{databaseId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1148,9 +1278,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties"]
+              "raw": "{{BASE_URL}}/properties",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties"
+              ]
             }
           },
           "event": [
@@ -1188,7 +1322,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Profit %\",\n  \"type\": \"FORMULA\",\n  \"position\": 6,\n  \"config\": {\n    \"formula\": \"prop('Exit') - prop('Entry')\",\n    \"output\": { \"type\": \"number\" }\n  }\n}",
+              "raw": "{\n  \"name\": \"Profit %\",\n  \"type\": \"FORMULA\",\n  \"position\": 6,\n  \"config\": {\n    \"formula\": \"prop('Exit') - prop('Entry')\",\n    \"output\": {\n      \"type\": \"number\"\n    }\n  },\n  \"databaseId\": \"{{databaseId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1196,9 +1330,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties"]
+              "raw": "{{BASE_URL}}/properties",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties"
+              ]
             }
           },
           "event": [
@@ -1236,7 +1374,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Related Records\",\n  \"type\": \"RELATION\",\n  \"position\": 7,\n  \"config\": {\n    \"relatedEntityId\": \"{{databaseId}}\",\n    \"multiple\": true\n  }\n}",
+              "raw": "{\n  \"name\": \"Related Records\",\n  \"type\": \"RELATION\",\n  \"position\": 7,\n  \"config\": {\n    \"relatedEntityId\": \"{{databaseId}}\",\n    \"multiple\": true\n  },\n  \"databaseId\": \"{{databaseId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1244,9 +1382,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties"]
+              "raw": "{{BASE_URL}}/properties",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties"
+              ]
             }
           },
           "event": [
@@ -1277,9 +1419,20 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties"]
+              "raw": "{{BASE_URL}}/properties?databaseId={{databaseId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties"
+              ],
+              "query": [
+                {
+                  "key": "databaseId",
+                  "value": "{{databaseId}}",
+                  "description": ""
+                }
+              ]
             }
           }
         },
@@ -1289,9 +1442,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties/{{propertyId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties", "{{propertyId}}"]
+              "raw": "{{BASE_URL}}/properties/{{propertyId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties",
+                "{{propertyId}}"
+              ]
             }
           }
         },
@@ -1315,9 +1473,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties/{{propertyId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties", "{{propertyId}}"]
+              "raw": "{{BASE_URL}}/properties/{{propertyId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties",
+                "{{propertyId}}"
+              ]
             }
           }
         },
@@ -1341,9 +1504,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties/{{numberPropertyId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties", "{{numberPropertyId}}"]
+              "raw": "{{BASE_URL}}/properties/{{numberPropertyId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties",
+                "{{numberPropertyId}}"
+              ]
             }
           }
         },
@@ -1367,9 +1535,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties/{{selectPropertyId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties", "{{selectPropertyId}}"]
+              "raw": "{{BASE_URL}}/properties/{{selectPropertyId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties",
+                "{{selectPropertyId}}"
+              ]
             }
           }
         },
@@ -1393,9 +1566,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties/{{statusPropertyId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties", "{{statusPropertyId}}"]
+              "raw": "{{BASE_URL}}/properties/{{statusPropertyId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties",
+                "{{statusPropertyId}}"
+              ]
             }
           }
         },
@@ -1419,9 +1597,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties/{{formulaPropertyId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties", "{{formulaPropertyId}}"]
+              "raw": "{{BASE_URL}}/properties/{{formulaPropertyId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties",
+                "{{formulaPropertyId}}"
+              ]
             }
           }
         }
@@ -1477,7 +1660,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Trade #001\",\n  \"icon\": \"💹\"\n}",
+              "raw": "{\n  \"name\": \"Trade #001\",\n  \"icon\": \"💹\",\n  \"databaseId\": \"{{databaseId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1485,9 +1668,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/records",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "records"]
+              "raw": "{{BASE_URL}}/records",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "records"
+              ]
             }
           }
         },
@@ -1516,9 +1703,20 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/records",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "records"]
+              "raw": "{{BASE_URL}}/records?databaseId={{databaseId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "records"
+              ],
+              "query": [
+                {
+                  "key": "databaseId",
+                  "value": "{{databaseId}}",
+                  "description": ""
+                }
+              ]
             }
           }
         },
@@ -1528,9 +1726,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/records/{{recordId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "records", "{{recordId}}"]
+              "raw": "{{BASE_URL}}/records/{{recordId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "records",
+                "{{recordId}}"
+              ]
             }
           }
         },
@@ -1554,9 +1757,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/records/{{recordId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "records", "{{recordId}}"]
+              "raw": "{{BASE_URL}}/records/{{recordId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "records",
+                "{{recordId}}"
+              ]
             }
           }
         },
@@ -1580,9 +1788,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/records/{{recordId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "records", "{{recordId}}"]
+              "raw": "{{BASE_URL}}/records/{{recordId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "records",
+                "{{recordId}}"
+              ]
             }
           }
         }
@@ -1637,9 +1850,20 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values"]
+              "raw": "{{BASE_URL}}/values?recordId={{recordId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values"
+              ],
+              "query": [
+                {
+                  "key": "recordId",
+                  "value": "{{recordId}}",
+                  "description": ""
+                }
+              ]
             }
           }
         },
@@ -1649,9 +1873,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{valueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{valueId}}"]
+              "raw": "{{BASE_URL}}/values/{{valueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{valueId}}"
+              ]
             }
           }
         },
@@ -1675,9 +1904,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{textValueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{textValueId}}"]
+              "raw": "{{BASE_URL}}/values/{{textValueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{textValueId}}"
+              ]
             }
           }
         },
@@ -1701,9 +1935,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{numberValueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{numberValueId}}"]
+              "raw": "{{BASE_URL}}/values/{{numberValueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{numberValueId}}"
+              ]
             }
           }
         },
@@ -1727,9 +1966,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{dateValueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{dateValueId}}"]
+              "raw": "{{BASE_URL}}/values/{{dateValueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{dateValueId}}"
+              ]
             }
           }
         },
@@ -1753,9 +1997,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{checkboxValueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{checkboxValueId}}"]
+              "raw": "{{BASE_URL}}/values/{{checkboxValueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{checkboxValueId}}"
+              ]
             }
           }
         },
@@ -1779,9 +2028,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{selectValueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{selectValueId}}"]
+              "raw": "{{BASE_URL}}/values/{{selectValueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{selectValueId}}"
+              ]
             }
           }
         },
@@ -1805,9 +2059,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{statusValueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{statusValueId}}"]
+              "raw": "{{BASE_URL}}/values/{{statusValueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{statusValueId}}"
+              ]
             }
           }
         },
@@ -1831,9 +2090,14 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{formulaValueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{formulaValueId}}"]
+              "raw": "{{BASE_URL}}/values/{{formulaValueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{formulaValueId}}"
+              ]
             }
           }
         }
@@ -1849,8 +2113,14 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/records/{{recordId}}/content",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "content"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "records",
+                "{{recordId}}",
+                "content"
+              ]
             }
           }
         },
@@ -1875,8 +2145,14 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/records/{{recordId}}/content",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "content"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "records",
+                "{{recordId}}",
+                "content"
+              ]
             }
           }
         }
@@ -1892,8 +2168,13 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/settings/space",
-              "host": ["{{BASE_URL}}"],
-              "path": ["settings", "space"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "settings",
+                "space"
+              ]
             }
           }
         },
@@ -1918,8 +2199,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/settings/space",
-              "host": ["{{BASE_URL}}"],
-              "path": ["settings", "space"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "settings",
+                "space"
+              ]
             }
           }
         },
@@ -1930,8 +2216,13 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/settings/database",
-              "host": ["{{BASE_URL}}"],
-              "path": ["settings", "database"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "settings",
+                "database"
+              ]
             }
           }
         },
@@ -1956,8 +2247,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/settings/database",
-              "host": ["{{BASE_URL}}"],
-              "path": ["settings", "database"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "settings",
+                "database"
+              ]
             }
           }
         },
@@ -1968,8 +2264,13 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/settings/section",
-              "host": ["{{BASE_URL}}"],
-              "path": ["settings", "section"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "settings",
+                "section"
+              ]
             }
           }
         },
@@ -1994,8 +2295,13 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/settings/section",
-              "host": ["{{BASE_URL}}"],
-              "path": ["settings", "section"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "settings",
+                "section"
+              ]
             }
           }
         }
@@ -2050,9 +2356,20 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values"]
+              "raw": "{{BASE_URL}}/values?recordId={{recordId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values"
+              ],
+              "query": [
+                {
+                  "key": "recordId",
+                  "value": "{{recordId}}",
+                  "description": ""
+                }
+              ]
             }
           }
         },
@@ -2063,7 +2380,11 @@
               "listen": "test",
               "script": {
                 "type": "text/javascript",
-                "exec": ["pm.test(\"Status 200 — value deleted\", () => {", "  pm.response.to.have.status(200);", "});"]
+                "exec": [
+                  "pm.test(\"Status 200 — value deleted\", () => {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
               }
             }
           ],
@@ -2071,9 +2392,14 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{textValueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{textValueId}}"]
+              "raw": "{{BASE_URL}}/values/{{textValueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{textValueId}}"
+              ]
             }
           }
         },
@@ -2109,7 +2435,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"propertyId\": \"{{textPropertyId}}\",\n  \"value\": \"Edge case text value\"\n}",
+              "raw": "{\n  \"propertyId\": \"{{textPropertyId}}\",\n  \"value\": \"Edge case text value\",\n  \"recordId\": \"{{recordId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2117,9 +2443,13 @@
               }
             },
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values"]
+              "raw": "{{BASE_URL}}/values",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values"
+              ]
             }
           }
         },
@@ -2147,9 +2477,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{textValueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{textValueId}}"]
+              "raw": "{{BASE_URL}}/values/{{textValueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{textValueId}}"
+              ]
             }
           }
         }
@@ -2165,8 +2500,14 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/records/{{recordId}}/content",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "content"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "records",
+                "{{recordId}}",
+                "content"
+              ]
             }
           }
         },
@@ -2176,9 +2517,14 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/records/{{recordId}}/values/{{valueId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["records", "{{recordId}}", "values", "{{valueId}}"]
+              "raw": "{{BASE_URL}}/values/{{valueId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "values",
+                "{{valueId}}"
+              ]
             }
           }
         },
@@ -2188,9 +2534,14 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/records/{{recordId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "records", "{{recordId}}"]
+              "raw": "{{BASE_URL}}/records/{{recordId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "records",
+                "{{recordId}}"
+              ]
             }
           }
         },
@@ -2200,9 +2551,14 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/databases/{{databaseId}}/properties/{{propertyId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["databases", "{{databaseId}}", "properties", "{{propertyId}}"]
+              "raw": "{{BASE_URL}}/properties/{{propertyId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "properties",
+                "{{propertyId}}"
+              ]
             }
           }
         },
@@ -2212,9 +2568,14 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{BASE_URL}}/spaces/{{spaceId}}/databases/{{databaseId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}", "databases", "{{databaseId}}"]
+              "raw": "{{BASE_URL}}/databases/{{databaseId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "databases",
+                "{{databaseId}}"
+              ]
             }
           }
         },
@@ -2225,8 +2586,13 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/spaces/{{spaceId}}",
-              "host": ["{{BASE_URL}}"],
-              "path": ["spaces", "{{spaceId}}"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "spaces",
+                "{{spaceId}}"
+              ]
             }
           }
         },
@@ -2237,8 +2603,13 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/users/me",
-              "host": ["{{BASE_URL}}"],
-              "path": ["users", "me"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
             }
           }
         }
@@ -2267,8 +2638,13 @@
             "header": [],
             "url": {
               "raw": "{{BASE_URL}}/auth/logout",
-              "host": ["{{BASE_URL}}"],
-              "path": ["auth", "logout"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
             }
           }
         },
@@ -2357,8 +2733,14 @@
             },
             "url": {
               "raw": "{{BASE_URL}}/auth/dev/reset",
-              "host": ["{{BASE_URL}}"],
-              "path": ["auth", "dev", "reset"]
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "dev",
+                "reset"
+              ]
             }
           }
         }

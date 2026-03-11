@@ -209,10 +209,10 @@ All endpoints require JWT authentication unless marked as public.
 | **Auth**           | `/auth`                             | register, verify, login, refresh, logout | register/verify/login/refresh are public   |
 | **User**           | `/users`                            | `GET/PATCH/DELETE /users/me`             | —                                          |
 | **Space**          | `/spaces`                           | Full CRUD + duplicate                    | Ownership guard                            |
-| **Database**       | `/spaces/:spaceId/databases`        | Full CRUD                                | Ownership guard                            |
-| **Property**       | `/databases/:databaseId/properties` | Full CRUD                                | Column definitions                         |
-| **Record**         | `/databases/:databaseId/records`    | Full CRUD                                | Row data                                   |
-| **Property Value** | `/records/:recordId/values`         | Full CRUD                                | Cell data (JSON storage)                   |
+| **Database**       | `/databases`                        | Full CRUD + duplicate                    | `spaceId` in body (POST) or query (GET)    |
+| **Property**       | `/properties`                       | Full CRUD                                | `databaseId` in body (POST) or query (GET) |
+| **Record**         | `/records`                          | Full CRUD                                | `databaseId` in body (POST) or query (GET) |
+| **Property Value** | `/values`                           | Full CRUD                                | `recordId` in body (POST) or query (GET)   |
 | **Record Content** | `/records/:recordId/content`        | `GET`, `PUT`, `DELETE`                   | Rich content per record                    |
 | **Settings**       | `/settings`                         | `GET/PATCH` per category                 | Categories: `space`, `database`, `section` |
 
@@ -223,3 +223,5 @@ All endpoints require JWT authentication unless marked as public.
 - Login is rate-limited: **5 requests per 60 seconds**
 - Use `@Public()` decorator on endpoints to bypass JWT guard
 - `ResourceOwnerGuard` validates that the requesting user owns the resource
+
+
