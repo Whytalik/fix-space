@@ -1,9 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@nucleus/database";
+import { AppLogger } from "../common/logger/app-logger.service";
 
 @Injectable()
 export class SettingsService {
+  constructor(private readonly logger: AppLogger) {
+    this.logger.setContext(SettingsService.name);
+  }
+
   async getSettings<T extends object>(userId: string, category: string, defaultValues: T): Promise<T> {
+    this.logger.debug("Getting settings", { userId, category });
+
     const dbSettings = await prisma.settings.findMany({
       where: {
         userId,
@@ -21,6 +28,8 @@ export class SettingsService {
       }
     }
 
+    this.logger.log("Settings retrieved", { userId, category });
+
     return result;
   }
 
@@ -30,6 +39,8 @@ export class SettingsService {
     updateDto: Partial<T>,
     defaultValues: T,
   ): Promise<T> {
+    this.logger.debug("Updating settings", { userId, category });
+
     const operations = Object.entries({
       ...updateDto,
     }).map(([key, value]) => {
@@ -67,6 +78,8 @@ export class SettingsService {
     });
 
     await Promise.all(operations);
+
+    this.logger.log("Settings updated", { userId, category });
 
     return this.getSettings(userId, category, defaultValues);
   }
