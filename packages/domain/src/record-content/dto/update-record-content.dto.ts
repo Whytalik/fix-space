@@ -1,4 +1,7 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { CreateRecordContentDto } from "./create-record-content.dto";
+import { IsObject } from 'class-validator';
+import { ContainerBlock } from './content-node.dto';
 
-export class UpdateRecordContentDto extends PartialType(CreateRecordContentDto) {}
+export class UpdateRecordContentDto {
+  @IsObject()
+  content: ContainerBlock;
+}
