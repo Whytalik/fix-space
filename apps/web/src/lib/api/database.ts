@@ -1,41 +1,33 @@
-import type {
-  DatabaseResponseDto,
-  PropertyResponseDto,
-  PropertyValueResponseDto,
-  RecordResponseDto,
-} from "@nucleus/domain";
+import type { DatabaseResponseDto } from "@nucleus/domain";
 import { apiFetch } from "./client";
-
-export function getProperties(databaseId: string) {
-  return apiFetch<PropertyResponseDto[]>(`/databases/${databaseId}/properties`);
-}
-
-export function getRecords(databaseId: string) {
-  return apiFetch<RecordResponseDto[]>(`/databases/${databaseId}/records`);
-}
 
 export function updateDatabase(
   spaceId: string,
   databaseId: string,
-  data: { name?: string; title?: string; icon?: string },
+  data: { name?: string; title?: string; icon?: string; sectionId?: string | null },
 ) {
-  return apiFetch<DatabaseResponseDto>(`/spaces/${spaceId}/databases/${databaseId}`, {
+  return apiFetch<DatabaseResponseDto>(`/databases/${databaseId}`, {
     method: "PATCH",
     body: data,
   });
 }
 
-export function createRecord(databaseId: string, data: { name?: string; icon?: string }) {
-  return apiFetch<RecordResponseDto>(`/databases/${databaseId}/records`, { method: "POST", body: data });
+export function createDatabase(
+  spaceId: string,
+  data: { name: string; title: string; type?: string; sectionId?: string; icon?: string },
+) {
+  return apiFetch<DatabaseResponseDto>(`/databases`, {
+    method: "POST",
+    body: { ...data, spaceId },
+  });
 }
 
-export function createPropertyValue(recordId: string, data: { propertyId: string; value?: unknown }) {
-  return apiFetch<PropertyValueResponseDto>(`/records/${recordId}/values`, { method: "POST", body: data });
+export function deleteDatabase(spaceId: string, databaseId: string) {
+  return apiFetch(`/databases/${databaseId}`, { method: "DELETE" });
 }
 
-export function updatePropertyValue(recordId: string, valueId: string, data: { value?: unknown }) {
-  return apiFetch<PropertyValueResponseDto>(`/records/${recordId}/values/${valueId}`, {
-    method: "PATCH",
-    body: data,
+export function duplicateDatabase(spaceId: string, databaseId: string) {
+  return apiFetch<DatabaseResponseDto>(`/databases/${databaseId}/duplicate`, {
+    method: "POST",
   });
 }
