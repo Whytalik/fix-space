@@ -1,10 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_TEXT_PROPERTY, PropertyType, URL_HANDLING_VALUES, UrlHandling } from "@nucleus/domain";
-import { PropertyTypeHandler } from "../handler.interface";
+import { DEFAULT_TEXT_PROPERTY, PropertyType, TextProperty, URL_HANDLING_VALUES, UrlHandling } from "@nucleus/domain";
+import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
-export class TextHandler implements PropertyTypeHandler {
+export class TextHandler implements PropertyConfigHandler, PropertyValueHandler {
   readonly type = PropertyType.TEXT;
+
+  private parseConfig(config: Record<string, unknown>): TextProperty {
+    return config as unknown as TextProperty;
+  }
 
   getDefaultConfig(): Record<string, unknown> {
     return {
@@ -43,6 +47,6 @@ export class TextHandler implements PropertyTypeHandler {
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (config.defaultValue as string | undefined) ?? "";
+    return this.parseConfig(config).defaultValue ?? "";
   }
 }

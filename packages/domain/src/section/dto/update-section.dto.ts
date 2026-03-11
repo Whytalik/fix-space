@@ -1,8 +1,21 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { IsOptional, IsString } from "class-validator";
-import { CreateSectionDto } from "./create-section.dto";
+import { IsInt, IsOptional, IsString, MaxLength, Min, MinLength } from "class-validator";
 
-export class UpdateSectionDto extends PartialType(CreateSectionDto) {
+export class UpdateSectionDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(1, { message: "Section name must be at least 1 character" })
+  @MaxLength(120, { message: "Section name must not exceed 120 characters" })
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  key?: string;
+
+  @IsOptional()
+  @IsInt({ message: "Position must be an integer" })
+  @Min(0, { message: "Position must be a non-negative integer" })
+  position?: number;
+
   @IsOptional()
   @IsString()
   icon?: string;
