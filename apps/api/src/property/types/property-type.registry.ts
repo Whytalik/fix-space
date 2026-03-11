@@ -1,15 +1,17 @@
-import { Inject, Injectable, OnModuleInit } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { PropertyType } from "@nucleus/domain";
-import { PropertyTypeHandler } from "./handler.interface";
+import { PropertyConfigHandler, PropertyValueHandler } from "./handler.interface";
 import { PROPERTY_TYPE_HANDLERS } from "./property-type.tokens";
+
+type FullHandler = PropertyConfigHandler & PropertyValueHandler;
 
 @Injectable()
 export class PropertyTypeRegistry implements OnModuleInit {
-  private readonly handlers = new Map<PropertyType, PropertyTypeHandler>();
+  private readonly handlers = new Map<PropertyType, FullHandler>();
 
   constructor(
     @Inject(PROPERTY_TYPE_HANDLERS)
-    private readonly handlerList: PropertyTypeHandler[],
+    private readonly handlerList: FullHandler[],
   ) {}
 
   onModuleInit(): void {
@@ -21,15 +23,19 @@ export class PropertyTypeRegistry implements OnModuleInit {
     }
   }
 
-  getHandler(type: PropertyType): PropertyTypeHandler {
+  getConfigHandler(type: PropertyType): PropertyConfigHandler {
     const handler = this.handlers.get(type);
     if (!handler) {
-      throw new Error(`No handler registered for property type: ${type}`);
+      throw new BadRequestException(`No handler registered for property type: ${type}`);
     }
     return handler;
   }
 
-  hasHandler(type: PropertyType): boolean {
-    return this.handlers.has(type);
+  getValueHandler(type: PropertyType): PropertyValueHandler {
+    const handler = this.handlers.get(type);
+    if (!handler) {
+      throw new BadRequestException(`No handler registered for property type: ${type}`);
+    }
+    return handler;
   }
 }

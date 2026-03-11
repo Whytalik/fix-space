@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class CreateSpaceDto {
   @IsString()
@@ -16,4 +16,10 @@ export class CreateSpaceDto {
   @IsOptional()
   @IsString()
   icon?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isDefault?: boolean;
 }
+
+

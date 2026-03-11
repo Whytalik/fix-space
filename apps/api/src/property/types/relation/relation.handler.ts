@@ -1,10 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_RELATION_PROPERTY, PropertyType } from "@nucleus/domain";
-import { PropertyTypeHandler } from "../handler.interface";
+import { DEFAULT_RELATION_PROPERTY, PropertyType, RelationProperty } from "@nucleus/domain";
+import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
-export class RelationHandler implements PropertyTypeHandler {
+export class RelationHandler implements PropertyConfigHandler, PropertyValueHandler {
   readonly type = PropertyType.RELATION;
+
+  private parseConfig(config: Record<string, unknown>): RelationProperty {
+    return config as unknown as RelationProperty;
+  }
 
   getDefaultConfig(): Record<string, unknown> {
     return {
@@ -29,7 +33,7 @@ export class RelationHandler implements PropertyTypeHandler {
   validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
     if (value === null) return null;
 
-    const isMultiple = config.multiple as boolean | undefined;
+    const { multiple: isMultiple } = this.parseConfig(config);
 
     if (isMultiple) {
       if (!Array.isArray(value)) {
@@ -50,12 +54,12 @@ export class RelationHandler implements PropertyTypeHandler {
 
   formatValue(value: unknown, config: Record<string, unknown>): unknown {
     if (value === null || value === undefined) {
-      return (config.multiple as boolean | undefined) ? [] : null;
+      return this.parseConfig(config).multiple ? [] : null;
     }
     return value;
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (config.multiple as boolean | undefined) ? [] : null;
+    return this.parseConfig(config).multiple ? [] : null;
   }
 }
