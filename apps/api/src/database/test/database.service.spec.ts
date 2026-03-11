@@ -11,16 +11,16 @@ import { DatabaseService } from "../database.service";
 jest.mock("@nucleus/database", () => ({
   prisma: {
     space: {
-      findFirst: jest.fn(),
+      findFirst: jest.fn<any>(),
     },
     database: {
-      findFirst: jest.fn(),
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+      findFirst: jest.fn<any>(),
+      findMany: jest.fn<any>(),
+      findUnique: jest.fn<any>(),
+      update: jest.fn<any>(),
+      delete: jest.fn<any>(),
     },
-    $transaction: jest.fn(),
+    $transaction: jest.fn<any>(),
   },
 }));
 
@@ -28,24 +28,24 @@ describe("DatabaseService", () => {
   let service: DatabaseService;
 
   const mockLogger = {
-    setContext: jest.fn(),
-    debug: jest.fn(),
-    log: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    setContext: jest.fn<any>(),
+    debug: jest.fn<any>(),
+    log: jest.fn<any>(),
+    warn: jest.fn<any>(),
+    error: jest.fn<any>(),
   };
 
   const mockHandler = {
     type: PropertyType.TEXT,
-    getDefaultConfig: jest.fn().mockReturnValue({
+    getDefaultConfig: jest.fn<any>().mockReturnValue({
       defaultValue: "",
       isRichText: false,
     }),
-    validateConfig: jest.fn().mockReturnValue(null),
+    validateConfig: jest.fn<any>().mockReturnValue(null),
   };
 
   const mockTypeRegistry = {
-    getHandler: jest.fn().mockReturnValue(mockHandler),
+    getConfigHandler: jest.fn<any>().mockReturnValue(mockHandler),
   };
 
   const mockSpace = {
@@ -91,24 +91,25 @@ describe("DatabaseService", () => {
 
   describe("create", () => {
     it("should create a database with default properties and return DatabaseResponseDto", async () => {
-      (prisma.space.findFirst as jest.Mock).mockResolvedValue(mockSpace);
-      (prisma.database.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.space.findFirst as jest.Mock<any>).mockResolvedValue(mockSpace);
+      (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue(null);
 
       const mockTx = {
         database: {
           create: jest.fn<() => Promise<typeof mockDatabase>>().mockResolvedValue(mockDatabase),
         },
         property: {
-          create: jest.fn().mockResolvedValue({}),
+          create: jest.fn<any>().mockResolvedValue({}),
         },
       };
-      (prisma.$transaction as jest.Mock).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+      (prisma.$transaction as jest.Mock<any>).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
         cb(mockTx),
       );
 
       const result = await service.create(
         "space-123",
         {
+          spaceId: "space-123",
           name: "Test DB",
           title: "Test Database",
         },
@@ -149,7 +150,7 @@ describe("DatabaseService", () => {
           databaseId: "db-123",
         }),
       });
-      expect(mockLogger.log).toHaveBeenCalledWith("Database created with default properties", {
+      expect(mockLogger.log).toHaveBeenCalledWith("Database created with properties", {
         databaseId: "db-123",
         spaceId: "space-123",
         propertyCount: defaultInitializationConfig.defaultDatabaseProperties.length,
@@ -157,24 +158,34 @@ describe("DatabaseService", () => {
     });
 
     it("should throw NotFoundException when space not found or not owned by user", async () => {
-      (prisma.space.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.space.findFirst as jest.Mock<any>).mockResolvedValue(null);
 
-      await expect(service.create("space-nonexistent", { name: "Test DB" }, "user-123")).rejects.toThrow(
-        NotFoundException,
-      );
-      await expect(service.create("space-nonexistent", { name: "Test DB" }, "user-123")).rejects.toThrow(
-        "Space not found",
-      );
+      await expect(
+        service.create(
+          "space-nonexistent",
+          { spaceId: "space-nonexistent", name: "Test DB", title: "Test DB" },
+          "user-123",
+        ),
+      ).rejects.toThrow(NotFoundException);
+      await expect(
+        service.create(
+          "space-nonexistent",
+          { spaceId: "space-nonexistent", name: "Test DB", title: "Test DB" },
+          "user-123",
+        ),
+      ).rejects.toThrow("Space not found");
     });
 
     it("should throw ConflictException when database name already taken in space", async () => {
-      (prisma.space.findFirst as jest.Mock).mockResolvedValue(mockSpace);
-      (prisma.database.findFirst as jest.Mock).mockResolvedValue(mockDatabase);
+      (prisma.space.findFirst as jest.Mock<any>).mockResolvedValue(mockSpace);
+      (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue(mockDatabase);
 
-      await expect(service.create("space-123", { name: "Test DB" }, "user-123")).rejects.toThrow(ConflictException);
-      await expect(service.create("space-123", { name: "Test DB" }, "user-123")).rejects.toThrow(
-        "Database name is already taken in this space.",
-      );
+      await expect(
+        service.create("space-123", { spaceId: "space-123", name: "Test DB", title: "Test DB" }, "user-123"),
+      ).rejects.toThrow(ConflictException);
+      await expect(
+        service.create("space-123", { spaceId: "space-123", name: "Test DB", title: "Test DB" }, "user-123"),
+      ).rejects.toThrow("Database name is already taken in this space.");
     });
   });
 
@@ -188,7 +199,7 @@ describe("DatabaseService", () => {
           name: "DB 2",
         },
       ];
-      (prisma.database.findMany as jest.Mock).mockResolvedValue(databases);
+      (prisma.database.findMany as jest.Mock<any>).mockResolvedValue(databases);
 
       const result = await service.findAll("space-123", "user-123");
 
@@ -206,7 +217,7 @@ describe("DatabaseService", () => {
     });
 
     it("should return empty array when no databases", async () => {
-      (prisma.database.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.database.findMany as jest.Mock<any>).mockResolvedValue([]);
 
       const result = await service.findAll("space-123", "user-123");
 
@@ -216,7 +227,7 @@ describe("DatabaseService", () => {
 
   describe("findOne", () => {
     it("should return DatabaseResponseDto for valid id", async () => {
-      (prisma.database.findUnique as jest.Mock).mockResolvedValue(mockDatabase);
+      (prisma.database.findUnique as jest.Mock<any>).mockResolvedValue(mockDatabase);
 
       const result = await service.findOne("db-123");
 
@@ -230,7 +241,7 @@ describe("DatabaseService", () => {
     });
 
     it("should throw NotFoundException when database not found", async () => {
-      (prisma.database.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.database.findUnique as jest.Mock<any>).mockResolvedValue(null);
 
       await expect(service.findOne("nonexistent")).rejects.toThrow(NotFoundException);
       await expect(service.findOne("nonexistent")).rejects.toThrow("Database with id nonexistent not found");
@@ -244,8 +255,8 @@ describe("DatabaseService", () => {
         name: "Updated DB",
         title: "New Title",
       };
-      (prisma.database.findUnique as jest.Mock).mockResolvedValue(mockDatabase);
-      (prisma.database.update as jest.Mock).mockResolvedValue(updatedDatabase);
+      (prisma.database.findUnique as jest.Mock<any>).mockResolvedValue(mockDatabase);
+      (prisma.database.update as jest.Mock<any>).mockResolvedValue(updatedDatabase);
 
       const result = await service.update("db-123", {
         name: "Updated DB",
@@ -274,7 +285,7 @@ describe("DatabaseService", () => {
     });
 
     it("should throw NotFoundException when database not found", async () => {
-      (prisma.database.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.database.findUnique as jest.Mock<any>).mockResolvedValue(null);
 
       await expect(service.update("nonexistent", { name: "Updated" })).rejects.toThrow(NotFoundException);
       await expect(service.update("nonexistent", { name: "Updated" })).rejects.toThrow(
@@ -285,8 +296,8 @@ describe("DatabaseService", () => {
 
   describe("remove", () => {
     it("should delete database and return DatabaseResponseDto", async () => {
-      (prisma.database.findUnique as jest.Mock).mockResolvedValue(mockDatabase);
-      (prisma.database.delete as jest.Mock).mockResolvedValue(mockDatabase);
+      (prisma.database.findUnique as jest.Mock<any>).mockResolvedValue(mockDatabase);
+      (prisma.database.delete as jest.Mock<any>).mockResolvedValue(mockDatabase);
 
       const result = await service.remove("db-123");
 
@@ -305,7 +316,7 @@ describe("DatabaseService", () => {
     });
 
     it("should throw NotFoundException when database not found", async () => {
-      (prisma.database.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.database.findUnique as jest.Mock<any>).mockResolvedValue(null);
 
       await expect(service.remove("nonexistent")).rejects.toThrow(NotFoundException);
       await expect(service.remove("nonexistent")).rejects.toThrow("Database with id nonexistent not found");
