@@ -24,8 +24,6 @@ export const envSchema = z.object({
   APP_URL: z.string().default("http://localhost:3001"),
 
   CORS_ORIGIN: z.string().default("http://localhost:3001"),
-
-  SPACE_NAME_TEMPLATE: z.string().default("{{username}}'s Space"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

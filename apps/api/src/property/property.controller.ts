@@ -1,27 +1,28 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { CreatePropertyDto, UpdatePropertyDto } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { PropertyService } from "./property.service";
 
-@Controller("databases/:databaseId/properties")
+@Controller("properties")
 export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()
   create(
-    @Param("databaseId")
-    databaseId: string,
     @CurrentUser("userId")
     userId: string,
     @Body()
     createPropertyDto: CreatePropertyDto,
   ) {
-    return this.propertyService.create(databaseId, createPropertyDto, userId);
+    if (!createPropertyDto.databaseId) {
+      throw new BadRequestException("databaseId is required");
+    }
+    return this.propertyService.create(createPropertyDto.databaseId, createPropertyDto, userId);
   }
 
   @Get()
   findAll(
-    @Param("databaseId")
+    @Query("databaseId")
     databaseId: string,
     @CurrentUser("userId")
     userId: string,

@@ -14,6 +14,12 @@ export enum PropertyType {
 export class CreatePropertyDto {
   @IsString()
   @IsNotEmpty({
+    message: "Database ID is required",
+  })
+  databaseId: string;
+
+  @IsString()
+  @IsNotEmpty({
     message: "Property name is required",
   })
   @MinLength(1, {
@@ -59,6 +65,14 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsString()
   color?: string;
+
+  @IsOptional()
+  @IsString()
+  hint?: string;
+
+  @IsOptional()
+  @IsString()
+  group?: string;
 
   @IsOptional()
   config?: Record<string, unknown>;

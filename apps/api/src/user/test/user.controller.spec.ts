@@ -19,6 +19,7 @@ describe("UserController", () => {
   const mockUserService = {
     findById: jest.fn<() => Promise<UserResponseDto>>(),
     update: jest.fn<() => Promise<UserResponseDto>>(),
+    changePassword: jest.fn<any>(),
     remove: jest.fn<() => Promise<UserResponseDto>>(),
   };
 
@@ -66,6 +67,20 @@ describe("UserController", () => {
       expect(result).toEqual(updatedUser);
       expect(mockUserService.update).toHaveBeenCalledWith("user-123", updateDto);
       expect(mockUserService.update).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("changePassword", () => {
+    it("should call userService.changePassword with userId and dto", async () => {
+      const dto = { currentPassword: "Old@pass1", newPassword: "New@pass1" };
+      const expected = { message: "Password changed successfully" };
+      mockUserService.changePassword.mockResolvedValue(expected);
+
+      const result = await controller.changePassword("user-123", dto as any);
+
+      expect(result).toEqual(expected);
+      expect(mockUserService.changePassword).toHaveBeenCalledWith("user-123", dto);
+      expect(mockUserService.changePassword).toHaveBeenCalledTimes(1);
     });
   });
 

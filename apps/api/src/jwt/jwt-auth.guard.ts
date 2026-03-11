@@ -5,11 +5,11 @@ import { IS_PUBLIC_ROUTE } from "../auth/decorators/public.decorator";
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {
-  constructor(private reflector: Reflector) {
+  constructor(private readonly reflector: Reflector) {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_ROUTE, [
       context.getHandler(),
       context.getClass(),
@@ -17,6 +17,6 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
 
     if (isPublic) return true;
 
-    return super.canActivate(context);
+    return super.canActivate(context) as Promise<boolean>;
   }
 }

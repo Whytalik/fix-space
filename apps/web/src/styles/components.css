@@ -1,0 +1,35 @@
+@layer components {
+  .type-page-title {
+    @apply text-2xl font-bold text-ink;
+  }
+
+  .type-panel-title {
+    @apply text-lg font-bold text-ink;
+  }
+
+  .type-modal-title {
+    @apply text-base font-bold text-ink;
+  }
+
+  .type-field-label {
+    @apply text-xs font-semibold uppercase tracking-wide text-ink-secondary;
+  }
+
+  .type-form-label {
+    @apply text-sm font-semibold text-ink-secondary;
+  }
+
+  .type-hint {
+    @apply text-xs text-ink-muted;
+  }
+
+  .type-nav-label {
+    @apply text-[11px] font-semibold uppercase tracking-wider text-ink-muted;
+  }
+
+  .field-input {
+    @apply w-full rounded-lg border border-stroke bg-canvas px-3 py-2 text-sm text-ink
+           outline-none focus:border-accent transition-colors duration-150
+           placeholder:text-ink-muted;
+  }
+}

@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Patch } from "@nestjs/common";
-import { UpdateUserDto } from "@nucleus/domain";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch } from "@nestjs/common";
+import { ChangePasswordDto, UpdateUserDto } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { UserService } from "./user.service";
 
@@ -23,6 +23,17 @@ export class UserController {
     updateUserDto: UpdateUserDto,
   ) {
     return this.userService.update(userId, updateUserDto);
+  }
+
+  @Patch("me/password")
+  @HttpCode(HttpStatus.OK)
+  changePassword(
+    @CurrentUser("userId")
+    userId: string,
+    @Body()
+    changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.userService.changePassword(userId, changePasswordDto);
   }
 
   @Delete("me")
