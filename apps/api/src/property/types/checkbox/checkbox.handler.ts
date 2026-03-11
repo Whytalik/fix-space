@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { DEFAULT_CHECKBOX_PROPERTY, PropertyType } from "@nucleus/domain";
-import { PropertyTypeHandler } from "../handler.interface";
+import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
-export class CheckboxHandler implements PropertyTypeHandler {
+export class CheckboxHandler implements PropertyConfigHandler, PropertyValueHandler {
   readonly type = PropertyType.CHECKBOX;
 
   getDefaultConfig(): Record<string, unknown> {
