@@ -1,6 +1,5 @@
 import { Exclude, Expose, Type } from "class-transformer";
 import { PropertyValueResponseDto } from "../../property-value/dto/property-value-response.dto";
-import { RecordContentResponseDto } from "../../record-content/dto/record-content-response.dto";
 
 @Exclude()
 export class RecordResponseDto {
@@ -29,11 +28,9 @@ export class RecordResponseDto {
   @Type(() => PropertyValueResponseDto)
   values?: PropertyValueResponseDto[];
 
-  @Expose()
-  @Type(() => RecordContentResponseDto)
-  content?: RecordContentResponseDto;
-
   constructor(partial: Partial<RecordResponseDto>) {
     Object.assign(this, partial);
   }
 }
+
+

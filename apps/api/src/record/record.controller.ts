@@ -1,27 +1,25 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { CreateRecordDto, UpdateRecordDto } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { RecordService } from "./record.service";
 
-@Controller("databases/:databaseId/records")
+@Controller("records")
 export class RecordController {
   constructor(private readonly recordService: RecordService) {}
 
   @Post()
   create(
-    @Param("databaseId")
-    databaseId: string,
     @CurrentUser("userId")
     userId: string,
     @Body()
     createRecordDto: CreateRecordDto,
   ) {
-    return this.recordService.create(databaseId, createRecordDto, userId);
+    return this.recordService.create(createRecordDto.databaseId, createRecordDto, userId);
   }
 
   @Get()
   findAll(
-    @Param("databaseId")
+    @Query("databaseId")
     databaseId: string,
     @CurrentUser("userId")
     userId: string,
