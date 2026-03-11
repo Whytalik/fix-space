@@ -3,11 +3,13 @@ import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { prisma } from "@nucleus/database";
 import cookieParser from "cookie-parser";
+import type { Server } from "http";
 import request from "supertest";
 import { AppModule } from "../src/app.module";
 
 describe("Auth (e2e)", () => {
   let app: INestApplication;
+  let httpServer: Server;
   let testUserEmail: string;
   let testUsername: string;
   let testPassword: string;
@@ -31,6 +33,7 @@ describe("Auth (e2e)", () => {
     );
 
     await app.init();
+    httpServer = app.getHttpServer() as Server;
   });
 
   afterAll(async () => {
@@ -50,14 +53,7 @@ describe("Auth (e2e)", () => {
     if (testUserEmail) {
       await prisma.user.deleteMany({
         where: {
-          OR: [
-            {
-              email: testUserEmail,
-            },
-            {
-              username: testUsername,
-            },
-          ],
+          OR: [{ email: testUserEmail }, { username: testUsername }],
         },
       });
     }
@@ -65,7 +61,7 @@ describe("Auth (e2e)", () => {
 
   describe("POST /auth/register", () => {
     it("should register a new user successfully", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -80,9 +76,7 @@ describe("Auth (e2e)", () => {
 
       // Verify user was created in database
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
 
       expect(user).toBeDefined();
@@ -94,7 +88,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should create verification token in database", async () => {
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -104,15 +98,11 @@ describe("Auth (e2e)", () => {
         .expect(201);
 
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
 
       const token = await prisma.emailVerificationToken.findFirst({
-        where: {
-          userId: user!.id,
-        },
+        where: { userId: user!.id },
       });
 
       expect(token).toBeDefined();
@@ -123,7 +113,7 @@ describe("Auth (e2e)", () => {
 
     it("should reject registration with existing email", async () => {
       // First registration
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -133,7 +123,7 @@ describe("Auth (e2e)", () => {
         .expect(201);
 
       // Second registration with same email
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -147,7 +137,7 @@ describe("Auth (e2e)", () => {
 
     it("should reject registration with existing username", async () => {
       // First registration
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -157,7 +147,7 @@ describe("Auth (e2e)", () => {
         .expect(201);
 
       // Second registration with same username
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/register")
         .send({
           email: "different@example.com",
@@ -170,7 +160,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should reject registration with invalid email", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/register")
         .send({
           email: "invalid-email",
@@ -183,7 +173,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should reject registration with weak password", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -196,7 +186,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should reject registration with short username", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -209,7 +199,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should reject registration with invalid username characters", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -225,22 +215,10 @@ describe("Auth (e2e)", () => {
   describe("POST /auth/verify", () => {
     beforeEach(async () => {
       // Register a user and get verification token
-      await request(app.getHttpServer()).post("/auth/register").send({
+      await request(httpServer).post("/auth/register").send({
         email: testUserEmail,
         username: testUsername,
         password: testPassword,
-      });
-
-      const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
-      });
-
-      const tokenRecord = await prisma.emailVerificationToken.findFirst({
-        where: {
-          userId: user!.id,
-        },
       });
 
       // In real app, token is sent via email. Here we'll need to mock it or use a test token
@@ -257,7 +235,7 @@ describe("Auth (e2e)", () => {
       // 3. Use a test database with known tokens
 
       // For demonstration, this test shows the expected behavior
-      const response = await request(app.getHttpServer()).post("/auth/verify").send({
+      const response = await request(httpServer).post("/auth/verify").send({
         token: verificationToken,
       });
 
@@ -267,7 +245,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should reject verification with invalid token", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/verify")
         .send({
           token: "invalid-token",
@@ -280,9 +258,7 @@ describe("Auth (e2e)", () => {
     it("should reject verification with expired token", async () => {
       // Create expired token
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
 
       await prisma.emailVerificationToken.create({
@@ -293,7 +269,7 @@ describe("Auth (e2e)", () => {
         },
       });
 
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/verify")
         .send({
           token: "expired-token",
@@ -307,7 +283,7 @@ describe("Auth (e2e)", () => {
   describe("POST /auth/login", () => {
     beforeEach(async () => {
       // Register and verify a user
-      await request(app.getHttpServer()).post("/auth/register").send({
+      await request(httpServer).post("/auth/register").send({
         email: testUserEmail,
         username: testUsername,
         password: testPassword,
@@ -315,17 +291,13 @@ describe("Auth (e2e)", () => {
 
       // Manually verify the user (bypass email verification for testing)
       await prisma.user.update({
-        where: {
-          email: testUserEmail,
-        },
-        data: {
-          isVerified: true,
-        },
+        where: { email: testUserEmail },
+        data: { isVerified: true },
       });
     });
 
     it("should login successfully with valid credentials", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/login")
         .send({
           email: testUserEmail,
@@ -338,14 +310,14 @@ describe("Auth (e2e)", () => {
       expect(response.body).toHaveProperty("refreshToken");
 
       // Check cookies are set
-      const cookies = response.headers["set-cookie"];
-      expect(cookies).toBeDefined();
-      expect(cookies.some((c: string) => c.startsWith("access_token="))).toBe(true);
-      expect(cookies.some((c: string) => c.startsWith("refresh_token="))).toBe(true);
+      const cookies = ([] as string[]).concat(response.headers["set-cookie"] ?? []);
+      expect(cookies.length).toBeGreaterThan(0);
+      expect(cookies.some((c) => c.startsWith("access_token="))).toBe(true);
+      expect(cookies.some((c) => c.startsWith("refresh_token="))).toBe(true);
     });
 
     it("should create refresh token in database on login", async () => {
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/login")
         .send({
           email: testUserEmail,
@@ -354,23 +326,18 @@ describe("Auth (e2e)", () => {
         .expect(200);
 
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
 
       const refreshTokens = await prisma.refreshToken.findMany({
-        where: {
-          userId: user!.id,
-          revokedAt: null,
-        },
+        where: { userId: user!.id, revokedAt: null },
       });
 
       expect(refreshTokens.length).toBeGreaterThan(0);
     });
 
     it("should reject login with incorrect password", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/login")
         .send({
           email: testUserEmail,
@@ -382,7 +349,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should reject login with non-existent email", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/login")
         .send({
           email: "nonexistent@example.com",
@@ -396,7 +363,7 @@ describe("Auth (e2e)", () => {
     it("should reject login for unverified email", async () => {
       // Create unverified user
       const unverifiedEmail = `unverified${Date.now()}@example.com`;
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/register")
         .send({
           email: unverifiedEmail,
@@ -404,7 +371,7 @@ describe("Auth (e2e)", () => {
           password: testPassword,
         });
 
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/login")
         .send({
           email: unverifiedEmail,
@@ -415,11 +382,7 @@ describe("Auth (e2e)", () => {
       expect(response.body.message).toContain("verify your email");
 
       // Cleanup
-      await prisma.user.deleteMany({
-        where: {
-          email: unverifiedEmail,
-        },
-      });
+      await prisma.user.deleteMany({ where: { email: unverifiedEmail } });
     });
 
     it("should enforce rate limiting on login endpoint", async () => {
@@ -428,7 +391,7 @@ describe("Auth (e2e)", () => {
       // Make 6 requests (limit is 5)
       for (let i = 0; i < 6; i++) {
         requests.push(
-          request(app.getHttpServer()).post("/auth/login").send({
+          request(httpServer).post("/auth/login").send({
             email: testUserEmail,
             password: "wrong-password",
           }),
@@ -444,13 +407,13 @@ describe("Auth (e2e)", () => {
 
     it("should not leak information about whether email exists", async () => {
       // Login with non-existent email
-      const response1 = await request(app.getHttpServer()).post("/auth/login").send({
+      const response1 = await request(httpServer).post("/auth/login").send({
         email: "nonexistent@example.com",
         password: testPassword,
       });
 
       // Login with existing email but wrong password
-      const response2 = await request(app.getHttpServer()).post("/auth/login").send({
+      const response2 = await request(httpServer).post("/auth/login").send({
         email: testUserEmail,
         password: "WrongPassword123!",
       });
@@ -463,7 +426,7 @@ describe("Auth (e2e)", () => {
 
     it("should allow concurrent sessions from different devices", async () => {
       // Login from "device 1"
-      const response1 = await request(app.getHttpServer())
+      const response1 = await request(httpServer)
         .post("/auth/login")
         .send({
           email: testUserEmail,
@@ -474,7 +437,7 @@ describe("Auth (e2e)", () => {
       const token1 = response1.body.refreshToken;
 
       // Login from "device 2"
-      const response2 = await request(app.getHttpServer())
+      const response2 = await request(httpServer)
         .post("/auth/login")
         .send({
           email: testUserEmail,
@@ -488,16 +451,11 @@ describe("Auth (e2e)", () => {
       expect(token1).not.toBe(token2);
 
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
 
       const activeTokens = await prisma.refreshToken.findMany({
-        where: {
-          userId: user!.id,
-          revokedAt: null,
-        },
+        where: { userId: user!.id, revokedAt: null },
       });
 
       // Both sessions should be active
@@ -510,22 +468,18 @@ describe("Auth (e2e)", () => {
 
     beforeEach(async () => {
       // Register, verify, and login a user
-      await request(app.getHttpServer()).post("/auth/register").send({
+      await request(httpServer).post("/auth/register").send({
         email: testUserEmail,
         username: testUsername,
         password: testPassword,
       });
 
       await prisma.user.update({
-        where: {
-          email: testUserEmail,
-        },
-        data: {
-          isVerified: true,
-        },
+        where: { email: testUserEmail },
+        data: { isVerified: true },
       });
 
-      const loginResponse = await request(app.getHttpServer()).post("/auth/login").send({
+      const loginResponse = await request(httpServer).post("/auth/login").send({
         email: testUserEmail,
         password: testPassword,
       });
@@ -534,7 +488,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should refresh tokens successfully", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .expect(200);
@@ -547,7 +501,7 @@ describe("Auth (e2e)", () => {
 
     it("should rotate refresh token (invalidate old token)", async () => {
       // First refresh
-      const response1 = await request(app.getHttpServer())
+      const response1 = await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .expect(200);
@@ -555,7 +509,7 @@ describe("Auth (e2e)", () => {
       const newRefreshToken = response1.body.refreshToken;
 
       // Try to use old token again
-      const response2 = await request(app.getHttpServer())
+      const response2 = await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .expect(401);
@@ -563,14 +517,14 @@ describe("Auth (e2e)", () => {
       expect(response2.body.message).toContain("Invalid or expired");
 
       // New token should work
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", [`refresh_token=${newRefreshToken}`])
         .expect(200);
     });
 
     it("should reject refresh with invalid token", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", ["refresh_token=invalid-token"])
         .expect(401);
@@ -579,7 +533,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should reject refresh without token", async () => {
-      const response = await request(app.getHttpServer()).post("/auth/refresh").expect(401);
+      const response = await request(httpServer).post("/auth/refresh").expect(401);
 
       expect(response.body.message).toContain("not provided");
     });
@@ -587,9 +541,7 @@ describe("Auth (e2e)", () => {
     it("should reject refresh with expired token", async () => {
       // Manually create expired token
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
 
       const expiredTokenHash = "expired-hash-for-test";
@@ -601,7 +553,7 @@ describe("Auth (e2e)", () => {
         },
       });
 
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", ["refresh_token=expired-raw-token"])
         .expect(401);
@@ -613,7 +565,7 @@ describe("Auth (e2e)", () => {
       let currentToken = refreshToken;
 
       for (let i = 0; i < 3; i++) {
-        const response = await request(app.getHttpServer())
+        const response = await request(httpServer)
           .post("/auth/refresh")
           .set("Cookie", [`refresh_token=${currentToken}`])
           .expect(200);
@@ -630,22 +582,18 @@ describe("Auth (e2e)", () => {
 
     beforeEach(async () => {
       // Register, verify, and login a user
-      await request(app.getHttpServer()).post("/auth/register").send({
+      await request(httpServer).post("/auth/register").send({
         email: testUserEmail,
         username: testUsername,
         password: testPassword,
       });
 
       await prisma.user.update({
-        where: {
-          email: testUserEmail,
-        },
-        data: {
-          isVerified: true,
-        },
+        where: { email: testUserEmail },
+        data: { isVerified: true },
       });
 
-      const loginResponse = await request(app.getHttpServer()).post("/auth/login").send({
+      const loginResponse = await request(httpServer).post("/auth/login").send({
         email: testUserEmail,
         password: testPassword,
       });
@@ -655,7 +603,7 @@ describe("Auth (e2e)", () => {
     });
 
     it("should logout successfully", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/logout")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .set("Authorization", `Bearer ${accessToken}`)
@@ -666,14 +614,14 @@ describe("Auth (e2e)", () => {
     });
 
     it("should revoke refresh token on logout", async () => {
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/logout")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(200);
 
       // Try to use the same refresh token
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .expect(401);
@@ -682,21 +630,21 @@ describe("Auth (e2e)", () => {
     });
 
     it("should clear cookies on logout", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/logout")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(200);
 
-      const cookies = response.headers["set-cookie"];
-      if (cookies) {
+      const cookies = ([] as string[]).concat(response.headers["set-cookie"] ?? []);
+      if (cookies.length > 0) {
         // Check that cookies are cleared (set to empty or expired)
-        expect(cookies.some((c: string) => c.includes("access_token"))).toBe(true);
+        expect(cookies.some((c) => c.includes("access_token"))).toBe(true);
       }
     });
 
     it("should allow logout without refresh token", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/logout")
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(200);
@@ -706,7 +654,7 @@ describe("Auth (e2e)", () => {
 
     it("should not affect other sessions on single logout", async () => {
       // Create second session
-      const loginResponse2 = await request(app.getHttpServer()).post("/auth/login").send({
+      const loginResponse2 = await request(httpServer).post("/auth/login").send({
         email: testUserEmail,
         password: testPassword,
       });
@@ -714,14 +662,14 @@ describe("Auth (e2e)", () => {
       const refreshToken2 = loginResponse2.body.refreshToken;
 
       // Logout first session
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/logout")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(200);
 
       // Second session should still work
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", [`refresh_token=${refreshToken2}`])
         .expect(200);
@@ -731,7 +679,7 @@ describe("Auth (e2e)", () => {
   describe("Full Registration to Login Flow", () => {
     it("should complete full flow: register → verify → login", async () => {
       // Step 1: Register
-      const registerResponse = await request(app.getHttpServer())
+      const registerResponse = await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -744,24 +692,18 @@ describe("Auth (e2e)", () => {
 
       // Step 2: Manually verify (in real app, this would be done via email link)
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
       expect(user).toBeDefined();
       expect(user!.isVerified).toBe(false);
 
       await prisma.user.update({
-        where: {
-          id: user!.id,
-        },
-        data: {
-          isVerified: true,
-        },
+        where: { id: user!.id },
+        data: { isVerified: true },
       });
 
       // Step 3: Login
-      const loginResponse = await request(app.getHttpServer())
+      const loginResponse = await request(httpServer)
         .post("/auth/login")
         .send({
           email: testUserEmail,
@@ -775,7 +717,7 @@ describe("Auth (e2e)", () => {
 
     it("should complete full flow: register → verify → login → refresh → logout", async () => {
       // Register
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/register")
         .send({
           email: testUserEmail,
@@ -786,16 +728,12 @@ describe("Auth (e2e)", () => {
 
       // Verify
       await prisma.user.update({
-        where: {
-          email: testUserEmail,
-        },
-        data: {
-          isVerified: true,
-        },
+        where: { email: testUserEmail },
+        data: { isVerified: true },
       });
 
       // Login
-      const loginResponse = await request(app.getHttpServer())
+      const loginResponse = await request(httpServer)
         .post("/auth/login")
         .send({
           email: testUserEmail,
@@ -804,10 +742,9 @@ describe("Auth (e2e)", () => {
         .expect(200);
 
       const refreshToken = loginResponse.body.refreshToken;
-      const accessToken = loginResponse.body.accessToken;
 
       // Refresh
-      const refreshResponse = await request(app.getHttpServer())
+      const refreshResponse = await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .expect(200);
@@ -816,14 +753,14 @@ describe("Auth (e2e)", () => {
       const newAccessToken = refreshResponse.body.accessToken;
 
       // Logout
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/logout")
         .set("Cookie", [`refresh_token=${newRefreshToken}`])
         .set("Authorization", `Bearer ${newAccessToken}`)
         .expect(200);
 
       // Verify logout was successful - token should be revoked
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", [`refresh_token=${newRefreshToken}`])
         .expect(401);
@@ -833,22 +770,18 @@ describe("Auth (e2e)", () => {
   describe("Token Blacklisting", () => {
     it("should not allow reuse of revoked refresh token", async () => {
       // Register and login
-      await request(app.getHttpServer()).post("/auth/register").send({
+      await request(httpServer).post("/auth/register").send({
         email: testUserEmail,
         username: testUsername,
         password: testPassword,
       });
 
       await prisma.user.update({
-        where: {
-          email: testUserEmail,
-        },
-        data: {
-          isVerified: true,
-        },
+        where: { email: testUserEmail },
+        data: { isVerified: true },
       });
 
-      const loginResponse = await request(app.getHttpServer()).post("/auth/login").send({
+      const loginResponse = await request(httpServer).post("/auth/login").send({
         email: testUserEmail,
         password: testPassword,
       });
@@ -857,14 +790,14 @@ describe("Auth (e2e)", () => {
       const accessToken = loginResponse.body.accessToken;
 
       // Logout (revokes token)
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/logout")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .set("Authorization", `Bearer ${accessToken}`)
         .expect(200);
 
       // Try to use revoked token
-      const response = await request(app.getHttpServer())
+      const response = await request(httpServer)
         .post("/auth/refresh")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .expect(401);
@@ -874,22 +807,18 @@ describe("Auth (e2e)", () => {
 
     it("should mark token as revoked in database", async () => {
       // Register and login
-      await request(app.getHttpServer()).post("/auth/register").send({
+      await request(httpServer).post("/auth/register").send({
         email: testUserEmail,
         username: testUsername,
         password: testPassword,
       });
 
       await prisma.user.update({
-        where: {
-          email: testUserEmail,
-        },
-        data: {
-          isVerified: true,
-        },
+        where: { email: testUserEmail },
+        data: { isVerified: true },
       });
 
-      const loginResponse = await request(app.getHttpServer()).post("/auth/login").send({
+      const loginResponse = await request(httpServer).post("/auth/login").send({
         email: testUserEmail,
         password: testPassword,
       });
@@ -898,13 +827,11 @@ describe("Auth (e2e)", () => {
       const accessToken = loginResponse.body.accessToken;
 
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
 
       // Logout
-      await request(app.getHttpServer())
+      await request(httpServer)
         .post("/auth/logout")
         .set("Cookie", [`refresh_token=${refreshToken}`])
         .set("Authorization", `Bearer ${accessToken}`)
@@ -912,9 +839,7 @@ describe("Auth (e2e)", () => {
 
       // Check token is revoked in database
       const tokens = await prisma.refreshToken.findMany({
-        where: {
-          userId: user!.id,
-        },
+        where: { userId: user!.id },
       });
 
       expect(tokens.length).toBeGreaterThan(0);
@@ -924,24 +849,20 @@ describe("Auth (e2e)", () => {
 
   describe("Security Tests", () => {
     it("should prevent timing attacks on login", async () => {
-      await request(app.getHttpServer()).post("/auth/register").send({
+      await request(httpServer).post("/auth/register").send({
         email: testUserEmail,
         username: testUsername,
         password: testPassword,
       });
 
       await prisma.user.update({
-        where: {
-          email: testUserEmail,
-        },
-        data: {
-          isVerified: true,
-        },
+        where: { email: testUserEmail },
+        data: { isVerified: true },
       });
 
       // Login with non-existent user
       const start1 = Date.now();
-      await request(app.getHttpServer()).post("/auth/login").send({
+      await request(httpServer).post("/auth/login").send({
         email: "nonexistent@example.com",
         password: testPassword,
       });
@@ -949,7 +870,7 @@ describe("Auth (e2e)", () => {
 
       // Login with wrong password
       const start2 = Date.now();
-      await request(app.getHttpServer()).post("/auth/login").send({
+      await request(httpServer).post("/auth/login").send({
         email: testUserEmail,
         password: "WrongPassword123!",
       });
@@ -961,16 +882,14 @@ describe("Auth (e2e)", () => {
     });
 
     it("should not store plain text passwords", async () => {
-      await request(app.getHttpServer()).post("/auth/register").send({
+      await request(httpServer).post("/auth/register").send({
         email: testUserEmail,
         username: testUsername,
         password: testPassword,
       });
 
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
 
       expect(user!.passwordHash).not.toBe(testPassword);
@@ -979,16 +898,14 @@ describe("Auth (e2e)", () => {
     });
 
     it("should hash passwords with sufficient complexity", async () => {
-      await request(app.getHttpServer()).post("/auth/register").send({
+      await request(httpServer).post("/auth/register").send({
         email: testUserEmail,
         username: testUsername,
         password: testPassword,
       });
 
       const user = await prisma.user.findUnique({
-        where: {
-          email: testUserEmail,
-        },
+        where: { email: testUserEmail },
       });
 
       // Bcrypt hashes are 60 characters
