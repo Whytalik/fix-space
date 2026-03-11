@@ -1,11 +1,9 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma, prisma } from "@nucleus/database";
-import { CreateDatabaseDto, DatabaseResponseDto, UpdateDatabaseDto } from "@nucleus/domain";
-import { PropertyType } from "@nucleus/domain";
+import { CreateDatabaseDto, DatabaseResponseDto, PropertyType, UpdateDatabaseDto } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 import { defaultInitializationConfig } from "../config/initialization.config";
 import { PropertyTypeRegistry } from "../property/types";
-import { defaultDatabaseConfig } from "./database.config";
 
 @Injectable()
 export class DatabaseService {
@@ -57,7 +55,6 @@ export class DatabaseService {
           spaceId,
           sectionId: createDatabaseDto.sectionId,
           config: {
-            ...defaultDatabaseConfig,
             type: createDatabaseDto.type ?? "custom",
           },
         },
@@ -69,11 +66,9 @@ export class DatabaseService {
           : defaultInitializationConfig.defaultDatabaseProperties;
 
       for (const propertyDef of propertiesToCreate) {
-        const handler = this.typeRegistry.getHandler(propertyDef.type as PropertyType);
+        const handler = this.typeRegistry.getConfigHandler(propertyDef.type as PropertyType);
         const defaultConfig = handler.getDefaultConfig();
-        const mergedConfig = propertyDef.config
-          ? { ...defaultConfig, ...propertyDef.config }
-          : defaultConfig;
+        const mergedConfig = propertyDef.config ? { ...defaultConfig, ...propertyDef.config } : defaultConfig;
 
         await tx.property.create({
           data: {
