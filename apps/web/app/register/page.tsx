@@ -1,10 +1,11 @@
 "use client";
 
-import { devVerifyUser, register } from "@/lib/api/auth";
-import { ApiError } from "@/lib/api/client";
+import { AuthPageShell } from "@/components/auth/auth-page-shell";
+import { FormErrors } from "@/components/ui/form/form-errors";
+import { FormField } from "@/components/ui/form/form-field";
 import { Button } from "@/components/ui/primitives/button";
-import { Card } from "@/components/ui/primitives/card";
-import Link from "next/link";
+import { devVerifyUser, register } from "@/lib/api/auth";
+import { parseApiErrors } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -43,7 +44,7 @@ export default function RegisterPage() {
       });
       setSuccess(true);
     } catch (err) {
-      setErrors(err instanceof ApiError ? err.messages : ["Unable to connect to the server. Please try again."]);
+      setErrors(parseApiErrors(err));
     } finally {
       setLoading(false);
     }
@@ -75,91 +76,54 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex items-center justify-center flex-1 p-6">
-      <div className="w-full max-w-100">
-        <div className="mb-8 text-center">
-          <h1 className="text-[22px] font-bold tracking-[-0.03em] text-ink">Create an account</h1>
-          <p className="text-sm text-ink-secondary mt-1.5">Start using Nucleus today</p>
-        </div>
-
-        <Card>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-[13px] font-semibold text-ink-secondary">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="bg-elevated border border-stroke rounded-lg px-3 py-2.5 text-sm text-ink outline-none w-full transition-colors duration-150 focus:border-accent"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="username" className="text-[13px] font-semibold text-ink-secondary">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                autoComplete="nickname"
-                required
-                minLength={3}
-                maxLength={50}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="your_username"
-                className="bg-elevated border border-stroke rounded-lg px-3 py-2.5 text-sm text-ink outline-none w-full transition-colors duration-150 focus:border-accent"
-              />
-              <span className="text-xs text-ink-muted">Letters, numbers, underscores and hyphens only</span>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-[13px] font-semibold text-ink-secondary">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="bg-elevated border border-stroke rounded-lg px-3 py-2.5 text-sm text-ink outline-none w-full transition-colors duration-150 focus:border-accent"
-              />
-              <span className="text-xs text-ink-muted">
-                Min 8 chars · uppercase · lowercase · number · special character
-              </span>
-            </div>
-
-            {errors.length > 0 && (
-              <div className="bg-error-bg border border-error rounded-lg px-3 py-2.5 text-[13px] text-error flex flex-col gap-1">
-                {errors.map((msg, i) => (
-                  <span key={i}>{msg}</span>
-                ))}
-              </div>
-            )}
-
-            <Button type="submit" loading={loading} className="mt-1">
-              {loading ? "Creating account…" : "Create account"}
-            </Button>
-          </form>
-        </Card>
-
-        <p className="text-center mt-5 text-[13.5px] text-ink-secondary">
-          Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-accent">
-            Sign in
-          </Link>
-        </p>
-      </div>
-    </div>
+    <AuthPageShell
+      title="Create an account"
+      subtitle="Start using Nucleus today"
+      footerText="Already have an account?"
+      footerLinkHref="/login"
+      footerLinkText="Sign in"
+    >
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <FormField
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="new-email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+        />
+        <FormField
+          id="username"
+          label="Username"
+          type="text"
+          autoComplete="nickname"
+          required
+          minLength={3}
+          maxLength={50}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="your_username"
+          hint="Letters, numbers, underscores and hyphens only"
+        />
+        <FormField
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          hint="Min 8 chars · uppercase · lowercase · number · special character"
+        />
+        <FormErrors errors={errors} />
+        <Button type="submit" loading={loading} className="mt-1">
+          {loading ? "Creating account…" : "Create account"}
+        </Button>
+      </form>
+    </AuthPageShell>
   );
 }

@@ -2,7 +2,8 @@
 
 import { DatabaseHeader } from "@/components/database/database-header";
 import { DatabaseTable } from "@/components/database/database-table";
-import { Sidebar } from "@/components/home/sidebar/sidebar";
+import { Button } from "@/components/ui/primitives/button";
+import { Sidebar } from "@/components/navigation/sidebar/sidebar";
 import { useDatabaseContext } from "@/context/database-context";
 
 export default function DatabasePage() {
@@ -17,12 +18,9 @@ export default function DatabasePage() {
         {isLoading ? null : error ? (
           <div className="flex flex-col items-center justify-center h-40 gap-3">
             <p className="text-error text-sm">{error}</p>
-            <button
-              onClick={refresh}
-              className="px-3 py-1.5 text-xs rounded-lg font-medium bg-surface border border-stroke text-ink-secondary hover:text-ink hover:bg-elevated transition-colors duration-150"
-            >
+            <Button variant="secondary" size="sm" onClick={refresh}>
               Retry
-            </button>
+            </Button>
           </div>
         ) : (
           <DatabaseTable
