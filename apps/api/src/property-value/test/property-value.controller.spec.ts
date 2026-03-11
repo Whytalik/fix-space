@@ -40,14 +40,15 @@ describe("PropertyValueController", () => {
   });
 
   describe("create", () => {
-    it("should call propertyValueService.create with recordId, dto and userId", async () => {
+    it("should call propertyValueService.create with dto.recordId, dto and userId", async () => {
       const dto = {
         propertyId: "prop-123",
         value: "Hello",
+        recordId: "record-123",
       };
       mockPropertyValueService.create.mockResolvedValue(mockPropertyValueResponse);
 
-      const result = await controller.create("record-123", "user-123", dto);
+      const result = await controller.create("user-123", dto);
 
       expect(result).toEqual(mockPropertyValueResponse);
       expect(mockPropertyValueService.create).toHaveBeenCalledWith("record-123", dto, "user-123");
@@ -56,7 +57,7 @@ describe("PropertyValueController", () => {
   });
 
   describe("findAll", () => {
-    it("should call propertyValueService.findAll with recordId and userId", async () => {
+    it("should call propertyValueService.findAll with recordId query param and userId", async () => {
       mockPropertyValueService.findAll.mockResolvedValue([mockPropertyValueResponse]);
 
       const result = await controller.findAll("record-123", "user-123");

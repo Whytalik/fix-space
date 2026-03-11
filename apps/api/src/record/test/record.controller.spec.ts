@@ -44,14 +44,15 @@ describe("RecordController", () => {
   });
 
   describe("create", () => {
-    it("should call recordService.create with databaseId, dto and userId", async () => {
+    it("should call recordService.create with dto.databaseId, dto and userId", async () => {
       const dto = {
         name: "New Record",
         icon: "📝",
+        databaseId: "db-123",
       };
       mockRecordService.create.mockResolvedValue(mockRecordResponse);
 
-      const result = await controller.create("db-123", "user-123", dto);
+      const result = await controller.create("user-123", dto);
 
       expect(result).toEqual(mockRecordResponse);
       expect(mockRecordService.create).toHaveBeenCalledWith("db-123", dto, "user-123");
@@ -60,7 +61,7 @@ describe("RecordController", () => {
   });
 
   describe("findAll", () => {
-    it("should call recordService.findAll with databaseId and userId", async () => {
+    it("should call recordService.findAll with databaseId query param and userId", async () => {
       mockRecordService.findAll.mockResolvedValue([mockRecordResponse]);
 
       const result = await controller.findAll("db-123", "user-123");
