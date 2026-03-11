@@ -1,4 +1,18 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { CreatePropertyValueDto } from "./create-property-value.dto";
+import { IsBoolean, IsOptional, IsString } from "class-validator";
 
-export class UpdatePropertyValueDto extends PartialType(CreatePropertyValueDto) {}
+export class UpdatePropertyValueDto {
+  @IsOptional()
+  @IsString()
+  recordId?: string;
+
+  @IsOptional()
+  @IsString()
+  propertyId?: string;
+
+  @IsOptional()
+  value?: unknown;
+
+  @IsOptional()
+  @IsBoolean({ message: "computed must be a boolean" })
+  computed?: boolean;
+}
