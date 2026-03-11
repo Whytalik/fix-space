@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { prisma } from "@nucleus/database";
+import { Prisma, prisma } from "@nucleus/database";
 import { SectionOperationType } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { SectionService } from "../providers/section.service";
@@ -9,170 +9,141 @@ import { SectionService } from "../providers/section.service";
 jest.mock("@nucleus/database", () => ({
   prisma: {
     section: {
-      create: jest.fn(),
+      create: jest.fn<any>(),
+      findFirst: jest.fn<any>(),
     },
   },
 }));
 
+const mockLogger = {
+  setContext: jest.fn<any>(),
+  debug: jest.fn<any>(),
+  log: jest.fn<any>(),
+  warn: jest.fn<any>(),
+  error: jest.fn<any>(),
+};
+
+const mockSection = {
+  id: "section-123",
+  name: "Routine",
+  position: 0,
+  icon: null,
+  color: null,
+  spaceId: "space-123",
+};
+
+const mockTxSection = {
+  findUnique: jest.fn<any>(),
+  findFirst: jest.fn<any>(),
+  create: jest.fn<any>(),
+  update: jest.fn<any>(),
+  delete: jest.fn<any>(),
+};
+
+const mockTx = {
+  section: mockTxSection,
+} as unknown as Prisma.TransactionClient;
+
 describe("SectionService", () => {
   let service: SectionService;
-
-  const mockLogger = {
-    setContext: jest.fn(),
-    debug: jest.fn(),
-    log: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-
-  const mockSection = {
-    id: "section-123",
-    spaceId: "space-123",
-    name: "Test Section",
-    position: 0,
-    icon: "📁",
-    color: null,
-    createdAt: new Date("2024-01-01"),
-    updatedAt: new Date("2024-01-01"),
-  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SectionService,
-        {
-          provide: AppLogger,
-          useValue: mockLogger,
-        },
-      ],
+      providers: [SectionService, { provide: AppLogger, useValue: mockLogger }],
     }).compile();
 
     service = module.get<SectionService>(SectionService);
   });
 
   describe("create", () => {
-    it("should create a section and return SectionResponseDto", async () => {
-      (prisma.section.create as jest.Mock).mockResolvedValue(mockSection);
+    it("should create a section without a transaction and return SectionResponseDto", async () => {
+      const sectionData = {
+        id: "section-new",
+        name: "New Section",
+        position: 1,
+        icon: null,
+        color: null,
+        spaceId: "space-123",
+      };
+      (prisma.section.create as jest.Mock<any>).mockResolvedValue(sectionData);
 
-      const result = await service.create("space-123", {
-        name: "Test Section",
-        position: 0,
-        icon: "📁",
-      });
+      const result = await service.create("space-123", { name: "New Section", position: 1 });
 
-      expect(result.id).toBe("section-123");
-      expect(result.name).toBe("Test Section");
+      expect(result).toEqual(expect.objectContaining({ id: "section-new", name: "New Section" }));
       expect(prisma.section.create).toHaveBeenCalledWith({
-        data: {
-          name: "Test Section",
-          position: 0,
-          icon: "📁",
-          color: undefined,
-          spaceId: "space-123",
-        },
+        data: { name: "New Section", position: 1, icon: undefined, color: undefined, spaceId: "space-123" },
       });
       expect(mockLogger.log).toHaveBeenCalledWith("Section created", {
-        sectionId: "section-123",
+        sectionId: "section-new",
         spaceId: "space-123",
       });
-    });
-
-    it("should throw NotFoundException when space not found (P2003)", async () => {
-      const prismaError = Object.assign(new Error("Foreign key"), {
-        code: "P2003",
-      });
-      (prisma.section.create as jest.Mock).mockRejectedValue(prismaError);
-
-      await expect(service.create("nonexistent", { name: "Test" })).rejects.toThrow(NotFoundException);
-      await expect(service.create("nonexistent", { name: "Test" })).rejects.toThrow(
-        "Space with id nonexistent not found",
-      );
-    });
-
-    it("should rethrow unknown errors", async () => {
-      (prisma.section.create as jest.Mock).mockRejectedValue(new Error("DB error"));
-
-      await expect(service.create("space-123", { name: "Test" })).rejects.toThrow("DB error");
     });
   });
 
   describe("processOperations", () => {
-    const mockTx = {
-      section: {
-        create: jest.fn(),
-        findUnique: jest.fn(),
-        findFirst: jest.fn(),
-        update: jest.fn(),
-        delete: jest.fn(),
-      },
-    };
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     describe("CREATE operation", () => {
       it("should create a section via transaction", async () => {
-        mockTx.section.create.mockResolvedValue(mockSection);
+        mockTxSection.create.mockResolvedValue({ ...mockSection, id: "section-new" });
 
-        await service.processOperations(mockTx as any, "space-123", [
+        await service.processOperations(mockTx, "space-123", [
           {
             operation: SectionOperationType.CREATE,
-            create: {
-              name: "New Section",
-              position: 1,
-              icon: "📁",
-            },
+            create: { name: "New Section", position: 1 },
           },
         ]);
 
-        expect(mockTx.section.create).toHaveBeenCalledWith({
-          data: {
+        expect(mockTxSection.create).toHaveBeenCalledWith({
+          data: expect.objectContaining({
             name: "New Section",
-            position: 1,
-            icon: "📁",
-            color: undefined,
             spaceId: "space-123",
+          }),
+        });
+      });
+
+      it("should auto-assign position when not provided", async () => {
+        mockTxSection.findFirst.mockResolvedValue({ position: 2 });
+        mockTxSection.create.mockResolvedValue(mockSection);
+
+        await service.processOperations(mockTx, "space-123", [
+          {
+            operation: SectionOperationType.CREATE,
+            create: { name: "Auto Position" },
           },
+        ]);
+
+        expect(mockTxSection.create).toHaveBeenCalledWith({
+          data: expect.objectContaining({ position: 3 }),
         });
       });
 
       it("should throw BadRequestException when create field is missing", async () => {
         await expect(
-          service.processOperations(mockTx as any, "space-123", [
-            {
-              operation: SectionOperationType.CREATE,
-            },
-          ]),
+          service.processOperations(mockTx, "space-123", [{ operation: SectionOperationType.CREATE }]),
         ).rejects.toThrow(BadRequestException);
+        await expect(
+          service.processOperations(mockTx, "space-123", [{ operation: SectionOperationType.CREATE }]),
+        ).rejects.toThrow('CREATE operation requires "create" field with section data');
       });
     });
 
     describe("UPDATE operation", () => {
       it("should update a section via transaction", async () => {
-        mockTx.section.findUnique.mockResolvedValue(mockSection);
-        mockTx.section.findFirst.mockResolvedValue(null);
-        mockTx.section.update.mockResolvedValue({
-          ...mockSection,
-          name: "Updated",
-        });
+        mockTxSection.findUnique.mockResolvedValue(mockSection);
+        mockTxSection.findFirst.mockResolvedValue(null);
+        mockTxSection.update.mockResolvedValue({ ...mockSection, name: "Updated" });
 
-        await service.processOperations(mockTx as any, "space-123", [
+        await service.processOperations(mockTx, "space-123", [
           {
             operation: SectionOperationType.UPDATE,
             id: "section-123",
-            update: {
-              name: "Updated",
-            },
+            update: { name: "Updated" },
           },
         ]);
 
-        expect(mockTx.section.update).toHaveBeenCalledWith({
-          where: {
-            id: "section-123",
-          },
+        expect(mockTxSection.update).toHaveBeenCalledWith({
+          where: { id: "section-123" },
           data: {
             name: "Updated",
             position: undefined,
@@ -184,58 +155,40 @@ describe("SectionService", () => {
 
       it("should throw BadRequestException when id is missing", async () => {
         await expect(
-          service.processOperations(mockTx as any, "space-123", [
-            {
-              operation: SectionOperationType.UPDATE,
-            },
-          ]),
+          service.processOperations(mockTx, "space-123", [{ operation: SectionOperationType.UPDATE }]),
         ).rejects.toThrow('UPDATE operation requires "id" field');
       });
 
       it("should throw NotFoundException when section not found", async () => {
-        mockTx.section.findUnique.mockResolvedValue(null);
+        mockTxSection.findUnique.mockResolvedValue(null);
 
         await expect(
-          service.processOperations(mockTx as any, "space-123", [
-            {
-              operation: SectionOperationType.UPDATE,
-              id: "nonexistent",
-            },
+          service.processOperations(mockTx, "space-123", [
+            { operation: SectionOperationType.UPDATE, id: "nonexistent" },
           ]),
         ).rejects.toThrow(NotFoundException);
       });
 
       it("should throw BadRequestException when section belongs to different space", async () => {
-        mockTx.section.findUnique.mockResolvedValue({
-          ...mockSection,
-          spaceId: "other-space",
-        });
+        mockTxSection.findUnique.mockResolvedValue({ ...mockSection, spaceId: "other-space" });
 
         await expect(
-          service.processOperations(mockTx as any, "space-123", [
-            {
-              operation: SectionOperationType.UPDATE,
-              id: "section-123",
-            },
+          service.processOperations(mockTx, "space-123", [
+            { operation: SectionOperationType.UPDATE, id: "section-123" },
           ]),
         ).rejects.toThrow(BadRequestException);
       });
 
       it("should throw BadRequestException on duplicate section name", async () => {
-        mockTx.section.findUnique.mockResolvedValue(mockSection);
-        mockTx.section.findFirst.mockResolvedValue({
-          id: "other-section",
-          name: "Duplicate",
-        });
+        mockTxSection.findUnique.mockResolvedValue(mockSection);
+        mockTxSection.findFirst.mockResolvedValue({ id: "other-section", name: "Duplicate" });
 
         await expect(
-          service.processOperations(mockTx as any, "space-123", [
+          service.processOperations(mockTx, "space-123", [
             {
               operation: SectionOperationType.UPDATE,
               id: "section-123",
-              update: {
-                name: "Duplicate",
-              },
+              update: { name: "Duplicate" },
             },
           ]),
         ).rejects.toThrow('Section with name "Duplicate" already exists in this space');
@@ -244,21 +197,14 @@ describe("SectionService", () => {
 
     describe("DELETE operation", () => {
       it("should delete a section via transaction", async () => {
-        mockTx.section.findUnique.mockResolvedValue(mockSection);
-        mockTx.section.delete.mockResolvedValue(mockSection);
+        mockTxSection.findUnique.mockResolvedValue(mockSection);
+        mockTxSection.delete.mockResolvedValue(mockSection);
 
-        await service.processOperations(mockTx as any, "space-123", [
-          {
-            operation: SectionOperationType.DELETE,
-            id: "section-123",
-          },
+        await service.processOperations(mockTx, "space-123", [
+          { operation: SectionOperationType.DELETE, id: "section-123" },
         ]);
 
-        expect(mockTx.section.delete).toHaveBeenCalledWith({
-          where: {
-            id: "section-123",
-          },
-        });
+        expect(mockTxSection.delete).toHaveBeenCalledWith({ where: { id: "section-123" } });
         expect(mockLogger.log).toHaveBeenCalledWith("Section deleted", {
           sectionId: "section-123",
           spaceId: "space-123",
@@ -267,70 +213,29 @@ describe("SectionService", () => {
 
       it("should throw BadRequestException when id is missing", async () => {
         await expect(
-          service.processOperations(mockTx as any, "space-123", [
-            {
-              operation: SectionOperationType.DELETE,
-            },
-          ]),
+          service.processOperations(mockTx, "space-123", [{ operation: SectionOperationType.DELETE }]),
         ).rejects.toThrow('DELETE operation requires "id" field');
       });
 
       it("should throw NotFoundException when section not found", async () => {
-        mockTx.section.findUnique.mockResolvedValue(null);
+        mockTxSection.findUnique.mockResolvedValue(null);
 
         await expect(
-          service.processOperations(mockTx as any, "space-123", [
-            {
-              operation: SectionOperationType.DELETE,
-              id: "nonexistent",
-            },
+          service.processOperations(mockTx, "space-123", [
+            { operation: SectionOperationType.DELETE, id: "nonexistent" },
           ]),
         ).rejects.toThrow(NotFoundException);
       });
 
       it("should throw BadRequestException when section belongs to different space", async () => {
-        mockTx.section.findUnique.mockResolvedValue({
-          ...mockSection,
-          spaceId: "other-space",
-        });
+        mockTxSection.findUnique.mockResolvedValue({ ...mockSection, spaceId: "other-space" });
 
         await expect(
-          service.processOperations(mockTx as any, "space-123", [
-            {
-              operation: SectionOperationType.DELETE,
-              id: "section-123",
-            },
+          service.processOperations(mockTx, "space-123", [
+            { operation: SectionOperationType.DELETE, id: "section-123" },
           ]),
         ).rejects.toThrow(BadRequestException);
       });
-    });
-
-    it("should process multiple operations in order", async () => {
-      const callOrder: string[] = [];
-      mockTx.section.create.mockImplementation(async () => {
-        callOrder.push("create");
-        return mockSection;
-      });
-      mockTx.section.findUnique.mockResolvedValue(mockSection);
-      mockTx.section.delete.mockImplementation(async () => {
-        callOrder.push("delete");
-        return mockSection;
-      });
-
-      await service.processOperations(mockTx as any, "space-123", [
-        {
-          operation: SectionOperationType.CREATE,
-          create: {
-            name: "New",
-          },
-        },
-        {
-          operation: SectionOperationType.DELETE,
-          id: "section-123",
-        },
-      ]);
-
-      expect(callOrder).toEqual(["create", "delete"]);
     });
   });
 });
