@@ -2,7 +2,8 @@ import { BadRequestException, Injectable, NotFoundException, UnauthorizedExcepti
 import { prisma } from "@nucleus/database";
 import { LoginUserDto } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
-import { comparePassword } from "../common/utils/password";
+import { MailService } from "../mail/mail.service";
+import { comparePassword, hashPassword } from "../common/utils/password";
 import { UserService } from "../user/user.service";
 import { TokenService } from "./token.service";
 
@@ -11,6 +12,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly tokenService: TokenService,
+    private readonly mailService: MailService,
     private readonly logger: AppLogger,
   ) {
     this.logger.setContext(AuthService.name);
@@ -48,7 +50,6 @@ export class AuthService {
       throw new UnauthorizedException("Please verify your email before logging in");
     }
 
-    // Generate tokens
     const accessToken = this.tokenService.generateAccessToken(user.id, user.username);
     const refreshToken = await this.tokenService.createRefreshToken(user.id);
 
@@ -57,7 +58,6 @@ export class AuthService {
       username: user.username,
     });
 
-    // Return tokens - interceptor will set cookies
     return {
       message: "Login successful",
       accessToken,
@@ -78,13 +78,11 @@ export class AuthService {
 
     const user = await this.userService.findById(validated.userId);
 
-    // Rotate refresh token
     const newRefreshToken = await this.tokenService.rotateRefreshToken(validated.tokenId, validated.userId);
     const newAccessToken = this.tokenService.generateAccessToken(user.id, user.username);
 
     this.logger.log("Token refreshed successfully", { userId: user.id });
 
-    // Return tokens - interceptor will set cookies
     return {
       message: "Token refreshed successfully",
       accessToken: newAccessToken,
@@ -99,7 +97,6 @@ export class AuthService {
 
     this.logger.log("Logout successful");
 
-    // Return clearCookies flag - interceptor will clear cookies
     return {
       message: "Logged out successfully",
       clearCookies: true,
@@ -113,12 +110,17 @@ export class AuthService {
       throw new BadRequestException("Invalid or expired verification token");
     }
 
-    await prisma.user.update({
-      where: { id: validated.userId },
-      data: { isVerified: true },
-    });
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: validated.userId },
+        data: { isVerified: true },
+      });
 
-    await this.tokenService.markVerificationTokenUsed(validated.tokenId);
+      await tx.emailVerificationToken.update({
+        where: { id: validated.tokenId },
+        data: { usedAt: new Date() },
+      });
+    });
 
     this.logger.log("Email verified successfully", {
       userId: validated.userId,
@@ -139,6 +141,53 @@ export class AuthService {
     this.logger.log("Dev: test data reset", { email });
 
     return { message: `Test data for ${email} deleted (cascade)` };
+  }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    this.logger.debug("Forgot password requested", { email });
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    // Always return success to avoid user enumeration
+    if (!user) {
+      this.logger.warn("Forgot password: user not found, returning generic response", { email });
+      return { message: "If this email is registered, you will receive a password reset link." };
+    }
+
+    const rawToken = await this.tokenService.createPasswordResetToken(user.id);
+    await this.mailService.sendPasswordResetEmail(email, rawToken);
+
+    this.logger.log("Password reset email sent", { userId: user.id });
+
+    return { message: "If this email is registered, you will receive a password reset link." };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    this.logger.debug("Reset password attempt");
+
+    const validated = await this.tokenService.validatePasswordResetToken(token);
+
+    if (!validated) {
+      throw new BadRequestException("Invalid or expired password reset token");
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: validated.userId },
+        data: { passwordHash },
+      });
+
+      await tx.passwordResetToken.update({
+        where: { id: validated.tokenId },
+        data: { usedAt: new Date() },
+      });
+    });
+
+    this.logger.log("Password reset successful", { userId: validated.userId });
+
+    return { message: "Password reset successfully" };
   }
 
   async devVerifyUser(email: string) {
