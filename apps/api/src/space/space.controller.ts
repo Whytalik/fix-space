@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { CreateSpaceDto, UpdateSpaceDto } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import { RequireOwnership } from "../auth/decorators/required-ownership.decoractor";
-import { ResourceOwnerGuard } from "../auth/guards/resourse-owner.guard";
+import { RequireOwnership } from "../auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "../auth/guards/resource-owner.guard";
 import { DuplicateSpaceUseCase } from "./providers/duplicate-space.usecase";
 import { SpaceService } from "./space.service";
 
