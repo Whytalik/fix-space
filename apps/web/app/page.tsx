@@ -1,8 +1,8 @@
 "use client";
 
-import { Sidebar } from "@/components/home/sidebar/sidebar";
-import { useAppContext } from "@/context/app-context";
+import { Sidebar } from "@/components/navigation/sidebar/sidebar";
 import { LogoIcon } from "@/components/ui/brand/logo-icon";
+import { useAppContext } from "@/context/app-context";
 
 export default function Home() {
   const { user, isLoading } = useAppContext();
@@ -14,7 +14,7 @@ export default function Home() {
       <div className="flex flex-1 min-h-0">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center">
-          <h1 className="text-2xl font-bold text-ink">Welcome back, {user.username}!</h1>
+          <h1 className="type-page-title">Welcome back, {user.username}!</h1>
         </main>
       </div>
     );

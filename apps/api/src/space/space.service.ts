@@ -10,26 +10,7 @@ import {
 import { AppLogger } from "../common/logger/app-logger.service";
 import { SettingsService } from "../settings/settings.service";
 import { SectionService } from "./providers/section.service";
-
-const sectionsInclude = {
-  sections: {
-    orderBy: {
-      position: "asc" as const,
-    },
-    include: {
-      databases: {
-        orderBy: {
-          createdAt: "asc" as const,
-        },
-      },
-    },
-  },
-  databases: {
-    orderBy: {
-      createdAt: "asc" as const,
-    },
-  },
-};
+import { sectionsInclude } from "./space.constants";
 
 @Injectable()
 export class SpaceService {
@@ -49,38 +30,27 @@ export class SpaceService {
 
     const spaceSettings = await this.settingsService.getSettings(ownerId, "space", DEFAULT_SPACE_SETTINGS);
 
-    try {
-      const space = await prisma.space.create({
+    const space = await prisma.$transaction(async (tx) => {
+      if (dto.isDefault) {
+        await tx.space.updateMany({
+          where: { ownerId, isDefault: true },
+          data: { isDefault: false },
+        });
+      }
+      return tx.space.create({
         data: {
           name: dto.name,
           icon: dto.icon,
+          isDefault: dto.isDefault ?? false,
           ownerId,
           config: spaceSettings as unknown as Prisma.JsonValue,
         },
         include: sectionsInclude,
       });
+    });
 
-      this.logger.log("Space created", {
-        spaceId: space.id,
-        ownerId,
-      });
-      return new SpaceResponseDto(space);
-    } catch (e: unknown) {
-      if (
-        (
-          e as {
-            code?: string;
-          }
-        )?.code === "P2002"
-      ) {
-        this.logger.warn("Duplicate space name", {
-          ownerId,
-          name: dto.name,
-        });
-        throw new BadRequestException("Space with this name already exists for the owner");
-      }
-      throw e;
-    }
+    this.logger.log("Space created", { spaceId: space.id, ownerId });
+    return new SpaceResponseDto(space);
   }
 
   async findAll(ownerId: string): Promise<SpaceResponseDto[]> {
@@ -120,64 +90,41 @@ export class SpaceService {
         await this.sectionService.processOperations(tx, id, sectionOperations as SectionOperationDto[]);
       }
 
-      try {
-        const space = await tx.space.update({
-          where: { id },
-          data: {
-            name: spaceData.name,
-            icon: spaceData.icon,
-          },
-          include: sectionsInclude,
-        });
-
-        this.logger.log("Space updated", { spaceId: id });
-        return new SpaceResponseDto(space);
-      } catch (e: unknown) {
-        if (
-          (
-            e as {
-              code?: string;
-            }
-          )?.code === "P2025"
-        ) {
-          throw new NotFoundException(`Space with id ${id} not found`);
+      if (spaceData.isDefault === true) {
+        const current = await tx.space.findUnique({ where: { id }, select: { ownerId: true } });
+        if (current) {
+          await tx.space.updateMany({
+            where: { ownerId: current.ownerId, isDefault: true, id: { not: id } },
+            data: { isDefault: false },
+          });
         }
-        if (
-          (
-            e as {
-              code?: string;
-            }
-          )?.code === "P2002"
-        ) {
-          this.logger.warn("Duplicate space name on update", { id });
-          throw new BadRequestException("Space with this name already exists for the owner");
-        }
-        throw e;
       }
+
+      const space = await tx.space.update({
+        where: { id },
+        data: {
+          name: spaceData.name,
+          icon: spaceData.icon,
+          isDefault: spaceData.isDefault,
+        },
+        include: sectionsInclude,
+      });
+
+      this.logger.log("Space updated", { spaceId: id });
+      return new SpaceResponseDto(space);
     });
   }
 
   async remove(id: string): Promise<SpaceResponseDto> {
     this.logger.debug("Removing space", { id });
 
-    try {
-      const space = await prisma.space.delete({
-        where: { id },
-      });
-
-      this.logger.log("Space removed", { id });
-      return new SpaceResponseDto(space);
-    } catch (e: unknown) {
-      if (
-        (
-          e as {
-            code?: string;
-          }
-        )?.code === "P2025"
-      ) {
-        throw new NotFoundException(`Space with id ${id} not found`);
-      }
-      throw e;
+    const existing = await prisma.space.findUnique({ where: { id }, select: { isDefault: true } });
+    if (existing?.isDefault) {
+      throw new BadRequestException("Cannot delete the default space");
     }
+
+    const space = await prisma.space.delete({ where: { id } });
+    this.logger.log("Space removed", { id });
+    return new SpaceResponseDto(space);
   }
 }

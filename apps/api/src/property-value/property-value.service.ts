@@ -18,6 +18,15 @@ export class PropertyValueService {
     this.logger.setContext(PropertyValueService.name);
   }
 
+  private resolveHandlerAndConfig(property: { type: string; config: unknown }) {
+    const type = property.type as PropertyType;
+    const handler = this.typeRegistry.getValueHandler(type);
+    const config =
+      (property.config as Record<string, unknown> | null) ??
+      this.typeRegistry.getConfigHandler(type).getDefaultConfig();
+    return { handler, config };
+  }
+
   async create(
     recordId: string,
     createPropertyValueDto: CreatePropertyValueDto,
@@ -61,25 +70,7 @@ export class PropertyValueService {
       throw new ConflictException("Property does not belong to the same database as the record");
     }
 
-    const existingValue = await prisma.propertyValue.findUnique({
-      where: {
-        recordId_propertyId: {
-          recordId,
-          propertyId: createPropertyValueDto.propertyId,
-        },
-      },
-    });
-
-    if (existingValue) {
-      this.logger.warn("Duplicate property value", {
-        recordId,
-        propertyId: createPropertyValueDto.propertyId,
-      });
-      throw new ConflictException("A value for this property already exists on this record");
-    }
-
-    const handler = this.typeRegistry.getHandler(property.type as PropertyType);
-    const config = (property.config as Record<string, unknown> | null) ?? handler.getDefaultConfig();
+    const { handler, config } = this.resolveHandlerAndConfig(property);
 
     const rawValue =
       createPropertyValueDto.value !== undefined ? createPropertyValueDto.value : handler.getDefaultValue(config);
@@ -91,8 +82,18 @@ export class PropertyValueService {
 
     const formattedValue = handler.formatValue(rawValue, config);
 
-    const propertyValue = await prisma.propertyValue.create({
-      data: {
+    const propertyValue = await prisma.propertyValue.upsert({
+      where: {
+        recordId_propertyId: {
+          recordId,
+          propertyId: createPropertyValueDto.propertyId,
+        },
+      },
+      update: {
+        value: formattedValue as Prisma.InputJsonValue,
+        computed: createPropertyValueDto.computed ?? false,
+      },
+      create: {
         recordId,
         propertyId: createPropertyValueDto.propertyId,
         value: formattedValue as Prisma.InputJsonValue,
@@ -183,8 +184,7 @@ export class PropertyValueService {
     let formattedValue: unknown = undefined;
 
     if (updatePropertyValueDto.value !== undefined) {
-      const handler = this.typeRegistry.getHandler(existingValue.property.type as PropertyType);
-      const config = (existingValue.property.config as Record<string, unknown> | null) ?? handler.getDefaultConfig();
+      const { handler, config } = this.resolveHandlerAndConfig(existingValue.property);
 
       const valueErrors = handler.validateValue(updatePropertyValueDto.value, config);
       if (valueErrors) {
@@ -202,7 +202,7 @@ export class PropertyValueService {
         ...(formattedValue !== undefined && {
           value: formattedValue as Prisma.InputJsonValue,
         }),
-        computed: updatePropertyValueDto.computed,
+        ...(updatePropertyValueDto.computed !== undefined && { computed: updatePropertyValueDto.computed }),
       },
     });
 

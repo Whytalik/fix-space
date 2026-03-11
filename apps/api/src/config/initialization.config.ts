@@ -1,10 +1,15 @@
-import { CreateDatabaseDto, CreatePropertyDto, CreateSectionDto, PropertyType } from "@nucleus/domain";
+import { CreateDatabaseDto, CreatePropertyDto, CreateSectionDto, DatabaseType, PropertyType } from "@nucleus/domain";
+
+type DatabaseTemplate = Omit<CreateDatabaseDto, "spaceId" | "properties"> & {
+  type?: DatabaseType;
+  properties?: Omit<CreatePropertyDto, "databaseId">[];
+};
 
 export interface InitializationConfig {
   spaceNameTemplate: string;
   sections: CreateSectionDto[];
-  databases: CreateDatabaseDto[];
-  defaultDatabaseProperties: CreatePropertyDto[];
+  databases: DatabaseTemplate[];
+  defaultDatabaseProperties: Omit<CreatePropertyDto, "databaseId">[];
 }
 
 const PAIR_CATEGORIES = [
@@ -12,9 +17,7 @@ const PAIR_CATEGORIES = [
   { label: "Commodity", options: ["XAUUSD"] },
 ];
 
-const TOPIC_CATEGORIES = [
-  { label: "Topic", options: ["Entry", "Exit", "Risk Management", "Psychology", "Analysis"] },
-];
+const TOPIC_CATEGORIES = [{ label: "Topic", options: ["Entry", "Exit", "Risk Management", "Psychology", "Analysis"] }];
 
 const DATE_CONFIG = {
   defaultValue: null,
@@ -41,19 +44,23 @@ export const defaultInitializationConfig: InitializationConfig = {
       type: "trading-journal",
       sectionKey: "routine",
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0 },
-        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG },
+        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Trade name or journal entry title", group: "General" },
+        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the trade was opened or closed", group: "General" },
         {
           name: "Account",
           type: PropertyType.RELATION,
           position: 2,
           config: { sourceDatabaseType: "accounts", multiple: false },
+          hint: "Trading account used to open this trade",
+          group: "General",
         },
         {
           name: "Pair",
           type: PropertyType.SELECT,
           position: 3,
           config: { isMultiSelect: false, categories: PAIR_CATEGORIES },
+          hint: "Trading instrument or currency pair",
+          group: "General",
         },
         {
           name: "Session",
@@ -61,10 +68,10 @@ export const defaultInitializationConfig: InitializationConfig = {
           position: 4,
           config: {
             isMultiSelect: false,
-            categories: [
-              { label: "Session", options: ["Asia", "London", "New York", "Pre-London", "Pre-New York"] },
-            ],
+            categories: [{ label: "Session", options: ["Asia", "London", "New York", "Pre-London", "Pre-New York"] }],
           },
+          hint: "Trading session at the time of entry",
+          group: "General",
         },
         {
           name: "Direction",
@@ -74,6 +81,8 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Direction", options: ["Long", "Short"] }],
           },
+          hint: "Trade direction — Long (buy) or Short (sell)",
+          group: "Trade Setup",
         },
         {
           name: "Narrative TF",
@@ -83,6 +92,8 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Timeframe", options: ["Weekly", "Daily", "4H", "1H", "15m", "5m"] }],
           },
+          hint: "Timeframe of the main narrative used for analysis",
+          group: "Trade Setup",
         },
         {
           name: "Result",
@@ -92,12 +103,16 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Result", options: ["Win", "Loss", "Break-even"] }],
           },
+          hint: "Trade outcome: win, loss, or break-even",
+          group: "Outcome",
         },
         {
           name: "Gained RR",
           type: PropertyType.NUMBER,
           position: 8,
           config: { defaultValue: 0, format: "float", decimalPlaces: 2 },
+          hint: "Actual risk-to-reward ratio achieved (R:R)",
+          group: "Outcome",
         },
         {
           name: "Position Type",
@@ -107,6 +122,8 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Type", options: ["Intraday", "Introweek", "Swing"] }],
           },
+          hint: "Position type by time horizon: intraday, introweek, or swing",
+          group: "Trade Setup",
         },
         {
           name: "Trade Position Type",
@@ -116,6 +133,8 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Type", options: ["Reversal", "Continuation", "Retracement"] }],
           },
+          hint: "Price movement character: reversal, continuation, or retracement",
+          group: "Trade Setup",
         },
         {
           name: "Entry Model",
@@ -124,9 +143,14 @@ export const defaultInitializationConfig: InitializationConfig = {
           config: {
             isMultiSelect: false,
             categories: [
-              { label: "Model", options: ["FVG", "Order Block", "BOS", "MSS", "Breaker Block", "Mitigation Block", "CISD"] },
+              {
+                label: "Model",
+                options: ["FVG", "Order Block", "BOS", "MSS", "Breaker Block", "Mitigation Block", "CISD"],
+              },
             ],
           },
+          hint: "Entry model used for this trade",
+          group: "Entry",
         },
         {
           name: "Entry Timeframe",
@@ -136,6 +160,8 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Timeframe", options: ["Weekly", "Daily", "4H", "1H", "15m", "5m"] }],
           },
+          hint: "Timeframe used to identify the entry point",
+          group: "Entry",
         },
         {
           name: "Point A",
@@ -145,6 +171,8 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Structure", options: ["FVG", "SNR", "Fractal", "Premium DR", "Discount DR"] }],
           },
+          hint: "Structure or level confirming the start of the price move",
+          group: "Entry",
         },
         {
           name: "Point B",
@@ -154,6 +182,8 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Structure", options: ["FVG", "SNR", "Fractal", "Premium DR", "Discount DR"] }],
           },
+          hint: "Target level or exit zone",
+          group: "Entry",
         },
         {
           name: "Stop Loss position",
@@ -168,6 +198,8 @@ export const defaultInitializationConfig: InitializationConfig = {
               },
             ],
           },
+          hint: "Stop loss placement relative to market structure",
+          group: "Entry",
         },
         {
           name: "Delivery",
@@ -177,6 +209,8 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Delivery", options: ["Order Flow", "Strong Order Flow"] }],
           },
+          hint: "Price delivery type to target: standard or strong order flow",
+          group: "Execution",
         },
         {
           name: "Session Confirm",
@@ -184,10 +218,10 @@ export const defaultInitializationConfig: InitializationConfig = {
           position: 17,
           config: {
             isMultiSelect: false,
-            categories: [
-              { label: "Session", options: ["Asia", "London", "New York", "Pre-London", "Pre-New York"] },
-            ],
+            categories: [{ label: "Session", options: ["Asia", "London", "New York", "Pre-London", "Pre-New York"] }],
           },
+          hint: "Session during which the signal was confirmed",
+          group: "Execution",
         },
         {
           name: "Session Point",
@@ -197,24 +231,32 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Point", options: ["Open", "High", "Low", "Sweep", "Reversal"] }],
           },
+          hint: "Key session point used for entry",
+          group: "Execution",
         },
         {
           name: "Daily Routine",
           type: PropertyType.RELATION,
           position: 19,
           config: { sourceDatabaseType: "daily-routine", multiple: false },
+          hint: "Linked session analysis entry",
+          group: "Related",
         },
         {
           name: "Notes",
           type: PropertyType.RELATION,
           position: 20,
           config: { sourceDatabaseType: "notes", multiple: true },
+          hint: "Notes related to this trade",
+          group: "Related",
         },
         {
           name: "Mistakes",
           type: PropertyType.RELATION,
           position: 21,
           config: { sourceDatabaseType: "mistakes", multiple: true },
+          hint: "Mistakes made during this trade",
+          group: "Related",
         },
       ],
     },
@@ -225,31 +267,39 @@ export const defaultInitializationConfig: InitializationConfig = {
       type: "daily-routine",
       sectionKey: "routine",
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0 },
-        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG },
+        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Session analysis title", group: "General" },
+        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the analysis session was conducted", group: "General" },
         {
           name: "Account",
           type: PropertyType.RELATION,
           position: 2,
           config: { sourceDatabaseType: "accounts", multiple: false },
+          hint: "Trading account for this session",
+          group: "General",
         },
         {
           name: "Pair",
           type: PropertyType.SELECT,
           position: 3,
           config: { isMultiSelect: false, categories: PAIR_CATEGORIES },
+          hint: "Instrument analyzed in this session",
+          group: "General",
         },
         {
           name: "Trading System",
           type: PropertyType.RELATION,
           position: 4,
           config: { sourceDatabaseType: "trading-system", multiple: false },
+          hint: "Trading system applied in this session",
+          group: "Analysis",
         },
         {
           name: "Narrative",
           type: PropertyType.SELECT,
           position: 5,
           config: { isMultiSelect: false, categories: [] },
+          hint: "Market narrative — expected price direction",
+          group: "Analysis",
         },
         {
           name: "Outcome",
@@ -259,14 +309,18 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Outcome", options: ["Win", "Loss", "Break-even"] }],
           },
+          hint: "Session analysis outcome",
+          group: "Analysis",
         },
-        { name: "Narrative Accurate", type: PropertyType.FORMULA, position: 7, config: FORMULA_TEXT },
-        { name: "Execution", type: PropertyType.FORMULA, position: 8, config: FORMULA_TEXT },
+        { name: "Narrative Accurate", type: PropertyType.FORMULA, position: 7, config: FORMULA_TEXT, hint: "Whether the market narrative matched actual price movement", group: "Analysis" },
+        { name: "Execution", type: PropertyType.FORMULA, position: 8, config: FORMULA_TEXT, hint: "Quality of trade plan execution in this session", group: "Analysis" },
         {
           name: "Trades",
           type: PropertyType.RELATION,
           position: 9,
           config: { sourceDatabaseType: "trading-journal", multiple: true },
+          hint: "Trades taken within this session",
+          group: "Related",
         },
       ],
     },
@@ -277,37 +331,43 @@ export const defaultInitializationConfig: InitializationConfig = {
       type: "notes",
       sectionKey: "insight",
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0 },
-        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG },
+        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Note or observation title", group: "General" },
+        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the note was created", group: "General" },
         {
           name: "Type",
           type: PropertyType.SELECT,
           position: 2,
           config: {
             isMultiSelect: false,
-            categories: [
-              { label: "Type", options: ["Lesson", "Rule", "Observation", "Strategy", "Psychology"] },
-            ],
+            categories: [{ label: "Type", options: ["Lesson", "Rule", "Observation", "Strategy", "Psychology"] }],
           },
+          hint: "Note category by purpose",
+          group: "General",
         },
         {
           name: "Topic",
           type: PropertyType.SELECT,
           position: 3,
           config: { isMultiSelect: false, categories: TOPIC_CATEGORIES },
+          hint: "Subject or knowledge area this note relates to",
+          group: "General",
         },
-        { name: "Date of Last Use", type: PropertyType.FORMULA, position: 4, config: FORMULA_TEXT },
+        { name: "Date of Last Use", type: PropertyType.FORMULA, position: 4, config: FORMULA_TEXT, hint: "Date this note was last applied in work", group: "Stats" },
         {
           name: "Used in Analysis",
           type: PropertyType.NUMBER,
           position: 5,
           config: { defaultValue: 0, format: "integer" },
+          hint: "Number of times this note was applied in analysis",
+          group: "Stats",
         },
         {
           name: "Used in Trades",
           type: PropertyType.NUMBER,
           position: 6,
           config: { defaultValue: 0, format: "integer" },
+          hint: "Number of times this note was applied in trades",
+          group: "Stats",
         },
       ],
     },
@@ -318,9 +378,9 @@ export const defaultInitializationConfig: InitializationConfig = {
       type: "mistakes",
       sectionKey: "insight",
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0 },
-        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG },
-        { name: "Severity", type: PropertyType.FORMULA, position: 2, config: FORMULA_TEXT },
+        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Mistake name or short description", group: "General" },
+        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the mistake was recorded", group: "General" },
+        { name: "Severity", type: PropertyType.FORMULA, position: 2, config: FORMULA_TEXT, hint: "Degree of impact this mistake had on trading results", group: "General" },
         {
           name: "Type",
           type: PropertyType.SELECT,
@@ -334,25 +394,33 @@ export const defaultInitializationConfig: InitializationConfig = {
               },
             ],
           },
+          hint: "Mistake category by area of impact",
+          group: "General",
         },
         {
           name: "Topic",
           type: PropertyType.SELECT,
           position: 4,
           config: { isMultiSelect: false, categories: TOPIC_CATEGORIES },
+          hint: "Trading aspect this mistake relates to",
+          group: "General",
         },
-        { name: "Date of Last Use", type: PropertyType.FORMULA, position: 5, config: FORMULA_TEXT },
+        { name: "Date of Last Use", type: PropertyType.FORMULA, position: 5, config: FORMULA_TEXT, hint: "Date this mistake was last repeated", group: "Stats" },
         {
           name: "Used in Analysis",
           type: PropertyType.NUMBER,
           position: 6,
           config: { defaultValue: 0, format: "integer" },
+          hint: "Number of times this mistake appeared in analysis",
+          group: "Stats",
         },
         {
           name: "Used in Trades",
           type: PropertyType.NUMBER,
           position: 7,
           config: { defaultValue: 0, format: "integer" },
+          hint: "Number of trades where this mistake was made",
+          group: "Stats",
         },
       ],
     },
@@ -363,8 +431,8 @@ export const defaultInitializationConfig: InitializationConfig = {
       type: "accounts",
       sectionKey: "settings",
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0 },
-        { name: "Started", type: PropertyType.DATE, position: 1, config: DATE_CONFIG },
+        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Trading account name", group: "General" },
+        { name: "Started", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the account was opened or started", group: "General" },
         {
           name: "Account Type",
           type: PropertyType.SELECT,
@@ -373,48 +441,68 @@ export const defaultInitializationConfig: InitializationConfig = {
             isMultiSelect: false,
             categories: [{ label: "Type", options: ["Funded", "Personal", "Demo", "Challenge"] }],
           },
+          hint: "Account type: funded, personal, demo, or challenge",
+          group: "General",
         },
-        { name: "Status", type: PropertyType.STATUS, position: 3 },
+        { name: "Status", type: PropertyType.STATUS, position: 3, hint: "Current account status", group: "General" },
         {
           name: "Starting Equity",
           type: PropertyType.NUMBER,
           position: 4,
           config: { defaultValue: 0, format: "currency", currencySymbol: "$", decimalPlaces: 2 },
+          hint: "Initial account equity",
+          group: "Financials",
         },
         {
           name: "Current Equity",
           type: PropertyType.NUMBER,
           position: 5,
           config: { defaultValue: 0, format: "currency", currencySymbol: "$", decimalPlaces: 2 },
+          hint: "Current account equity",
+          group: "Financials",
         },
         {
-          name: "Payouts",
+          name: "Operations",
           type: PropertyType.RELATION,
           position: 6,
-          config: { sourceDatabaseType: "payouts", multiple: true },
+          config: { sourceDatabaseType: "operations", multiple: true },
+          hint: "Deposit or withdrawal operations for this account",
+          group: "Financials",
         },
       ],
     },
 
     {
-      name: "[DB] Payouts",
-      title: "Payouts",
-      type: "payouts",
+      name: "[DB] Operations",
+      title: "Operations",
+      type: "operations",
       sectionKey: "settings",
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0 },
-        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG },
+        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Operation name or description" },
+        {
+          name: "Type",
+          type: PropertyType.SELECT,
+          position: 1,
+          config: {
+            isMultiSelect: false,
+            categories: [{ label: "Type", options: ["Deposit", "Withdrawal"] }],
+          },
+          hint: "Operation type: deposit or withdrawal",
+        },
+        { name: "Date", type: PropertyType.DATE, position: 2, config: DATE_CONFIG, hint: "Date the operation was processed" },
         {
           name: "Account",
           type: PropertyType.RELATION,
-          position: 2,
+          position: 3,
           config: { sourceDatabaseType: "accounts", multiple: false },
+          hint: "Account this operation belongs to",
         },
         {
           name: "Amount",
           type: PropertyType.NUMBER,
-          position: 3,
+          position: 4,
           config: { defaultValue: 0, format: "currency", currencySymbol: "$", decimalPlaces: 2 },
+          hint: "Operation amount in USD",
         },
       ],
     },
@@ -425,8 +513,8 @@ export const defaultInitializationConfig: InitializationConfig = {
       type: "trading-system",
       sectionKey: "settings",
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0 },
-        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG },
+        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Trading system or strategy name" },
+        { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the system was created or last updated" },
       ],
     },
   ],

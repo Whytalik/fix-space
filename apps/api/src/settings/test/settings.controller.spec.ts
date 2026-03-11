@@ -1,21 +1,15 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { Test, TestingModule } from "@nestjs/testing";
-import { DEFAULT_DATABASE_SETTINGS, DEFAULT_SECTION_SETTINGS, DEFAULT_SPACE_SETTINGS, User } from "@nucleus/domain";
+import { DEFAULT_DATABASE_SETTINGS, DEFAULT_SECTION_SETTINGS, DEFAULT_SPACE_SETTINGS } from "@nucleus/domain";
 import { SettingsController } from "../settings.controller";
 import { SettingsService } from "../settings.service";
 
 describe("SettingsController", () => {
   let controller: SettingsController;
 
-  const mockUser = {
-    id: "user-123",
-    email: "test@example.com",
-    username: "testuser",
-  } as unknown as User;
-
   const mockSettingsService = {
-    getSettings: jest.fn(),
-    updateSettings: jest.fn(),
+    getSettings: jest.fn<any>(),
+    updateSettings: jest.fn<any>(),
   };
 
   beforeEach(async () => {
@@ -41,7 +35,7 @@ describe("SettingsController", () => {
       };
       mockSettingsService.getSettings.mockResolvedValue(mockResult);
 
-      const result = await controller.getSpaceSettings(mockUser);
+      const result = await controller.getSpaceSettings("user-123");
 
       expect(result).toEqual(mockResult);
       expect(mockSettingsService.getSettings).toHaveBeenCalledWith("user-123", "space", DEFAULT_SPACE_SETTINGS);
@@ -60,7 +54,7 @@ describe("SettingsController", () => {
       };
       mockSettingsService.updateSettings.mockResolvedValue(mockResult);
 
-      const result = await controller.updateSpaceSettings(mockUser, dto);
+      const result = await controller.updateSpaceSettings("user-123", dto);
 
       expect(result).toEqual(mockResult);
       expect(mockSettingsService.updateSettings).toHaveBeenCalledWith("user-123", "space", dto, DEFAULT_SPACE_SETTINGS);
@@ -75,7 +69,7 @@ describe("SettingsController", () => {
       };
       mockSettingsService.getSettings.mockResolvedValue(mockResult);
 
-      const result = await controller.getDatabaseSettings(mockUser);
+      const result = await controller.getDatabaseSettings("user-123");
 
       expect(result).toEqual(mockResult);
       expect(mockSettingsService.getSettings).toHaveBeenCalledWith("user-123", "database", DEFAULT_DATABASE_SETTINGS);
@@ -93,7 +87,7 @@ describe("SettingsController", () => {
       };
       mockSettingsService.updateSettings.mockResolvedValue(mockResult);
 
-      const result = await controller.updateDatabaseSettings(mockUser, dto);
+      const result = await controller.updateDatabaseSettings("user-123", dto);
 
       expect(result).toEqual(mockResult);
       expect(mockSettingsService.updateSettings).toHaveBeenCalledWith(
@@ -112,7 +106,7 @@ describe("SettingsController", () => {
       };
       mockSettingsService.getSettings.mockResolvedValue(mockResult);
 
-      const result = await controller.getSectionSettings(mockUser);
+      const result = await controller.getSectionSettings("user-123");
 
       expect(result).toEqual(mockResult);
       expect(mockSettingsService.getSettings).toHaveBeenCalledWith("user-123", "section", DEFAULT_SECTION_SETTINGS);
@@ -130,7 +124,7 @@ describe("SettingsController", () => {
       };
       mockSettingsService.updateSettings.mockResolvedValue(mockResult);
 
-      const result = await controller.updateSectionSettings(mockUser, dto);
+      const result = await controller.updateSectionSettings("user-123", dto);
 
       expect(result).toEqual(mockResult);
       expect(mockSettingsService.updateSettings).toHaveBeenCalledWith(

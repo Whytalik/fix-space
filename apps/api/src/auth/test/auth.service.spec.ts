@@ -1,20 +1,25 @@
+import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { UnauthorizedException } from "@nestjs/common";
-import { describe, it, expect, beforeEach, jest } from "@jest/globals";
+import { prisma } from "@nucleus/database";
+import { AppLogger } from "../../common/logger/app-logger.service";
+import * as passwordUtils from "../../common/utils/password";
+import { UserService } from "../../user/user.service";
 import { AuthService } from "../auth.service";
 import { TokenService } from "../token.service";
-import { UserService } from "../../user/user.service";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { prisma } from "@nucleus/database";
-import * as passwordUtils from "../../common/utils/password";
 
 // Mock modules
 jest.mock("@nucleus/database", () => ({
   prisma: {
     user: {
-      findUnique: jest.fn(),
+      findUnique: jest.fn<any>(),
+      update: jest.fn<any>(),
+      delete: jest.fn<any>(),
+    },
+    emailVerificationToken: {
       update: jest.fn(),
     },
+    $transaction: jest.fn(),
   },
 }));
 
@@ -25,25 +30,19 @@ jest.mock("../../common/utils/password", () => ({
 
 describe("AuthService", () => {
   let service: AuthService;
-  let tokenService: TokenService;
-  let userService: UserService;
-  let logger: AppLogger;
 
   const mockTokenService = {
-    generateAccessToken: jest.fn(),
-    createRefreshToken: jest.fn(),
-    validateRefreshToken: jest.fn(),
-    rotateRefreshToken: jest.fn(),
-    revokeRefreshToken: jest.fn(),
-    createVerificationToken: jest.fn(),
-    validateVerificationToken: jest.fn(),
-    markVerificationTokenUsed: jest.fn(),
+    generateAccessToken: jest.fn<() => string>(),
+    createRefreshToken: jest.fn<() => Promise<string>>(),
+    validateRefreshToken: jest.fn<() => Promise<{ userId: string; tokenId: string } | null>>(),
+    rotateRefreshToken: jest.fn<() => Promise<string>>(),
+    revokeRefreshToken: jest.fn<() => Promise<void>>(),
+    createVerificationToken: jest.fn<() => Promise<string>>(),
+    validateVerificationToken: jest.fn<() => Promise<{ userId: string; tokenId: string } | null>>(),
   };
 
   const mockUserService = {
-    findById: jest.fn(),
-    findByEmail: jest.fn(),
-    create: jest.fn(),
+    findById: jest.fn<() => Promise<any>>(),
   };
 
   const mockLogger = {
@@ -56,6 +55,7 @@ describe("AuthService", () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    (prisma.$transaction as any).mockImplementation((cb) => cb(prisma));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -76,9 +76,6 @@ describe("AuthService", () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    tokenService = module.get<TokenService>(TokenService);
-    userService = module.get<UserService>(UserService);
-    logger = module.get<AppLogger>(AppLogger);
   });
 
   describe("login", () => {
@@ -98,8 +95,8 @@ describe("AuthService", () => {
     };
 
     it("should login successfully with valid credentials", async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(true);
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+      (passwordUtils.comparePassword as any).mockResolvedValue(true);
       mockTokenService.generateAccessToken.mockReturnValue("access-token");
       mockTokenService.createRefreshToken.mockResolvedValue("refresh-token");
 
@@ -123,7 +120,7 @@ describe("AuthService", () => {
     });
 
     it("should throw UnauthorizedException if user not found", async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.findUnique as any).mockResolvedValue(null);
 
       await expect(service.login(validLoginDto)).rejects.toThrow(UnauthorizedException);
       await expect(service.login(validLoginDto)).rejects.toThrow("Invalid credentials");
@@ -132,8 +129,8 @@ describe("AuthService", () => {
     });
 
     it("should throw UnauthorizedException if password is invalid", async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(false);
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+      (passwordUtils.comparePassword as any).mockResolvedValue(false);
 
       await expect(service.login(validLoginDto)).rejects.toThrow(UnauthorizedException);
       await expect(service.login(validLoginDto)).rejects.toThrow("Invalid credentials");
@@ -146,8 +143,8 @@ describe("AuthService", () => {
 
     it("should throw UnauthorizedException if email not verified", async () => {
       const unverifiedUser = { ...mockUser, isVerified: false };
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(unverifiedUser);
-      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(true);
+      (prisma.user.findUnique as any).mockResolvedValue(unverifiedUser);
+      (passwordUtils.comparePassword as any).mockResolvedValue(true);
 
       await expect(service.login(validLoginDto)).rejects.toThrow(UnauthorizedException);
       await expect(service.login(validLoginDto)).rejects.toThrow("Please verify your email before logging in");
@@ -160,8 +157,8 @@ describe("AuthService", () => {
 
     it("should handle case-insensitive email lookup", async () => {
       const uppercaseEmail = { ...validLoginDto, email: "TEST@EXAMPLE.COM" };
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(true);
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+      (passwordUtils.comparePassword as any).mockResolvedValue(true);
       mockTokenService.generateAccessToken.mockReturnValue("access-token");
       mockTokenService.createRefreshToken.mockResolvedValue("refresh-token");
 
@@ -173,8 +170,8 @@ describe("AuthService", () => {
     });
 
     it("should log debug message on login attempt", async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(true);
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+      (passwordUtils.comparePassword as any).mockResolvedValue(true);
       mockTokenService.generateAccessToken.mockReturnValue("access-token");
       mockTokenService.createRefreshToken.mockResolvedValue("refresh-token");
 
@@ -186,7 +183,7 @@ describe("AuthService", () => {
     });
 
     it("should not expose whether email exists in error message", async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.findUnique as any).mockResolvedValue(null);
 
       await expect(service.login(validLoginDto)).rejects.toThrow("Invalid credentials");
 
@@ -195,8 +192,8 @@ describe("AuthService", () => {
     });
 
     it("should not expose password validation details in error message", async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(false);
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+      (passwordUtils.comparePassword as any).mockResolvedValue(false);
 
       await expect(service.login(validLoginDto)).rejects.toThrow("Invalid credentials");
 
@@ -285,11 +282,11 @@ describe("AuthService", () => {
     });
 
     it("should handle null refresh token", async () => {
-      await expect(service.refresh(null as any)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refresh(null)).rejects.toThrow(UnauthorizedException);
     });
 
     it("should handle undefined refresh token", async () => {
-      await expect(service.refresh(undefined as any)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refresh(undefined)).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -319,7 +316,7 @@ describe("AuthService", () => {
     });
 
     it("should handle logout with null refresh token", async () => {
-      const result = await service.logout(null as any);
+      const result = await service.logout(null);
 
       expect(result).toEqual({
         message: "Logged out successfully",
@@ -329,7 +326,7 @@ describe("AuthService", () => {
     });
 
     it("should handle logout with undefined refresh token", async () => {
-      const result = await service.logout(undefined as any);
+      const result = await service.logout(undefined);
 
       expect(result).toEqual({
         message: "Logged out successfully",
@@ -359,11 +356,8 @@ describe("AuthService", () => {
       const validatedToken = { userId: "user-123", tokenId: "token-id" };
 
       mockTokenService.validateVerificationToken.mockResolvedValue(validatedToken);
-      (prisma.user.update as jest.Mock).mockResolvedValue({
-        id: "user-123",
-        isVerified: true,
-      });
-      mockTokenService.markVerificationTokenUsed.mockResolvedValue(undefined);
+      (prisma.user.update as any).mockResolvedValue({ id: "user-123", isVerified: true });
+      (prisma.emailVerificationToken.update as any).mockResolvedValue({ id: "token-id", usedAt: new Date() });
 
       const result = await service.verifyEmail(token);
 
@@ -373,7 +367,10 @@ describe("AuthService", () => {
         where: { id: validatedToken.userId },
         data: { isVerified: true },
       });
-      expect(mockTokenService.markVerificationTokenUsed).toHaveBeenCalledWith(validatedToken.tokenId);
+      expect(prisma.emailVerificationToken.update).toHaveBeenCalledWith({
+        where: { id: validatedToken.tokenId },
+        data: { usedAt: expect.any(Date) },
+      });
       expect(mockLogger.log).toHaveBeenCalledWith("Email verified successfully", { userId: validatedToken.userId });
     });
 
@@ -383,7 +380,7 @@ describe("AuthService", () => {
 
       await expect(service.verifyEmail(token)).rejects.toThrow("Invalid or expired verification token");
       expect(prisma.user.update).not.toHaveBeenCalled();
-      expect(mockTokenService.markVerificationTokenUsed).not.toHaveBeenCalled();
+      expect(prisma.emailVerificationToken.update).not.toHaveBeenCalled();
     });
 
     it("should throw BadRequestException if token is expired", async () => {
@@ -398,15 +395,15 @@ describe("AuthService", () => {
       const validatedToken = { userId: "user-123", tokenId: "token-id" };
 
       mockTokenService.validateVerificationToken.mockResolvedValue(validatedToken);
-      (prisma.user.update as jest.Mock).mockResolvedValue({
-        id: "user-123",
-        isVerified: true,
-      });
-      mockTokenService.markVerificationTokenUsed.mockResolvedValue(undefined);
+      (prisma.user.update as any).mockResolvedValue({ id: "user-123", isVerified: true });
+      (prisma.emailVerificationToken.update as any).mockResolvedValue({ id: "token-id", usedAt: new Date() });
 
       await service.verifyEmail(token);
 
-      expect(mockTokenService.markVerificationTokenUsed).toHaveBeenCalledWith("token-id");
+      expect(prisma.emailVerificationToken.update).toHaveBeenCalledWith({
+        where: { id: "token-id" },
+        data: { usedAt: expect.any(Date) },
+      });
     });
 
     it("should update user isVerified flag", async () => {
@@ -414,11 +411,8 @@ describe("AuthService", () => {
       const validatedToken = { userId: "user-123", tokenId: "token-id" };
 
       mockTokenService.validateVerificationToken.mockResolvedValue(validatedToken);
-      (prisma.user.update as jest.Mock).mockResolvedValue({
-        id: "user-123",
-        isVerified: true,
-      });
-      mockTokenService.markVerificationTokenUsed.mockResolvedValue(undefined);
+      (prisma.user.update as any).mockResolvedValue({ id: "user-123", isVerified: true });
+      (prisma.emailVerificationToken.update as any).mockResolvedValue({ id: "token-id", usedAt: new Date() });
 
       await service.verifyEmail(token);
 
@@ -436,6 +430,58 @@ describe("AuthService", () => {
     });
   });
 
+  describe("devResetTestData", () => {
+    it("should delete user and log when found", async () => {
+      const mockUser = { id: "user-123", email: "test@example.com" };
+      (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(mockUser);
+      (prisma.user.delete as jest.Mock<any>).mockResolvedValue(mockUser);
+
+      const result = await service.devResetTestData("test@example.com");
+
+      expect(result).toEqual({ message: "Test data for test@example.com deleted (cascade)" });
+      expect(prisma.user.delete).toHaveBeenCalledWith({ where: { email: "test@example.com" } });
+      expect(mockLogger.log).toHaveBeenCalledWith("Dev: test data reset", { email: "test@example.com" });
+    });
+
+    it("should return 'nothing to reset' message when user not found", async () => {
+      (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(null);
+
+      const result = await service.devResetTestData("notfound@example.com");
+
+      expect(result).toEqual({ message: "No user found for notfound@example.com — nothing to reset" });
+      expect(prisma.user.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("devVerifyUser", () => {
+    it("should update isVerified and return success message", async () => {
+      const mockUser = { id: "user-123", email: "test@example.com" };
+      (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(mockUser);
+      (prisma.user.update as jest.Mock<any>).mockResolvedValue({ ...mockUser, isVerified: true });
+
+      const result = await service.devVerifyUser("test@example.com");
+
+      expect(result).toEqual({ message: "User test@example.com verified successfully" });
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { email: "test@example.com" },
+        data: { isVerified: true },
+      });
+      expect(mockLogger.log).toHaveBeenCalledWith("Dev: user verified", {
+        userId: mockUser.id,
+        email: "test@example.com",
+      });
+    });
+
+    it("should throw NotFoundException when user not found", async () => {
+      (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(null);
+
+      await expect(service.devVerifyUser("notfound@example.com")).rejects.toThrow(NotFoundException);
+      await expect(service.devVerifyUser("notfound@example.com")).rejects.toThrow(
+        "User with email notfound@example.com not found",
+      );
+    });
+  });
+
   describe("Security Properties", () => {
     it("should not leak timing information on login failure", async () => {
       const validLoginDto = {
@@ -444,7 +490,7 @@ describe("AuthService", () => {
       };
 
       // Test non-existent user timing
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.findUnique as any).mockResolvedValue(null);
       const start1 = Date.now();
       await service.login(validLoginDto).catch(() => {});
       const duration1 = Date.now() - start1;
@@ -459,8 +505,8 @@ describe("AuthService", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(false);
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+      (passwordUtils.comparePassword as any).mockResolvedValue(false);
 
       const start2 = Date.now();
       await service.login(validLoginDto).catch(() => {});
@@ -479,7 +525,7 @@ describe("AuthService", () => {
       };
 
       // Non-existent user error
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.findUnique as any).mockResolvedValue(null);
       const error1Promise = service.login(validLoginDto);
 
       // Wrong password error
@@ -492,8 +538,8 @@ describe("AuthService", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (passwordUtils.comparePassword as jest.Mock).mockResolvedValue(false);
+      (prisma.user.findUnique as any).mockResolvedValue(mockUser);
+      (passwordUtils.comparePassword as any).mockResolvedValue(false);
       const error2Promise = service.login(validLoginDto);
 
       // Both should throw the same error message

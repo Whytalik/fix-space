@@ -17,6 +17,9 @@ export class SpaceResponseDto {
   icon?: string;
 
   @Expose()
+  isDefault: boolean;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()
@@ -34,3 +37,5 @@ export class SpaceResponseDto {
     Object.assign(this, partial);
   }
 }
+
+
