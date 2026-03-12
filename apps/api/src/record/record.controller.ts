@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from "@nestjs/common";
 import { CreateRecordDto, UpdateRecordDto } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { RecordService } from "./record.service";
@@ -21,9 +21,16 @@ export class RecordController {
   findAll(
     @Query("databaseId")
     databaseId: string,
+    @Query("page", new ParseIntPipe({ optional: true }))
+    page: number | undefined,
+    @Query("pageSize", new ParseIntPipe({ optional: true }))
+    pageSize: number | undefined,
     @CurrentUser("userId")
     userId: string,
   ) {
+    if (page !== undefined && pageSize !== undefined) {
+      return this.recordService.findAllPaged(databaseId, userId, page, pageSize);
+    }
     return this.recordService.findAll(databaseId, userId);
   }
 

@@ -111,7 +111,9 @@ export class SectionService {
         name: operation.update?.name,
         position: operation.update?.position,
         icon: operation.update?.icon,
-        color: operation.update?.color,
+        color: operation.update?.color !== undefined
+          ? (operation.update.color || null)
+          : undefined,
       },
     });
   }
