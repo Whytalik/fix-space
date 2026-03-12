@@ -19,22 +19,19 @@ export class PropertyResponseDto {
   position: number;
 
   @Expose()
-  icon?: string;
+  icon: string | null;
 
   @Expose()
-  color?: string;
+  hint: string | null;
 
   @Expose()
-  hint?: string;
-
-  @Expose()
-  group?: string;
+  group: string | null;
 
   @Expose()
   isRequired: boolean;
 
   @Expose()
-  isPrimary: boolean;
+  isVisible: boolean;
 
   @Expose()
   createdAt: Date;

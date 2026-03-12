@@ -3,5 +3,5 @@ export interface RecordSettings {
 }
 
 export const DEFAULT_RECORD_SETTINGS = {
-  defaultRecordIcon: "",
+  defaultRecordIcon: "icon:FileText",
 } satisfies RecordSettings;

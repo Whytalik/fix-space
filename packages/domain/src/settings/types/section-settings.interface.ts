@@ -4,6 +4,6 @@ export interface SectionSettings {
 }
 
 export const DEFAULT_SECTION_SETTINGS = {
-  defaultSectionIcon: "📁",
+  defaultSectionIcon: "icon:FolderOpen",
   defaultSectionColor: "transparent",
 } satisfies SectionSettings;
