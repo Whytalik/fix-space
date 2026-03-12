@@ -4,6 +4,7 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { RequireOwnership } from "../auth/decorators/required-ownership.decorator";
 import { ResourceOwnerGuard } from "../auth/guards/resource-owner.guard";
 import { DuplicateSpaceUseCase } from "./providers/duplicate-space.usecase";
+import { InitializeUserSpaceUseCase } from "./providers/initialize-user-space.usecase";
 import { SpaceService } from "./space.service";
 
 @Controller("spaces")
@@ -11,6 +12,7 @@ export class SpaceController {
   constructor(
     private readonly spaceService: SpaceService,
     private readonly duplicateSpaceUseCase: DuplicateSpaceUseCase,
+    private readonly initializeUserSpaceUseCase: InitializeUserSpaceUseCase,
   ) {}
 
   @Post()
@@ -20,9 +22,7 @@ export class SpaceController {
     @Body()
     createSpaceDto: CreateSpaceDto,
   ) {
-    return this.spaceService.create(userId, {
-      ...createSpaceDto,
-    });
+    return this.initializeUserSpaceUseCase.createAndSeed(userId, createSpaceDto);
   }
 
   @Get()

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { prisma } from "@nucleus/database";
+import { Prisma, prisma } from "@nucleus/database";
 import { DatabaseResponseDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 
@@ -36,7 +36,6 @@ export class DuplicateDatabaseUseCase {
           name: `${source.name}_copy`,
           title: newName,
           icon: source.icon,
-          config: source.config,
         },
       });
 
@@ -49,6 +48,7 @@ export class DuplicateDatabaseUseCase {
             ...prop,
             id: undefined,
             databaseId: newDb.id,
+            config: prop.config as Prisma.InputJsonValue,
           },
         });
 
@@ -62,7 +62,6 @@ export class DuplicateDatabaseUseCase {
             databaseId: newDb.id,
             name: record.name,
             icon: record.icon,
-            config: record.config,
           },
         });
 
@@ -75,7 +74,7 @@ export class DuplicateDatabaseUseCase {
             data: {
               recordId: newRecord.id,
               propertyId: newPropertyId,
-              value: value.value,
+              value: value.value as Prisma.InputJsonValue,
               computed: value.computed,
             },
           });
