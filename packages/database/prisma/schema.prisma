@@ -25,16 +25,8 @@ enum PropertyType {
   FORMULA
 }
 
-enum ViewType {
-  TABLE
-}
-
 enum AutomationTrigger {
   ON_RECORD_CREATE
-}
-
-enum AITaskType {
-  ANALYSIS
 }
 
 // ==============================
@@ -123,7 +115,6 @@ model Space {
   icon      String?
   isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
-  config    Json?
 
   owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   databases Database[]
@@ -154,15 +145,15 @@ model Section {
 }
 
 model Database {
-  id        String   @id @default(uuid())
-  spaceId   String
-  sectionId String?
-  name      String
-  title     String
-  icon      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  config    Json?
+  id          String   @id @default(uuid())
+  spaceId     String
+  sectionId   String?
+  name        String
+  title       String
+  icon        String?
+  recordLimit Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   space      Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   section    Section?   @relation(fields: [sectionId], references: [id], onDelete: SetNull)
@@ -186,11 +177,10 @@ model Property {
   type       PropertyType
   position   Int
   icon       String?
-  color      String?
   hint       String?
   group      String?
   isRequired Boolean      @default(false)
-  isPrimary  Boolean      @default(false)
+  isVisible  Boolean      @default(true)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   config     Json?
@@ -211,7 +201,6 @@ model Record {
   icon       String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  config     Json?
 
   database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   //sourceTemplate Template?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
@@ -242,7 +231,6 @@ model RecordContent {
   id           String   @id @default(uuid())
   recordId     String   @unique
   lastEditedAt DateTime @default(now())
-  config       Json?
 
   record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
   //gridItems GridItem[]
@@ -380,24 +368,6 @@ model RecordContent {
  */
 
 /**
- * model View {
- * id         String   @id @default(uuid())
- * databaseId String
- * name       String
- * type       ViewType
- * isDefault  Boolean  @default(false)
- * position   Int      @default(0)
- * createdAt  DateTime @default(now())
- * updatedAt  DateTime @updatedAt
- * config     Json?
- * database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
- * @@unique([databaseId, name])
- * @@index([databaseId])
- * @@index([position])
- * }
- */
-
-/**
  * model Automation {
  * id         String            @id @default(uuid())
  * databaseId String
@@ -415,22 +385,3 @@ model RecordContent {
  * }
  */
 
-/**
- * model AITask {
- * id        String     @id @default(uuid())
- * scopeType String
- * scopeId   String
- * type      AITaskType
- * status    String     @default("pending")
- * input     Json?
- * output    Json?
- * error     Json?
- * createdAt DateTime   @default(now())
- * updatedAt DateTime   @updatedAt
- * config    Json?
- * @@index([scopeType, scopeId])
- * @@index([type])
- * @@index([status])
- * @@index([createdAt])
- * }
- */
