@@ -13,7 +13,7 @@ export class RecordResponseDto {
   name: string;
 
   @Expose()
-  icon?: string;
+  icon: string | null;
 
   @Expose()
   createdAt: Date;

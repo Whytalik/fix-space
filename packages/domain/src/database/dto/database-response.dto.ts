@@ -15,7 +15,7 @@ export class DatabaseResponseDto {
   title: string;
 
   @Expose()
-  icon?: string;
+  icon: string | null;
 
   @Expose()
   createdAt: Date;
@@ -24,10 +24,10 @@ export class DatabaseResponseDto {
   updatedAt: Date;
 
   @Expose()
-  sectionId?: string;
+  sectionId: string | null;
 
   @Expose()
-  config?: unknown;
+  recordLimit: number | null;
 
   constructor(partial: Partial<DatabaseResponseDto>) {
     Object.assign(this, partial);
