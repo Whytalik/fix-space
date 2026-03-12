@@ -8,9 +8,8 @@ export class Property {
   type: PropertyType;
   position: number;
   icon?: string;
-  color?: string;
   isRequired: boolean;
-  isPrimary: boolean;
+  isVisible: boolean;
   createdAt: Date;
   updatedAt: Date;
   config?: Record<string, unknown>;

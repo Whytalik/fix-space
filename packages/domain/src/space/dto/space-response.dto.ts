@@ -14,7 +14,7 @@ export class SpaceResponseDto {
   name: string;
 
   @Expose()
-  icon?: string;
+  icon: string | null;
 
   @Expose()
   isDefault: boolean;
