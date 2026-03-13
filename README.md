@@ -211,10 +211,10 @@ All endpoints require JWT authentication unless marked as public.
 | **Space**          | `/spaces`                           | Full CRUD + duplicate                    | Ownership guard                            |
 | **Database**       | `/databases`                        | Full CRUD + duplicate                    | `spaceId` in body (POST) or query (GET)    |
 | **Property**       | `/properties`                       | Full CRUD                                | `databaseId` in body (POST) or query (GET) |
-| **Record**         | `/records`                          | Full CRUD                                | `databaseId` in body (POST) or query (GET) |
+| **Record**         | `/records`                          | Full CRUD                                | `databaseId` in body (POST) or query (GET); optional `page`/`limit` pagination on GET |
 | **Property Value** | `/values`                           | Full CRUD                                | `recordId` in body (POST) or query (GET)   |
 | **Record Content** | `/records/:recordId/content`        | `GET`, `PUT`, `DELETE`                   | Rich content per record                    |
-| **Settings**       | `/settings`                         | `GET/PATCH` per category                 | Categories: `space`, `database`, `section` |
+| **Settings**       | `/settings`                         | `GET/PATCH` per category                 | Categories: `space`, `database`, `section`, `record` |
 
 ### Auth Notes
 
@@ -223,5 +223,6 @@ All endpoints require JWT authentication unless marked as public.
 - Login is rate-limited: **5 requests per 60 seconds**
 - Use `@Public()` decorator on endpoints to bypass JWT guard
 - `ResourceOwnerGuard` validates that the requesting user owns the resource
+- Access token is also set as an HTTP-only cookie (`access_token`) for cookie-first JWT extraction
 
 

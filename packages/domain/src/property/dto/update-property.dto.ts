@@ -26,16 +26,12 @@ export class UpdatePropertyDto {
   isRequired?: boolean;
 
   @IsOptional()
-  @IsBoolean({ message: "isPrimary must be a boolean" })
-  isPrimary?: boolean;
+  @IsBoolean({ message: "isVisible must be a boolean" })
+  isVisible?: boolean;
 
   @IsOptional()
   @IsString()
   icon?: string;
-
-  @IsOptional()
-  @IsString()
-  color?: string;
 
   @IsOptional()
   @IsString()

@@ -2,6 +2,37 @@
 
 > Auto-generated from git history. Last updated: 2026-03-07
 
+## 2026-03-13
+
+### Features
+
+- feat(property): add config support and auto-create null values for existing records on property add
+- feat(record): enforce database record limit; add optional page/limit pagination
+- feat(settings): add settings service with per-category defaults and upsert logic (space, database, section, record)
+- feat(space): update space, section, and duplicate services for new data model
+
+### Tests
+
+- test: add spec coverage for property controller, property service, record service, and space duplication
+
+### Documentation
+
+- docs: add Ukrainian project description for diploma
+
+## 2026-03-12
+
+### Features
+
+- feat(auth): extract JWT from cookies with bearer token fallback
+- feat(space): define full trading workspace initialization config and seed data (7 databases, 4-pass init)
+- feat(domain): extend DTOs with recordLimit, property config, and settings interfaces
+- feat(database): enforce recordLimit in service and update duplicate use-case
+
+### Chores
+
+- chore(db): add recordLimit column to Database table (migration 20260312173750)
+- chore(config): add separate tsconfig and jest config for tests
+
 ## 2026-03-05
 
 ### Bug Fixes

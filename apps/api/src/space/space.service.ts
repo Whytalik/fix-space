@@ -1,12 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
-import {
-  CreateSpaceDto,
-  DEFAULT_SPACE_SETTINGS,
-  SectionOperationDto,
-  SpaceResponseDto,
-  UpdateSpaceDto,
-} from "@nucleus/domain";
+import { prisma } from "@nucleus/database";
+import { CreateSpaceDto, SectionOperationDto, SpaceResponseDto, UpdateSpaceDto } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 import { SettingsService } from "../settings/settings.service";
 import { SectionService } from "./providers/section.service";
@@ -28,8 +22,6 @@ export class SpaceService {
       name: dto.name,
     });
 
-    const spaceSettings = await this.settingsService.getSettings(ownerId, "space", DEFAULT_SPACE_SETTINGS);
-
     const space = await prisma.$transaction(async (tx) => {
       if (dto.isDefault) {
         await tx.space.updateMany({
@@ -43,7 +35,6 @@ export class SpaceService {
           icon: dto.icon,
           isDefault: dto.isDefault ?? false,
           ownerId,
-          config: spaceSettings as unknown as Prisma.JsonValue,
         },
         include: sectionsInclude,
       });

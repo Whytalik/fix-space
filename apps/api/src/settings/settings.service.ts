@@ -66,12 +66,12 @@ export class SettingsService {
           },
         },
         update: {
-          value: value as Prisma.JsonValue,
+          value: value as Prisma.InputJsonValue,
         },
         create: {
           userId,
           key,
-          value: value as Prisma.JsonValue,
+          value: value as Prisma.InputJsonValue,
           category,
         },
       });
