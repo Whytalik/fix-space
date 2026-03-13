@@ -1,9 +1,11 @@
 import { Body, Controller, Get, Patch } from "@nestjs/common";
 import {
   DEFAULT_DATABASE_SETTINGS,
+  DEFAULT_RECORD_SETTINGS,
   DEFAULT_SECTION_SETTINGS,
   DEFAULT_SPACE_SETTINGS,
   DatabaseSettings,
+  RecordSettings,
   SectionSettings,
   SpaceSettings,
 } from "@nucleus/domain";
@@ -66,5 +68,23 @@ export class SettingsController {
     updateSettingsDto: Partial<SectionSettings>,
   ) {
     return this.settingsService.updateSettings(userId, "section", updateSettingsDto, DEFAULT_SECTION_SETTINGS);
+  }
+
+  @Get("record")
+  getRecordSettings(
+    @CurrentUser("userId")
+    userId: string,
+  ) {
+    return this.settingsService.getSettings(userId, "record", DEFAULT_RECORD_SETTINGS);
+  }
+
+  @Patch("record")
+  updateRecordSettings(
+    @CurrentUser("userId")
+    userId: string,
+    @Body()
+    updateSettingsDto: Partial<RecordSettings>,
+  ) {
+    return this.settingsService.updateSettings(userId, "record", updateSettingsDto, DEFAULT_RECORD_SETTINGS);
   }
 }
