@@ -34,7 +34,7 @@ User → Space → Section → Database → Property / Record → PropertyValue
 | Concern | Technology |
 |---|---|
 | Framework | NestJS 11 (TypeScript) |
-| Database ORM | Prisma 6 |
+| Database ORM | Prisma 7 |
 | Database | PostgreSQL 16 (Docker) |
 | Authentication | JWT (access + refresh tokens), Passport |
 | Password hashing | bcryptjs |
@@ -213,6 +213,7 @@ Relations: `databases[]`
 | title | String? | display title |
 | icon | String? | |
 | config | Json? | |
+| recordLimit | Int? | max records allowed (null = unlimited) |
 | createdAt / updatedAt | DateTime | |
 
 Relations: `properties[]`, `records[]`
@@ -319,7 +320,7 @@ All endpoints are JWT-protected unless marked **[public]**. Auth is applied glob
 | Method | Path | Description |
 |---|---|---|
 | POST | /records | Create record (`databaseId` in body) |
-| GET | /records?databaseId=:id | List records |
+| GET | /records?databaseId=:id | List records (optional pagination: `page`, `limit`) |
 | GET | /records/:id | Get record |
 | PATCH | /records/:id | Update record |
 | DELETE | /records/:id | Delete record |
@@ -334,7 +335,16 @@ All endpoints are JWT-protected unless marked **[public]**. Auth is applied glob
 | DELETE | /values/:id | Delete value |
 
 ### Settings — `/settings`
-GET and PATCH by key + category.
+| Method | Path               | Description              |
+|--------|--------------------|--------------------------|
+| GET    | /settings/space    | Get space settings       |
+| PATCH  | /settings/space    | Update space settings    |
+| GET    | /settings/database | Get database settings    |
+| PATCH  | /settings/database | Update database settings |
+| GET    | /settings/section  | Get section settings     |
+| PATCH  | /settings/section  | Update section settings  |
+| GET    | /settings/record   | Get record settings      |
+| PATCH  | /settings/record   | Update record settings   |
 
 ---
 
@@ -387,6 +397,9 @@ GET and PATCH by key + category.
 - **`@CurrentUser()`** — extracts `userId` from JWT payload in controller params
 - **`ResourceOwnerGuard`** — verifies the requesting user owns the resource
 - **`ThrottlerGuard`** — rate limiting (configured per-route or globally)
+
+### JWT Strategy — Token Extraction
+`JwtStrategy` (`apps/api/src/jwt/jwt.strategy.ts`) extracts the access token from the `access_token` HTTP-only cookie first, then falls back to the `Authorization: Bearer` header. Helper functions `setAccessTokenCookie()` / `setRefreshTokenCookie()` in `apps/api/src/common/utils/cookie.helper.ts` manage both tokens.
 
 ---
 
@@ -467,19 +480,18 @@ RecordModal                 — create / edit record with PropertyInput per type
 | record | `RecordResponseDto`, `CreateRecordDto`, `UpdateRecordDto` |
 | property-value | `PropertyValueResponseDto`, `CreatePropertyValueDto` |
 | settings | `SettingsResponseDto`, `UpdateSettingsDto` |
+| settings | `DatabaseSettingsInterface`, `RecordSettingsInterface`, `SectionSettingsInterface`, `SpaceSettingsInterface` |
 
 ---
 
 ## 9. Initialization & Seeding
 
-When a user registers, `InitializeUserSpaceUseCase` runs and creates:
+When a user registers, `InitializeUserSpaceUseCase` runs a **4-pass initialization**:
 
-**Default Space** — `"{username}'s Space"`
-
-**3 Sections** (from `initialization.config.ts`):
-1. Routine (position 0)
-2. Insight (position 1)
-3. Settings (position 2)
+1. **Create sections** — Routine, Insight, Settings
+2. **Create empty databases** — 7 databases across sections
+3. **Create properties** — resolves `RELATION` symbolic refs (e.g. `{ relatedEntityType: 'accounts' }`)
+4. **Seed sample records** — defined in `initialization.seeds.ts`; resolves `RELATION` values via symbolic type refs (`SeedRecord`, `SeedRelation` interfaces)
 
 **7 Pre-seeded Databases:**
 
@@ -490,7 +502,7 @@ When a user registers, `InitializeUserSpaceUseCase` runs and creates:
 | Notes | Insight | Name, Date, Type (SELECT: Lesson/Rule/Observation/Strategy/Psychology), Topic |
 | Mistakes | Insight | Name, Date, Type, Topic, Severity |
 | Accounts | Settings | Name, Started, Account Type, Status, Starting Equity (currency), Current Equity (currency) |
-| Payouts | Settings | Name, Date, Account (relation), Amount (currency) |
+| Payouts / Operations | Settings | Name, Date, Account (relation), Amount (currency) |
 | Trading Systems | Settings | Name, Date |
 
 Every database gets a primary `Name` TEXT property. SELECT properties use categorized options (e.g. Forex pairs: EURUSD, GBPUSD, …; Commodities: XAUUSD).
@@ -507,9 +519,9 @@ Every database gets a primary `Name` TEXT property. SELECT properties use catego
 | Exception mapping | `GlobalExceptionFilter` maps Prisma errors → HTTP codes (P2002→409, P2025→404) |
 | ACID transactions | `prisma.$transaction()` for multi-step writes |
 | Logging | Custom `AppLogger`; every service calls `this.logger.setContext(ClassName)` |
-| Cookie management | `AuthCookiesInterceptor` sets/clears `refresh_token` cookie on auth responses |
+| Cookie management | `setAccessTokenCookie()` sets `access_token` cookie in response; `AuthCookiesInterceptor` still manages `refresh_token` |
 | Validation | Global `ValidationPipe` (whitelist, forbidNonWhitelisted, transform) |
-| Property type system | `PropertyTypeRegistry` + per-type handlers (`PropertyConfigHandler`, `PropertyValueHandler`) |
+| Property type system | `PropertyTypeRegistry` + per-type handlers (`PropertyConfigHandler`, `PropertyValueHandler`), creating a new property auto-creates null PropertyValues for all existing records in the database |
 | JSON config columns | Flexible per-model config stored as `Json?` field (Space, Database, Property, Record) |
 
 ### Frontend

@@ -54,9 +54,7 @@ export class DatabaseService {
           icon: createDatabaseDto.icon,
           spaceId,
           sectionId: createDatabaseDto.sectionId,
-          config: {
-            type: createDatabaseDto.type ?? "custom",
-          },
+          recordLimit: createDatabaseDto.recordLimit ?? 10,
         },
       });
 
@@ -76,11 +74,10 @@ export class DatabaseService {
             type: propertyDef.type,
             position: propertyDef.position,
             icon: propertyDef.icon,
-            color: propertyDef.color,
             isRequired: propertyDef.isRequired ?? false,
-            isPrimary: propertyDef.isPrimary ?? false,
+            isVisible: propertyDef.isVisible ?? true,
             databaseId: database.id,
-            config: mergedConfig as Prisma.JsonValue,
+            config: mergedConfig as Prisma.InputJsonValue,
           },
         });
       }
@@ -140,6 +137,7 @@ export class DatabaseService {
         title: updateDatabaseDto.title,
         icon: updateDatabaseDto.icon,
         sectionId: updateDatabaseDto.sectionId,
+        ...(updateDatabaseDto.recordLimit !== undefined && { recordLimit: updateDatabaseDto.recordLimit ?? null }),
       },
     });
 

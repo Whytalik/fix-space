@@ -1,12 +1,15 @@
 import { CreateDatabaseDto, CreatePropertyDto, CreateSectionDto, DatabaseType, PropertyType } from "@nucleus/domain";
+import { SeedRecord, seedsByDatabaseType } from "./initialization.seeds";
 
 type DatabaseTemplate = Omit<CreateDatabaseDto, "spaceId" | "properties"> & {
   type?: DatabaseType;
   properties?: Omit<CreatePropertyDto, "databaseId">[];
+  seeds?: SeedRecord[];
 };
 
 export interface InitializationConfig {
   spaceNameTemplate: string;
+  spaceIcon: string;
   sections: CreateSectionDto[];
   databases: DatabaseTemplate[];
   defaultDatabaseProperties: Omit<CreatePropertyDto, "databaseId">[];
@@ -30,11 +33,12 @@ const FORMULA_TEXT = { formula: "", output: { type: "text" } };
 
 export const defaultInitializationConfig: InitializationConfig = {
   spaceNameTemplate: "{{username}}'s Space",
+  spaceIcon: "icon:LayoutDashboard",
 
   sections: [
-    { key: "routine", name: "Routine", position: 0 },
-    { key: "insight", name: "Insight", position: 1 },
-    { key: "settings", name: "Settings", position: 2 },
+    { key: "routine", name: "Routine", position: 0, icon: "icon:CalendarDays", color: "#818cf8" },
+    { key: "insight", name: "Insight", position: 1, icon: "icon:Lightbulb", color: "#fbbf24" },
+    { key: "settings", name: "Settings", position: 2, icon: "icon:Settings", color: "#a78bfa" },
   ],
 
   databases: [
@@ -42,9 +46,11 @@ export const defaultInitializationConfig: InitializationConfig = {
       name: "[DB] Trading Journal",
       title: "Trading Journal",
       type: "trading-journal",
+      icon: "icon:BookOpen",
       sectionKey: "routine",
+      seeds: seedsByDatabaseType["trading-journal"],
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Trade name or journal entry title", group: "General" },
+        { name: "Name", type: PropertyType.TEXT, isRequired: true, position: 0, hint: "Trade name or journal entry title", group: "General" },
         { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the trade was opened or closed", group: "General" },
         {
           name: "Account",
@@ -265,9 +271,11 @@ export const defaultInitializationConfig: InitializationConfig = {
       name: "[DB] Session Routine",
       title: "Session Routine",
       type: "daily-routine",
+      icon: "icon:CalendarCheck",
       sectionKey: "routine",
+      seeds: seedsByDatabaseType["daily-routine"],
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Session analysis title", group: "General" },
+        { name: "Name", type: PropertyType.TEXT, isRequired: true, position: 0, hint: "Session analysis title", group: "General" },
         { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the analysis session was conducted", group: "General" },
         {
           name: "Account",
@@ -329,9 +337,11 @@ export const defaultInitializationConfig: InitializationConfig = {
       name: "[DB] Notes",
       title: "Notes",
       type: "notes",
+      icon: "icon:StickyNote",
       sectionKey: "insight",
+      seeds: seedsByDatabaseType["notes"],
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Note or observation title", group: "General" },
+        { name: "Name", type: PropertyType.TEXT, isRequired: true, position: 0, hint: "Note or observation title", group: "General" },
         { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the note was created", group: "General" },
         {
           name: "Type",
@@ -376,9 +386,11 @@ export const defaultInitializationConfig: InitializationConfig = {
       name: "[DB] Mistakes",
       title: "Mistakes",
       type: "mistakes",
+      icon: "icon:TriangleAlert",
       sectionKey: "insight",
+      seeds: seedsByDatabaseType["mistakes"],
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Mistake name or short description", group: "General" },
+        { name: "Name", type: PropertyType.TEXT, isRequired: true, position: 0, hint: "Mistake name or short description", group: "General" },
         { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the mistake was recorded", group: "General" },
         { name: "Severity", type: PropertyType.FORMULA, position: 2, config: FORMULA_TEXT, hint: "Degree of impact this mistake had on trading results", group: "General" },
         {
@@ -429,9 +441,11 @@ export const defaultInitializationConfig: InitializationConfig = {
       name: "[DB] Accounts",
       title: "Accounts",
       type: "accounts",
+      icon: "icon:Wallet",
       sectionKey: "settings",
+      seeds: seedsByDatabaseType["accounts"],
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Trading account name", group: "General" },
+        { name: "Name", type: PropertyType.TEXT, isRequired: true, position: 0, hint: "Trading account name", group: "General" },
         { name: "Started", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the account was opened or started", group: "General" },
         {
           name: "Account Type",
@@ -476,9 +490,11 @@ export const defaultInitializationConfig: InitializationConfig = {
       name: "[DB] Operations",
       title: "Operations",
       type: "operations",
+      icon: "icon:ArrowLeftRight",
       sectionKey: "settings",
+      seeds: seedsByDatabaseType["operations"],
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Operation name or description" },
+        { name: "Name", type: PropertyType.TEXT, isRequired: true, position: 0, hint: "Operation name or description" },
         {
           name: "Type",
           type: PropertyType.SELECT,
@@ -511,9 +527,11 @@ export const defaultInitializationConfig: InitializationConfig = {
       name: "[DB] Trading Systems",
       title: "Trading Systems",
       type: "trading-system",
+      icon: "icon:Target",
       sectionKey: "settings",
+      seeds: seedsByDatabaseType["trading-system"],
       properties: [
-        { name: "Name", type: PropertyType.TEXT, isPrimary: true, position: 0, hint: "Trading system or strategy name" },
+        { name: "Name", type: PropertyType.TEXT, isRequired: true, position: 0, hint: "Trading system or strategy name" },
         { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the system was created or last updated" },
       ],
     },
@@ -525,7 +543,6 @@ export const defaultInitializationConfig: InitializationConfig = {
       type: PropertyType.TEXT,
       position: 0,
       isRequired: true,
-      isPrimary: true,
     },
   ],
 };
