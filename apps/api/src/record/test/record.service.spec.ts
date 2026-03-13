@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { Prisma, prisma } from "@nucleus/database";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { RecordService } from "../record.service";
 
 jest.mock("@nucleus/database", () => ({
+  Prisma: { DbNull: null },
   prisma: {
     database: {
       findFirst: jest.fn<any>(),
@@ -17,6 +18,7 @@ jest.mock("@nucleus/database", () => ({
       findMany: jest.fn<any>(),
       findFirst: jest.fn<any>(),
       findUniqueOrThrow: jest.fn<any>(),
+      count: jest.fn<any>(),
       update: jest.fn<any>(),
       delete: jest.fn<any>(),
     },
@@ -40,8 +42,7 @@ describe("RecordService", () => {
 
   const mockDatabase = {
     id: "db-123",
-    spaceId: "space-123",
-    name: "Test Database",
+    recordLimit: null,
   };
 
   const mockProperty1 = {
@@ -142,6 +143,7 @@ describe("RecordService", () => {
             ownerId: "user-123",
           },
         },
+        select: { id: true, recordLimit: true },
       });
       expect(prisma.property.findMany).toHaveBeenCalledWith({
         where: {
@@ -221,6 +223,41 @@ describe("RecordService", () => {
       await expect(
         service.create("db-nonexistent", { databaseId: "db-nonexistent", name: "Test" }, "user-123"),
       ).rejects.toThrow("Database with id db-nonexistent not found");
+    });
+
+    it("should throw BadRequestException when record limit is reached", async () => {
+      (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue({ id: "db-123", recordLimit: 3 });
+      (prisma.record.count as jest.Mock<any>).mockResolvedValue(3);
+
+      await expect(
+        service.create("db-123", { databaseId: "db-123", name: "Over Limit" }, "user-123"),
+      ).rejects.toThrow(BadRequestException);
+      await expect(
+        service.create("db-123", { databaseId: "db-123", name: "Over Limit" }, "user-123"),
+      ).rejects.toThrow("Record limit of 3 reached");
+    });
+
+    it("should not check count when recordLimit is null", async () => {
+      (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue({ id: "db-123", recordLimit: null });
+      (prisma.property.findMany as jest.Mock<any>).mockResolvedValue([]);
+
+      const mockTx = {
+        record: {
+          create: jest.fn<any>().mockResolvedValue(mockRecord),
+          findUniqueOrThrow: jest.fn<any>().mockResolvedValue(mockRecordWithIncludes),
+        },
+        propertyValue: {
+          create: jest.fn<any>(),
+        },
+      } as unknown as Prisma.TransactionClient;
+
+      (prisma.$transaction as jest.Mock<any>).mockImplementation(
+        async (cb: (tx: Prisma.TransactionClient) => Promise<unknown>) => cb(mockTx),
+      );
+
+      await service.create("db-123", { databaseId: "db-123", name: "No Limit" }, "user-123");
+
+      expect(prisma.record.count).not.toHaveBeenCalled();
     });
   });
 
