@@ -45,7 +45,7 @@ export function parseDurationToMs(duration: string): number {
     throw new Error(`Invalid duration format: ${duration}`);
   }
 
-  const value = parseInt(match[1], 10);
+  const value = parseInt(match[1]!, 10);
   const unit = match[2];
 
   switch (unit) {

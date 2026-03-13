@@ -1,8 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { Prisma, prisma } from "@nucleus/database";
-import { DEFAULT_SPACE_SETTINGS, SpaceResponseDto } from "@nucleus/domain";
+import { SpaceResponseDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
-import { SettingsService } from "../../settings/settings.service";
 import { sectionsInclude } from "../space.constants";
 
 export interface DuplicateSpaceOptions {
@@ -11,10 +10,7 @@ export interface DuplicateSpaceOptions {
 
 @Injectable()
 export class DuplicateSpaceUseCase {
-  constructor(
-    private readonly logger: AppLogger,
-    private readonly settingsService: SettingsService,
-  ) {
+  constructor(private readonly logger: AppLogger) {
     this.logger.setContext(DuplicateSpaceUseCase.name);
   }
 
@@ -45,8 +41,6 @@ export class DuplicateSpaceUseCase {
 
     const newName = options?.newName ?? this.generateUniqueName(sourceSpace.name);
 
-    const spaceSettings = await this.settingsService.getSettings(ownerId, "space", DEFAULT_SPACE_SETTINGS);
-
     return prisma.$transaction(async (tx) => {
       // Create new space
       const newSpace = await tx.space.create({
@@ -54,7 +48,6 @@ export class DuplicateSpaceUseCase {
           name: newName,
           icon: sourceSpace.icon,
           ownerId,
-          config: sourceSpace.config ?? (spaceSettings as unknown as Prisma.JsonValue),
         },
       });
 
@@ -98,7 +91,6 @@ export class DuplicateSpaceUseCase {
               }
               return mapped;
             })(),
-            config: database.config,
           },
         });
 
@@ -110,11 +102,10 @@ export class DuplicateSpaceUseCase {
               type: property.type,
               position: property.position,
               icon: property.icon,
-              color: property.color,
               isRequired: property.isRequired,
-              isPrimary: property.isPrimary,
+              isVisible: property.isVisible,
               databaseId: newDatabase.id,
-              config: property.config,
+              config: property.config as Prisma.InputJsonValue,
             },
           });
           propertyIdMap.set(property.id, newProperty.id);
@@ -127,7 +118,6 @@ export class DuplicateSpaceUseCase {
               name: record.name,
               icon: record.icon,
               databaseId: newDatabase.id,
-              config: record.config,
             },
           });
 
@@ -139,7 +129,7 @@ export class DuplicateSpaceUseCase {
                 data: {
                   recordId: newRecord.id,
                   propertyId: newPropertyId,
-                  value: value.value,
+                  value: value.value as Prisma.InputJsonValue,
                   computed: value.computed,
                 },
               });
@@ -151,7 +141,6 @@ export class DuplicateSpaceUseCase {
             await tx.recordContent.create({
               data: {
                 recordId: newRecord.id,
-                config: record.content.config,
               },
             });
           }

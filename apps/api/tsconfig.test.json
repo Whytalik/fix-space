@@ -1,0 +1,7 @@
+{
+  "extends": "@nucleus/typescript-config/test.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist"
+  }
+}

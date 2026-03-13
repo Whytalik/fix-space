@@ -68,13 +68,12 @@ export class PropertyService {
           type: createPropertyDto.type,
           position: createPropertyDto.position,
           icon: createPropertyDto.icon,
-          color: createPropertyDto.color,
           hint: createPropertyDto.hint,
           group: createPropertyDto.group,
           isRequired: createPropertyDto.isRequired ?? false,
-          isPrimary: createPropertyDto.isPrimary ?? false,
+          isVisible: createPropertyDto.isVisible ?? true,
           databaseId,
-          config: mergedConfig as Prisma.JsonValue,
+          config: mergedConfig as Prisma.InputJsonValue,
         },
       });
 
@@ -92,7 +91,7 @@ export class PropertyService {
           data: existingRecords.map((record) => ({
             recordId: record.id,
             propertyId: created.id,
-            value: null,
+            value: Prisma.DbNull,
             computed: false,
           })),
         });
@@ -211,12 +210,11 @@ export class PropertyService {
         ...(updatePropertyDto.type !== undefined && { type: updatePropertyDto.type }),
         ...(updatePropertyDto.position !== undefined && { position: updatePropertyDto.position }),
         ...(updatePropertyDto.icon !== undefined && { icon: updatePropertyDto.icon }),
-        ...(updatePropertyDto.color !== undefined && { color: updatePropertyDto.color }),
         ...(updatePropertyDto.hint !== undefined && { hint: updatePropertyDto.hint }),
         ...(updatePropertyDto.group !== undefined && { group: updatePropertyDto.group }),
         ...(updatePropertyDto.isRequired !== undefined && { isRequired: updatePropertyDto.isRequired }),
-        ...(updatePropertyDto.isPrimary !== undefined && { isPrimary: updatePropertyDto.isPrimary }),
-        ...(configToSave !== undefined && { config: configToSave as Prisma.JsonValue }),
+        ...(updatePropertyDto.isVisible !== undefined && { isVisible: updatePropertyDto.isVisible }),
+        ...(configToSave !== undefined && { config: configToSave as Prisma.InputJsonValue }),
       },
     });
 

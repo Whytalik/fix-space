@@ -12,7 +12,7 @@ export class UserResponseDto {
   username: string;
 
   @Expose()
-  icon?: string;
+  icon: string | null;
 
   @Expose()
   isVerified: boolean;

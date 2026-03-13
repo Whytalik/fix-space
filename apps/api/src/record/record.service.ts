@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma, prisma } from "@nucleus/database";
-import { CreateRecordDto, DEFAULT_RECORD_SETTINGS, RecordResponseDto, UpdateRecordDto } from "@nucleus/domain";
+import { CreateRecordDto, RecordResponseDto, UpdateRecordDto } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 
 @Injectable()
@@ -19,10 +19,18 @@ export class RecordService {
           ownerId: userId,
         },
       },
+      select: { id: true, recordLimit: true },
     });
 
     if (!database) {
       throw new NotFoundException(`Database with id ${databaseId} not found`);
+    }
+
+    if (database.recordLimit) {
+      const count = await prisma.record.count({ where: { databaseId } });
+      if (count >= database.recordLimit) {
+        throw new BadRequestException(`Record limit of ${database.recordLimit} reached`);
+      }
     }
 
     const properties = await prisma.property.findMany({
@@ -37,7 +45,6 @@ export class RecordService {
           databaseId,
           name: createRecordDto.name,
           icon: createRecordDto.icon,
-          config: DEFAULT_RECORD_SETTINGS as Prisma.JsonValue,
         },
       });
 
@@ -46,7 +53,7 @@ export class RecordService {
           data: {
             recordId: record.id,
             propertyId: property.id,
-            value: null,
+            value: Prisma.DbNull,
             computed: false,
           },
         });
@@ -92,6 +99,51 @@ export class RecordService {
       },
     });
     return records.map((record) => new RecordResponseDto(record));
+  }
+
+  async findAllPaged(
+    databaseId: string,
+    userId: string,
+    page: number,
+    pageSize: number,
+  ): Promise<{ data: RecordResponseDto[]; total: number; page: number; pageSize: number }> {
+    if (page < 1 || pageSize < 1) {
+      throw new BadRequestException("page and pageSize must be positive integers");
+    }
+
+    this.logger.debug("Finding paged records", { databaseId, page, pageSize });
+
+    const where = {
+      databaseId,
+      database: {
+        space: {
+          ownerId: userId,
+        },
+      },
+    };
+
+    const [records, total] = await Promise.all([
+      prisma.record.findMany({
+        where,
+        include: {
+          values: true,
+          content: true,
+        },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.record.count({ where }),
+    ]);
+
+    this.logger.debug("Paged records found", { databaseId, total, page, pageSize });
+
+    return {
+      data: records.map((record) => new RecordResponseDto(record)),
+      total,
+      page,
+      pageSize,
+    };
   }
 
   async findOne(id: string, userId: string): Promise<RecordResponseDto> {
