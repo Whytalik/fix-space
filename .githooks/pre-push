@@ -5,13 +5,12 @@ set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-echo "[pre-push] Refreshing changelog and stats..."
+echo "[pre-push] Refreshing changelog..."
 bash "$REPO_ROOT/scripts/update-changelog.sh"
-bash "$REPO_ROOT/scripts/stats.sh"
 
-# Commit if either file was created or modified
+# Commit if the file was created or modified
 changed=false
-for f in docs/CHANGELOG.md docs/STATS.md; do
+for f in docs/CHANGELOG.md; do
   if ! git -C "$REPO_ROOT" diff --quiet "$f" 2>/dev/null || \
      git -C "$REPO_ROOT" ls-files --others --exclude-standard -- "$f" | grep -q .; then
     if [ -f "$REPO_ROOT/$f" ]; then
@@ -24,7 +23,7 @@ done
 if $changed; then
   NOW="$(date -u '+%Y-%m-%dT%H:%M:%S')"
   GIT_AUTHOR_DATE="$NOW" GIT_COMMITTER_DATE="$NOW" \
-    git -C "$REPO_ROOT" commit -m "chore: update changelog and stats"
+    git -C "$REPO_ROOT" commit -m "chore: update changelog"
   echo "[pre-push] Docs committed — will be included in the next push."
 fi
 

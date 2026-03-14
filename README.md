@@ -214,6 +214,8 @@ All endpoints require JWT authentication unless marked as public.
 | **Record**         | `/records`                          | Full CRUD                                | `databaseId` in body (POST) or query (GET); optional `page`/`limit` pagination on GET |
 | **Property Value** | `/values`                           | Full CRUD                                | `recordId` in body (POST) or query (GET)   |
 | **Record Content** | `/records/:recordId/content`        | `GET`, `PUT`, `DELETE`                   | Rich content per record                    |
+| **Template** | `/templates`                              | Full CRUD                                | `databaseId` in body (POST) or query (GET) |
+| **Template Property Value** | `/template-property-values` | Full CRUD                           | `templateId` in body (POST) or query (GET) |
 | **Settings**       | `/settings`                         | `GET/PATCH` per category                 | Categories: `space`, `database`, `section`, `record` |
 
 ### Auth Notes

@@ -39,10 +39,43 @@ export class RecordService {
       },
     });
 
+    let resolvedTemplateId: string | null = null;
+    const templateValues: Map<string, unknown> = new Map();
+
+    if (createRecordDto.templateId !== undefined) {
+      if (createRecordDto.templateId !== null) {
+        const template = await prisma.template.findFirst({
+          where: {
+            id: createRecordDto.templateId,
+            databaseId,
+          },
+          include: { values: true },
+        });
+        if (template) {
+          resolvedTemplateId = template.id;
+          for (const tv of template.values) {
+            templateValues.set(tv.propertyId, tv.value);
+          }
+        }
+      }
+    } else {
+      const defaultTemplate = await prisma.template.findFirst({
+        where: { databaseId, isDefault: true },
+        include: { values: true },
+      });
+      if (defaultTemplate) {
+        resolvedTemplateId = defaultTemplate.id;
+        for (const tv of defaultTemplate.values) {
+          templateValues.set(tv.propertyId, tv.value);
+        }
+      }
+    }
+
     return await prisma.$transaction(async (tx) => {
       const record = await tx.record.create({
         data: {
           databaseId,
+          templateId: resolvedTemplateId,
           name: createRecordDto.name,
           icon: createRecordDto.icon,
         },
@@ -53,7 +86,7 @@ export class RecordService {
           data: {
             recordId: record.id,
             propertyId: property.id,
-            value: Prisma.DbNull,
+            value: templateValues.has(property.id) ? (templateValues.get(property.id) as Prisma.InputJsonValue) : Prisma.DbNull,
             computed: false,
           },
         });
@@ -62,6 +95,7 @@ export class RecordService {
       this.logger.log("Record created with property values", {
         recordId: record.id,
         databaseId,
+        templateId: resolvedTemplateId,
         propertyCount: properties.length,
       });
 
