@@ -1,10 +1,19 @@
 import { CreateDatabaseDto, CreatePropertyDto, CreateSectionDto, DatabaseType, PropertyType } from "@nucleus/domain";
 import { SeedRecord, seedsByDatabaseType } from "./initialization.seeds";
 
+type TemplateDefinition = {
+  name: string;
+  description?: string;
+  icon?: string;
+  isDefault?: boolean;
+  position?: number;
+};
+
 type DatabaseTemplate = Omit<CreateDatabaseDto, "spaceId" | "properties"> & {
   type?: DatabaseType;
   properties?: Omit<CreatePropertyDto, "databaseId">[];
   seeds?: SeedRecord[];
+  templates?: TemplateDefinition[];
 };
 
 export interface InitializationConfig {
@@ -265,6 +274,10 @@ export const defaultInitializationConfig: InitializationConfig = {
           group: "Related",
         },
       ],
+      templates: [
+        { name: "Quick Trade", description: "Fast entry for standard trades with minimal fields", isDefault: true, position: 0 },
+        { name: "Full Analysis", description: "Complete trade documentation with all fields filled", isDefault: false, position: 1 },
+      ],
     },
 
     {
@@ -331,6 +344,10 @@ export const defaultInitializationConfig: InitializationConfig = {
           group: "Related",
         },
       ],
+      templates: [
+        { name: "Pre-Market Session", description: "Pre-market preparation and bias definition", isDefault: true, position: 0 },
+        { name: "Post-Market Review", description: "End-of-session trade review and performance analysis", isDefault: false, position: 1 },
+      ],
     },
 
     {
@@ -379,6 +396,10 @@ export const defaultInitializationConfig: InitializationConfig = {
           hint: "Number of times this note was applied in trades",
           group: "Stats",
         },
+      ],
+      templates: [
+        { name: "Lesson", description: "Key learning captured from a trade or analysis session", isDefault: true, position: 0 },
+        { name: "Strategy Note", description: "Documentation of a trading rule or strategic approach", isDefault: false, position: 1 },
       ],
     },
 
@@ -435,6 +456,10 @@ export const defaultInitializationConfig: InitializationConfig = {
           group: "Stats",
         },
       ],
+      templates: [
+        { name: "Trade Mistake", description: "Mistake made during trade execution or management", isDefault: true, position: 0 },
+        { name: "Analysis Mistake", description: "Error in market reading, bias, or session preparation", isDefault: false, position: 1 },
+      ],
     },
 
     {
@@ -484,6 +509,10 @@ export const defaultInitializationConfig: InitializationConfig = {
           group: "Financials",
         },
       ],
+      templates: [
+        { name: "Funded Account", description: "Prop firm funded trading account", isDefault: true, position: 0 },
+        { name: "Personal Account", description: "Personal or demo trading account", isDefault: false, position: 1 },
+      ],
     },
 
     {
@@ -521,6 +550,10 @@ export const defaultInitializationConfig: InitializationConfig = {
           hint: "Operation amount in USD",
         },
       ],
+      templates: [
+        { name: "Deposit", description: "Funds added to a trading account", isDefault: true, position: 0 },
+        { name: "Withdrawal", description: "Funds withdrawn from a trading account", isDefault: false, position: 1 },
+      ],
     },
 
     {
@@ -533,6 +566,10 @@ export const defaultInitializationConfig: InitializationConfig = {
       properties: [
         { name: "Name", type: PropertyType.TEXT, isRequired: true, position: 0, hint: "Trading system or strategy name" },
         { name: "Date", type: PropertyType.DATE, position: 1, config: DATE_CONFIG, hint: "Date the system was created or last updated" },
+      ],
+      templates: [
+        { name: "Main System", description: "Primary trading strategy used in live sessions", isDefault: true, position: 0 },
+        { name: "Alternative System", description: "Secondary or experimental trading approach", isDefault: false, position: 1 },
       ],
     },
   ],
