@@ -15,6 +15,8 @@ import { PropertyModule } from "./property/property.module";
 import { RecordModule } from "./record/record.module";
 import { SettingsModule } from "./settings/settings.module";
 import { SpaceModule } from "./space/space.module";
+import { TemplateModule } from "./template/template.module";
+import { TemplatePropertyValueModule } from "./template-property-value/template-property-value.module";
 import { UserModule } from "./user/user.module";
 
 @Module({
@@ -34,6 +36,8 @@ import { UserModule } from "./user/user.module";
     PropertyModule,
     RecordModule,
     PropertyValueModule,
+    TemplateModule,
+    TemplatePropertyValueModule,
     SettingsModule,
   ],
   providers: [

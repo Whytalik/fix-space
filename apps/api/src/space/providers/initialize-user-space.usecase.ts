@@ -5,6 +5,7 @@ import { AppLogger } from "../../common/logger/app-logger.service";
 import { InitializationConfigService } from "../../config/initialization-config.service";
 import { DatabaseService } from "../../database/database.service";
 import { PropertyService } from "../../property/property.service";
+import { TemplateService } from "../../template/template.service";
 import { SpaceService } from "../space.service";
 import { SectionService } from "./section.service";
 
@@ -15,6 +16,7 @@ export class InitializeUserSpaceUseCase {
     private readonly sectionService: SectionService,
     private readonly databaseService: DatabaseService,
     private readonly propertyService: PropertyService,
+    private readonly templateService: TemplateService,
     private readonly configService: InitializationConfigService,
     private readonly logger: AppLogger,
   ) {
@@ -183,6 +185,16 @@ export class InitializeUserSpaceUseCase {
             data: { value },
           });
         }
+      }
+    }
+
+    // Pass 4 — Create templates for each database
+    for (const dbDef of config.databases) {
+      const databaseId = dbDef.type ? databaseByType.get(dbDef.type) : undefined;
+      if (!databaseId || !dbDef.templates?.length) continue;
+
+      for (const templateDef of dbDef.templates) {
+        await this.templateService.create(databaseId, { databaseId, ...templateDef }, userId);
       }
     }
 

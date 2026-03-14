@@ -25,6 +25,9 @@ jest.mock("@nucleus/database", () => ({
     propertyValue: {
       create: jest.fn<any>(),
     },
+    template: {
+      findFirst: jest.fn<any>(),
+    },
     $transaction: jest.fn<any>(),
   },
 }));
@@ -94,6 +97,7 @@ describe("RecordService", () => {
     it("should create a record with property values and return RecordResponseDto", async () => {
       (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue(mockDatabase);
       (prisma.property.findMany as jest.Mock<any>).mockResolvedValue([mockProperty1, mockProperty2]);
+      (prisma.template.findFirst as jest.Mock<any>).mockResolvedValue(null);
 
       const mockPv1 = {
         id: "pv-1",
@@ -180,6 +184,7 @@ describe("RecordService", () => {
       expect(mockLogger.log).toHaveBeenCalledWith("Record created with property values", {
         recordId: "record-123",
         databaseId: "db-123",
+        templateId: null,
         propertyCount: 2,
       });
     });
@@ -187,6 +192,7 @@ describe("RecordService", () => {
     it("should create record with no property values when database has no properties", async () => {
       (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue(mockDatabase);
       (prisma.property.findMany as jest.Mock<any>).mockResolvedValue([]);
+      (prisma.template.findFirst as jest.Mock<any>).mockResolvedValue(null);
 
       const mockTx = {
         record: {

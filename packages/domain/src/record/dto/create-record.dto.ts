@@ -18,4 +18,8 @@ export class CreateRecordDto {
   @IsOptional()
   @IsString()
   icon?: string;
+
+  @IsOptional()
+  @IsString()
+  templateId?: string;
 }
