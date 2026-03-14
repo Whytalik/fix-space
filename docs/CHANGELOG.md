@@ -4,269 +4,273 @@
 
 ### Features
 
-- feat(api): wire template system into initialization, record creation, and AppModule [`333578a`](https://github.com/Whytalik/nucleus/commit/333578a8bc4b51e388c71710a454656cb7013ae9)
-- feat(template): add Template and TemplatePropertyValue CRUD modules with service, controller, and tests [`1b2e096`](https://github.com/Whytalik/nucleus/commit/1b2e09680ddb3d558dec479e573b0df186cb95d9)
+- feat(api): wire template system into initialization, record creation, and AppModule [`f6b75a4`](https://github.com/Whytalik/nucleus/commit/f6b75a4f0b944fe2c41c53a094a39ca297d7b686)
+- feat(template): add Template and TemplatePropertyValue CRUD modules with service, controller, and tests [`c39c787`](https://github.com/Whytalik/nucleus/commit/c39c7871825bd74fd9e097defcbcc11c6b1636a1)
+
+### Chores
+
+- chore: update changelog [`6489d2f`](https://github.com/Whytalik/nucleus/commit/6489d2f4d759b963d4871608f16583dc3912257e)
 
 ## 2026-03-13
 
 ### Features
 
-- feat(domain): add Template and TemplatePropertyValue DTOs, entities, and exports [`01a0bec`](https://github.com/Whytalik/nucleus/commit/01a0bec8e2faaaed0a09b617f3d1e76ece7f4e39)
-- feat(database): add Template and TemplatePropertyValue schema models [`cd60a99`](https://github.com/Whytalik/nucleus/commit/cd60a99db84ab4992f852ab05b19773cbfbf50df)
+- feat(domain): add Template and TemplatePropertyValue DTOs, entities, and exports [`042ee54`](https://github.com/Whytalik/nucleus/commit/042ee54aa4084b7efa4e443402c0f48a3873967b)
+- feat(database): add Template and TemplatePropertyValue schema models [`8a6abcb`](https://github.com/Whytalik/nucleus/commit/8a6abcbc4815254c1cf10f9fe298c27855facd22)
 
 ### Tests
 
-- test: fix spec coverage for property, record, and space; add settings service and project docs [`be0da09`](https://github.com/Whytalik/nucleus/commit/be0da09e317bd5adf230d4646a97f54b292f6d9f)
+- test: fix spec coverage for property, record, and space; add settings service and project docs [`42939cf`](https://github.com/Whytalik/nucleus/commit/42939cfeb42de292f12da6a098367603f0ea4fd2)
 
 ### Documentation
 
-- docs: update architecture and API overview for template system [`05f4768`](https://github.com/Whytalik/nucleus/commit/05f47685e3602d5c3d32798fa190884393c118f0)
+- docs: update architecture and API overview for template system [`fa42601`](https://github.com/Whytalik/nucleus/commit/fa426012864487d1a961a9326177024f568104f9)
 
 ## 2026-03-12
 
 ### Features
 
-- feat(api): implement record limit, pagination, settings, and workspace initialization [`8543461`](https://github.com/Whytalik/nucleus/commit/8543461242a75141a28ada77192e77407c88ff85)
-- feat(domain): extend DTOs with recordLimit, property config, and settings interfaces [`f1a37b7`](https://github.com/Whytalik/nucleus/commit/f1a37b76bed0a662237e0175a5bfab9f2155c1d9)
+- feat(api): implement record limit, pagination, settings, and workspace initialization [`b74bdc9`](https://github.com/Whytalik/nucleus/commit/b74bdc921d6809a21549b382a9d9515e62dda312)
+- feat(domain): extend DTOs with recordLimit, property config, and settings interfaces [`064673a`](https://github.com/Whytalik/nucleus/commit/064673a64572266659f58d6dc8bd367acdbd8e80)
 
 ### Chores
 
-- chore: update DB schema, tighten TypeScript config, and bump dependencies [`381c22e`](https://github.com/Whytalik/nucleus/commit/381c22ef20868cfdbe55583cef7379e839d703a2)
+- chore: update DB schema, tighten TypeScript config, and bump dependencies [`feebaa5`](https://github.com/Whytalik/nucleus/commit/feebaa5ac5339a243e43e9b4f3849d3081faafdd)
 
 ## 2026-03-10
 
 ### Documentation
 
-- docs: update architecture guide, CHANGELOG, and Postman collection [`fb6657b`](https://github.com/Whytalik/nucleus/commit/fb6657bf66376f0e0b6d8c880ad4a57e8c2351a5)
-- docs: rewrite README with current tech stack, features, and setup instructions [`ac9c64c`](https://github.com/Whytalik/nucleus/commit/ac9c64ccda927f8abce5888b696b586883018ea6)
+- docs: update architecture guide, CHANGELOG, and Postman collection [`f7adb10`](https://github.com/Whytalik/nucleus/commit/f7adb1018698f612b2810e9a93b0ed97a847524e)
+- docs: rewrite README with current tech stack, features, and setup instructions [`d09eb98`](https://github.com/Whytalik/nucleus/commit/d09eb98ce331ca926559983042b8224bd27df9c1)
 
 ### Chores
 
-- chore: fix pre-push hook to skip missing docs files [`4172ed2`](https://github.com/Whytalik/nucleus/commit/4172ed257750e253e1b0bae23215ba744757f872)
-- chore: update .gitignore (add *.tmp.* pattern) and turbo.json pipeline [`cde5258`](https://github.com/Whytalik/nucleus/commit/cde5258c114de2d2228a979fc1f588bcdc3dedba)
+- chore: fix pre-push hook to skip missing docs files [`1b0ab91`](https://github.com/Whytalik/nucleus/commit/1b0ab91c7184c11752b36454c8218052f29ad0e9)
+- chore: update .gitignore (add *.tmp.* pattern) and turbo.json pipeline [`d48078a`](https://github.com/Whytalik/nucleus/commit/d48078ae1523e173a1ac8ad0bf497090ed15e063)
 
 ## 2026-03-09
 
 ### Features
 
-- feat(web): update root layout, database pages, and auth pages with new shell components [`e37c695`](https://github.com/Whytalik/nucleus/commit/e37c695601c6c86e5c8bb54e20ba11d10f3102b8)
-- feat(web): add reset-password page and custom 404 page [`d7b9c82`](https://github.com/Whytalik/nucleus/commit/d7b9c823a858e591a51ce991581040771d0b6b30)
-- feat(web): add profile page and settings shell with profile tab [`c3c5abf`](https://github.com/Whytalik/nucleus/commit/c3c5abfe02ef3ae884d387b3f3e138ed17393981)
-- feat(web): add full-page record view with inline edit mode [`208670b`](https://github.com/Whytalik/nucleus/commit/208670b697e92ebb1d1977e1a4a3c45f2aa2743e)
-- feat(web): update database table with CellValue renderer and record navigation link [`79f90e8`](https://github.com/Whytalik/nucleus/commit/79f90e8bb9d47b198280774548376bd1dd9dc805)
-- feat(web): add property display components (icon, hint, input, relation input) [`377972d`](https://github.com/Whytalik/nucleus/commit/377972dabb0d509c676ea5ad5e8734c2d460d938)
+- feat(web): update root layout, database pages, and auth pages with new shell components [`d80ceed`](https://github.com/Whytalik/nucleus/commit/d80ceedd571c9b2d80c87889907198aaec87b1cb)
+- feat(web): add reset-password page and custom 404 page [`3f8876e`](https://github.com/Whytalik/nucleus/commit/3f8876e676245dfd17c9ee1239a9cb33a8da0702)
+- feat(web): add profile page and settings shell with profile tab [`6414d4d`](https://github.com/Whytalik/nucleus/commit/6414d4d0d1bd8d997fbe6ecf46a23030026c989d)
+- feat(web): add full-page record view with inline edit mode [`3e796a4`](https://github.com/Whytalik/nucleus/commit/3e796a44f78e3e042055a0b8cb3f4505caaf9317)
+- feat(web): update database table with CellValue renderer and record navigation link [`2fdd161`](https://github.com/Whytalik/nucleus/commit/2fdd161fadd08c4845db980fbb1641d708588190)
+- feat(web): add property display components (icon, hint, input, relation input) [`b0f583d`](https://github.com/Whytalik/nucleus/commit/b0f583dc2975de7d4b237bc0c71dd9e0c5cafdd5)
 
 ## 2026-03-08
 
 ### Features
 
-- feat(web): add space switcher and page header with database actions [`079e480`](https://github.com/Whytalik/nucleus/commit/079e48085f8773b4db61d37279153becfc09d629)
-- feat(web): add collapsible sidebar with drag-and-drop section/database reordering [`41c5736`](https://github.com/Whytalik/nucleus/commit/41c5736080ecc5c385c61555de5ee5f348d2fe78)
-- feat(web): add UI primitive components (button, badge, avatar, card, overlays, icons, form, color-picker) [`3e5c59e`](https://github.com/Whytalik/nucleus/commit/3e5c59e6e1ed06f336ce0db5ef2aa41c63399842)
-- feat(web): add custom hooks for modal, mutation, and space/database state management [`d1cdca5`](https://github.com/Whytalik/nucleus/commit/d1cdca52384fa0266de8dc8497d137bc295da621)
-- feat(web): add UIContext for global error and settings panel state [`5ecee0b`](https://github.com/Whytalik/nucleus/commit/5ecee0b4f0e2a9d63ae467a84663c16d43f41ad7)
-- feat(web): add auth middleware for route protection and redirects [`08b4d65`](https://github.com/Whytalik/nucleus/commit/08b4d65e4cbd1da435e8a0a42703e98ef1570bff)
-- feat(web): add storage abstraction, API clients for property/record, and utility helpers [`9b8a7a3`](https://github.com/Whytalik/nucleus/commit/9b8a7a305951597f9f5d29d6eae94b7e624ef6fa)
-- feat(web): add CSS design token system (tokens, base, components, utilities) [`f9b1637`](https://github.com/Whytalik/nucleus/commit/f9b1637c701261e7504639c5990b12cd14be9fdc)
+- feat(web): add space switcher and page header with database actions [`9ba4206`](https://github.com/Whytalik/nucleus/commit/9ba42062511aefcd8a5bb766c1ac5a5993243b90)
+- feat(web): add collapsible sidebar with drag-and-drop section/database reordering [`97ab9f7`](https://github.com/Whytalik/nucleus/commit/97ab9f7b886c52f6929181b625274ae39a2586ef)
+- feat(web): add UI primitive components (button, badge, avatar, card, overlays, icons, form, color-picker) [`66cb910`](https://github.com/Whytalik/nucleus/commit/66cb91079f162359ed42414994a005cafd87fa33)
+- feat(web): add custom hooks for modal, mutation, and space/database state management [`f9a53e9`](https://github.com/Whytalik/nucleus/commit/f9a53e9f8b8e4a471cb9529e161b30700e697c81)
+- feat(web): add UIContext for global error and settings panel state [`b395ac5`](https://github.com/Whytalik/nucleus/commit/b395ac52893c7a9ed3a2344c7331ab232e0e3848)
+- feat(web): add auth middleware for route protection and redirects [`1868925`](https://github.com/Whytalik/nucleus/commit/1868925ac88ce199de4ae714d13c211346bc68ec)
+- feat(web): add storage abstraction, API clients for property/record, and utility helpers [`9dc454f`](https://github.com/Whytalik/nucleus/commit/9dc454f7a26f1387b6d50b3684cb51bf1bbcbf63)
+- feat(web): add CSS design token system (tokens, base, components, utilities) [`8b176b4`](https://github.com/Whytalik/nucleus/commit/8b176b4f2d1e261631dfb9bfda66b38739503602)
 
 ## 2026-03-07
 
 ### Features
 
-- feat(database): add POST /:id/duplicate endpoint to DatabaseController [`cd75f89`](https://github.com/Whytalik/nucleus/commit/cd75f897db4c85964d66919288c55dbbf5236e05)
-- feat(database): implement DuplicateDatabaseUseCase with atomic property and record copy [`eec3cf3`](https://github.com/Whytalik/nucleus/commit/eec3cf3b34b9be938f429228dc0110ab0a56591d)
+- feat(database): add POST /:id/duplicate endpoint to DatabaseController [`2c5d417`](https://github.com/Whytalik/nucleus/commit/2c5d417e1521e9d64c7f124ded3327d46182fd4b)
+- feat(database): implement DuplicateDatabaseUseCase with atomic property and record copy [`b5d8fcf`](https://github.com/Whytalik/nucleus/commit/b5d8fcfe834a9714dccba0f13015d01356a37fc5)
 
 ### Tests
 
-- test(api): update space, record, settings, user, and e2e specs [`df3d0cd`](https://github.com/Whytalik/nucleus/commit/df3d0cde4da0e71d9afa21c1002e1846a9f92da5)
-- test(config,jwt,database): add initialization config, JWT strategy, and duplicate usecase specs [`635cbd5`](https://github.com/Whytalik/nucleus/commit/635cbd5a2a11b4649b0af4cce3265d6cb8258461)
-- test(common): add specs for filters, interceptors, and cookie helper [`d6c9c2e`](https://github.com/Whytalik/nucleus/commit/d6c9c2e7cf3cfcaa87d974de9de97293a3736e21)
-- test(auth): add controller, guard, and usecase specs [`505682a`](https://github.com/Whytalik/nucleus/commit/505682a3c7688e02d4876e875bf2cf0a31e457e7)
-- test(property): add unit specs for all eight property type handlers [`d9ee4fd`](https://github.com/Whytalik/nucleus/commit/d9ee4fd9a1766bcc6d9c49c3ec93c97d00b21d14)
+- test(api): update space, record, settings, user, and e2e specs [`a43c6f1`](https://github.com/Whytalik/nucleus/commit/a43c6f14c66d80e3562a145b824955f96fb6d0af)
+- test(config,jwt,database): add initialization config, JWT strategy, and duplicate usecase specs [`13f0187`](https://github.com/Whytalik/nucleus/commit/13f01873b4a8489e1af3ca6b64a579a57280dd20)
+- test(common): add specs for filters, interceptors, and cookie helper [`af54e94`](https://github.com/Whytalik/nucleus/commit/af54e94a2b9583797a69c89d6ff1c6be2b1c0d63)
+- test(auth): add controller, guard, and usecase specs [`5709c52`](https://github.com/Whytalik/nucleus/commit/5709c524b51bb5f8a72adcdf549135a2f657e407)
+- test(property): add unit specs for all eight property type handlers [`287d711`](https://github.com/Whytalik/nucleus/commit/287d7115a8fad791e0233b53350fbe98160b290d)
 
 ## 2026-03-06
 
 ### Features
 
-- feat(auth): implement forgot-password and reset-password flow [`b8a4e30`](https://github.com/Whytalik/nucleus/commit/b8a4e30f603daafd200f8a6ac562d5bd8ac3ff34)
-- feat(domain): add ForgotPasswordDto, ResetPasswordDto, and ChangePasswordDto [`b147c4d`](https://github.com/Whytalik/nucleus/commit/b147c4de46780e998049fa042c1f59819d65e6ab)
-- feat(db): add PasswordResetToken model to Prisma schema [`b23669e`](https://github.com/Whytalik/nucleus/commit/b23669ed35926a0868b2a5ccb5714c21db15c241)
-- feat(auth): add dev-only test utility endpoints and update common infrastructure [`300e3ed`](https://github.com/Whytalik/nucleus/commit/300e3ed094af4851598c405f38b3d67b27e876c5)
-- feat(auth): add ResourceOwnerGuard and @RequireOwnership() decorator [`5dc1b97`](https://github.com/Whytalik/nucleus/commit/5dc1b9743a8703f759f5c2c576f4b0759fd0e0b8)
-- feat(auth): add DevOnlyGuard and @DevOnly() composite decorator [`86c9c09`](https://github.com/Whytalik/nucleus/commit/86c9c09532e241ff5d91fb370df4776c3d383217)
-- feat(domain): add group, color, hint fields to PropertyResponseDto [`91df20a`](https://github.com/Whytalik/nucleus/commit/91df20a0f8a0fff96f938261e052675fc61d50d2)
+- feat(auth): implement forgot-password and reset-password flow [`907cf3f`](https://github.com/Whytalik/nucleus/commit/907cf3fb5807e3120dd343b28e7c9c0abae414a9)
+- feat(domain): add ForgotPasswordDto, ResetPasswordDto, and ChangePasswordDto [`becf2df`](https://github.com/Whytalik/nucleus/commit/becf2df011771ee1118b25f8e801877ef9d7cd8b)
+- feat(db): add PasswordResetToken model to Prisma schema [`255ed6b`](https://github.com/Whytalik/nucleus/commit/255ed6bb139e3f6ebcaceb901ed30ed8e5af1ccc)
+- feat(auth): add dev-only test utility endpoints and update common infrastructure [`3403dac`](https://github.com/Whytalik/nucleus/commit/3403dacdf3be0ca2082b2c56395a7769baaa79d2)
+- feat(auth): add ResourceOwnerGuard and @RequireOwnership() decorator [`8a43846`](https://github.com/Whytalik/nucleus/commit/8a4384648b32ee4e29c0755c5aec10f3ba7ff40f)
+- feat(auth): add DevOnlyGuard and @DevOnly() composite decorator [`2585062`](https://github.com/Whytalik/nucleus/commit/258506285c36946162395b45f29d5f438bc03220)
+- feat(domain): add group, color, hint fields to PropertyResponseDto [`739d558`](https://github.com/Whytalik/nucleus/commit/739d558c7a9438379d83bf98afc1ddfbf8e85ae8)
 
 ### Refactoring
 
-- refactor(auth): move RegisterUserUseCase into providers/ subdirectory [`2aa47ac`](https://github.com/Whytalik/nucleus/commit/2aa47acc6ce29191a120d04bb1a90bd2864d2b53)
-- refactor(property): update select, status, relation, formula handlers to dual interface [`d928796`](https://github.com/Whytalik/nucleus/commit/d9287962d23f050297f09395fe0b76e5b7c9ce6e)
-- refactor(property): update text, number, checkbox, date handlers to dual interface [`61cd248`](https://github.com/Whytalik/nucleus/commit/61cd24859f5ec4520ddb42ba686ce7d2ecad972f)
-- refactor(property): split IPropertyHandler into PropertyConfigHandler and PropertyValueHandler [`8c3e9a6`](https://github.com/Whytalik/nucleus/commit/8c3e9a6b199ab7cac1246d2f83d3d69d46f5cf65)
-- refactor(api): remove record-content module and simplify record service [`011e16a`](https://github.com/Whytalik/nucleus/commit/011e16a0caccd9cfc33f0fbc2c1a8c90109ff68b)
+- refactor(auth): move RegisterUserUseCase into providers/ subdirectory [`ae32b89`](https://github.com/Whytalik/nucleus/commit/ae32b89b0d6f5ef739e2bb1765a5aaecc5836e51)
+- refactor(property): update select, status, relation, formula handlers to dual interface [`864ecdb`](https://github.com/Whytalik/nucleus/commit/864ecdbdf21d75d72df5549afc1c7f03755b8def)
+- refactor(property): update text, number, checkbox, date handlers to dual interface [`625a04b`](https://github.com/Whytalik/nucleus/commit/625a04babf0e6dac3a133a824cf4a229c234181e)
+- refactor(property): split IPropertyHandler into PropertyConfigHandler and PropertyValueHandler [`8c426c5`](https://github.com/Whytalik/nucleus/commit/8c426c5ed448cd97f4522a0d57d50abb1413bf45)
+- refactor(api): remove record-content module and simplify record service [`9fe0195`](https://github.com/Whytalik/nucleus/commit/9fe01951a2abf6ca1132458076f272d9d764f977)
 
 ## 2026-03-05
 
 ### Bug Fixes
 
-- fix(web): remove @nucleus/ui package, inline styles and migrate components to local [`7961e17`](https://github.com/Whytalik/nucleus/commit/7961e176fc43c308751e03c51d7fec322110e0e7)
+- fix(web): remove @nucleus/ui package, inline styles and migrate components to local [`9ba0af2`](https://github.com/Whytalik/nucleus/commit/9ba0af28c042e02cce96f2e0bb198951b0a726c9)
 
 ### Refactoring
 
-- refactor(domain): remove record-content types and clean domain entry barrel [`aa256a8`](https://github.com/Whytalik/nucleus/commit/aa256a85eba7bc0c42ed5fa0e0a7ac487b853f75)
-- refactor(space): extract sectionsInclude constant for DRY Prisma queries [`62918bb`](https://github.com/Whytalik/nucleus/commit/62918bbee7c0e22b377b8e3c020aa5be2c186fdb)
-- refactor(config): rename ConfigModule to InitializationConfigModule [`af2ec89`](https://github.com/Whytalik/nucleus/commit/af2ec89a96ca3f01846a1cba462341b77e5f49b2)
+- refactor(space): extract sectionsInclude constant for DRY Prisma queries [`345a647`](https://github.com/Whytalik/nucleus/commit/345a6479ec789f9e8d65421f234ad745187cbe66)
+- refactor(domain): remove record-content types and clean domain entry barrel [`8ac601f`](https://github.com/Whytalik/nucleus/commit/8ac601fe3c703111eb05e2859efa60fa82112a28)
+- refactor(config): rename ConfigModule to InitializationConfigModule [`913e2bd`](https://github.com/Whytalik/nucleus/commit/913e2bda9cdcfce283d18f626db97b4160de1893)
 
 ### Chores
 
-- chore(api): remove default AppController and AppService scaffolding [`bec6675`](https://github.com/Whytalik/nucleus/commit/bec6675e109a2ec815113369643deed2b20cbde9)
+- chore(api): remove default AppController and AppService scaffolding [`1187b66`](https://github.com/Whytalik/nucleus/commit/1187b664d6def84d07fe758e5a92fb1faf58d84a)
 
 ## 2026-03-04
 
 ### Documentation
 
-- docs: replace stale app readmes with centralized project documentation [`87f450f`](https://github.com/Whytalik/nucleus/commit/87f450fff48d9b14b15413adab4691830f264e60)
+- docs: replace stale app readmes with centralized project documentation [`5352f43`](https://github.com/Whytalik/nucleus/commit/5352f43903ee8346f1ef3f6e42d414e32fbe0816)
 
 ### Chores
 
-- chore: update pnpm lockfile [`b0ca5ee`](https://github.com/Whytalik/nucleus/commit/b0ca5ee1a6484ed7f2cc4b715469ab73b7412393)
-- chore: add pre-push hook for automated changelog and stats [`8870287`](https://github.com/Whytalik/nucleus/commit/88702871b9e7b5bd42ec0683e5599416acb8cb16)
-- chore: update monorepo config and remove legacy files [`aebdfb3`](https://github.com/Whytalik/nucleus/commit/aebdfb3dc817aaba4c609aacb47bc40ea46cca21)
+- chore: update pnpm lockfile [`133f122`](https://github.com/Whytalik/nucleus/commit/133f1225cf71cb3d46a2b622b21649ad611ff657)
+- chore: add pre-push hook for automated changelog and stats [`414b86a`](https://github.com/Whytalik/nucleus/commit/414b86a02855a392d0e7e833397633b8ae215611)
+- chore: update monorepo config and remove legacy files [`ae6afe5`](https://github.com/Whytalik/nucleus/commit/ae6afe5a4d59b1caa8011a127908683ba71bf489)
 
 ## 2026-03-02
 
 ### Features
 
-- feat(web): use IconDisplay in sidebar and database item [`ae44e46`](https://github.com/Whytalik/nucleus/commit/ae44e4651d31997f11119bbee3f0b8d047ac06cd)
-- feat(web): add database view components [`5fd3e75`](https://github.com/Whytalik/nucleus/commit/5fd3e755f47141e6c575403da51078c5c2bad0b3)
-- feat(web): add IconPicker and IconDisplay UI components [`25cfd69`](https://github.com/Whytalik/nucleus/commit/25cfd6972f2d981eb5bd253387ffac721412e6c8)
-- feat(web): add database route layout with auth guard and update page [`e801127`](https://github.com/Whytalik/nucleus/commit/e801127843c0f286d48667cfda075799c688bbc0)
-- feat(web): add DatabaseContext for per-database state [`dd4eb74`](https://github.com/Whytalik/nucleus/commit/dd4eb7487e51e21f14ee9abb656e4cbb1fbc804b)
-- feat(web): add updateDatabaseInSpace to AppContext [`e8f0ae4`](https://github.com/Whytalik/nucleus/commit/e8f0ae4096fc771009da520ca27645ee61f270f4)
-- feat(web): add database API module [`3c62a76`](https://github.com/Whytalik/nucleus/commit/3c62a76b8c96a9c1c98637016596d10bd382340c)
-- feat(web): implement token refresh and redirect in API client [`3f01d9a`](https://github.com/Whytalik/nucleus/commit/3f01d9a2dccb59e61d99ec4c0cb28400c4d5e968)
-- feat(api): expand initialization config with full property definitions [`f709360`](https://github.com/Whytalik/nucleus/commit/f709360c275e37f5ba9539c2d98b1603fce13658)
-- feat(api): implement 3-pass space initialization with property seeding [`97af46a`](https://github.com/Whytalik/nucleus/commit/97af46ab61f08e8ca12d321c9d8e4c858839769c)
-- feat(api): use explicit property list in DatabaseService.create [`7c81dfd`](https://github.com/Whytalik/nucleus/commit/7c81dfdaa4aaf7861fef2dce6895bcd5a9c1030a)
-- feat(domain): add payouts database type and type CreateDatabaseDto properties [`a4b6ca8`](https://github.com/Whytalik/nucleus/commit/a4b6ca87d1ccbfce29198167c50902cd101205c2)
+- feat(web): use IconDisplay in sidebar and database item [`d310407`](https://github.com/Whytalik/nucleus/commit/d3104075e9e19d8715ec97e5c36815c2a3362288)
+- feat(web): add database view components [`e3c4f7d`](https://github.com/Whytalik/nucleus/commit/e3c4f7dbdd0f2b7a4a65666418f991f858e9e009)
+- feat(web): add IconPicker and IconDisplay UI components [`359f6d9`](https://github.com/Whytalik/nucleus/commit/359f6d9a689cb5ad4eabee63856e8ae8c74bc959)
+- feat(web): add database route layout with auth guard and update page [`6aa99ee`](https://github.com/Whytalik/nucleus/commit/6aa99ee29e5cdc292f2521e96d2c93afce216114)
+- feat(web): add DatabaseContext for per-database state [`069c878`](https://github.com/Whytalik/nucleus/commit/069c878606cdde4b411d5915f779eba66a028b50)
+- feat(web): add updateDatabaseInSpace to AppContext [`b35d592`](https://github.com/Whytalik/nucleus/commit/b35d59202c8de08a04510b7b8e5263330117ce13)
+- feat(web): add database API module [`a8d1ba4`](https://github.com/Whytalik/nucleus/commit/a8d1ba48b4e580ec1c8ca62370f624503d3d8f2b)
+- feat(web): implement token refresh and redirect in API client [`0d3c3eb`](https://github.com/Whytalik/nucleus/commit/0d3c3eb1c2f8df2587710396c563f0bc4a8f361d)
+- feat(api): expand initialization config with full property definitions [`db35928`](https://github.com/Whytalik/nucleus/commit/db359284eaaac06329fbe2ba7273485dbdcd2ea6)
+- feat(api): implement 3-pass space initialization with property seeding [`cb5b5ec`](https://github.com/Whytalik/nucleus/commit/cb5b5ec7932969b5b7eae02bebc5269d76067502)
+- feat(api): use explicit property list in DatabaseService.create [`bc8c26d`](https://github.com/Whytalik/nucleus/commit/bc8c26d0baffac9f1bf3107863a00083889d56e4)
+- feat(domain): add payouts database type and type CreateDatabaseDto properties [`5044da5`](https://github.com/Whytalik/nucleus/commit/5044da53cf220d0a4afdbaafbdde1b9f1d366bd8)
 
 ### Bug Fixes
 
-- fix(web): correct autocomplete attribute and placeholder on register form [`4e6d473`](https://github.com/Whytalik/nucleus/commit/4e6d473414f1123216e7bdf46adda4b84b8e89eb)
-- fix(web): update header components to use DatabaseContext and IconDisplay [`59ef0a4`](https://github.com/Whytalik/nucleus/commit/59ef0a483a2677addf083e0770a852965d7f64cc)
+- fix(web): correct autocomplete attribute and placeholder on register form [`2d757f9`](https://github.com/Whytalik/nucleus/commit/2d757f9896e1c3a4007614a64f1a132576b3c52d)
+- fix(web): update header components to use DatabaseContext and IconDisplay [`295b425`](https://github.com/Whytalik/nucleus/commit/295b42592122bc7d45b893bd57575cd19966b38f)
 
 ### Refactoring
 
-- refactor(api): move ThrottlerModule registration to global app module [`5c389c6`](https://github.com/Whytalik/nucleus/commit/5c389c66a5e6df8e3d8b5dbefec4e7b0f5523a48)
-- refactor(domain): replace select options array with category groups [`e1c7920`](https://github.com/Whytalik/nucleus/commit/e1c7920efe7943f15da29be9382518968e9ae692)
+- refactor(api): move ThrottlerModule registration to global app module [`3440823`](https://github.com/Whytalik/nucleus/commit/344082361b8987c8fc7ecf7d790cc34813758da8)
+- refactor(domain): replace select options array with category groups [`33e7d0a`](https://github.com/Whytalik/nucleus/commit/33e7d0a5cfd66352f47a0d850a1cc953f5f6138c)
 
 ### Chores
 
-- chore(web): add emoji-mart dependencies [`f92574d`](https://github.com/Whytalik/nucleus/commit/f92574de8035e206b229b5e16e6f7c3420b7fba8)
+- chore(web): add emoji-mart dependencies [`c2ef20e`](https://github.com/Whytalik/nucleus/commit/c2ef20e1162ec09897290b5dc905f7347d820c43)
 
 ## 2026-02-28
 
 ### Features
 
-- feat(web): add settings modal with tabbed navigation and settings page [`62ef244`](https://github.com/Whytalik/nucleus/commit/62ef2448544b805cc3a9d90484c9891df29972c6)
-- feat(web): add settings API client for space, database, and section [`0b79c50`](https://github.com/Whytalik/nucleus/commit/0b79c50afa3c1f8e51f8d7d9b38b9cf77f71999f)
-- feat(web): add database detail page route [`d29217b`](https://github.com/Whytalik/nucleus/commit/d29217bcf2b9457953cdc8819a20552efb033cce)
-- feat(web): update sidebar and database-item with active states and routing [`353a232`](https://github.com/Whytalik/nucleus/commit/353a232b6d2b2d21388cfaef72f6dc6373a0b340)
-- feat(web): update header with user actions and database info display [`c6ffb3b`](https://github.com/Whytalik/nucleus/commit/c6ffb3b0881a8f9847e936c9e2c15e7462782472)
-- feat(web): update app context with caching and session management [`2daadd2`](https://github.com/Whytalik/nucleus/commit/2daadd26d713f4fe8bb94c295f46d83d1beef314)
-- feat(web): update home page and root layout with app provider and sidebar [`579a153`](https://github.com/Whytalik/nucleus/commit/579a1534b03556697beaf1745a3d8d96454e6072)
-- feat(domain): add optional sectionKey and properties fields to CreateDatabaseDto [`e21ac8a`](https://github.com/Whytalik/nucleus/commit/e21ac8a0909ddc4eeca58cda5fd069c61ee0d05f)
-- feat(web): add space api client and cache utilities [`89ef264`](https://github.com/Whytalik/nucleus/commit/89ef264e7a9d51c4e516965c995803f1df558cf6)
-- feat(web): add app context provider for auth and workspace state [`6c0d482`](https://github.com/Whytalik/nucleus/commit/6c0d48226e4be157c675dedf2a488410a2fce844)
-- feat(web): update root layout and home page to use shared ui components [`20efca9`](https://github.com/Whytalik/nucleus/commit/20efca913ef7175cfa0357744e96cb9321e9cab2)
-- feat(web): add header with auth-aware navigation and footer [`f205667`](https://github.com/Whytalik/nucleus/commit/f2056674df56adb0f50a8e9783925113f3da0fe4)
-- feat(web): add register page with email verification flow [`38f26dc`](https://github.com/Whytalik/nucleus/commit/38f26dca6b3da3098294edf27f64c0a9515d6d47)
-- feat(web): add login page with form and error handling [`01f69f2`](https://github.com/Whytalik/nucleus/commit/01f69f2f533a6cb3481f564e1454a8a091600d5e)
-- feat(web): add api client with bearer token support and typed error handling [`9f3439c`](https://github.com/Whytalik/nucleus/commit/9f3439c044c2ad5304616b6dde5b4c4ed146b667)
-- feat(auth): add dev-only endpoints for e2e test setup [`1e87287`](https://github.com/Whytalik/nucleus/commit/1e87287ce916b41e03aafccfa9b57e2426c5a729)
-- feat(auth): expose access token in response body and support bearer auth in jwt strategy [`a6a299a`](https://github.com/Whytalik/nucleus/commit/a6a299ac464c4ffe1c973384296ea0a03207f340)
-- feat(auth): add email verification token flow with expiration and revocation [`51a10e5`](https://github.com/Whytalik/nucleus/commit/51a10e5cfd6d766bd7910fc463f3543ca0c0defe)
-- feat(ui): initialize shared ui package with button, card, and logo components [`991a295`](https://github.com/Whytalik/nucleus/commit/991a295ffe1320cd34eabead557cdbd88c3dae3c)
+- feat(web): add settings modal with tabbed navigation and settings page [`24f2dcb`](https://github.com/Whytalik/nucleus/commit/24f2dcbed2895fd9794ebeccf2ce4c73226b5c0f)
+- feat(web): add settings API client for space, database, and section [`e475bc0`](https://github.com/Whytalik/nucleus/commit/e475bc0aff3ab131ead421f9192172dbe8dcbfcb)
+- feat(web): add database detail page route [`f508983`](https://github.com/Whytalik/nucleus/commit/f508983aaedc2282988c90321d271834bc85dcac)
+- feat(web): update sidebar and database-item with active states and routing [`2b22771`](https://github.com/Whytalik/nucleus/commit/2b227712ba491ebc6630415b96f03e06624de419)
+- feat(web): update header with user actions and database info display [`2a48694`](https://github.com/Whytalik/nucleus/commit/2a486942c5e3b274c809b2cbb187fdf25aae8c36)
+- feat(web): update app context with caching and session management [`8030c06`](https://github.com/Whytalik/nucleus/commit/8030c06d4cb02a0faffefa2918ef6579e87d128c)
+- feat(web): update home page and root layout with app provider and sidebar [`a3e36a0`](https://github.com/Whytalik/nucleus/commit/a3e36a025cd90c818eb8637823d46e95d48ccc00)
+- feat(domain): add optional sectionKey and properties fields to CreateDatabaseDto [`8f6f2ed`](https://github.com/Whytalik/nucleus/commit/8f6f2ed99f0877d27228ad122f7f9ad500b73fda)
+- feat(web): add space api client and cache utilities [`98fd9ae`](https://github.com/Whytalik/nucleus/commit/98fd9aee7aa7ef237077dc18287047b5bfe82d41)
+- feat(web): add app context provider for auth and workspace state [`18ce881`](https://github.com/Whytalik/nucleus/commit/18ce881b8b185ce58afafef0911d28b5011fea20)
+- feat(web): update root layout and home page to use shared ui components [`90e8abc`](https://github.com/Whytalik/nucleus/commit/90e8abc07511e298e90736cdb4ad90d0f8b16309)
+- feat(web): add header with auth-aware navigation and footer [`082b287`](https://github.com/Whytalik/nucleus/commit/082b2873660e23ca3bb7f65c791434f714ba48c9)
+- feat(web): add register page with email verification flow [`9b442cb`](https://github.com/Whytalik/nucleus/commit/9b442cb89b4fa28d5dabf4223385b982d71a8d40)
+- feat(web): add login page with form and error handling [`333e934`](https://github.com/Whytalik/nucleus/commit/333e934fdf0af991262d621f23cc6e1d09919f46)
+- feat(web): add api client with bearer token support and typed error handling [`5c520ca`](https://github.com/Whytalik/nucleus/commit/5c520caab43670741697b9b7e6e93f9ea450e9d2)
+- feat(auth): add dev-only endpoints for e2e test setup [`7f1aba5`](https://github.com/Whytalik/nucleus/commit/7f1aba5fa89815f3a9f283e3562270a49a3b420e)
+- feat(auth): expose access token in response body and support bearer auth in jwt strategy [`f843e9e`](https://github.com/Whytalik/nucleus/commit/f843e9ee7f1321b93285a2f1e6b6a02a7e1aa711)
+- feat(auth): add email verification token flow with expiration and revocation [`13f8a0d`](https://github.com/Whytalik/nucleus/commit/13f8a0d8d1e4e48012f6a96f2637296d3a65cf72)
+- feat(ui): initialize shared ui package with button, card, and logo components [`2f46620`](https://github.com/Whytalik/nucleus/commit/2f46620dade74108359b09653fe3f9308cd3df50)
 
 ### Bug Fixes
 
-- fix(web): remove unused @nucleus/database dependency to fix vercel build [`fb3d428`](https://github.com/Whytalik/nucleus/commit/fb3d428daa62e0183f82a06df79a6594f61254f1)
-- fix(deploy): build domain before web via turbo filter and simplify database page [`af05c79`](https://github.com/Whytalik/nucleus/commit/af05c79285fbf78ed45cde3ce5dcb7ce874f5127)
-- fix(web): annotate section type in database page flatMap [`40d67c5`](https://github.com/Whytalik/nucleus/commit/40d67c58a820b008de34e1590ea3a97f07f5ae06)
-- fix(config): update domain build script and add ui transpilation in next.js [`d8c66de`](https://github.com/Whytalik/nucleus/commit/d8c66de46ca10bf712b13e68113c094a1dc396cb)
-- fix(deploy): track vercel.json and fix Next.js output directory [`511389d`](https://github.com/Whytalik/nucleus/commit/511389dd369f6dd09d4740587b14e2986459e38b)
-- fix(deploy): enable experimentalDecorators for domain DTOs in web [`45a40b9`](https://github.com/Whytalik/nucleus/commit/45a40b92e33bf122640a1a532a7e54de3033c305)
-- fix(deploy): disable strictPropertyInitialization for domain DTOs in web [`d833c99`](https://github.com/Whytalik/nucleus/commit/d833c99f41c159c67da7974f7866d4a556341141)
-- fix(deploy): transpile @nucleus/domain in Next.js and export TypeScript source [`75df6c7`](https://github.com/Whytalik/nucleus/commit/75df6c7a5ce37fe5d47ede5bf48ca2f7fd6f9359)
-- fix(deploy): update pnpm-lock.yaml after ui package dependency cleanup [`99705ec`](https://github.com/Whytalik/nucleus/commit/99705ec7d55001571ce79f11f7bf74daa3d77dfc)
-- fix(deploy): add .npmrc for pnpm on Vercel and transpile @nucleus/ui in Next.js [`108d846`](https://github.com/Whytalik/nucleus/commit/108d8461ee6c93ce958343e3659141bf028e1966)
+- fix(web): remove unused @nucleus/database dependency to fix vercel build [`3a59ccb`](https://github.com/Whytalik/nucleus/commit/3a59ccb651fdb07ce44144cca9415e88673f9f80)
+- fix(deploy): build domain before web via turbo filter and simplify database page [`8b6f083`](https://github.com/Whytalik/nucleus/commit/8b6f0834a51b927ff4807d0ccb9dc35b2c89e049)
+- fix(web): annotate section type in database page flatMap [`14b5f4a`](https://github.com/Whytalik/nucleus/commit/14b5f4a9326bdb270bdc0e12d16b69dcf948427e)
+- fix(config): update domain build script and add ui transpilation in next.js [`24b0fce`](https://github.com/Whytalik/nucleus/commit/24b0fcef4c48eed5126792c4c4cea6322dd88d1a)
+- fix(deploy): track vercel.json and fix Next.js output directory [`82c3033`](https://github.com/Whytalik/nucleus/commit/82c3033f7f856a76c3d724d8f46e3f71bbf0b11d)
+- fix(deploy): enable experimentalDecorators for domain DTOs in web [`4bbfc7f`](https://github.com/Whytalik/nucleus/commit/4bbfc7f650c2b1974dea5db71f2fd92993424b89)
+- fix(deploy): disable strictPropertyInitialization for domain DTOs in web [`0cd8c1d`](https://github.com/Whytalik/nucleus/commit/0cd8c1d4355b7c79afaa6b05788086c61e1e90a6)
+- fix(deploy): transpile @nucleus/domain in Next.js and export TypeScript source [`44c0cab`](https://github.com/Whytalik/nucleus/commit/44c0cab7d19ec26a296a145c88a8c7431ea2b63d)
+- fix(deploy): update pnpm-lock.yaml after ui package dependency cleanup [`27ac519`](https://github.com/Whytalik/nucleus/commit/27ac519493aad30e023c3d561a0f487e7171797a)
+- fix(deploy): add .npmrc for pnpm on Vercel and transpile @nucleus/ui in Next.js [`2a582b7`](https://github.com/Whytalik/nucleus/commit/2a582b72ef145d322a8499ffd668537385250dec)
 
 ### Refactoring
 
-- refactor(web): reorganize components into layout and home directories [`12b8556`](https://github.com/Whytalik/nucleus/commit/12b85568842dc52456df0f1a88be5b94be68c822)
+- refactor(web): reorganize components into layout and home directories [`32a137b`](https://github.com/Whytalik/nucleus/commit/32a137b72d6a6d1cacf183f7cdea094b603a8c74)
 
 ### Chores
 
-- chore: update lockfile after removing @nucleus/database from web deps [`bf03661`](https://github.com/Whytalik/nucleus/commit/bf036613656e93c3c3a884fcd3d2029f06ff01a1)
-- chore: standardize quotes to double quotes across monorepo [`9792f08`](https://github.com/Whytalik/nucleus/commit/9792f08348d6a8f44a0a072701f0b5c2843da74b)
-- chore: apply prettier formatting across all packages [`ad04345`](https://github.com/Whytalik/nucleus/commit/ad04345ebee7a7488000d93908f8ad8be99e3317)
+- chore: update lockfile after removing @nucleus/database from web deps [`98c39be`](https://github.com/Whytalik/nucleus/commit/98c39be1395391cf35880cd153b289b1390e097c)
+- chore: standardize quotes to double quotes across monorepo [`05e3526`](https://github.com/Whytalik/nucleus/commit/05e352647dbf8b9b2339dc71dbc55100cca34bfc)
+- chore: apply prettier formatting across all packages [`ce8be3c`](https://github.com/Whytalik/nucleus/commit/ce8be3c7e86137aa4e5d8cca3386ab1d9d3636b3)
 
 ## 2026-02-24
 
 ### Features
 
-- feat(api): initialize property values for existing records on property creation [`15071ba`](https://github.com/Whytalik/nucleus/commit/15071ba1c4ed86029bb31d2724ae286534c4055c)
-- feat(api): support Bearer token auth and expose access token in response [`afe2126`](https://github.com/Whytalik/nucleus/commit/afe2126923868061f2535084250d80793e97414c)
-- feat(api): add dev-only endpoints for e2e test setup [`7ff2cea`](https://github.com/Whytalik/nucleus/commit/7ff2ceacff9907b2b9f83f6bcb64768f00b4dea0)
+- feat(api): initialize property values for existing records on property creation [`a26c6f1`](https://github.com/Whytalik/nucleus/commit/a26c6f1474cd68970a1ec59d4a60701412f16e3d)
+- feat(api): support Bearer token auth and expose access token in response [`051e948`](https://github.com/Whytalik/nucleus/commit/051e948bc85dcdb21089ad3ba599144174cf8f2d)
+- feat(api): add dev-only endpoints for e2e test setup [`98ebcb7`](https://github.com/Whytalik/nucleus/commit/98ebcb78fcb76a4947738b408f27c30982f46f47)
 
 ### Refactoring
 
-- refactor(api): extract userId directly from CurrentUser decorator in settings [`55455ce`](https://github.com/Whytalik/nucleus/commit/55455ce8deaff25543a94e142ff58f5b466de3c7)
+- refactor(api): extract userId directly from CurrentUser decorator in settings [`4f2a7d1`](https://github.com/Whytalik/nucleus/commit/4f2a7d1c613c2a94d6b2e95d736816e217dcd60a)
 
 ## 2026-02-23
 
 ### Features
 
-- feat(api): add tests for all current modules [`4318db8`](https://github.com/Whytalik/nucleus/commit/4318db8ba19e9c9298df55f3d4e67f83189c439e)
-- feat(api): add record config [`2414ac1`](https://github.com/Whytalik/nucleus/commit/2414ac1718433af0fc8cf42b05985ea768212984)
-- feat(api): implement property value processing for records [`ff0b15b`](https://github.com/Whytalik/nucleus/commit/ff0b15b1d43ee36393e6805a64c4d990bf94a216)
-- feat(api): add new handlers for proprty types [`690bdb0`](https://github.com/Whytalik/nucleus/commit/690bdb0a49e56e22f9e31387c3f97d22f22bd070)
+- feat(api): add tests for all current modules [`ac61552`](https://github.com/Whytalik/nucleus/commit/ac61552ec912d355bba3d608944668eff1edeb5f)
+- feat(api): add record config [`afa586c`](https://github.com/Whytalik/nucleus/commit/afa586cb14e517292c3c7d8c4fc848b7821220da)
+- feat(api): implement property value processing for records [`88a1ae6`](https://github.com/Whytalik/nucleus/commit/88a1ae63208880ace2ba5ff71373dad5216dfefe)
+- feat(api): add new handlers for proprty types [`4a1e521`](https://github.com/Whytalik/nucleus/commit/4a1e52182914f888a7e18446322af9c9f25f6014)
 
 ### Refactoring
 
-- refactor(api): clean up imports and enforce code style [`eb8d97d`](https://github.com/Whytalik/nucleus/commit/eb8d97dbd5895f62113b63891b5559cd2992de25)
-- refactor(api): add verification of the ownership of resources for a specific user [`b337330`](https://github.com/Whytalik/nucleus/commit/b337330f7fc5ee239415dc9303e3fe5981267508)
+- refactor(api): clean up imports and enforce code style [`d2df705`](https://github.com/Whytalik/nucleus/commit/d2df7050858cddc952d0bc522469e6aed1242670)
+- refactor(api): add verification of the ownership of resources for a specific user [`9d29a9b`](https://github.com/Whytalik/nucleus/commit/9d29a9b1f49316a3df8673ab752661bb0d741f1b)
 
 ## 2026-02-21
 
 ### Features
 
-- feat(domain): add property type configs for all property types [`7c115b8`](https://github.com/Whytalik/nucleus/commit/7c115b889b53b0c25a04ffa5ca3aa912e122d996)
-- feat(database): use property type registry for default property config [`254dde7`](https://github.com/Whytalik/nucleus/commit/254dde7cfa2b496e28dba0fbb01dc5a186a2ebe9)
-- feat(property): register handlers in module and integrate registry into service [`8653907`](https://github.com/Whytalik/nucleus/commit/86539078801bcea6f63ef6b12210fb24017eb555)
-- feat(property): implement strategy + registry pattern for property type handlers [`7d71bbb`](https://github.com/Whytalik/nucleus/commit/7d71bbb23b6df47097144b94a3f8bc46d8707e90)
-- feat(domain): add property type interfaces and config field to DTO [`b9b2e9e`](https://github.com/Whytalik/nucleus/commit/b9b2e9e05518667811f2b3f918f61ead0bcd3f92)
+- feat(domain): add property type configs for all property types [`7efd576`](https://github.com/Whytalik/nucleus/commit/7efd5761813b8b8556f9c90efe488789f3a83a7a)
+- feat(database): use property type registry for default property config [`98b26fa`](https://github.com/Whytalik/nucleus/commit/98b26faac22e0ec2943ae8eb2963f587015cbaf2)
+- feat(property): register handlers in module and integrate registry into service [`55fc43b`](https://github.com/Whytalik/nucleus/commit/55fc43bf0f2558d9d9cc9dbfc144f4c9dea6b636)
+- feat(property): implement strategy + registry pattern for property type handlers [`0e4e74b`](https://github.com/Whytalik/nucleus/commit/0e4e74b7f34a64af4e52d3a3d1f4c74ab6207d5a)
+- feat(domain): add property type interfaces and config field to DTO [`704333a`](https://github.com/Whytalik/nucleus/commit/704333a3683a96e3557011a388f2cec8f0a5e20a)
 
 ### Bug Fixes
 
-- fix(build): add .prettierignore and fix database format script [`b191be0`](https://github.com/Whytalik/nucleus/commit/b191be011ac5c4538c02b7bf2cb67011fec330c2)
+- fix(build): add .prettierignore and fix database format script [`7e689e8`](https://github.com/Whytalik/nucleus/commit/7e689e88677ccb633fd63094ee658121ebde0ce3)
 
 ### Refactoring
 
-- refactor(property): use domain type constants in handlers and remove local configs [`c5f2334`](https://github.com/Whytalik/nucleus/commit/c5f23341fbe873240f413bb0a8f8a1e158219f7d)
+- refactor(property): use domain type constants in handlers and remove local configs [`fb2fb40`](https://github.com/Whytalik/nucleus/commit/fb2fb4046ce55fdb1753226748ce1b6b3b07d233)
 
 ### Documentation
 
-- docs: update README [`40e305d`](https://github.com/Whytalik/nucleus/commit/40e305da429adb434db68618218b43e394ca17b3)
+- docs: update README [`e090426`](https://github.com/Whytalik/nucleus/commit/e090426d44d7b7996aa521fb72589eba88e04040)
 
 ### Chores
 
-- Add environment variables for GitLab mirror job [`a9372b3`](https://github.com/Whytalik/nucleus/commit/a9372b386be60516b4c5c305f1ca3609f27aba97)
-- Add debug step for GitLab repository secrets [`93336dc`](https://github.com/Whytalik/nucleus/commit/93336dc0878e543d5e2d509c419693b0fe8e59bb)
-- Add GitHub Actions workflow to mirror to GitLab [`aa5b719`](https://github.com/Whytalik/nucleus/commit/aa5b7193967bfd1d20fb44621f37afee88e9020d)
+- Add environment variables for GitLab mirror job [`83b8a24`](https://github.com/Whytalik/nucleus/commit/83b8a24deeac5d4634d23333c523179f9ec3e2f6)
+- Add debug step for GitLab repository secrets [`3b3dfd9`](https://github.com/Whytalik/nucleus/commit/3b3dfd9b517a7ebaf64745d465dc7f975fc7fe3f)
+- Add GitHub Actions workflow to mirror to GitLab [`d11f547`](https://github.com/Whytalik/nucleus/commit/d11f5471e5925a866c94a3cee1f1d545e63e64d7)
 
 ### Style
 
-- style: apply prettier formatting across codebase [`b586b7a`](https://github.com/Whytalik/nucleus/commit/b586b7a6c9998bc55e5b0d41c426c59874b7fdc5)
+- style: apply prettier formatting across codebase [`da4bad4`](https://github.com/Whytalik/nucleus/commit/da4bad430c101d9cdad8ce5d20d3cc5c0f3d1084)
 
 ## 2026-02-18
 
