@@ -78,6 +78,8 @@ nucleus-project/
 │   │       ├── property/           # Property (column) CRUD
 │   │       ├── property-value/     # Cell values
 │   │       ├── record/             # Record (row) CRUD
+│   │       ├── template/           # Template CRUD
+│   │       ├── template-property-value/ # Template cell values
 │   │       ├── user/               # User profile
 │   │       ├── settings/           # Key-value user settings
 │   │       ├── jwt/                # JWT strategy, guard
@@ -216,7 +218,7 @@ Relations: `databases[]`
 | recordLimit | Int? | max records allowed (null = unlimited) |
 | createdAt / updatedAt | DateTime | |
 
-Relations: `properties[]`, `records[]`
+Relations: `properties[]`, `records[]`, `templates[]`
 
 #### Property (column definition)
 | Field | Type | Notes |
@@ -232,6 +234,8 @@ Relations: `properties[]`, `records[]`
 | config | Json? | type-specific config (see below) |
 | createdAt / updatedAt | DateTime | |
 
+Relations: `values[]`, `templateValues[]`
+
 **Type-specific config shapes:**
 - **NUMBER**: `{ format: 'float' | 'integer' | 'currency', decimalPlaces, defaultValue }`
 - **DATE**: `{ format, includeTime, timeFormat }`
@@ -245,6 +249,7 @@ Relations: `properties[]`, `records[]`
 |---|---|---|
 | id | uuid | PK |
 | databaseId | uuid | FK → Database |
+| templateId | uuid? | FK → Template (nullable) |
 | name | String | |
 | icon | String? | |
 | config | Json? | |
@@ -262,6 +267,31 @@ Relations: `values[]`
 | computed | Boolean | true for formula results |
 
 Unique on `(recordId, propertyId)`.
+
+#### Template
+| Field | Type | Notes |
+|---|---|---|
+| id | uuid | PK |
+| databaseId | uuid | FK → Database |
+| name | String | unique per database |
+| description | String? | |
+| icon | String? | |
+| isDefault | Boolean | auto-applied on record create if no templateId given |
+| position | Int | display order |
+| config | Json? | |
+| createdAt / updatedAt | DateTime | |
+
+Relations: `values[]`, `records[]`
+
+#### TemplatePropertyValue (template cell)
+| Field | Type | Notes |
+|---|---|---|
+| id | uuid | PK |
+| templateId | uuid | FK → Template |
+| propertyId | uuid | FK → Property |
+| value | Json? | pre-filled value |
+
+Unique on `(templateId, propertyId)`.
 
 ---
 
@@ -333,6 +363,24 @@ All endpoints are JWT-protected unless marked **[public]**. Auth is applied glob
 | GET | /values/:id | Get value |
 | PATCH | /values/:id | Update value |
 | DELETE | /values/:id | Delete value |
+
+### Template — `/templates`
+| Method | Path | Description |
+|---|---|---|
+| POST | /templates | Create template (`databaseId` in body) |
+| GET | /templates?databaseId=:id | List templates |
+| GET | /templates/:id | Get template |
+| PATCH | /templates/:id | Update template |
+| DELETE | /templates/:id | Delete template |
+
+### TemplatePropertyValue — `/template-property-values`
+| Method | Path | Description |
+|---|---|---|
+| POST | /template-property-values | Create value (`templateId` in body) |
+| GET | /template-property-values?templateId=:id | List values |
+| GET | /template-property-values/:id | Get value |
+| PATCH | /template-property-values/:id | Update value |
+| DELETE | /template-property-values/:id | Delete value |
 
 ### Settings — `/settings`
 | Method | Path               | Description              |
@@ -479,6 +527,8 @@ RecordModal                 — create / edit record with PropertyInput per type
 | property | `PropertyResponseDto`, `CreatePropertyDto`, `PropertyType` enum, type configs |
 | record | `RecordResponseDto`, `CreateRecordDto`, `UpdateRecordDto` |
 | property-value | `PropertyValueResponseDto`, `CreatePropertyValueDto` |
+| template | `TemplateResponseDto`, `CreateTemplateDto`, `UpdateTemplateDto` |
+| template-property-value | `TemplatePropertyValueResponseDto`, `CreateTemplatePropertyValueDto`, `UpdateTemplatePropertyValueDto` |
 | settings | `SettingsResponseDto`, `UpdateSettingsDto` |
 | settings | `DatabaseSettingsInterface`, `RecordSettingsInterface`, `SectionSettingsInterface`, `SpaceSettingsInterface` |
 
@@ -491,7 +541,8 @@ When a user registers, `InitializeUserSpaceUseCase` runs a **4-pass initializati
 1. **Create sections** — Routine, Insight, Settings
 2. **Create empty databases** — 7 databases across sections
 3. **Create properties** — resolves `RELATION` symbolic refs (e.g. `{ relatedEntityType: 'accounts' }`)
-4. **Seed sample records** — defined in `initialization.seeds.ts`; resolves `RELATION` values via symbolic type refs (`SeedRecord`, `SeedRelation` interfaces)
+4. **Create default templates** — 2 templates per database (defined inline in `initialization.config.ts`); the first is `isDefault: true` and is auto-applied when a record is created without an explicit `templateId`
+5. **Seed sample records** — defined in `initialization.seeds.ts`; resolves `RELATION` values via symbolic type refs (`SeedRecord`, `SeedRelation` interfaces)
 
 **7 Pre-seeded Databases:**
 
