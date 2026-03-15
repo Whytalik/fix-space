@@ -13,10 +13,10 @@ export class TemplateResponseDto {
   name: string;
 
   @Expose()
-  description?: string;
+  description: string | null;
 
   @Expose()
-  icon?: string;
+  icon: string | null;
 
   @Expose()
   isDefault: boolean;
