@@ -64,7 +64,7 @@ describe("RecordController", () => {
     it("should call recordService.findAll with databaseId query param and userId", async () => {
       mockRecordService.findAll.mockResolvedValue([mockRecordResponse]);
 
-      const result = await controller.findAll("db-123", "user-123");
+      const result = await controller.findAll("db-123", undefined, undefined, "user-123");
 
       expect(result).toEqual([mockRecordResponse]);
       expect(mockRecordService.findAll).toHaveBeenCalledWith("db-123", "user-123");
