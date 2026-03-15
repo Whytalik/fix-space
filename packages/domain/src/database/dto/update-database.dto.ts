@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLength } from "class-validator";
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLength } from "class-validator";
 import { CreatePropertyDto } from "../../property/dto/create-property.dto";
 import { DATABASE_TYPES, DatabaseType } from "./create-database.dto";
 
@@ -40,6 +40,10 @@ export class UpdateDatabaseDto {
   @Min(1)
   @Max(100)
   recordLimit?: number | null;
+
+  @IsOptional()
+  @IsBoolean()
+  useDefaultTemplate?: boolean;
 
   @IsOptional()
   properties?: CreatePropertyDto[];
