@@ -1,11 +1,15 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
 import { CreateTemplateDto, UpdateTemplateDto } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { DuplicateTemplateUseCase } from "./providers/duplicate-template.usecase";
 import { TemplateService } from "./template.service";
 
 @Controller("templates")
 export class TemplateController {
-  constructor(private readonly templateService: TemplateService) {}
+  constructor(
+    private readonly templateService: TemplateService,
+    private readonly duplicateTemplateUseCase: DuplicateTemplateUseCase,
+  ) {}
 
   @Post()
   create(
@@ -45,6 +49,14 @@ export class TemplateController {
     dto: UpdateTemplateDto,
   ) {
     return this.templateService.update(id, dto, userId);
+  }
+
+  @Post(":id/duplicate")
+  duplicate(
+    @Param("id") id: string,
+    @CurrentUser("userId") userId: string,
+  ) {
+    return this.duplicateTemplateUseCase.execute(id, userId);
   }
 
   @Delete(":id")
