@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { PropertyType } from "@nucleus/domain";
 import { Test, TestingModule } from "@nestjs/testing";
@@ -5,6 +6,7 @@ import { AppLogger } from "../../common/logger/app-logger.service";
 import { InitializationConfigService } from "../../config/initialization-config.service";
 import { DatabaseService } from "../../database/database.service";
 import { PropertyService } from "../../property/property.service";
+import { TemplateService } from "../../template/template.service";
 import { SectionService } from "../providers/section.service";
 import { InitializeUserSpaceUseCase } from "../providers/initialize-user-space.usecase";
 import { SpaceService } from "../space.service";
@@ -35,6 +37,10 @@ describe("InitializeUserSpaceUseCase", () => {
 
   const mockPropertyService = {
     create: jest.fn<any>(),
+  };
+
+  const mockTemplateService = {
+    createDefaultTemplate: jest.fn<any>(),
   };
 
   const mockConfig = {
@@ -97,6 +103,10 @@ describe("InitializeUserSpaceUseCase", () => {
         {
           provide: PropertyService,
           useValue: mockPropertyService,
+        },
+        {
+          provide: TemplateService,
+          useValue: mockTemplateService,
         },
         {
           provide: InitializationConfigService,
@@ -206,7 +216,7 @@ describe("InitializeUserSpaceUseCase", () => {
         },
       ],
     };
-    mockConfigService.getConfig.mockReturnValueOnce(configWithRelation);
+    mockConfigService.getConfig.mockReturnValueOnce(configWithRelation).mockReturnValueOnce(configWithRelation);
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
     mockSpaceService.findOne.mockResolvedValue(mockSpaceResponse);
     mockSectionService.create.mockResolvedValue({ id: "section-a-id" });
@@ -231,7 +241,7 @@ describe("InitializeUserSpaceUseCase", () => {
       ...mockConfig,
       databases: [{ name: "db-no-type", title: "No Type DB", sectionKey: "a", properties: [] }],
     };
-    mockConfigService.getConfig.mockReturnValueOnce(configWithNoType);
+    mockConfigService.getConfig.mockReturnValueOnce(configWithNoType).mockReturnValueOnce(configWithNoType);
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
     mockSectionService.create.mockResolvedValue({ id: "section-id" });
     mockDatabaseService.create.mockResolvedValue({ id: "db-id" });
@@ -258,7 +268,7 @@ describe("InitializeUserSpaceUseCase", () => {
         },
       ],
     };
-    mockConfigService.getConfig.mockReturnValueOnce(configWithBadRelation);
+    mockConfigService.getConfig.mockReturnValueOnce(configWithBadRelation).mockReturnValueOnce(configWithBadRelation);
     mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
     mockSectionService.create.mockResolvedValue({ id: "section-id" });
     mockDatabaseService.create.mockResolvedValue({ id: "db-1-id" });

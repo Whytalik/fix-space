@@ -3,6 +3,7 @@ import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 
 jest.mock("@nucleus/database", () => ({
+  Prisma: { JsonNull: "JsonNull", DbNull: "DbNull" },
   prisma: {
     database: {
       findFirst: jest.fn<any>(),
@@ -71,13 +72,14 @@ describe("TemplateService", () => {
       (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue(mockDatabase);
       (prisma.property.findMany as jest.Mock<any>).mockResolvedValue([mockProperty]);
 
-      const mockTxTemplate = { create: jest.fn<any>(), updateMany: jest.fn<any>(), findUniqueOrThrow: jest.fn<any>() };
+      const mockTxTemplate = { create: jest.fn<any>(), updateMany: jest.fn<any>(), findUniqueOrThrow: jest.fn<any>(), count: jest.fn<any>() };
       const mockTxTemplatePropertyValue = { create: jest.fn<any>() };
       const mockTx = {
         template: mockTxTemplate,
         templatePropertyValue: mockTxTemplatePropertyValue,
       } as unknown as Prisma.TransactionClient;
 
+      mockTxTemplate.count.mockResolvedValue(1);
       mockTxTemplate.updateMany.mockResolvedValue({ count: 0 });
       mockTxTemplate.create.mockResolvedValue(mockTemplate);
       mockTxTemplatePropertyValue.create.mockResolvedValue({});
@@ -92,7 +94,7 @@ describe("TemplateService", () => {
       expect(result.id).toBe("tmpl-1");
       expect(mockTxTemplate.create).toHaveBeenCalled();
       expect(mockTxTemplatePropertyValue.create).toHaveBeenCalledWith({
-        data: { templateId: "tmpl-1", propertyId: "prop-1", value: null },
+        data: { templateId: "tmpl-1", propertyId: "prop-1", value: Prisma.JsonNull },
       });
     });
 
@@ -110,12 +112,13 @@ describe("TemplateService", () => {
       (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue(mockDatabase);
       (prisma.property.findMany as jest.Mock<any>).mockResolvedValue([]);
 
-      const mockTxTemplate = { create: jest.fn<any>(), updateMany: jest.fn<any>(), findUniqueOrThrow: jest.fn<any>() };
+      const mockTxTemplate = { create: jest.fn<any>(), updateMany: jest.fn<any>(), findUniqueOrThrow: jest.fn<any>(), count: jest.fn<any>() };
       const mockTx = {
         template: mockTxTemplate,
         templatePropertyValue: { create: jest.fn<any>() },
       } as unknown as Prisma.TransactionClient;
 
+      mockTxTemplate.count.mockResolvedValue(1);
       mockTxTemplate.updateMany.mockResolvedValue({ count: 1 });
       mockTxTemplate.create.mockResolvedValue({ ...mockTemplate, isDefault: true });
       mockTxTemplate.findUniqueOrThrow.mockResolvedValue({ ...mockTemplate, isDefault: true });
@@ -212,11 +215,45 @@ describe("TemplateService", () => {
   describe("remove", () => {
     it("should delete a template", async () => {
       (prisma.template.findFirst as jest.Mock<any>).mockResolvedValue(mockTemplate);
-      (prisma.template.delete as jest.Mock<any>).mockResolvedValue(mockTemplate);
+
+      const mockTxTemplate = { delete: jest.fn<any>(), findFirst: jest.fn<any>(), update: jest.fn<any>() };
+      const mockTx = { template: mockTxTemplate } as unknown as Prisma.TransactionClient;
+
+      mockTxTemplate.delete.mockResolvedValue(mockTemplate);
+      mockTxTemplate.findFirst.mockResolvedValue(null);
+
+      (prisma.$transaction as jest.Mock<any>).mockImplementation(
+        async (cb: (tx: Prisma.TransactionClient) => Promise<unknown>) => cb(mockTx),
+      );
 
       const result = await service.remove("tmpl-1", "user-1");
 
       expect(result.id).toBe("tmpl-1");
+    });
+
+    it("should promote next template to default when deleting the default one", async () => {
+      const defaultTemplate = { ...mockTemplate, isDefault: true };
+      const nextTemplate = { ...mockTemplate, id: "tmpl-2", position: 1 };
+
+      (prisma.template.findFirst as jest.Mock<any>).mockResolvedValue(defaultTemplate);
+
+      const mockTxTemplate = { delete: jest.fn<any>(), findFirst: jest.fn<any>(), update: jest.fn<any>() };
+      const mockTx = { template: mockTxTemplate } as unknown as Prisma.TransactionClient;
+
+      mockTxTemplate.delete.mockResolvedValue(defaultTemplate);
+      mockTxTemplate.findFirst.mockResolvedValue(nextTemplate);
+      mockTxTemplate.update.mockResolvedValue({ ...nextTemplate, isDefault: true });
+
+      (prisma.$transaction as jest.Mock<any>).mockImplementation(
+        async (cb: (tx: Prisma.TransactionClient) => Promise<unknown>) => cb(mockTx),
+      );
+
+      await service.remove("tmpl-1", "user-1");
+
+      expect(mockTxTemplate.update).toHaveBeenCalledWith({
+        where: { id: "tmpl-2" },
+        data: { isDefault: true },
+      });
     });
 
     it("should throw NotFoundException when template not found", async () => {
@@ -227,7 +264,15 @@ describe("TemplateService", () => {
 
     it("should rethrow unknown errors", async () => {
       (prisma.template.findFirst as jest.Mock<any>).mockResolvedValue(mockTemplate);
-      (prisma.template.delete as jest.Mock<any>).mockRejectedValue(new Error("DB error"));
+
+      const mockTxTemplate = { delete: jest.fn<any>() };
+      const mockTx = { template: mockTxTemplate } as unknown as Prisma.TransactionClient;
+
+      mockTxTemplate.delete.mockRejectedValue(new Error("DB error"));
+
+      (prisma.$transaction as jest.Mock<any>).mockImplementation(
+        async (cb: (tx: Prisma.TransactionClient) => Promise<unknown>) => cb(mockTx),
+      );
 
       await expect(service.remove("tmpl-1", "user-1")).rejects.toThrow("DB error");
     });

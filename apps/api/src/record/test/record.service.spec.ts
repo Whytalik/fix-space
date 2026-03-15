@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { Prisma, prisma } from "@nucleus/database";
 import { AppLogger } from "../../common/logger/app-logger.service";
@@ -147,7 +147,7 @@ describe("RecordService", () => {
             ownerId: "user-123",
           },
         },
-        select: { id: true, recordLimit: true },
+        select: { id: true },
       });
       expect(prisma.property.findMany).toHaveBeenCalledWith({
         where: {
@@ -231,29 +231,29 @@ describe("RecordService", () => {
       ).rejects.toThrow("Database with id db-nonexistent not found");
     });
 
-    it("should throw BadRequestException when record limit is reached", async () => {
-      (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue({ id: "db-123", recordLimit: 3 });
-      (prisma.record.count as jest.Mock<any>).mockResolvedValue(3);
-
-      await expect(
-        service.create("db-123", { databaseId: "db-123", name: "Over Limit" }, "user-123"),
-      ).rejects.toThrow(BadRequestException);
-      await expect(
-        service.create("db-123", { databaseId: "db-123", name: "Over Limit" }, "user-123"),
-      ).rejects.toThrow("Record limit of 3 reached");
-    });
-
-    it("should not check count when recordLimit is null", async () => {
-      (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue({ id: "db-123", recordLimit: null });
-      (prisma.property.findMany as jest.Mock<any>).mockResolvedValue([]);
+    it("should copy name, icon, and property values from explicit templateId", async () => {
+      (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue(mockDatabase);
+      (prisma.property.findMany as jest.Mock<any>).mockResolvedValue([mockProperty1, mockProperty2]);
+      (prisma.template.findFirst as jest.Mock<any>).mockResolvedValue({
+        id: "tmpl-1",
+        name: "Quick Trade",
+        icon: "📈",
+        isDefault: false,
+        position: 0,
+        databaseId: "db-123",
+        values: [
+          { propertyId: "prop-1", value: "Long" },
+          { propertyId: "prop-2", value: null },
+        ],
+      });
 
       const mockTx = {
         record: {
-          create: jest.fn<any>().mockResolvedValue(mockRecord),
-          findUniqueOrThrow: jest.fn<any>().mockResolvedValue(mockRecordWithIncludes),
+          create: jest.fn<any>().mockResolvedValue({ ...mockRecord, name: "Quick Trade", icon: "📈", templateId: "tmpl-1" }),
+          findUniqueOrThrow: jest.fn<any>().mockResolvedValue({ ...mockRecordWithIncludes, name: "Quick Trade", icon: "📈" }),
         },
         propertyValue: {
-          create: jest.fn<any>(),
+          create: jest.fn<any>().mockResolvedValue({}),
         },
       } as unknown as Prisma.TransactionClient;
 
@@ -261,10 +261,70 @@ describe("RecordService", () => {
         async (cb: (tx: Prisma.TransactionClient) => Promise<unknown>) => cb(mockTx),
       );
 
-      await service.create("db-123", { databaseId: "db-123", name: "No Limit" }, "user-123");
+      const result = await service.create("db-123", { databaseId: "db-123", templateId: "tmpl-1" }, "user-123");
 
-      expect(prisma.record.count).not.toHaveBeenCalled();
+      expect(result.name).toBe("Quick Trade");
+      expect(result.icon).toBe("📈");
+      expect(mockTx.record.create).toHaveBeenCalledWith({
+        data: {
+          databaseId: "db-123",
+          templateId: "tmpl-1",
+          name: "Quick Trade",
+          icon: "📈",
+        },
+      });
+      expect(mockTx.propertyValue.create).toHaveBeenCalledTimes(2);
+      expect(mockTx.propertyValue.create).toHaveBeenNthCalledWith(1, {
+        data: { recordId: expect.any(String), propertyId: "prop-1", value: "Long", computed: false },
+      });
+      expect(mockTx.propertyValue.create).toHaveBeenNthCalledWith(2, {
+        data: { recordId: expect.any(String), propertyId: "prop-2", value: null, computed: false },
+      });
     });
+
+    it("should pick default template when templateId is not provided", async () => {
+      (prisma.database.findFirst as jest.Mock<any>).mockResolvedValue(mockDatabase);
+      (prisma.property.findMany as jest.Mock<any>).mockResolvedValue([mockProperty1]);
+      (prisma.template.findFirst as jest.Mock<any>).mockResolvedValue({
+        id: "tmpl-default",
+        name: "Default Tmpl",
+        icon: null,
+        isDefault: true,
+        position: 0,
+        databaseId: "db-123",
+        values: [{ propertyId: "prop-1", value: "default-value" }],
+      });
+
+      const mockTx = {
+        record: {
+          create: jest.fn<any>().mockResolvedValue({ ...mockRecord, name: "Default Tmpl", icon: null, templateId: "tmpl-default" }),
+          findUniqueOrThrow: jest.fn<any>().mockResolvedValue({ ...mockRecordWithIncludes, name: "Default Tmpl", icon: null }),
+        },
+        propertyValue: {
+          create: jest.fn<any>().mockResolvedValue({}),
+        },
+      } as unknown as Prisma.TransactionClient;
+
+      (prisma.$transaction as jest.Mock<any>).mockImplementation(
+        async (cb: (tx: Prisma.TransactionClient) => Promise<unknown>) => cb(mockTx),
+      );
+
+      const result = await service.create("db-123", { databaseId: "db-123" }, "user-123");
+
+      expect(result.name).toBe("Default Tmpl");
+      expect(mockTx.record.create).toHaveBeenCalledWith({
+        data: {
+          databaseId: "db-123",
+          templateId: "tmpl-default",
+          name: "Default Tmpl",
+          icon: undefined,
+        },
+      });
+      expect(mockTx.propertyValue.create).toHaveBeenCalledWith({
+        data: { recordId: expect.any(String), propertyId: "prop-1", value: "default-value", computed: false },
+      });
+    });
+
   });
 
   describe("findAll", () => {
