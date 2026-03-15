@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { prisma } from "@nucleus/database";
+import { Prisma, prisma } from "@nucleus/database";
 import { CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 
@@ -28,7 +28,10 @@ export class TemplateService {
     });
 
     return await prisma.$transaction(async (tx) => {
-      if (dto.isDefault) {
+      const existingCount = await tx.template.count({ where: { databaseId } });
+      const isDefault = dto.isDefault ?? existingCount === 0;
+
+      if (isDefault) {
         await tx.template.updateMany({
           where: { databaseId, isDefault: true },
           data: { isDefault: false },
@@ -41,7 +44,7 @@ export class TemplateService {
           name: dto.name ?? "Untitled",
           description: dto.description,
           icon: dto.icon,
-          isDefault: dto.isDefault ?? false,
+          isDefault,
           position: dto.position ?? 0,
         },
       });
@@ -51,7 +54,7 @@ export class TemplateService {
           data: {
             templateId: template.id,
             propertyId: property.id,
-            value: null,
+            value: Prisma.JsonNull,
           },
         });
       }
@@ -126,7 +129,7 @@ export class TemplateService {
         });
       }
 
-      return tx.template.update({
+      const updated = await tx.template.update({
         where: { id },
         data: {
           name: dto.name,
@@ -137,6 +140,23 @@ export class TemplateService {
         },
         include: { values: true },
       });
+
+      if (dto.isDefault === false) {
+        const remaining = await tx.template.findFirst({
+          where: { databaseId: existing.databaseId, isDefault: true },
+        });
+        if (!remaining) {
+          const first = await tx.template.findFirst({
+            where: { databaseId: existing.databaseId },
+            orderBy: { position: "asc" },
+          });
+          if (first) {
+            await tx.template.update({ where: { id: first.id }, data: { isDefault: true } });
+          }
+        }
+      }
+
+      return updated;
     });
 
     this.logger.log("Template updated", { id });
@@ -157,7 +177,21 @@ export class TemplateService {
       throw new NotFoundException(`Template with id ${id} not found`);
     }
 
-    const template = await prisma.template.delete({ where: { id }, include: { values: true } });
+    const template = await prisma.$transaction(async (tx) => {
+      const deleted = await tx.template.delete({ where: { id }, include: { values: true } });
+
+      if (deleted.isDefault) {
+        const next = await tx.template.findFirst({
+          where: { databaseId: existing.databaseId },
+          orderBy: { position: "asc" },
+        });
+        if (next) {
+          await tx.template.update({ where: { id: next.id }, data: { isDefault: true } });
+        }
+      }
+
+      return deleted;
+    });
 
     this.logger.log("Template removed", { id });
     return new TemplateResponseDto(template);
