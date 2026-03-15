@@ -51,6 +51,7 @@ CLAUDE.md
 *.swo
 *~
 scripts/
+.playwright-mcp/
 
 # OS
 .DS_Store
