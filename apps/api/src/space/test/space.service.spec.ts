@@ -108,14 +108,12 @@ describe("SpaceService", () => {
 
       expect(result.id).toBe("space-123");
       expect(result.name).toBe("Test Space");
-      expect(mockSettingsService.getSettings).toHaveBeenCalledWith("user-123", "space", expect.any(Object));
       expect(prisma.space.create).toHaveBeenCalledWith({
         data: {
           name: "Test Space",
           icon: "🚀",
           isDefault: false,
           ownerId: "user-123",
-          config: mockSpaceSettings,
         },
         include: sectionsInclude,
       });

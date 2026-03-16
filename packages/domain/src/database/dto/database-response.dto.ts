@@ -29,6 +29,9 @@ export class DatabaseResponseDto {
   @Expose()
   recordLimit: number | null;
 
+  @Expose()
+  useDefaultTemplate: boolean;
+
   constructor(partial: Partial<DatabaseResponseDto>) {
     Object.assign(this, partial);
   }

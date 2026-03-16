@@ -19,18 +19,11 @@ export class RecordService {
           ownerId: userId,
         },
       },
-      select: { id: true, recordLimit: true },
+      select: { id: true },
     });
 
     if (!database) {
       throw new NotFoundException(`Database with id ${databaseId} not found`);
-    }
-
-    if (database.recordLimit) {
-      const count = await prisma.record.count({ where: { databaseId } });
-      if (count >= database.recordLimit) {
-        throw new BadRequestException(`Record limit of ${database.recordLimit} reached`);
-      }
     }
 
     const properties = await prisma.property.findMany({
@@ -40,6 +33,8 @@ export class RecordService {
     });
 
     let resolvedTemplateId: string | null = null;
+    let templateName: string | undefined = undefined;
+    let templateIcon: string | undefined = undefined;
     const templateValues: Map<string, unknown> = new Map();
 
     if (createRecordDto.templateId !== undefined) {
@@ -53,18 +48,28 @@ export class RecordService {
         });
         if (template) {
           resolvedTemplateId = template.id;
+          templateName = template.name;
+          templateIcon = template.icon ?? undefined;
           for (const tv of template.values) {
             templateValues.set(tv.propertyId, tv.value);
           }
         }
       }
     } else {
-      const defaultTemplate = await prisma.template.findFirst({
-        where: { databaseId, isDefault: true },
-        include: { values: true },
-      });
+      const defaultTemplate =
+        (await prisma.template.findFirst({
+          where: { databaseId, isDefault: true },
+          include: { values: true },
+        })) ??
+        (await prisma.template.findFirst({
+          where: { databaseId },
+          orderBy: { position: "asc" },
+          include: { values: true },
+        }));
       if (defaultTemplate) {
         resolvedTemplateId = defaultTemplate.id;
+        templateName = defaultTemplate.name;
+        templateIcon = defaultTemplate.icon ?? undefined;
         for (const tv of defaultTemplate.values) {
           templateValues.set(tv.propertyId, tv.value);
         }
@@ -76,17 +81,18 @@ export class RecordService {
         data: {
           databaseId,
           templateId: resolvedTemplateId,
-          name: createRecordDto.name,
-          icon: createRecordDto.icon,
+          name: createRecordDto.name ?? templateName,
+          icon: createRecordDto.icon ?? templateIcon,
         },
       });
 
       for (const property of properties) {
+        const tmplVal = templateValues.has(property.id) ? templateValues.get(property.id) : undefined;
         await tx.propertyValue.create({
           data: {
             recordId: record.id,
             propertyId: property.id,
-            value: templateValues.has(property.id) ? (templateValues.get(property.id) as Prisma.InputJsonValue) : Prisma.DbNull,
+            value: tmplVal == null ? Prisma.DbNull : (tmplVal as Prisma.InputJsonValue),
             computed: false,
           },
         });
