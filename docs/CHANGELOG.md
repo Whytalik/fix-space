@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-03-15
+
+### Features
+
+- feat(record): inherit name and icon from template; support useDefaultTemplate in database update [`e04006b`](https://github.com/Whytalik/nucleus/commit/e04006b146d709c519d08afad5de624473fc3b25)
+- feat(template): add DuplicateTemplateUseCase with POST :id/duplicate endpoint [`8b87e11`](https://github.com/Whytalik/nucleus/commit/8b87e11c6f4a57a51cfe02d827a1b8012a85c1b5)
+- feat(database): add useDefaultTemplate column, migrations, domain DTOs, and tooling fixes [`4e45677`](https://github.com/Whytalik/nucleus/commit/4e4567755695c60633884fdb694a12015f399de8)
+
+### Tests
+
+- test: update spec coverage for template duplicate, record inheritance, and minor fixes [`1f6477e`](https://github.com/Whytalik/nucleus/commit/1f6477e0f86feeeffacd4b0da8daab4520a7f884)
+
 ## 2026-03-14
 
 ### Features

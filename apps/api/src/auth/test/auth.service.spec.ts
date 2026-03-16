@@ -6,6 +6,7 @@ import { AppLogger } from "../../common/logger/app-logger.service";
 import * as passwordUtils from "../../common/utils/password";
 import { UserService } from "../../user/user.service";
 import { AuthService } from "../auth.service";
+import { MailService } from "../../mail/mail.service";
 import { TokenService } from "../token.service";
 
 // Mock modules
@@ -53,6 +54,8 @@ describe("AuthService", () => {
     error: jest.fn(),
   };
 
+  const mockMailService = { sendPasswordResetEmail: jest.fn<any>() };
+
   beforeEach(async () => {
     jest.clearAllMocks();
     (prisma.$transaction as any).mockImplementation((cb) => cb(prisma));
@@ -71,6 +74,10 @@ describe("AuthService", () => {
         {
           provide: AppLogger,
           useValue: mockLogger,
+        },
+        {
+          provide: MailService,
+          useValue: mockMailService,
         },
       ],
     }).compile();
