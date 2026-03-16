@@ -1,15 +1,23 @@
 # Changelog
 
+## 2026-03-15
+
+### Features
+
+- feat(record): inherit name and icon from template; support useDefaultTemplate in database update [`e04006b`](https://github.com/Whytalik/nucleus/commit/e04006b146d709c519d08afad5de624473fc3b25)
+- feat(template): add DuplicateTemplateUseCase with POST :id/duplicate endpoint [`8b87e11`](https://github.com/Whytalik/nucleus/commit/8b87e11c6f4a57a51cfe02d827a1b8012a85c1b5)
+- feat(database): add useDefaultTemplate column, migrations, domain DTOs, and tooling fixes [`4e45677`](https://github.com/Whytalik/nucleus/commit/4e4567755695c60633884fdb694a12015f399de8)
+
+### Tests
+
+- test: update spec coverage for template duplicate, record inheritance, and minor fixes [`1f6477e`](https://github.com/Whytalik/nucleus/commit/1f6477e0f86feeeffacd4b0da8daab4520a7f884)
+
 ## 2026-03-14
 
 ### Features
 
 - feat(api): wire template system into initialization, record creation, and AppModule [`f6b75a4`](https://github.com/Whytalik/nucleus/commit/f6b75a4f0b944fe2c41c53a094a39ca297d7b686)
 - feat(template): add Template and TemplatePropertyValue CRUD modules with service, controller, and tests [`c39c787`](https://github.com/Whytalik/nucleus/commit/c39c7871825bd74fd9e097defcbcc11c6b1636a1)
-
-### Chores
-
-- chore: update changelog [`6489d2f`](https://github.com/Whytalik/nucleus/commit/6489d2f4d759b963d4871608f16583dc3912257e)
 
 ## 2026-03-13
 
