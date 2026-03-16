@@ -7,10 +7,6 @@
 - feat(api): wire template system into initialization, record creation, and AppModule [`f6b75a4`](https://github.com/Whytalik/nucleus/commit/f6b75a4f0b944fe2c41c53a094a39ca297d7b686)
 - feat(template): add Template and TemplatePropertyValue CRUD modules with service, controller, and tests [`c39c787`](https://github.com/Whytalik/nucleus/commit/c39c7871825bd74fd9e097defcbcc11c6b1636a1)
 
-### Chores
-
-- chore: update changelog [`6489d2f`](https://github.com/Whytalik/nucleus/commit/6489d2f4d759b963d4871608f16583dc3912257e)
-
 ## 2026-03-13
 
 ### Features
