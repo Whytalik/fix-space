@@ -138,6 +138,7 @@ export class DatabaseService {
         icon: updateDatabaseDto.icon,
         sectionId: updateDatabaseDto.sectionId,
         ...(updateDatabaseDto.recordLimit !== undefined && { recordLimit: updateDatabaseDto.recordLimit ?? null }),
+        ...(updateDatabaseDto.useDefaultTemplate !== undefined && { useDefaultTemplate: updateDatabaseDto.useDefaultTemplate }),
       },
     });
 

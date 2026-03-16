@@ -151,8 +151,9 @@ model Database {
   name        String
   title       String
   icon        String?
-  recordLimit Int?
-  createdAt   DateTime @default(now())
+  recordLimit         Int?
+  useDefaultTemplate  Boolean  @default(true)
+  createdAt           DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   space      Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)

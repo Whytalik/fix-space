@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { STATUS_CATEGORY_VALUES, STATUS_OPTION_COLOR_VALUES } from "@nucleus/domain";
 import { StatusHandler } from "../status.handler";
