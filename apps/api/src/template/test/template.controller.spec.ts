@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { Test, TestingModule } from "@nestjs/testing";
 import { CreateTemplateDto, UpdateTemplateDto } from "@nucleus/domain";
 import { TemplateController } from "../template.controller";
+import { DuplicateTemplateUseCase } from "../providers/duplicate-template.usecase";
 import { TemplateService } from "../template.service";
 
 const mockTemplateService = {
@@ -11,6 +12,8 @@ const mockTemplateService = {
   update: jest.fn<any>(),
   remove: jest.fn<any>(),
 };
+
+const mockDuplicateTemplateUseCase = { execute: jest.fn<any>() };
 
 const mockTemplate = {
   id: "tmpl-1",
@@ -31,7 +34,10 @@ describe("TemplateController", () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [TemplateController],
-      providers: [{ provide: TemplateService, useValue: mockTemplateService }],
+      providers: [
+        { provide: TemplateService, useValue: mockTemplateService },
+        { provide: DuplicateTemplateUseCase, useValue: mockDuplicateTemplateUseCase },
+      ],
     }).compile();
 
     controller = module.get<TemplateController>(TemplateController);
@@ -91,6 +97,18 @@ describe("TemplateController", () => {
 
       expect(mockTemplateService.remove).toHaveBeenCalledWith("tmpl-1", "user-1");
       expect(result).toEqual(mockTemplate);
+    });
+  });
+
+  describe("duplicate", () => {
+    it("should delegate to duplicateTemplateUseCase.execute", async () => {
+      const copied = { ...mockTemplate, name: "My Template Copy" };
+      mockDuplicateTemplateUseCase.execute.mockResolvedValue(copied);
+
+      const result = await controller.duplicate("tmpl-1", "user-1");
+
+      expect(mockDuplicateTemplateUseCase.execute).toHaveBeenCalledWith("tmpl-1", "user-1");
+      expect(result).toEqual(copied);
     });
   });
 });

@@ -3,6 +3,7 @@ import { Reflector } from "@nestjs/core";
 import { Test, TestingModule } from "@nestjs/testing";
 import { SpaceResponseDto } from "@nucleus/domain";
 import { DuplicateSpaceUseCase } from "../providers/duplicate-space.usecase";
+import { InitializeUserSpaceUseCase } from "../providers/initialize-user-space.usecase";
 import { SpaceController } from "../space.controller";
 import { SpaceService } from "../space.service";
 
@@ -30,6 +31,10 @@ describe("SpaceController", () => {
     execute: jest.fn<() => Promise<SpaceResponseDto>>(),
   };
 
+  const mockInitializeUserSpaceUseCase = {
+    createAndSeed: jest.fn<any>(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -44,6 +49,10 @@ describe("SpaceController", () => {
           provide: DuplicateSpaceUseCase,
           useValue: mockDuplicateSpaceUseCase,
         },
+        {
+          provide: InitializeUserSpaceUseCase,
+          useValue: mockInitializeUserSpaceUseCase,
+        },
         Reflector,
       ],
     }).compile();
@@ -52,17 +61,17 @@ describe("SpaceController", () => {
   });
 
   describe("create", () => {
-    it("should call spaceService.create with userId and dto", async () => {
+    it("should call initializeUserSpaceUseCase.createAndSeed with userId and dto", async () => {
       const dto = {
         name: "New Space",
         icon: "🚀",
       };
-      mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+      mockInitializeUserSpaceUseCase.createAndSeed.mockResolvedValue(mockSpaceResponse);
 
       const result = await controller.create("user-123", dto);
 
       expect(result).toEqual(mockSpaceResponse);
-      expect(mockSpaceService.create).toHaveBeenCalledWith("user-123", { ...dto });
+      expect(mockInitializeUserSpaceUseCase.createAndSeed).toHaveBeenCalledWith("user-123", { ...dto });
     });
   });
 

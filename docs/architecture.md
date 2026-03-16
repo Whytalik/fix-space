@@ -216,6 +216,7 @@ Relations: `databases[]`
 | icon | String? | |
 | config | Json? | |
 | recordLimit | Int? | max records allowed (null = unlimited) |
+| useDefaultTemplate | Boolean | auto-apply default template on record create (default: true) |
 | createdAt / updatedAt | DateTime | |
 
 Relations: `properties[]`, `records[]`, `templates[]`
@@ -372,6 +373,7 @@ All endpoints are JWT-protected unless marked **[public]**. Auth is applied glob
 | GET | /templates/:id | Get template |
 | PATCH | /templates/:id | Update template |
 | DELETE | /templates/:id | Delete template |
+| POST | /templates/:id/duplicate | Duplicate a template |
 
 ### TemplatePropertyValue — `/template-property-values`
 | Method | Path | Description |
