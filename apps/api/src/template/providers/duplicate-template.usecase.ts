@@ -1,32 +1,30 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma } from "@nucleus/database";
 import { TemplateResponseDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { TemplateRepository } from "../template.repository";
 
 @Injectable()
 export class DuplicateTemplateUseCase {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly templateRepo: TemplateRepository,
+  ) {
     this.logger.setContext(DuplicateTemplateUseCase.name);
   }
 
   async execute(id: string, userId: string): Promise<TemplateResponseDto> {
     this.logger.debug("Duplicating template", { id });
 
-    const source = await prisma.template.findFirst({
-      where: {
-        id,
-        database: { space: { ownerId: userId } },
-      },
-      include: { values: true },
-    });
+    const source = await this.templateRepo.findByIdWithValues(id, userId);
 
     if (!source) {
       throw new NotFoundException(`Template with id ${id} not found`);
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const copy = await tx.template.create({
-        data: {
+    const result = await this.templateRepo.transaction(async (tx) => {
+      const copy = await this.templateRepo.create(
+        {
           databaseId: source.databaseId,
           name: `${source.name} Copy`,
           description: source.description,
@@ -34,7 +32,8 @@ export class DuplicateTemplateUseCase {
           isDefault: false,
           position: source.position,
         },
-      });
+        tx,
+      );
 
       for (const tpv of source.values) {
         await tx.templatePropertyValue.create({
@@ -46,10 +45,7 @@ export class DuplicateTemplateUseCase {
         });
       }
 
-      return tx.template.findUniqueOrThrow({
-        where: { id: copy.id },
-        include: { values: true },
-      });
+      return this.templateRepo.findUniqueOrThrowWithValues(copy.id, tx);
     });
 
     this.logger.log("Template duplicated", { sourceId: id, copyId: result.id });

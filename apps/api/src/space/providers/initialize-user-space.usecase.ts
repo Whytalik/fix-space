@@ -1,11 +1,15 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma } from "@nucleus/database";
 import { CreateSpaceDto, PropertyType, SpaceResponseDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { InitializationConfigService } from "../../config/initialization-config.service";
 import { DatabaseService } from "../../database/database.service";
+import { PropertyRepository } from "../../property/property.repository";
 import { PropertyService } from "../../property/property.service";
+import { PropertyValueRepository } from "../../property-value/property-value.repository";
+import { RecordRepository } from "../../record/record.repository";
 import { TemplateService } from "../../template/template.service";
+import { SpaceRepository } from "../space.repository";
 import { SpaceService } from "../space.service";
 import { SectionService } from "./section.service";
 
@@ -19,6 +23,10 @@ export class InitializeUserSpaceUseCase {
     private readonly templateService: TemplateService,
     private readonly configService: InitializationConfigService,
     private readonly logger: AppLogger,
+    private readonly propertyRepo: PropertyRepository,
+    private readonly propertyValueRepo: PropertyValueRepository,
+    private readonly recordRepo: RecordRepository,
+    private readonly spaceRepo: SpaceRepository,
   ) {
     this.logger.setContext(InitializeUserSpaceUseCase.name);
   }
@@ -107,7 +115,10 @@ export class InitializeUserSpaceUseCase {
 
     // Pass 4 — Seed sample records
     // Sub-pass 4a: create all records + scalar values in parallel per database, track name → id per database type
-    type PropCache = { properties: { id: string; name: string }[]; propByName: Map<string, { id: string; name: string }> };
+    type PropCache = {
+      properties: { id: string; name: string }[];
+      propByName: Map<string, { id: string; name: string }>;
+    };
     const recordIdByType = new Map<string, Map<string, string>>();
     const propCacheByType = new Map<string, PropCache>();
 
@@ -118,7 +129,7 @@ export class InitializeUserSpaceUseCase {
           const databaseId = databaseByType.get(dbDef.type!);
           if (!databaseId) return;
 
-          const properties = await prisma.property.findMany({ where: { databaseId } });
+          const properties = await this.propertyRepo.findManyByDatabase(databaseId);
           const propByName = new Map(properties.map((p) => [p.name, p]));
           propCacheByType.set(dbDef.type!, { properties, propByName });
 
@@ -127,23 +138,23 @@ export class InitializeUserSpaceUseCase {
 
           await Promise.all(
             dbDef.seeds!.map(async (seed) => {
-              const record = await prisma.record.create({
-                data: {
-                  databaseId,
-                  name: seed.name,
-                  icon: seed.icon,
-                },
+              const record = await this.recordRepo.create({
+                databaseId,
+                name: seed.name,
+                icon: seed.icon,
               });
               nameToId.set(seed.name, record.id);
 
-              await prisma.propertyValue.createMany({
-                data: properties.map((p) => ({
+              await this.propertyValueRepo.createMany(
+                properties.map((p) => ({
                   recordId: record.id,
                   propertyId: p.id,
-                  value: (seed.values?.[p.name] !== undefined ? seed.values[p.name] : Prisma.DbNull) as Prisma.InputJsonValue,
+                  value: (seed.values?.[p.name] !== undefined
+                    ? seed.values[p.name]
+                    : Prisma.DbNull) as Prisma.InputJsonValue,
                   computed: false,
                 })),
-              });
+              );
             }),
           );
         }),
@@ -169,9 +180,7 @@ export class InitializeUserSpaceUseCase {
 
           let value: Prisma.InputJsonValue;
           if (Array.isArray(relRef)) {
-            const ids = relRef
-              .map((r) => recordIdByType.get(r.type)?.get(r.name))
-              .filter((id): id is string => !!id);
+            const ids = relRef.map((r) => recordIdByType.get(r.type)?.get(r.name)).filter((id): id is string => !!id);
             if (ids.length === 0) continue;
             value = ids;
           } else {
@@ -180,10 +189,7 @@ export class InitializeUserSpaceUseCase {
             value = id;
           }
 
-          await prisma.propertyValue.update({
-            where: { recordId_propertyId: { recordId, propertyId: prop.id } },
-            data: { value },
-          });
+          await this.propertyValueRepo.updateByCompositeKey(recordId, prop.id, { value });
         }
       }
     }
@@ -208,7 +214,13 @@ export class InitializeUserSpaceUseCase {
   async createAndSeed(userId: string, dto: CreateSpaceDto): Promise<SpaceResponseDto> {
     this.logger.debug("Creating and seeding space from DTO", { userId, name: dto.name });
     const space = await this.spaceService.create(userId, dto);
-    await this.seedContent(space.id, userId);
+    try {
+      await this.seedContent(space.id, userId);
+    } catch (err) {
+      this.logger.error("Seed failed, removing partially-initialized space", { spaceId: space.id, userId });
+      await this.spaceRepo.delete(space.id).catch(() => undefined);
+      throw err;
+    }
     this.logger.log("Space created and seeded", { userId, spaceId: space.id });
     return this.spaceService.findOne(space.id);
   }
@@ -220,7 +232,13 @@ export class InitializeUserSpaceUseCase {
     const spaceName = this.configService.interpolateSpaceName(username);
     const space = await this.spaceService.create(userId, { name: spaceName, isDefault: true, icon: config.spaceIcon });
 
-    await this.seedContent(space.id, userId);
+    try {
+      await this.seedContent(space.id, userId);
+    } catch (err) {
+      this.logger.error("Seed failed, removing partially-initialized space", { spaceId: space.id, userId });
+      await this.spaceRepo.delete(space.id).catch(() => undefined);
+      throw err;
+    }
 
     this.logger.log("User space initialized", { userId, spaceId: space.id });
 
