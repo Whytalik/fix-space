@@ -1,26 +1,20 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma } from "@nucleus/database";
 import { DatabaseResponseDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { DatabaseRepository } from "../database.repository";
 
 @Injectable()
 export class DuplicateDatabaseUseCase {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly databaseRepo: DatabaseRepository,
+  ) {
     this.logger.setContext(DuplicateDatabaseUseCase.name);
   }
 
-  async execute(databaseId: string): Promise<DatabaseResponseDto> {
-    const source = await prisma.database.findUnique({
-      where: { id: databaseId },
-      include: {
-        properties: true,
-        records: {
-          include: {
-            values: true,
-          },
-        },
-      },
-    });
+  async execute(databaseId: string, userId: string): Promise<DatabaseResponseDto> {
+    const source = await this.databaseRepo.findByIdForDuplicate(databaseId, userId);
 
     if (!source) {
       throw new NotFoundException("Database not found");
@@ -28,7 +22,7 @@ export class DuplicateDatabaseUseCase {
 
     const newName = `${source.title} Copy`;
 
-    return prisma.$transaction(async (tx) => {
+    return this.databaseRepo.transaction(async (tx) => {
       const newDb = await tx.database.create({
         data: {
           spaceId: source.spaceId,
@@ -41,7 +35,6 @@ export class DuplicateDatabaseUseCase {
 
       const propertyIdMap = new Map<string, string>();
 
-      // Properties
       for (const prop of source.properties) {
         const newProp = await tx.property.create({
           data: {
@@ -55,7 +48,6 @@ export class DuplicateDatabaseUseCase {
         propertyIdMap.set(prop.id, newProp.id);
       }
 
-      // Records
       for (const record of source.records) {
         const newRecord = await tx.record.create({
           data: {
