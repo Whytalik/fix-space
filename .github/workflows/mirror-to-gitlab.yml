@@ -3,7 +3,7 @@ name: Mirror to GitLab
 on:
   push:
     branches:
-      - '**'
+      - "**"
 
 jobs:
   mirror:
@@ -17,12 +17,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Debug repo
-        run: echo "REPO='${GITLAB_REPO}'"
-
       - name: Push to GitLab
         run: |
           git remote remove gitlab || true
           git remote add gitlab https://oauth2:${GITLAB_TOKEN}@${GITLAB_REPO}
-          git push gitlab --all
-          git push gitlab --tags
+          git push gitlab --all --force
+          git push gitlab --tags --force
