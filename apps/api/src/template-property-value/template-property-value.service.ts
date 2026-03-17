@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma } from "@nucleus/database";
 import {
   CreateTemplatePropertyValueDto,
   PropertyType,
@@ -8,12 +8,14 @@ import {
 } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 import { PropertyTypeRegistry } from "../property/types";
+import { TemplatePropertyValueRepository } from "./template-property-value.repository";
 
 @Injectable()
 export class TemplatePropertyValueService {
   constructor(
     private readonly logger: AppLogger,
     private readonly typeRegistry: PropertyTypeRegistry,
+    private readonly tpvRepo: TemplatePropertyValueRepository,
   ) {
     this.logger.setContext(TemplatePropertyValueService.name);
   }
@@ -33,20 +35,13 @@ export class TemplatePropertyValueService {
       propertyId: dto.propertyId,
     });
 
-    const template = await prisma.template.findFirst({
-      where: {
-        id: dto.templateId,
-        database: { space: { ownerId: userId } },
-      },
-    });
+    const template = await this.tpvRepo.findTemplateByOwner(dto.templateId, userId);
 
     if (!template) {
       throw new NotFoundException(`Template with id ${dto.templateId} not found`);
     }
 
-    const property = await prisma.property.findUnique({
-      where: { id: dto.propertyId },
-    });
+    const property = await this.tpvRepo.findPropertyById(dto.propertyId);
 
     if (!property) {
       throw new NotFoundException(`Property with id ${dto.propertyId} not found`);
@@ -71,22 +66,11 @@ export class TemplatePropertyValueService {
 
     const formattedValue = handler.formatValue(rawValue, config);
 
-    const templatePropertyValue = await prisma.templatePropertyValue.upsert({
-      where: {
-        templateId_propertyId: {
-          templateId: dto.templateId,
-          propertyId: dto.propertyId,
-        },
-      },
-      update: {
-        value: formattedValue as Prisma.InputJsonValue,
-      },
-      create: {
-        templateId: dto.templateId,
-        propertyId: dto.propertyId,
-        value: formattedValue as Prisma.InputJsonValue,
-      },
-    });
+    const templatePropertyValue = await this.tpvRepo.upsert(
+      dto.templateId,
+      dto.propertyId,
+      formattedValue as Prisma.InputJsonValue,
+    );
 
     this.logger.log("Template property value created", {
       templatePropertyValueId: templatePropertyValue.id,
@@ -98,15 +82,7 @@ export class TemplatePropertyValueService {
   async findAll(templateId: string, userId: string): Promise<TemplatePropertyValueResponseDto[]> {
     this.logger.debug("Finding all template property values", { templateId });
 
-    const values = await prisma.templatePropertyValue.findMany({
-      where: {
-        templateId,
-        template: {
-          database: { space: { ownerId: userId } },
-        },
-      },
-      include: { property: true },
-    });
+    const values = await this.tpvRepo.findAllByTemplate(templateId, userId);
 
     return values.map((v) => new TemplatePropertyValueResponseDto(v));
   }
@@ -114,15 +90,7 @@ export class TemplatePropertyValueService {
   async findOne(id: string, userId: string): Promise<TemplatePropertyValueResponseDto> {
     this.logger.debug("Finding template property value", { id });
 
-    const value = await prisma.templatePropertyValue.findFirst({
-      where: {
-        id,
-        template: {
-          database: { space: { ownerId: userId } },
-        },
-      },
-      include: { property: true },
-    });
+    const value = await this.tpvRepo.findByIdWithOwner(id, userId);
 
     if (!value) {
       throw new NotFoundException(`TemplatePropertyValue with id ${id} not found`);
@@ -138,15 +106,7 @@ export class TemplatePropertyValueService {
   ): Promise<TemplatePropertyValueResponseDto> {
     this.logger.debug("Updating template property value", { id });
 
-    const existing = await prisma.templatePropertyValue.findFirst({
-      where: {
-        id,
-        template: {
-          database: { space: { ownerId: userId } },
-        },
-      },
-      include: { property: true },
-    });
+    const existing = await this.tpvRepo.findByIdWithOwner(id, userId);
 
     if (!existing) {
       throw new NotFoundException(`TemplatePropertyValue with id ${id} not found`);
@@ -167,11 +127,8 @@ export class TemplatePropertyValueService {
       formattedValue = handler.formatValue(dto.value, config);
     }
 
-    const value = await prisma.templatePropertyValue.update({
-      where: { id },
-      data: {
-        ...(formattedValue !== undefined && { value: formattedValue as Prisma.InputJsonValue }),
-      },
+    const value = await this.tpvRepo.update(id, {
+      ...(formattedValue !== undefined && { value: formattedValue as Prisma.InputJsonValue }),
     });
 
     this.logger.log("Template property value updated", { id });
@@ -181,20 +138,13 @@ export class TemplatePropertyValueService {
   async remove(id: string, userId: string): Promise<TemplatePropertyValueResponseDto> {
     this.logger.debug("Removing template property value", { id });
 
-    const existing = await prisma.templatePropertyValue.findFirst({
-      where: {
-        id,
-        template: {
-          database: { space: { ownerId: userId } },
-        },
-      },
-    });
+    const existing = await this.tpvRepo.findByIdWithOwner(id, userId);
 
     if (!existing) {
       throw new NotFoundException(`TemplatePropertyValue with id ${id} not found`);
     }
 
-    const value = await prisma.templatePropertyValue.delete({ where: { id } });
+    const value = await this.tpvRepo.delete(id);
 
     this.logger.log("Template property value removed", { id });
     return new TemplatePropertyValueResponseDto(value);
