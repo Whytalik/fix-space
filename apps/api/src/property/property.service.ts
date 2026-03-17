@@ -1,7 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma } from "@nucleus/database";
 import { CreatePropertyDto, PropertyResponseDto, PropertyType, UpdatePropertyDto } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
+import { PropertyRepository } from "./property.repository";
 import { PropertyTypeRegistry } from "./types";
 
 @Injectable()
@@ -9,6 +10,7 @@ export class PropertyService {
   constructor(
     private readonly logger: AppLogger,
     private readonly typeRegistry: PropertyTypeRegistry,
+    private readonly propertyRepo: PropertyRepository,
   ) {
     this.logger.setContext(PropertyService.name);
   }
@@ -19,25 +21,13 @@ export class PropertyService {
       name: createPropertyDto.name,
     });
 
-    const database = await prisma.database.findFirst({
-      where: {
-        id: databaseId,
-        space: {
-          ownerId: userId,
-        },
-      },
-    });
+    const database = await this.propertyRepo.findDatabaseByOwner(databaseId, userId);
 
     if (!database) {
       throw new NotFoundException(`Database not found`);
     }
 
-    const isPropertyNameTaken = await prisma.property.findFirst({
-      where: {
-        name: createPropertyDto.name,
-        databaseId,
-      },
-    });
+    const isPropertyNameTaken = await this.propertyRepo.findByNameInDatabase(createPropertyDto.name, databaseId);
 
     if (isPropertyNameTaken) {
       this.logger.warn("Duplicate property name", {
@@ -61,9 +51,9 @@ export class PropertyService {
       throw new BadRequestException(`Invalid config for ${createPropertyDto.type}: ${configErrors.join("; ")}`);
     }
 
-    const [property] = await prisma.$transaction(async (tx) => {
-      const created = await tx.property.create({
-        data: {
+    const [property] = await this.propertyRepo.transaction(async (tx) => {
+      const created = await this.propertyRepo.create(
+        {
           name: createPropertyDto.name,
           type: createPropertyDto.type,
           position: createPropertyDto.position,
@@ -74,8 +64,9 @@ export class PropertyService {
           isVisible: createPropertyDto.isVisible ?? true,
           databaseId,
           config: mergedConfig as Prisma.InputJsonValue,
-        },
-      });
+        } as Prisma.PropertyUncheckedCreateInput,
+        tx,
+      );
 
       const existingRecords = await tx.record.findMany({
         where: {
@@ -109,35 +100,14 @@ export class PropertyService {
 
   async findAll(databaseId: string, userId: string): Promise<PropertyResponseDto[]> {
     this.logger.debug("Finding all properties", { databaseId });
-    const properties = await prisma.property.findMany({
-      where: {
-        databaseId,
-        database: {
-          space: {
-            ownerId: userId,
-          },
-        },
-      },
-      orderBy: {
-        position: "asc",
-      },
-    });
+    const properties = await this.propertyRepo.findAllByDatabase(databaseId, userId);
     return properties.map((property) => new PropertyResponseDto({ ...property, type: property.type as PropertyType }));
   }
 
   async findOne(id: string, userId: string): Promise<PropertyResponseDto> {
     this.logger.debug("Finding property", { id });
 
-    const property = await prisma.property.findFirst({
-      where: {
-        id,
-        database: {
-          space: {
-            ownerId: userId,
-          },
-        },
-      },
-    });
+    const property = await this.propertyRepo.findByIdWithOwner(id, userId);
 
     if (!property) {
       throw new NotFoundException(`Property with id ${id} not found`);
@@ -149,29 +119,18 @@ export class PropertyService {
   async update(id: string, updatePropertyDto: UpdatePropertyDto, userId: string): Promise<PropertyResponseDto> {
     this.logger.debug("Updating property", { id });
 
-    const existingProperty = await prisma.property.findFirst({
-      where: {
-        id,
-        database: {
-          space: {
-            ownerId: userId,
-          },
-        },
-      },
-    });
+    const existingProperty = await this.propertyRepo.findByIdWithOwner(id, userId);
 
     if (!existingProperty) {
       throw new NotFoundException(`Property with id ${id} not found`);
     }
 
     if (updatePropertyDto.name && updatePropertyDto.name !== existingProperty.name) {
-      const isPropertyNameTaken = await prisma.property.findFirst({
-        where: {
-          name: updatePropertyDto.name,
-          databaseId: existingProperty.databaseId,
-          NOT: { id },
-        },
-      });
+      const isPropertyNameTaken = await this.propertyRepo.findByNameExcluding(
+        updatePropertyDto.name,
+        existingProperty.databaseId,
+        id,
+      );
 
       if (isPropertyNameTaken) {
         this.logger.warn("Duplicate property name on update", {
@@ -203,19 +162,31 @@ export class PropertyService {
       configToSave = merged;
     }
 
-    const property = await prisma.property.update({
-      where: { id },
-      data: {
-        ...(updatePropertyDto.name !== undefined && { name: updatePropertyDto.name }),
-        ...(updatePropertyDto.type !== undefined && { type: updatePropertyDto.type }),
-        ...(updatePropertyDto.position !== undefined && { position: updatePropertyDto.position }),
-        ...(updatePropertyDto.icon !== undefined && { icon: updatePropertyDto.icon }),
-        ...(updatePropertyDto.hint !== undefined && { hint: updatePropertyDto.hint }),
-        ...(updatePropertyDto.group !== undefined && { group: updatePropertyDto.group }),
-        ...(updatePropertyDto.isRequired !== undefined && { isRequired: updatePropertyDto.isRequired }),
-        ...(updatePropertyDto.isVisible !== undefined && { isVisible: updatePropertyDto.isVisible }),
-        ...(configToSave !== undefined && { config: configToSave as Prisma.InputJsonValue }),
-      },
+    const typeChanged = updatePropertyDto.type !== undefined && updatePropertyDto.type !== existingProperty.type;
+
+    const property = await this.propertyRepo.transaction(async (tx) => {
+      if (typeChanged) {
+        await tx.propertyValue.updateMany({
+          where: { propertyId: id },
+          data: { value: Prisma.DbNull },
+        });
+      }
+
+      return this.propertyRepo.update(
+        id,
+        {
+          ...(updatePropertyDto.name !== undefined && { name: updatePropertyDto.name }),
+          ...(updatePropertyDto.type !== undefined && { type: updatePropertyDto.type }),
+          ...(updatePropertyDto.position !== undefined && { position: updatePropertyDto.position }),
+          ...(updatePropertyDto.icon !== undefined && { icon: updatePropertyDto.icon }),
+          ...(updatePropertyDto.hint !== undefined && { hint: updatePropertyDto.hint }),
+          ...(updatePropertyDto.group !== undefined && { group: updatePropertyDto.group }),
+          ...(updatePropertyDto.isRequired !== undefined && { isRequired: updatePropertyDto.isRequired }),
+          ...(updatePropertyDto.isVisible !== undefined && { isVisible: updatePropertyDto.isVisible }),
+          ...(configToSave !== undefined && { config: configToSave as Prisma.InputJsonValue }),
+        },
+        tx,
+      );
     });
 
     this.logger.log("Property updated", { id });
@@ -225,24 +196,13 @@ export class PropertyService {
   async remove(id: string, userId: string): Promise<PropertyResponseDto> {
     this.logger.debug("Removing property", { id });
 
-    const existingProperty = await prisma.property.findFirst({
-      where: {
-        id,
-        database: {
-          space: {
-            ownerId: userId,
-          },
-        },
-      },
-    });
+    const existingProperty = await this.propertyRepo.findByIdWithOwner(id, userId);
 
     if (!existingProperty) {
       throw new NotFoundException(`Property with id ${id} not found`);
     }
 
-    const property = await prisma.property.delete({
-      where: { id },
-    });
+    const property = await this.propertyRepo.delete(id);
 
     this.logger.log("Property removed", { id });
     return new PropertyResponseDto({ ...property, type: property.type as PropertyType });
