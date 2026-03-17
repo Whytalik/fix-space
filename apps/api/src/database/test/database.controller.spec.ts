@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { Reflector } from "@nestjs/core";
-import { Test, TestingModule } from "@nestjs/testing";
-import { DatabaseResponseDto } from "@nucleus/domain";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+import type { DatabaseResponseDto } from "@nucleus/domain";
 import { DatabaseController } from "../database.controller";
 import { DatabaseService } from "../database.service";
 import { DuplicateDatabaseUseCase } from "../providers/duplicate-database.usecase";
@@ -78,19 +79,19 @@ describe("DatabaseController", () => {
   });
 
   describe("findOne", () => {
-    it("should call databaseService.findOne with id", async () => {
+    it("should call databaseService.findOne with id and userId", async () => {
       mockDatabaseService.findOne.mockResolvedValue(mockDatabaseResponse);
 
-      const result = await controller.findOne("db-123");
+      const result = await controller.findOne("db-123", "user-123");
 
       expect(result).toEqual(mockDatabaseResponse);
-      expect(mockDatabaseService.findOne).toHaveBeenCalledWith("db-123");
+      expect(mockDatabaseService.findOne).toHaveBeenCalledWith("db-123", "user-123");
       expect(mockDatabaseService.findOne).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("update", () => {
-    it("should call databaseService.update with id and dto", async () => {
+    it("should call databaseService.update with id, dto, and userId", async () => {
       const dto = {
         name: "Updated DB",
       };
@@ -100,10 +101,10 @@ describe("DatabaseController", () => {
       } as unknown as DatabaseResponseDto;
       mockDatabaseService.update.mockResolvedValue(updatedResponse);
 
-      const result = await controller.update("db-123", dto);
+      const result = await controller.update("db-123", "user-123", dto);
 
       expect(result).toEqual(updatedResponse);
-      expect(mockDatabaseService.update).toHaveBeenCalledWith("db-123", dto);
+      expect(mockDatabaseService.update).toHaveBeenCalledWith("db-123", dto, "user-123");
       expect(mockDatabaseService.update).toHaveBeenCalledTimes(1);
     });
   });
@@ -112,22 +113,22 @@ describe("DatabaseController", () => {
     it("should call duplicateDatabaseUseCase.execute with the database id", async () => {
       mockDuplicateDatabaseUseCase.execute.mockResolvedValue(mockDatabaseResponse);
 
-      const result = await controller.duplicate("db-123");
+      const result = await controller.duplicate("db-123", "user-1");
 
       expect(result).toEqual(mockDatabaseResponse);
-      expect(mockDuplicateDatabaseUseCase.execute).toHaveBeenCalledWith("db-123");
+      expect(mockDuplicateDatabaseUseCase.execute).toHaveBeenCalledWith("db-123", "user-1");
       expect(mockDuplicateDatabaseUseCase.execute).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("remove", () => {
-    it("should call databaseService.remove with id", async () => {
+    it("should call databaseService.remove with id and userId", async () => {
       mockDatabaseService.remove.mockResolvedValue(mockDatabaseResponse);
 
-      const result = await controller.remove("db-123");
+      const result = await controller.remove("db-123", "user-123");
 
       expect(result).toEqual(mockDatabaseResponse);
-      expect(mockDatabaseService.remove).toHaveBeenCalledWith("db-123");
+      expect(mockDatabaseService.remove).toHaveBeenCalledWith("db-123", "user-123");
       expect(mockDatabaseService.remove).toHaveBeenCalledTimes(1);
     });
   });

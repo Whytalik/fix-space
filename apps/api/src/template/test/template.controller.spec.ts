@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { Test, TestingModule } from "@nestjs/testing";
-import { CreateTemplateDto, UpdateTemplateDto } from "@nucleus/domain";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+import type { CreateTemplateDto, UpdateTemplateDto } from "@nucleus/domain";
 import { TemplateController } from "../template.controller";
 import { DuplicateTemplateUseCase } from "../providers/duplicate-template.usecase";
 import { TemplateService } from "../template.service";
