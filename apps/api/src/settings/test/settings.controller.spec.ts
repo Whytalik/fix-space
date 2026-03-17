@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { DEFAULT_DATABASE_SETTINGS, DEFAULT_SECTION_SETTINGS, DEFAULT_SPACE_SETTINGS } from "@nucleus/domain";
 import { SettingsController } from "../settings.controller";
 import { SettingsService } from "../settings.service";
@@ -45,12 +46,9 @@ describe("SettingsController", () => {
 
   describe("updateSpaceSettings", () => {
     it("should call settingsService.updateSettings with userId, space category, dto and defaults", async () => {
-      const dto = {
-        sidebarCollapsed: true,
-      };
+      const dto = {};
       const mockResult = {
         ...DEFAULT_SPACE_SETTINGS,
-        sidebarCollapsed: true,
       };
       mockSettingsService.updateSettings.mockResolvedValue(mockResult);
 
@@ -78,9 +76,7 @@ describe("SettingsController", () => {
 
   describe("updateDatabaseSettings", () => {
     it("should call settingsService.updateSettings with userId, database category, dto and defaults", async () => {
-      const dto = {
-        defaultViewType: "table" as const,
-      };
+      const dto = {};
       const mockResult = {
         ...DEFAULT_DATABASE_SETTINGS,
         ...dto,
