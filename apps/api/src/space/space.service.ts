@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { prisma } from "@nucleus/database";
 import { CreateSpaceDto, SectionOperationDto, SpaceResponseDto, UpdateSpaceDto } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 import { SettingsService } from "../settings/settings.service";
 import { SectionService } from "./providers/section.service";
+import { SpaceRepository } from "./space.repository";
 import { sectionsInclude } from "./space.constants";
 
 @Injectable()
@@ -12,6 +12,7 @@ export class SpaceService {
     private readonly logger: AppLogger,
     private readonly sectionService: SectionService,
     private readonly settingsService: SettingsService,
+    private readonly spaceRepo: SpaceRepository,
   ) {
     this.logger.setContext(SpaceService.name);
   }
@@ -22,22 +23,20 @@ export class SpaceService {
       name: dto.name,
     });
 
-    const space = await prisma.$transaction(async (tx) => {
+    const space = await this.spaceRepo.transaction(async (tx) => {
       if (dto.isDefault) {
-        await tx.space.updateMany({
-          where: { ownerId, isDefault: true },
-          data: { isDefault: false },
-        });
+        await this.spaceRepo.updateMany({ ownerId, isDefault: true }, { isDefault: false }, tx);
       }
-      return tx.space.create({
-        data: {
+      return this.spaceRepo.create(
+        {
           name: dto.name,
           icon: dto.icon,
           isDefault: dto.isDefault ?? false,
           ownerId,
         },
-        include: sectionsInclude,
-      });
+        sectionsInclude,
+        tx,
+      );
     });
 
     this.logger.log("Space created", { spaceId: space.id, ownerId });
@@ -46,20 +45,14 @@ export class SpaceService {
 
   async findAll(ownerId: string): Promise<SpaceResponseDto[]> {
     this.logger.debug("Finding all spaces", { ownerId });
-    const spaces = await prisma.space.findMany({
-      where: { ownerId },
-      include: sectionsInclude,
-    });
+    const spaces = await this.spaceRepo.findAll(ownerId, sectionsInclude);
     return spaces.map((space) => new SpaceResponseDto(space));
   }
 
   async findOne(id: string): Promise<SpaceResponseDto> {
     this.logger.debug("Finding space", { id });
 
-    const space = await prisma.space.findUnique({
-      where: { id },
-      include: sectionsInclude,
-    });
+    const space = await this.spaceRepo.findOne(id, sectionsInclude);
 
     if (!space) {
       throw new NotFoundException(`Space with id ${id} not found`);
@@ -72,7 +65,7 @@ export class SpaceService {
     this.logger.debug("Updating space", { id });
     const { sectionOperations, ...spaceData } = dto;
 
-    return prisma.$transaction(async (tx) => {
+    return this.spaceRepo.transaction(async (tx) => {
       if (sectionOperations?.length) {
         this.logger.debug("Processing section operations", {
           spaceId: id,
@@ -82,24 +75,26 @@ export class SpaceService {
       }
 
       if (spaceData.isDefault === true) {
-        const current = await tx.space.findUnique({ where: { id }, select: { ownerId: true } });
+        const current = await this.spaceRepo.findOwner(id, tx);
         if (current) {
-          await tx.space.updateMany({
-            where: { ownerId: current.ownerId, isDefault: true, id: { not: id } },
-            data: { isDefault: false },
-          });
+          await this.spaceRepo.updateMany(
+            { ownerId: current.ownerId, isDefault: true, id: { not: id } },
+            { isDefault: false },
+            tx,
+          );
         }
       }
 
-      const space = await tx.space.update({
-        where: { id },
-        data: {
+      const space = await this.spaceRepo.update(
+        id,
+        {
           name: spaceData.name,
           icon: spaceData.icon,
           isDefault: spaceData.isDefault,
         },
-        include: sectionsInclude,
-      });
+        sectionsInclude,
+        tx,
+      );
 
       this.logger.log("Space updated", { spaceId: id });
       return new SpaceResponseDto(space);
@@ -109,12 +104,12 @@ export class SpaceService {
   async remove(id: string): Promise<SpaceResponseDto> {
     this.logger.debug("Removing space", { id });
 
-    const existing = await prisma.space.findUnique({ where: { id }, select: { isDefault: true } });
+    const existing = await this.spaceRepo.findOwner(id);
     if (existing?.isDefault) {
       throw new BadRequestException("Cannot delete the default space");
     }
 
-    const space = await prisma.space.delete({ where: { id } });
+    const space = await this.spaceRepo.delete(id);
     this.logger.log("Space removed", { id });
     return new SpaceResponseDto(space);
   }

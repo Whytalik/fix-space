@@ -52,10 +52,7 @@ export class TemplateController {
   }
 
   @Post(":id/duplicate")
-  duplicate(
-    @Param("id") id: string,
-    @CurrentUser("userId") userId: string,
-  ) {
+  duplicate(@Param("id") id: string, @CurrentUser("userId") userId: string) {
     return this.duplicateTemplateUseCase.execute(id, userId);
   }
 

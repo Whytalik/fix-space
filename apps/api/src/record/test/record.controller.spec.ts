@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { Test, TestingModule } from "@nestjs/testing";
-import { RecordResponseDto } from "@nucleus/domain";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+import type { RecordResponseDto } from "@nucleus/domain";
+import { FilterLogic } from "@nucleus/domain";
+import { FindRecordsUseCase } from "../providers/find-records.usecase";
+import { SearchRecordsUseCase } from "../providers/search-records.usecase";
 import { RecordController } from "../record.controller";
 import { RecordService } from "../record.service";
 
@@ -20,12 +24,16 @@ describe("RecordController", () => {
   } as unknown as RecordResponseDto;
 
   const mockRecordService = {
-    create: jest.fn<() => Promise<RecordResponseDto>>(),
-    findAll: jest.fn<() => Promise<RecordResponseDto[]>>(),
-    findOne: jest.fn<() => Promise<RecordResponseDto>>(),
-    update: jest.fn<() => Promise<RecordResponseDto>>(),
-    remove: jest.fn<() => Promise<RecordResponseDto>>(),
+    create: jest.fn<any>(),
+    findAll: jest.fn<any>(),
+    findAllPaged: jest.fn<any>(),
+    findOne: jest.fn<any>(),
+    update: jest.fn<any>(),
+    remove: jest.fn<any>(),
   };
+
+  const mockFindRecordsUseCase = { execute: jest.fn<any>() };
+  const mockSearchRecordsUseCase = { execute: jest.fn<any>() };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -36,6 +44,14 @@ describe("RecordController", () => {
         {
           provide: RecordService,
           useValue: mockRecordService,
+        },
+        {
+          provide: FindRecordsUseCase,
+          useValue: mockFindRecordsUseCase,
+        },
+        {
+          provide: SearchRecordsUseCase,
+          useValue: mockSearchRecordsUseCase,
         },
       ],
     }).compile();
@@ -64,7 +80,16 @@ describe("RecordController", () => {
     it("should call recordService.findAll with databaseId query param and userId", async () => {
       mockRecordService.findAll.mockResolvedValue([mockRecordResponse]);
 
-      const result = await controller.findAll("db-123", undefined, undefined, "user-123");
+      const result = await controller.findAll(
+        "db-123",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        "user-123",
+      );
 
       expect(result).toEqual([mockRecordResponse]);
       expect(mockRecordService.findAll).toHaveBeenCalledWith("db-123", "user-123");
@@ -112,6 +137,94 @@ describe("RecordController", () => {
       expect(result).toEqual(mockRecordResponse);
       expect(mockRecordService.remove).toHaveBeenCalledWith("record-123", "user-123");
       expect(mockRecordService.remove).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("search", () => {
+    it("should delegate to searchRecordsUseCase.execute with spaceId, userId, and q", async () => {
+      const mockResults = [{ id: "record-123", name: "Test", databaseId: "db-1" }];
+      mockSearchRecordsUseCase.execute.mockResolvedValue(mockResults);
+
+      const result = await controller.search("space-123", "test query", "user-123");
+
+      expect(result).toEqual(mockResults);
+      expect(mockSearchRecordsUseCase.execute).toHaveBeenCalledWith("space-123", "user-123", "test query");
+      expect(mockSearchRecordsUseCase.execute).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("findAll (advanced params)", () => {
+    it("with sort JSON string → calls findRecordsUseCase.execute with parsed sort array", async () => {
+      const sortArray = [{ field: "createdAt", direction: "asc" }];
+      const sortRaw = JSON.stringify(sortArray);
+      mockFindRecordsUseCase.execute.mockResolvedValue([mockRecordResponse]);
+
+      await controller.findAll("db-123", undefined, undefined, sortRaw, undefined, undefined, undefined, "user-123");
+
+      expect(mockFindRecordsUseCase.execute).toHaveBeenCalledWith(
+        "db-123",
+        "user-123",
+        expect.objectContaining({ sort: sortArray }),
+      );
+      expect(mockRecordService.findAll).not.toHaveBeenCalled();
+    });
+
+    it("with filters JSON string → calls findRecordsUseCase.execute with parsed filters", async () => {
+      const filtersArray = [{ propertyId: "prop-1", operator: "equals", value: "hello" }];
+      const filtersRaw = JSON.stringify(filtersArray);
+      mockFindRecordsUseCase.execute.mockResolvedValue([mockRecordResponse]);
+
+      await controller.findAll("db-123", undefined, undefined, undefined, filtersRaw, undefined, undefined, "user-123");
+
+      expect(mockFindRecordsUseCase.execute).toHaveBeenCalledWith(
+        "db-123",
+        "user-123",
+        expect.objectContaining({ filters: filtersArray }),
+      );
+    });
+
+    it("with filterLogic → passes filterLogic to findRecordsUseCase.execute", async () => {
+      mockFindRecordsUseCase.execute.mockResolvedValue([mockRecordResponse]);
+
+      await controller.findAll(
+        "db-123",
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        FilterLogic.OR,
+        undefined,
+        "user-123",
+      );
+
+      expect(mockFindRecordsUseCase.execute).toHaveBeenCalledWith(
+        "db-123",
+        "user-123",
+        expect.objectContaining({ filterLogic: FilterLogic.OR }),
+      );
+    });
+
+    it("with search param → passes search string to findRecordsUseCase.execute", async () => {
+      mockFindRecordsUseCase.execute.mockResolvedValue([mockRecordResponse]);
+
+      await controller.findAll("db-123", undefined, undefined, undefined, undefined, undefined, "my query", "user-123");
+
+      expect(mockFindRecordsUseCase.execute).toHaveBeenCalledWith(
+        "db-123",
+        "user-123",
+        expect.objectContaining({ search: "my query" }),
+      );
+    });
+
+    it("with page + pageSize only (no advanced params) → calls recordService.findAllPaged", async () => {
+      const pagedResult = { data: [mockRecordResponse], total: 1, page: 1, pageSize: 10 };
+      mockRecordService.findAllPaged.mockResolvedValue(pagedResult);
+
+      const result = await controller.findAll("db-123", 1, 10, undefined, undefined, undefined, undefined, "user-123");
+
+      expect(result).toEqual(pagedResult);
+      expect(mockRecordService.findAllPaged).toHaveBeenCalledWith("db-123", "user-123", 1, 10);
+      expect(mockFindRecordsUseCase.execute).not.toHaveBeenCalled();
     });
   });
 });
