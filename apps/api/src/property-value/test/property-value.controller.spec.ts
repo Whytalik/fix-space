@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { Test, TestingModule } from "@nestjs/testing";
-import { PropertyValueResponseDto } from "@nucleus/domain";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+import type { PropertyValueResponseDto } from "@nucleus/domain";
 import { PropertyValueController } from "../property-value.controller";
 import { PropertyValueService } from "../property-value.service";
 
