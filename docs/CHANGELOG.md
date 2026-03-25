@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-03-17
+
+### Refactoring
+
+- refactor(record): extract RecordRepository [`2f6c847`](https://github.com/Whytalik/nucleus/commit/2f6c8473862079b40b743016790998cbe4dee918)
+- refactor(space): extract SpaceRepository and SectionRepository [`6ecd70a`](https://github.com/Whytalik/nucleus/commit/6ecd70a7741c9d3ff69b75f4d1e8a12759f43df7)
+- refactor(template-property-value): extract TemplatePropertyValueRepository [`87a6088`](https://github.com/Whytalik/nucleus/commit/87a6088e8b03c16a13b2f4e36ebaba8ab6d90004)
+- refactor(template): extract TemplateRepository [`8c4825e`](https://github.com/Whytalik/nucleus/commit/8c4825e3caddeebb624d801b0b4b594347bdd44c)
+- refactor(property-value): extract PropertyValueRepository [`22a44a7`](https://github.com/Whytalik/nucleus/commit/22a44a7b86f45648eb083fb41d3f99ea6caf0d7c)
+- refactor(property): extract PropertyRepository and inject into PropertyService [`b29a3c6`](https://github.com/Whytalik/nucleus/commit/b29a3c60ceaba9fdb95e2f00f8a2537a166d2c64)
+- refactor(database): extract DatabaseRepository and inject into DatabaseService [`ca1cbad`](https://github.com/Whytalik/nucleus/commit/ca1cbadcf466397d650e99df4a664a27d55596ad)
+- refactor(settings): extract SettingsRepository and SettingsCategory enum [`d6d828f`](https://github.com/Whytalik/nucleus/commit/d6d828f0e2be6c87058dfdc373eb8b72e5e89832)
+- refactor(user): extract UserRepository and inject into UserService [`c62172a`](https://github.com/Whytalik/nucleus/commit/c62172ac2d1708662aa6b32af0602373713bfec7)
+- refactor(common): add parse-json query param utility [`ae472c1`](https://github.com/Whytalik/nucleus/commit/ae472c115b0b5970a12ee1bf4d4a45227e5ca35a)
+
 ## 2026-03-15
 
 ### Features
