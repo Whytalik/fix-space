@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
-# Pre-push hook: regenerates docs/CHANGELOG.md and auto-commits if changed.
+# Pre-push hook: regenerates docs/CHANGELOG.md, commits if changed, then pushes.
+# When the changelog changes the hook does the push itself (with --no-verify to
+# avoid recursion) and exits 1 to cancel the original push invocation — which
+# is already complete. Git will print "error: failed to push" in that case;
+# this is cosmetic and harmless — the push has already succeeded.
 
 set -euo pipefail
 
+# Prevent recursive call from the inner push below
+[[ "${_CHANGELOG_HOOK_ACTIVE:-}" == "1" ]] && exit 0
+
 REPO_ROOT="$(git rev-parse --show-toplevel)"
+REMOTE="${1:-origin}"
 
 echo "[pre-push] Refreshing changelog..."
 bash "$REPO_ROOT/scripts/update-changelog.sh"
@@ -24,7 +32,11 @@ if $changed; then
   NOW="$(date -u '+%Y-%m-%dT%H:%M:%S')"
   GIT_AUTHOR_DATE="$NOW" GIT_COMMITTER_DATE="$NOW" \
     git -C "$REPO_ROOT" commit -m "chore: update changelog"
-  echo "[pre-push] Docs committed — will be included in the next push."
+  echo "[pre-push] Changelog committed. Pushing all commits including changelog..."
+  _CHANGELOG_HOOK_ACTIVE=1 git push --no-verify "$REMOTE" HEAD
+  echo "[pre-push] Push complete."
+  # Cancel the original push — it was already handled above.
+  exit 1
 fi
 
 exit 0

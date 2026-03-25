@@ -1,45 +1,39 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma } from "@nucleus/database";
 import { CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
+import { TemplateRepository } from "./template.repository";
 
 @Injectable()
 export class TemplateService {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly templateRepo: TemplateRepository,
+  ) {
     this.logger.setContext(TemplateService.name);
   }
 
   async create(databaseId: string, dto: CreateTemplateDto, userId: string): Promise<TemplateResponseDto> {
     this.logger.debug("Creating template", { databaseId });
 
-    const database = await prisma.database.findFirst({
-      where: {
-        id: databaseId,
-        space: { ownerId: userId },
-      },
-    });
+    const database = await this.templateRepo.findDatabaseByOwner(databaseId, userId);
 
     if (!database) {
       throw new NotFoundException(`Database with id ${databaseId} not found`);
     }
 
-    const properties = await prisma.property.findMany({
-      where: { databaseId },
-    });
+    const properties = await this.templateRepo.findPropertiesByDatabase(databaseId);
 
-    return await prisma.$transaction(async (tx) => {
-      const existingCount = await tx.template.count({ where: { databaseId } });
+    return await this.templateRepo.transaction(async (tx) => {
+      const existingCount = await this.templateRepo.count(databaseId, tx);
       const isDefault = dto.isDefault ?? existingCount === 0;
 
       if (isDefault) {
-        await tx.template.updateMany({
-          where: { databaseId, isDefault: true },
-          data: { isDefault: false },
-        });
+        await this.templateRepo.updateMany({ databaseId, isDefault: true }, { isDefault: false }, tx);
       }
 
-      const template = await tx.template.create({
-        data: {
+      const template = await this.templateRepo.create(
+        {
           databaseId,
           name: dto.name ?? "Untitled",
           description: dto.description,
@@ -47,7 +41,8 @@ export class TemplateService {
           isDefault,
           position: dto.position ?? 0,
         },
-      });
+        tx,
+      );
 
       for (const property of properties) {
         await tx.templatePropertyValue.create({
@@ -65,10 +60,7 @@ export class TemplateService {
         propertyCount: properties.length,
       });
 
-      const createdTemplate = await tx.template.findUniqueOrThrow({
-        where: { id: template.id },
-        include: { values: true },
-      });
+      const createdTemplate = await this.templateRepo.findUniqueOrThrowWithValues(template.id, tx);
 
       return new TemplateResponseDto(createdTemplate);
     });
@@ -77,14 +69,7 @@ export class TemplateService {
   async findAll(databaseId: string, userId: string): Promise<TemplateResponseDto[]> {
     this.logger.debug("Finding all templates", { databaseId });
 
-    const templates = await prisma.template.findMany({
-      where: {
-        databaseId,
-        database: { space: { ownerId: userId } },
-      },
-      include: { values: true },
-      orderBy: { position: "asc" },
-    });
+    const templates = await this.templateRepo.findAllByDatabase(databaseId, userId);
 
     return templates.map((t) => new TemplateResponseDto(t));
   }
@@ -92,66 +77,54 @@ export class TemplateService {
   async findOne(id: string, userId: string): Promise<TemplateResponseDto> {
     this.logger.debug("Finding template", { id });
 
-    const template = await prisma.template.findFirst({
-      where: {
-        id,
-        database: { space: { ownerId: userId } },
-      },
-      include: { values: true },
-    });
+    const template = await this.templateRepo.findByIdWithOwner(id, userId);
 
     if (!template) {
       throw new NotFoundException(`Template with id ${id} not found`);
     }
 
-    return new TemplateResponseDto(template);
+    const templateWithValues = await this.templateRepo.findUniqueOrThrowWithValues(id);
+
+    return new TemplateResponseDto(templateWithValues);
   }
 
   async update(id: string, dto: UpdateTemplateDto, userId: string): Promise<TemplateResponseDto> {
     this.logger.debug("Updating template", { id });
 
-    const existing = await prisma.template.findFirst({
-      where: {
-        id,
-        database: { space: { ownerId: userId } },
-      },
-    });
+    const existing = await this.templateRepo.findByIdWithOwner(id, userId);
 
     if (!existing) {
       throw new NotFoundException(`Template with id ${id} not found`);
     }
 
-    const template = await prisma.$transaction(async (tx) => {
+    const template = await this.templateRepo.transaction(async (tx) => {
       if (dto.isDefault) {
-        await tx.template.updateMany({
-          where: { databaseId: existing.databaseId, isDefault: true },
-          data: { isDefault: false },
-        });
+        await this.templateRepo.updateMany(
+          { databaseId: existing.databaseId, isDefault: true },
+          { isDefault: false },
+          tx,
+        );
       }
 
-      const updated = await tx.template.update({
-        where: { id },
-        data: {
+      const updated = await this.templateRepo.update(
+        id,
+        {
           name: dto.name,
           description: dto.description,
           icon: dto.icon,
           isDefault: dto.isDefault,
           position: dto.position,
         },
-        include: { values: true },
-      });
+        { values: true },
+        tx,
+      );
 
       if (dto.isDefault === false) {
-        const remaining = await tx.template.findFirst({
-          where: { databaseId: existing.databaseId, isDefault: true },
-        });
+        const remaining = await this.templateRepo.findDefaultInDatabase(existing.databaseId, tx);
         if (!remaining) {
-          const first = await tx.template.findFirst({
-            where: { databaseId: existing.databaseId },
-            orderBy: { position: "asc" },
-          });
+          const first = await this.templateRepo.findFirstInDatabase(existing.databaseId, tx);
           if (first) {
-            await tx.template.update({ where: { id: first.id }, data: { isDefault: true } });
+            await this.templateRepo.update(first.id, { isDefault: true }, undefined, tx);
           }
         }
       }
@@ -166,27 +139,19 @@ export class TemplateService {
   async remove(id: string, userId: string): Promise<TemplateResponseDto> {
     this.logger.debug("Removing template", { id });
 
-    const existing = await prisma.template.findFirst({
-      where: {
-        id,
-        database: { space: { ownerId: userId } },
-      },
-    });
+    const existing = await this.templateRepo.findByIdWithOwner(id, userId);
 
     if (!existing) {
       throw new NotFoundException(`Template with id ${id} not found`);
     }
 
-    const template = await prisma.$transaction(async (tx) => {
-      const deleted = await tx.template.delete({ where: { id }, include: { values: true } });
+    const template = await this.templateRepo.transaction(async (tx) => {
+      const deleted = await this.templateRepo.delete(id, { values: true }, tx);
 
       if (deleted.isDefault) {
-        const next = await tx.template.findFirst({
-          where: { databaseId: existing.databaseId },
-          orderBy: { position: "asc" },
-        });
+        const next = await this.templateRepo.findFirstInDatabase(existing.databaseId, tx);
         if (next) {
-          await tx.template.update({ where: { id: next.id }, data: { isDefault: true } });
+          await this.templateRepo.update(next.id, { isDefault: true }, undefined, tx);
         }
       }
 

@@ -1,22 +1,21 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
 import { AppLogger } from "../common/logger/app-logger.service";
+import { SettingsCategory } from "./settings.constants";
+import { SettingsRepository } from "./settings.repository";
 
 @Injectable()
 export class SettingsService {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly settingsRepo: SettingsRepository,
+  ) {
     this.logger.setContext(SettingsService.name);
   }
 
-  async getSettings<T extends object>(userId: string, category: string, defaultValues: T): Promise<T> {
+  async getSettings<T extends object>(userId: string, category: SettingsCategory, defaultValues: T): Promise<T> {
     this.logger.debug("Getting settings", { userId, category });
 
-    const dbSettings = await prisma.settings.findMany({
-      where: {
-        userId,
-        category,
-      },
-    });
+    const dbSettings = await this.settingsRepo.findMany(userId, category);
 
     const result = {
       ...defaultValues,
@@ -35,7 +34,7 @@ export class SettingsService {
 
   async updateSettings<T extends object>(
     userId: string,
-    category: string,
+    category: SettingsCategory,
     updateDto: Partial<T>,
     defaultValues: T,
   ): Promise<T> {
@@ -49,35 +48,13 @@ export class SettingsService {
       const isEqual = JSON.stringify(value) === JSON.stringify(defaultValue);
 
       if (isEqual) {
-        return prisma.settings.deleteMany({
-          where: {
-            userId,
-            key,
-            category,
-          },
-        });
+        return this.settingsRepo.deleteMany(userId, key, category);
       }
 
-      return prisma.settings.upsert({
-        where: {
-          userId_key: {
-            userId,
-            key,
-          },
-        },
-        update: {
-          value: value as Prisma.InputJsonValue,
-        },
-        create: {
-          userId,
-          key,
-          value: value as Prisma.InputJsonValue,
-          category,
-        },
-      });
+      return this.settingsRepo.upsert(userId, key, category, value);
     });
 
-    await Promise.all(operations);
+    await this.settingsRepo.runTransaction(operations);
 
     this.logger.log("Settings updated", { userId, category });
 

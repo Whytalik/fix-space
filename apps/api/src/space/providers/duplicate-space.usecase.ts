@@ -1,8 +1,9 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { Prisma } from "@nucleus/database";
 import { SpaceResponseDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { sectionsInclude } from "../space.constants";
+import { SpaceRepository } from "../space.repository";
 
 export interface DuplicateSpaceOptions {
   newName?: string;
@@ -10,38 +11,29 @@ export interface DuplicateSpaceOptions {
 
 @Injectable()
 export class DuplicateSpaceUseCase {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly spaceRepo: SpaceRepository,
+  ) {
     this.logger.setContext(DuplicateSpaceUseCase.name);
   }
 
   async execute(id: string, ownerId: string, options?: DuplicateSpaceOptions): Promise<SpaceResponseDto> {
     this.logger.debug("Duplicating space", { id, ownerId });
 
-    const sourceSpace = await prisma.space.findUnique({
-      where: { id },
-      include: {
-        sections: true,
-        databases: {
-          include: {
-            properties: true,
-            records: {
-              include: {
-                values: true,
-                content: true,
-              },
-            },
-          },
-        },
-      },
-    });
+    const sourceSpace = await this.spaceRepo.findByIdForDuplicate(id);
 
     if (!sourceSpace) {
       throw new NotFoundException(`Space with id ${id} not found`);
     }
 
+    if (sourceSpace.ownerId !== ownerId) {
+      throw new ForbiddenException(`Space with id ${id} does not belong to the requesting user`);
+    }
+
     const newName = options?.newName ?? this.generateUniqueName(sourceSpace.name);
 
-    return prisma.$transaction(async (tx) => {
+    return this.spaceRepo.transaction(async (tx) => {
       // Create new space
       const newSpace = await tx.space.create({
         data: {
