@@ -15,6 +15,10 @@
 - refactor(user): extract UserRepository and inject into UserService [`c62172a`](https://github.com/Whytalik/nucleus/commit/c62172ac2d1708662aa6b32af0602373713bfec7)
 - refactor(common): add parse-json query param utility [`ae472c1`](https://github.com/Whytalik/nucleus/commit/ae472c115b0b5970a12ee1bf4d4a45227e5ca35a)
 
+### Chores
+
+- chore(ci): fix pre-push hook recursion and force-push GitLab mirror [`e225eda`](https://github.com/Whytalik/nucleus/commit/e225eda1e12c3c4b115dd5971e24c56e62d7eef0)
+
 ## 2026-03-15
 
 ### Features
