@@ -49,6 +49,12 @@ CLAUDE.md
 *.swo
 *~
 
+# Uploaded files
+apps/api/public/avatars/*
+!apps/api/public/avatars/.gitkeep
+scripts/
+.playwright-mcp/
+
 # OS
 .DS_Store
 Thumbs.db
