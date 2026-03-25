@@ -17,6 +17,9 @@ export class PropertyValueResponseDto {
   @Expose()
   computed: boolean;
 
+  @Expose()
+  propertyName?: string;
+
   constructor(partial: Partial<PropertyValueResponseDto>) {
     Object.assign(this, partial);
   }
