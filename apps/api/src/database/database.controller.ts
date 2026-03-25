@@ -32,26 +32,27 @@ export class DatabaseController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.databaseService.findOne(id);
+  findOne(@Param("id") id: string, @CurrentUser("userId") userId: string) {
+    return this.databaseService.findOne(id, userId);
   }
 
   @Patch(":id")
   update(
     @Param("id") id: string,
+    @CurrentUser("userId") userId: string,
     @Body()
     updateDatabaseDto: UpdateDatabaseDto,
   ) {
-    return this.databaseService.update(id, updateDatabaseDto);
+    return this.databaseService.update(id, updateDatabaseDto, userId);
   }
 
   @Post(":id/duplicate")
-  duplicate(@Param("id") id: string) {
-    return this.duplicateDatabaseUseCase.execute(id);
+  duplicate(@Param("id") id: string, @CurrentUser("userId") userId: string) {
+    return this.duplicateDatabaseUseCase.execute(id, userId);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.databaseService.remove(id);
+  remove(@Param("id") id: string, @CurrentUser("userId") userId: string) {
+    return this.databaseService.remove(id, userId);
   }
 }
