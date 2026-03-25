@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { Reflector } from "@nestjs/core";
-import { Test, TestingModule } from "@nestjs/testing";
-import { SpaceResponseDto } from "@nucleus/domain";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+import type { SpaceResponseDto } from "@nucleus/domain";
 import { DuplicateSpaceUseCase } from "../providers/duplicate-space.usecase";
 import { InitializeUserSpaceUseCase } from "../providers/initialize-user-space.usecase";
 import { SpaceController } from "../space.controller";

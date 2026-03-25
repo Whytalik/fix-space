@@ -1,15 +1,17 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma } from "@nucleus/database";
 import { CreateDatabaseDto, DatabaseResponseDto, PropertyType, UpdateDatabaseDto } from "@nucleus/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 import { defaultInitializationConfig } from "../config/initialization.config";
 import { PropertyTypeRegistry } from "../property/types";
+import { DatabaseRepository } from "./database.repository";
 
 @Injectable()
 export class DatabaseService {
   constructor(
     private readonly logger: AppLogger,
     private readonly typeRegistry: PropertyTypeRegistry,
+    private readonly databaseRepo: DatabaseRepository,
   ) {
     this.logger.setContext(DatabaseService.name);
   }
@@ -20,23 +22,13 @@ export class DatabaseService {
       name: createDatabaseDto.name,
     });
 
-    const space = await prisma.space.findFirst({
-      where: {
-        id: spaceId,
-        ownerId: userId,
-      },
-    });
+    const space = await this.databaseRepo.findSpaceByOwner(spaceId, userId);
 
     if (!space) {
       throw new NotFoundException(`Space not found`);
     }
 
-    const isDatabaseNameTaken = await prisma.database.findFirst({
-      where: {
-        name: createDatabaseDto.name,
-        spaceId,
-      },
-    });
+    const isDatabaseNameTaken = await this.databaseRepo.findByNameInSpace(createDatabaseDto.name, spaceId);
 
     if (isDatabaseNameTaken) {
       this.logger.warn("Duplicate database name", {
@@ -46,9 +38,9 @@ export class DatabaseService {
       throw new ConflictException("Database name is already taken in this space.");
     }
 
-    return await prisma.$transaction(async (tx) => {
-      const database = await tx.database.create({
-        data: {
+    return await this.databaseRepo.transaction(async (tx) => {
+      const database = await this.databaseRepo.create(
+        {
           name: createDatabaseDto.name,
           title: createDatabaseDto.title,
           icon: createDatabaseDto.icon,
@@ -56,12 +48,11 @@ export class DatabaseService {
           sectionId: createDatabaseDto.sectionId,
           recordLimit: createDatabaseDto.recordLimit ?? 10,
         },
-      });
+        tx,
+      );
 
       const propertiesToCreate =
-        createDatabaseDto.properties !== undefined
-          ? createDatabaseDto.properties
-          : defaultInitializationConfig.defaultDatabaseProperties;
+        createDatabaseDto.properties ?? defaultInitializationConfig.defaultDatabaseProperties;
 
       for (const propertyDef of propertiesToCreate) {
         const handler = this.typeRegistry.getConfigHandler(propertyDef.type as PropertyType);
@@ -94,23 +85,14 @@ export class DatabaseService {
 
   async findAll(spaceId: string, userId: string): Promise<DatabaseResponseDto[]> {
     this.logger.debug("Finding all databases", { spaceId });
-    const databases = await prisma.database.findMany({
-      where: {
-        spaceId,
-        space: {
-          ownerId: userId,
-        },
-      },
-    });
+    const databases = await this.databaseRepo.findAllBySpace(spaceId, userId);
     return databases.map((database) => new DatabaseResponseDto(database));
   }
 
-  async findOne(id: string): Promise<DatabaseResponseDto> {
+  async findOne(id: string, userId: string): Promise<DatabaseResponseDto> {
     this.logger.debug("Finding database", { id });
 
-    const database = await prisma.database.findUnique({
-      where: { id },
-    });
+    const database = await this.databaseRepo.findByIdWithOwner(id, userId);
 
     if (!database) {
       throw new NotFoundException(`Database with id ${id} not found`);
@@ -119,47 +101,50 @@ export class DatabaseService {
     return new DatabaseResponseDto(database);
   }
 
-  async update(id: string, updateDatabaseDto: UpdateDatabaseDto): Promise<DatabaseResponseDto> {
+  async update(id: string, updateDatabaseDto: UpdateDatabaseDto, userId: string): Promise<DatabaseResponseDto> {
     this.logger.debug("Updating database", { id });
 
-    const existingDatabase = await prisma.database.findUnique({
-      where: { id },
-    });
+    const existingDatabase = await this.databaseRepo.findByIdWithOwner(id, userId);
 
     if (!existingDatabase) {
       throw new NotFoundException(`Database with id ${id} not found`);
     }
 
-    const database = await prisma.database.update({
-      where: { id },
-      data: {
-        name: updateDatabaseDto.name,
-        title: updateDatabaseDto.title,
-        icon: updateDatabaseDto.icon,
-        sectionId: updateDatabaseDto.sectionId,
-        ...(updateDatabaseDto.recordLimit !== undefined && { recordLimit: updateDatabaseDto.recordLimit ?? null }),
-        ...(updateDatabaseDto.useDefaultTemplate !== undefined && { useDefaultTemplate: updateDatabaseDto.useDefaultTemplate }),
-      },
+    if (updateDatabaseDto.sectionId) {
+      const section = await this.databaseRepo.findSectionInSpace(
+        updateDatabaseDto.sectionId,
+        existingDatabase.spaceId,
+      );
+      if (!section) {
+        throw new NotFoundException(`Section not found in this space`);
+      }
+    }
+
+    const database = await this.databaseRepo.update(id, {
+      name: updateDatabaseDto.name,
+      title: updateDatabaseDto.title,
+      icon: updateDatabaseDto.icon,
+      sectionId: updateDatabaseDto.sectionId,
+      ...(updateDatabaseDto.recordLimit !== undefined && { recordLimit: updateDatabaseDto.recordLimit ?? null }),
+      ...(updateDatabaseDto.useDefaultTemplate !== undefined && {
+        useDefaultTemplate: updateDatabaseDto.useDefaultTemplate,
+      }),
     });
 
     this.logger.log("Database updated", { id });
     return new DatabaseResponseDto(database);
   }
 
-  async remove(id: string): Promise<DatabaseResponseDto> {
+  async remove(id: string, userId: string): Promise<DatabaseResponseDto> {
     this.logger.debug("Removing database", { id });
 
-    const existingDatabase = await prisma.database.findUnique({
-      where: { id },
-    });
+    const existingDatabase = await this.databaseRepo.findByIdWithOwner(id, userId);
 
     if (!existingDatabase) {
       throw new NotFoundException(`Database with id ${id} not found`);
     }
 
-    const database = await prisma.database.delete({
-      where: { id },
-    });
+    const database = await this.databaseRepo.delete(id);
 
     this.logger.log("Database removed", { id });
     return new DatabaseResponseDto(database);

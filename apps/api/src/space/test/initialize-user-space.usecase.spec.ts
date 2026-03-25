@@ -1,15 +1,20 @@
-import 'reflect-metadata';
+import "reflect-metadata";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { PropertyType } from "@nucleus/domain";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { InitializationConfigService } from "../../config/initialization-config.service";
 import { DatabaseService } from "../../database/database.service";
+import { PropertyRepository } from "../../property/property.repository";
 import { PropertyService } from "../../property/property.service";
-import { TemplateService } from "../../template/template.service";
+import { PropertyValueRepository } from "../../property-value/property-value.repository";
+import { RecordRepository } from "../../record/record.repository";
 import { SectionService } from "../providers/section.service";
 import { InitializeUserSpaceUseCase } from "../providers/initialize-user-space.usecase";
+import { SpaceRepository } from "../space.repository";
 import { SpaceService } from "../space.service";
+import { TemplateService } from "../../template/template.service";
 
 describe("InitializeUserSpaceUseCase", () => {
   let useCase: InitializeUserSpaceUseCase;
@@ -41,6 +46,24 @@ describe("InitializeUserSpaceUseCase", () => {
 
   const mockTemplateService = {
     createDefaultTemplate: jest.fn<any>(),
+    create: jest.fn<any>(),
+  };
+
+  const mockPropertyRepo = {
+    findManyByDatabase: jest.fn<any>().mockResolvedValue([]),
+  };
+
+  const mockPropertyValueRepo = {
+    createMany: jest.fn<any>().mockResolvedValue({ count: 0 }),
+    updateByCompositeKey: jest.fn<any>().mockResolvedValue({}),
+  };
+
+  const mockRecordRepo = {
+    create: jest.fn<any>(),
+  };
+
+  const mockSpaceRepo = {
+    delete: jest.fn<any>().mockResolvedValue({}),
   };
 
   const mockConfig = {
@@ -84,38 +107,24 @@ describe("InitializeUserSpaceUseCase", () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockSpaceRepo.delete.mockResolvedValue({});
+    mockPropertyRepo.findManyByDatabase.mockResolvedValue([]);
+    mockPropertyValueRepo.createMany.mockResolvedValue({ count: 0 });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         InitializeUserSpaceUseCase,
-        {
-          provide: SpaceService,
-          useValue: mockSpaceService,
-        },
-        {
-          provide: SectionService,
-          useValue: mockSectionService,
-        },
-        {
-          provide: DatabaseService,
-          useValue: mockDatabaseService,
-        },
-        {
-          provide: PropertyService,
-          useValue: mockPropertyService,
-        },
-        {
-          provide: TemplateService,
-          useValue: mockTemplateService,
-        },
-        {
-          provide: InitializationConfigService,
-          useValue: mockConfigService,
-        },
-        {
-          provide: AppLogger,
-          useValue: mockLogger,
-        },
+        { provide: SpaceService, useValue: mockSpaceService },
+        { provide: SectionService, useValue: mockSectionService },
+        { provide: DatabaseService, useValue: mockDatabaseService },
+        { provide: PropertyService, useValue: mockPropertyService },
+        { provide: TemplateService, useValue: mockTemplateService },
+        { provide: InitializationConfigService, useValue: mockConfigService },
+        { provide: AppLogger, useValue: mockLogger },
+        { provide: PropertyRepository, useValue: mockPropertyRepo },
+        { provide: PropertyValueRepository, useValue: mockPropertyValueRepo },
+        { provide: RecordRepository, useValue: mockRecordRepo },
+        { provide: SpaceRepository, useValue: mockSpaceRepo },
       ],
     }).compile();
 
@@ -276,6 +285,16 @@ describe("InitializeUserSpaceUseCase", () => {
     await expect(useCase.initialize("user-123", "testuser")).rejects.toThrow(
       'RELATION property "BadRel" references unknown sourceDatabaseType "unknown-type"',
     );
+  });
+
+  it("should delete space and rethrow when seedContent fails", async () => {
+    const seedError = new Error("Section creation failed");
+    mockSpaceService.create.mockResolvedValue(mockSpaceResponse);
+    mockSectionService.create.mockRejectedValue(seedError);
+
+    await expect(useCase.initialize("user-123", "testuser")).rejects.toThrow("Section creation failed");
+
+    expect(mockSpaceRepo.delete).toHaveBeenCalledWith("space-123");
   });
 
   it("should log initialization summary", async () => {
