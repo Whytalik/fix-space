@@ -49,15 +49,23 @@ describe("SelectHandler", () => {
       expect(errors).toContain("each category must have an options array");
     });
 
-    it("should return error when option is not a string", () => {
+    it("should return error when option is not a valid SelectOption object", () => {
       const errors = handler.validateConfig({
         categories: [{ label: "Cat", options: [1, 2] }],
       });
       expect(errors).not.toBeNull();
-      expect(errors).toContain("each option must be a string");
+      expect(errors).toContain("each option must be an object with a string value");
     });
 
-    it("should return null for valid categories", () => {
+    it("should return null for valid categories with SelectOption objects", () => {
+      expect(
+        handler.validateConfig({
+          categories: [{ label: "Cat", options: [{ value: "a" }, { value: "b", color: "#6B7280" }] }],
+        }),
+      ).toBeNull();
+    });
+
+    it("should return null for valid categories with plain string options (backward compat)", () => {
       expect(
         handler.validateConfig({
           categories: [{ label: "Cat", options: ["a", "b"] }],
@@ -71,8 +79,12 @@ describe("SelectHandler", () => {
       expect(handler.validateValue(null, {})).toBeNull();
     });
 
-    it("should return null for a valid string in single-select mode", () => {
+    it("should return null for a valid string in single-select mode (backward compat)", () => {
       expect(handler.validateValue("option1", {})).toBeNull();
+    });
+
+    it("should return null for a valid { label, color? } object in single-select mode", () => {
+      expect(handler.validateValue({ label: "option1", color: "#6B7280" }, {})).toBeNull();
     });
 
     it("should return error for a number in single-select mode", () => {
@@ -80,8 +92,14 @@ describe("SelectHandler", () => {
       expect(errors).not.toBeNull();
     });
 
-    it("should return null for a valid array in multi-select mode", () => {
+    it("should return null for a valid array of strings in multi-select mode (backward compat)", () => {
       expect(handler.validateValue(["a", "b"], { isMultiSelect: true })).toBeNull();
+    });
+
+    it("should return null for a valid array of { label, color? } objects in multi-select mode", () => {
+      expect(
+        handler.validateValue([{ label: "a" }, { label: "b", color: "#6B7280" }], { isMultiSelect: true }),
+      ).toBeNull();
     });
 
     it("should return error for non-array in multi-select mode", () => {
@@ -95,7 +113,24 @@ describe("SelectHandler", () => {
       expect(errors).not.toBeNull();
     });
 
-    it("should return error when single value is not in defined options", () => {
+    it("should return error when single value is not in defined options (SelectOption config)", () => {
+      const config = {
+        isMultiSelect: false,
+        categories: [{ label: "Cat", options: [{ value: "a" }, { value: "b" }] }],
+      };
+      const errors = handler.validateValue({ label: "c" }, config);
+      expect(errors).not.toBeNull();
+    });
+
+    it("should return null when single value is in defined options (SelectOption config)", () => {
+      const config = {
+        isMultiSelect: false,
+        categories: [{ label: "Cat", options: [{ value: "a" }, { value: "b" }] }],
+      };
+      expect(handler.validateValue({ label: "a" }, config)).toBeNull();
+    });
+
+    it("should return error when single value is not in defined options (plain string backward compat)", () => {
       const config = {
         isMultiSelect: false,
         categories: [{ label: "Cat", options: ["a", "b"] }],
@@ -104,7 +139,7 @@ describe("SelectHandler", () => {
       expect(errors).not.toBeNull();
     });
 
-    it("should return null when single value is in defined options", () => {
+    it("should return null when single value is in defined options (plain string backward compat)", () => {
       const config = {
         isMultiSelect: false,
         categories: [{ label: "Cat", options: ["a", "b"] }],
