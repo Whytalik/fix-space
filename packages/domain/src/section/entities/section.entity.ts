@@ -1,5 +1,5 @@
-import { Database } from "../../database/entities/database.entity";
-import { Space } from "../../space/entities/space.entity";
+import type { Database } from "../../database/entities/database.entity";
+import type { Space } from "../../space/entities/space.entity";
 
 export class Section {
   id: string;

@@ -5,6 +5,16 @@ import { tap } from "rxjs/operators";
 import { getRequestContext } from "../context/request-context";
 import { AppLogger } from "../logger/app-logger.service";
 
+const SENSITIVE_KEYS = new Set(["password", "passwordHash", "token", "secret", "refreshToken", "accessToken"]);
+
+function sanitizeBody(body: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(body)) {
+    result[key] = SENSITIVE_KEYS.has(key) ? "[REDACTED]" : value;
+  }
+  return result;
+}
+
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   private readonly logger: AppLogger;
@@ -26,8 +36,9 @@ export class LoggingInterceptor implements NestInterceptor {
 
     this.logger.log(`>>> ${method} ${url}`);
 
-    if (Object.keys((body as Record<string, unknown>) || {}).length > 0) {
-      this.logger.debug(`Body: ${JSON.stringify(body)}`);
+    const bodyObj = (body as Record<string, unknown>) || {};
+    if (Object.keys(bodyObj).length > 0) {
+      this.logger.debug(`Body: ${JSON.stringify(sanitizeBody(bodyObj))}`);
     }
 
     const now = Date.now();
