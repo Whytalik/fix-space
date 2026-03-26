@@ -9,41 +9,57 @@
     "NODE_ENV",
     "DATABASE_URL",
     "JWT_SECRET",
+    "JWT_REFRESH_SECRET",
     "PORT",
     "CORS_ORIGIN"
   ],
+
   "tasks": {
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },
     "build": {
-      "dependsOn": ["^build", "format"],
+      "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": ["NODE_ENV"]
     },
-    "db:migrate:dev": {
-      "cache": false,
-      "persistent": true,
-      "env": ["DATABASE_URL"]
+    "lint": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".eslintrc*", "eslint.config.*"],
+      "outputs": []
     },
-    "db:migrate:deploy": {
-      "cache": false
-    },
-    "db:push": {
-      "cache": false
-    },
-    "db:generate": {
-      "dependsOn": ["^db:generate"],
-      "cache": false
-    },
-    "lint": {},
     "format": {
       "inputs": ["$TURBO_DEFAULT$", ".prettierrc*"],
       "cache": false,
       "outputs": []
     },
-    "test": {},
-    "test:e2e": {}
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "outputs": []
+    },
+    "db:generate": {
+      "cache": false,
+      "outputs": []
+    },
+    "db:migrate:dev": {
+      "cache": false,
+      "outputs": []
+    },
+    "db:migrate:deploy": {
+      "cache": false,
+      "outputs": []
+    },
+    "db:push": {
+      "cache": false,
+      "outputs": []
+    }
   }
 }
