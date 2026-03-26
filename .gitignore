@@ -50,6 +50,10 @@ CLAUDE.md
 *.swp
 *.swo
 *~
+
+# Uploaded files
+apps/api/public/avatars/*
+!apps/api/public/avatars/.gitkeep
 scripts/
 .playwright-mcp/
 
