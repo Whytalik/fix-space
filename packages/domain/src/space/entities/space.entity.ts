@@ -1,6 +1,6 @@
-import { Database } from "../../database/entities/database.entity";
-import { Section } from "../../section/entities/section.entity";
-import { User } from "../../user/entities/user.entity";
+import type { Database } from "../../database/entities/database.entity";
+import type { Section } from "../../section/entities/section.entity";
+import type { User } from "../../user/entities/user.entity";
 
 export class Space {
   id: string;

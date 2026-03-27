@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 
 import { JwtStrategy } from "../jwt.strategy";
 
@@ -28,6 +30,20 @@ describe("JwtStrategy", () => {
       const result = await strategy.validate(payload);
 
       expect(result).toEqual({ userId: "user-123", username: "alice" });
+    });
+
+    it("should throw UnauthorizedException when payload is missing sub", async () => {
+      const payload = { username: "alice" } as { sub: string; username: string };
+
+      await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
+      await expect(strategy.validate(payload)).rejects.toThrow("Invalid token payload");
+    });
+
+    it("should throw UnauthorizedException when payload is missing username", async () => {
+      const payload = { sub: "user-123" } as { sub: string; username: string };
+
+      await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
+      await expect(strategy.validate(payload)).rejects.toThrow("Invalid token payload");
     });
   });
 });

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { prisma } from "@nucleus/database";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import * as passwordUtils from "../../common/utils/password";

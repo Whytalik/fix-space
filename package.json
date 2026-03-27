@@ -2,12 +2,10 @@
   "name": "my-turborepo",
   "version": "0.0.0",
   "private": true,
-  "description": "",
-  "author": "",
+  "author": "Vitalii Tushak",
   "license": "UNLICENSED",
   "prisma": {
-    "schema": "packages/database/prisma/schema.prisma",
-    "seed": "tsx packages/database/src/seed.ts"
+    "schema": "packages/database/prisma/schema.prisma"
   },
   "scripts": {
     "dev": "turbo run dev",
@@ -21,16 +19,19 @@
     "db:migrate:dev": "turbo run db:migrate:dev",
     "db:migrate:deploy": "cross-env NODE_ENV=production turbo run db:migrate:deploy",
     "db:push": "turbo run db:push",
-    "db:seed": "turbo run db:seed",
     "db:generate": "turbo run db:generate",
     "db:reset": "docker-compose down -v && docker-compose up -d && pnpm --filter @nucleus/database db:migrate:dev",
     "setup:hooks": "git config core.hooksPath .githooks && chmod +x .githooks/pre-push scripts/update-changelog.sh && echo \"Git hooks configured.\""
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@nucleus/eslint-config": "workspace:*",
     "@nucleus/typescript-config": "workspace:*",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
     "cross-env": "^10.1.0",
     "dotenv-cli": "^11.0.0",
+    "eslint": "^9.39.2",
     "prettier": "^3.2.5",
     "prisma": "latest",
     "tsx": "4.19.1",
@@ -39,6 +40,11 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "latest"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/pg": "8.11.11"
+    }
   },
   "packageManager": "pnpm@9.15.1",
   "engines": {
