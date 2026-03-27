@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { ExecutionContext, ForbiddenException } from "@nestjs/common";
+import type { ExecutionContext} from "@nestjs/common";
+import { ForbiddenException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 
 import { DevOnlyGuard } from "../guards/dev-only.guard";
 

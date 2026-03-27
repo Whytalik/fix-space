@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { ArgumentsHost, HttpException, HttpStatus } from "@nestjs/common";
+import type { ArgumentsHost} from "@nestjs/common";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
 jest.mock("../../context/request-context", () => ({
   getRequestContext: jest.fn<any>(),
 }));
 
 import { getRequestContext } from "../../context/request-context";
-import { AppLogger } from "../../logger/app-logger.service";
+import type { AppLogger } from "../../logger/app-logger.service";
 import { GlobalExceptionFilter } from "../global-exception.filter";
 
 const mockLogger = {
