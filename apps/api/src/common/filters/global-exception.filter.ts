@@ -5,12 +5,14 @@ import { getRequestContext } from "../context/request-context";
 import { AppLogger } from "../logger/app-logger.service";
 
 const PRISMA_ERROR_MAP: Record<string, { status: number; message: string }> = {
+  P2000: { status: HttpStatus.BAD_REQUEST, message: "Input value too long for field" },
   P2002: { status: HttpStatus.CONFLICT, message: "Resource already exists" },
-  P2003: {
-    status: HttpStatus.BAD_REQUEST,
-    message: "Referenced resource not found",
-  },
+  P2003: { status: HttpStatus.BAD_REQUEST, message: "Referenced resource not found" },
+  P2005: { status: HttpStatus.BAD_REQUEST, message: "Invalid value for field" },
+  P2006: { status: HttpStatus.BAD_REQUEST, message: "Invalid value provided" },
+  P2009: { status: HttpStatus.BAD_REQUEST, message: "Query validation failed" },
   P2025: { status: HttpStatus.NOT_FOUND, message: "Resource not found" },
+  P2026: { status: HttpStatus.BAD_REQUEST, message: "Database query limit exceeded" },
 };
 
 @Catch()

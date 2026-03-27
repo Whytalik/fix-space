@@ -1,4 +1,4 @@
-import { TemplatePropertyValue } from "../../template-property-value/entities/template-property-value.entity";
+import type { TemplatePropertyValue } from "../../template-property-value/entities/template-property-value.entity";
 
 export class Template {
   id: string;
