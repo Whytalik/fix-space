@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-03-27
+
+### Features
+
+- feat(record): add content and search API endpoints with use-cases and repository [`566c341`](https://github.com/Whytalik/fix-space/commit/566c3414a1249f1c428150ab4c1959a35f03d26e)
+- feat: add RecordContent schema, content-node DTOs and domain build config [`3d2688c`](https://github.com/Whytalik/fix-space/commit/3d2688c7cee35026897b716cf6c35bcbdc6ce51e)
+
+### Tests
+
+- test(record): add specs for RecordController and GetRecordContentUseCase [`be60ef9`](https://github.com/Whytalik/fix-space/commit/be60ef97046e9a887b99aef882b59e0792fbf5b4)
+
 ## 2026-03-26
 
 ### Features
