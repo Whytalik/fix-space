@@ -1,6 +1,12 @@
+export interface SelectOption {
+  value: string;
+  color?: string;
+  icon?: string;
+}
+
 export interface SelectCategory {
   label: string;
-  options: string[];
+  options: SelectOption[];
 }
 
 export interface SelectProperty {
