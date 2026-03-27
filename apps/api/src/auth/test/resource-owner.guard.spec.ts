@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { ExecutionContext, ForbiddenException, NotFoundException } from "@nestjs/common";
+import type { ExecutionContext} from "@nestjs/common";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 
 jest.mock("@nucleus/database", () => ({
   prisma: {
@@ -119,6 +121,15 @@ describe("ResourceOwnerGuard", () => {
       const result = await guard.canActivate(ctx);
 
       expect(result).toBe(true);
+    });
+
+    it("should throw Error when ownerField does not exist on entity", async () => {
+      mockReflector.get.mockReturnValue({ model: "space", param: "id", ownerField: "nonExistentField" });
+      (prisma.space.findUnique as jest.Mock<any>).mockResolvedValue({ ownerId: "user-1" });
+      const ctx = makeContext({ user: { userId: "user-1" }, params: { id: "space-1" } });
+
+      await expect(guard.canActivate(ctx)).rejects.toThrow(Error);
+      await expect(guard.canActivate(ctx)).rejects.toThrow(/does not exist on/);
     });
   });
 });
