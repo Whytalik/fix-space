@@ -32,5 +32,3 @@ export class RecordResponseDto {
     Object.assign(this, partial);
   }
 }
-
-

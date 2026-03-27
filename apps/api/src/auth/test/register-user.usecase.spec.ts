@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { ConflictException } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 
 jest.mock("@nucleus/database", () => ({
   prisma: {
