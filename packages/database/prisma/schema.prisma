@@ -231,10 +231,10 @@ model PropertyValue {
 model RecordContent {
   id           String   @id @default(uuid())
   recordId     String   @unique
-  lastEditedAt DateTime @default(now())
+  content      Json     @default("{}")
+  lastEditedAt DateTime @default(now()) @updatedAt
 
   record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
-  //gridItems GridItem[]
 }
 
 model Template {
@@ -273,61 +273,6 @@ model TemplatePropertyValue {
 }
 
 /**
- * model Component {
- * id        String   @id @default(uuid())
- * type      String
- * config    Json
- * createdAt DateTime @default(now())
- * updatedAt DateTime @updatedAt
- * gridPlacements    GridItem[]
- * blockCompositions BlockComponent[]
- * @@index([type])
- * }
- * model Block {
- * id          String   @id @default(uuid())
- * name        String
- * description String?
- * icon        String?
- * color       String?
- * isReusable  Boolean  @default(true)
- * createdAt   DateTime @default(now())
- * updatedAt   DateTime @updatedAt
- * config      Json?
- * components     BlockComponent[]
- * gridPlacements GridItem[]
- * @@index([isReusable])
- * }
- * model BlockComponent {
- * id          String @id @default(uuid())
- * blockId     String
- * componentId String
- * position    Int    @default(0)
- * config      Json?
- * block     Block     @relation(fields: [blockId], references: [id], onDelete: Cascade)
- * component Component @relation(fields: [componentId], references: [id], onDelete: Cascade)
- * @@unique([blockId, componentId, position])
- * @@index([blockId])
- * @@index([componentId])
- * }
- * model GridItem {
- * id              String   @id @default(uuid())
- * recordContentId String
- * componentId     String?
- * blockId         String?
- * x               Int
- * y               Int
- * width           Int
- * height          Int
- * config          Json?
- * createdAt       DateTime @default(now())
- * updatedAt       DateTime @updatedAt
- * recordContent RecordContent @relation(fields: [recordContentId], references: [id], onDelete: Cascade)
- * component     Component?    @relation(fields: [componentId], references: [id], onDelete: Cascade)
- * block         Block?        @relation(fields: [blockId], references: [id], onDelete: Cascade)
- * @@index([recordContentId])
- * @@index([componentId])
- * @@index([blockId])
- * }
  * model ImportMapping {
  * id           String   @id @default(uuid())
  * databaseId   String

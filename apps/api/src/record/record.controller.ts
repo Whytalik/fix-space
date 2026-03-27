@@ -1,16 +1,20 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, Query } from "@nestjs/common";
 import {
   CreateRecordDto,
   FilterLogic,
+  RecordContentResponseDto,
   RecordFilterDto,
   RecordSortDto,
   SpaceSearchResultDto,
+  UpdateRecordContentDto,
   UpdateRecordDto,
 } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { parseJson } from "../common/utils/parse-json";
 import { FindRecordsUseCase } from "./providers/find-records.usecase";
+import { GetRecordContentUseCase } from "./providers/get-record-content.usecase";
 import { SearchRecordsUseCase } from "./providers/search-records.usecase";
+import { UpdateRecordContentUseCase } from "./providers/update-record-content.usecase";
 import { RecordService } from "./record.service";
 
 @Controller("records")
@@ -19,6 +23,8 @@ export class RecordController {
     private readonly recordService: RecordService,
     private readonly findRecordsUseCase: FindRecordsUseCase,
     private readonly searchRecordsUseCase: SearchRecordsUseCase,
+    private readonly getRecordContentUseCase: GetRecordContentUseCase,
+    private readonly updateRecordContentUseCase: UpdateRecordContentUseCase,
   ) {}
 
   @Post()
@@ -93,6 +99,23 @@ export class RecordController {
     updateRecordDto: UpdateRecordDto,
   ) {
     return this.recordService.update(id, updateRecordDto, userId);
+  }
+
+  @Get(":id/content")
+  getContent(
+    @Param("id") id: string,
+    @CurrentUser("userId") userId: string,
+  ): Promise<RecordContentResponseDto> {
+    return this.getRecordContentUseCase.execute(id, userId);
+  }
+
+  @Put(":id/content")
+  updateContent(
+    @Param("id") id: string,
+    @CurrentUser("userId") userId: string,
+    @Body() updateRecordContentDto: UpdateRecordContentDto,
+  ): Promise<RecordContentResponseDto> {
+    return this.updateRecordContentUseCase.execute(id, userId, updateRecordContentDto.content);
   }
 
   @Delete(":id")
