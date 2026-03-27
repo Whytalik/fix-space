@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { RecordContentResponseDto } from "@nucleus/domain";
+import { BlockType, RecordContentResponseDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { RecordRepository } from "../record.repository";
 
@@ -25,7 +25,7 @@ export class GetRecordContentUseCase {
 
     if (!content) {
       this.logger.debug("No content found, initialising empty content", { recordId });
-      content = await this.recordRepo.upsertContent(recordId, {});
+      content = await this.recordRepo.upsertContent(recordId, { id: crypto.randomUUID(), type: BlockType.ROW, columns: 1, children: [] });
     }
 
     this.logger.debug("Record content retrieved", { recordId });

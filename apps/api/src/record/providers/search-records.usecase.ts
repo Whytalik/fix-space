@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { SpaceSearchResultDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
-import { RecordRepository } from "../record.repository";
 import { SpaceRepository } from "../../space/space.repository";
+import { RecordRepository } from "../record.repository";
 import { matchesSearch } from "../utils/record-search.util";
 
 @Injectable()
@@ -20,7 +20,7 @@ export class SearchRecordsUseCase {
 
     const owner = await this.spaceRepo.findOwner(spaceId);
 
-    if (!owner || owner.ownerId !== userId) {
+    if (owner?.ownerId !== userId) {
       throw new NotFoundException(`Space with id ${spaceId} not found`);
     }
 
