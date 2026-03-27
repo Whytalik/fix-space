@@ -1,14 +1,5 @@
 # Changelog
 
-
-## 2026-03-26
-
-### Chores
-
-- chore(deps): update turbo pipeline and package versions [`08ce8c2`](https://github.com/Whytalik/fix-space/commit/08ce8c286113d49a88ce72c38cc7d1ac48acc527)
-- chore(eslint): migrate to flat config v9 [`cff9fb1`](https://github.com/Whytalik/fix-space/commit/cff9fb1a38be9399c5262dab65db241bbec6b19e)
-
-
 ## 2026-03-17
 
 ### Refactoring

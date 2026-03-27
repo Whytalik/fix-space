@@ -23,8 +23,8 @@ export class DateHandler implements PropertyConfigHandler, PropertyValueHandler 
     const errors: string[] = [];
 
     if (config.defaultValue !== undefined && config.defaultValue !== null) {
-      const d = new Date(config.defaultValue as string);
-      if (isNaN(d.getTime())) {
+      const date = new Date(config.defaultValue as string);
+      if (isNaN(date.getTime())) {
         errors.push("defaultValue must be a valid date string or null");
       }
     }
@@ -51,8 +51,8 @@ export class DateHandler implements PropertyConfigHandler, PropertyValueHandler 
       return ["Date value must be an ISO date string or null"];
     }
 
-    const d = new Date(value);
-    if (isNaN(d.getTime())) {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) {
       return ["Date value must be a valid date"];
     }
 
@@ -62,10 +62,10 @@ export class DateHandler implements PropertyConfigHandler, PropertyValueHandler 
   formatValue(value: unknown): unknown {
     if (value === null || value === undefined) return null;
 
-    const d = new Date(value as string);
-    if (isNaN(d.getTime())) return null;
+    const date = new Date(value as string);
+    if (isNaN(date.getTime())) return null;
 
-    return d.toISOString();
+    return date.toISOString();
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {

@@ -40,7 +40,7 @@ export class RelationHandler implements PropertyConfigHandler, PropertyValueHand
         return ["Relation value must be an array of ID strings or null"];
       }
 
-      if ((value as unknown[]).some((v) => typeof v !== "string")) {
+      if ((value as unknown[]).some((item) => typeof item !== "string")) {
         return ["All relation IDs must be strings"];
       }
     } else {

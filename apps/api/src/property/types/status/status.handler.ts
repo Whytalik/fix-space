@@ -39,33 +39,37 @@ export class StatusHandler implements PropertyConfigHandler, PropertyValueHandle
             return;
           }
 
-          const c = cat as Record<string, unknown>;
+          const category = cat as Record<string, unknown>;
 
-          if (!STATUS_CATEGORY_VALUES.includes(c.category as StatusCategory)) {
+          if (!STATUS_CATEGORY_VALUES.includes(category.category as StatusCategory)) {
             errors.push(`categories[${i}].category must be one of: ${STATUS_CATEGORY_VALUES.join(", ")}`);
           }
 
-          if (typeof c.defaultOption !== "string") {
+          if (typeof category.defaultOption !== "string") {
             errors.push(`categories[${i}].defaultOption must be a string`);
           }
 
-          if (!Array.isArray(c.options)) {
+          if (!Array.isArray(category.options)) {
             errors.push(`categories[${i}].options must be an array`);
           } else {
-            (c.options as unknown[]).forEach((opt, j) => {
+            (category.options as unknown[]).forEach((opt, j) => {
               if (typeof opt !== "object" || opt === null) {
                 errors.push(`categories[${i}].options[${j}] must be an object`);
                 return;
               }
 
-              const o = opt as Record<string, unknown>;
+              const option = opt as Record<string, unknown>;
 
-              if (typeof o.name !== "string") {
+              if (typeof option.name !== "string") {
                 errors.push(`categories[${i}].options[${j}].name must be a string`);
               }
 
-              if (!STATUS_OPTION_COLOR_VALUES.includes(o.color as StatusOptionColor)) {
+              if (!STATUS_OPTION_COLOR_VALUES.includes(option.color as StatusOptionColor)) {
                 errors.push(`categories[${i}].options[${j}].color must be a valid status color`);
+              }
+
+              if (option.icon !== undefined && typeof option.icon !== "string") {
+                errors.push(`categories[${i}].options[${j}].icon must be a string`);
               }
             });
           }
@@ -85,7 +89,7 @@ export class StatusHandler implements PropertyConfigHandler, PropertyValueHandle
 
     const { categories } = this.parseConfig(config);
     if (categories) {
-      const allOptions = categories.flatMap((c) => c.options.map((o) => o.name));
+      const allOptions = categories.flatMap((category) => category.options.map((option) => option.name));
       if (!allOptions.includes(value)) {
         return [`Status value must be one of: ${allOptions.join(", ")}`];
       }
