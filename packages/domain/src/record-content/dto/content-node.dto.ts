@@ -13,6 +13,7 @@ export interface LeafBlock extends ContentNode {
 export interface ContainerBlock extends ContentNode {
   type: BlockType.ROW | BlockType.COLUMN | BlockType.BLOCK;
   columns?: number;
+  width?: number;
   blockType?: string;
   children: ContentNode[];
 }
