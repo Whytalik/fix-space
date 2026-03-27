@@ -49,6 +49,10 @@ export class ResourceOwnerGuard implements CanActivate {
       throw new NotFoundException(`${meta.model} not found`);
     }
 
+    if (!(ownerField in entity)) {
+      throw new Error(`Field "${ownerField}" does not exist on ${meta.model} — check @RequireOwnership config`);
+    }
+
     if (entity[ownerField] !== user.userId) {
       throw new ForbiddenException("You do not own this resource");
     }
