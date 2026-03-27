@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_SELECT_PROPERTY, SelectCategory, SelectProperty, PropertyType } from "@nucleus/domain";
+import { DEFAULT_SELECT_PROPERTY, PropertyType, SelectCategory, SelectOption, SelectProperty } from "@nucleus/domain";
 import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
@@ -25,15 +25,27 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
       if (!Array.isArray(config.categories)) {
         errors.push("categories must be an array");
       } else {
-        for (const cat of config.categories as unknown[]) {
-          const c = cat as SelectCategory;
-          if (typeof c.label !== "string") {
+        for (const rawCategory of config.categories as unknown[]) {
+          const category = rawCategory as SelectCategory;
+          if (typeof category.label !== "string") {
             errors.push("each category must have a string label");
           }
-          if (!Array.isArray(c.options)) {
+          if (!Array.isArray(category.options)) {
             errors.push("each category must have an options array");
-          } else if ((c.options as unknown[]).some((o) => typeof o !== "string")) {
-            errors.push("each option must be a string");
+          } else {
+            for (const rawOption of category.options as unknown[]) {
+              if (typeof rawOption === "string") continue; // backward compat
+              if (typeof rawOption !== "object" || rawOption === null || typeof (rawOption as SelectOption).value !== "string") {
+                errors.push("each option must be an object with a string value");
+              } else {
+                if ((rawOption as SelectOption).color !== undefined && typeof (rawOption as SelectOption).color !== "string") {
+                  errors.push("option color must be a string");
+                }
+                if ((rawOption as SelectOption).icon !== undefined && typeof (rawOption as SelectOption).icon !== "string") {
+                  errors.push("option icon must be a string");
+                }
+              }
+            }
           }
         }
       }
@@ -47,31 +59,45 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
 
     const { categories, isMultiSelect: isMulti } = this.parseConfig(config);
 
-    const allOptions = categories ? categories.flatMap((c) => c.options) : [];
+    const allOptions = categories
+      ? categories.flatMap((category) => category.options.map((option) => (typeof option === "string" ? option : option.value)))
+      : [];
+
+    function extractLabel(v: unknown): string | null {
+      if (typeof v === "string") return v;
+      if (typeof v === "object" && v !== null && typeof (v as Record<string, unknown>).label === "string") {
+        return (v as Record<string, unknown>).label as string;
+      }
+      return null;
+    }
 
     if (isMulti) {
       if (!Array.isArray(value)) {
-        return ["Multi-select value must be an array of strings or null"];
+        return ["Multi-select value must be an array or null"];
       }
 
-      const arr = value as unknown[];
-
-      if (arr.some((v) => typeof v !== "string")) {
-        return ["Multi-select values must be strings"];
+      const labels: string[] = [];
+      for (const val of value as unknown[]) {
+        const label = extractLabel(val);
+        if (label === null) {
+          return ["Multi-select values must be strings or { label, color? } objects"];
+        }
+        labels.push(label);
       }
 
       if (allOptions.length > 0) {
-        const invalid = (arr as string[]).filter((v) => !allOptions.includes(v));
+        const invalid = labels.filter((entry) => !allOptions.includes(entry));
         if (invalid.length > 0) {
           return [`Invalid options: ${invalid.join(", ")}. Must be one of: ${allOptions.join(", ")}`];
         }
       }
     } else {
-      if (typeof value !== "string") {
-        return ["Select value must be a string or null"];
+      const label = extractLabel(value);
+      if (label === null) {
+        return ["Select value must be a string, { label, color? } object, or null"];
       }
 
-      if (allOptions.length > 0 && !allOptions.includes(value)) {
+      if (allOptions.length > 0 && !allOptions.includes(label)) {
         return [`Value must be one of the defined options: ${allOptions.join(", ")}`];
       }
     }
