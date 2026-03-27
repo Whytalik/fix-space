@@ -1,23 +1,60 @@
 # Changelog
 
+## 2026-03-26
+
+### Features
+
+- feat(user): add StorageService for avatar file uploads [`779fc8a`](https://github.com/Whytalik/fix-space/commit/779fc8a679b5ed8205812039bac1d6efdfb2cc69)
+- feat(record): add FindRecords and SearchRecords use-cases [`534e92c`](https://github.com/Whytalik/fix-space/commit/534e92c7f12bccbebca0ab564ffff87c92a406c2)
+- feat(record): add in-memory filter, sort and search utilities [`f36f0c0`](https://github.com/Whytalik/fix-space/commit/f36f0c069a5d5004fd430fa56e3ed2beb6c0618a)
+- feat(domain): export record filter, sort and search DTOs [`6aba1c4`](https://github.com/Whytalik/fix-space/commit/6aba1c480f5a2a8bccdf8032c9d09187b8725637)
+- feat(domain): add SelectOption type and expose propertyName in PropertyValueResponseDto [`0ba01ef`](https://github.com/Whytalik/fix-space/commit/0ba01efc58d996003ad2de94b2b63ded4480e6b9)
+
+### Refactoring
+
+- refactor(auth): extract token helpers and harden resource-owner guard [`e9e4d14`](https://github.com/Whytalik/fix-space/commit/e9e4d140cdafa6734914dfa97273465e6533e204)
+- refactor(property): extend SelectHandler to support SelectOption objects [`05e3352`](https://github.com/Whytalik/fix-space/commit/05e33524cab7755733e9d1b25911a6dc20e703d3)
+- refactor(record): extract RecordRepository [`b3fa5a9`](https://github.com/Whytalik/fix-space/commit/b3fa5a97025197399c080b3c091c50c61abd30ee)
+- refactor(space): extract SpaceRepository and SectionRepository [`d3f7211`](https://github.com/Whytalik/fix-space/commit/d3f72115e35417168f98cc8a36eb605e895f339d)
+
+### Chores
+
+- chore: enforce import type and normalize whitespace across API and domain [`7171e12`](https://github.com/Whytalik/fix-space/commit/7171e1227d35df5d6aef41f413e2855e176c1e18)
+- chore(deps): update turbo pipeline and package versions [`08ce8c2`](https://github.com/Whytalik/fix-space/commit/08ce8c286113d49a88ce72c38cc7d1ac48acc527)
+- chore(eslint): migrate to flat config v9 [`cff9fb1`](https://github.com/Whytalik/fix-space/commit/cff9fb1a38be9399c5262dab65db241bbec6b19e)
+- chore(ci): fix pre-push hook recursion and force-push GitLab mirror [`cf266b4`](https://github.com/Whytalik/fix-space/commit/cf266b41d5b80133f631a2e46eea7b9ca24ca888)
+
+## 2026-03-25
+
+### Refactoring
+
+- refactor(template-property-value): extract TemplatePropertyValueRepository [`7a0772d`](https://github.com/Whytalik/fix-space/commit/7a0772d7a6d09d7ffb2e39039a9395796a6c1148)
+- refactor(template): extract TemplateRepository [`14cc735`](https://github.com/Whytalik/fix-space/commit/14cc73569aa674007efe10cb92176a07cfbe62ca)
+- refactor(property-value): extract PropertyValueRepository [`cf6b011`](https://github.com/Whytalik/fix-space/commit/cf6b011c2946f3af5bc15d995ba988a30f0ca546)
+- refactor(property): extract PropertyRepository and inject into PropertyService [`b9cdb9b`](https://github.com/Whytalik/fix-space/commit/b9cdb9ba32d68a605efee423f3c7ea12339ad9d7)
+- refactor(database): extract DatabaseRepository and inject into DatabaseService [`6f60dc6`](https://github.com/Whytalik/fix-space/commit/6f60dc6dd7c403073735c68964d71f5084384dda)
+- refactor(settings): extract SettingsRepository and SettingsCategory enum [`f294fb4`](https://github.com/Whytalik/fix-space/commit/f294fb42225af6f5d735cb4b3f65b0cadbdb70b9)
+- refactor(user): extract UserRepository and inject into UserService [`e7174e8`](https://github.com/Whytalik/fix-space/commit/e7174e8fd43cf71ce7706f3936cfe07f8cf92d67)
+- refactor(common): add parse-json query param utility [`9a06870`](https://github.com/Whytalik/fix-space/commit/9a068708a84b76092c5955c18cfce79143c93b71)
+
 ## 2026-03-17
 
 ### Refactoring
 
-- refactor(record): extract RecordRepository [`2f6c847`](https://github.com/Whytalik/nucleus/commit/2f6c8473862079b40b743016790998cbe4dee918)
-- refactor(space): extract SpaceRepository and SectionRepository [`6ecd70a`](https://github.com/Whytalik/nucleus/commit/6ecd70a7741c9d3ff69b75f4d1e8a12759f43df7)
-- refactor(template-property-value): extract TemplatePropertyValueRepository [`87a6088`](https://github.com/Whytalik/nucleus/commit/87a6088e8b03c16a13b2f4e36ebaba8ab6d90004)
-- refactor(template): extract TemplateRepository [`8c4825e`](https://github.com/Whytalik/nucleus/commit/8c4825e3caddeebb624d801b0b4b594347bdd44c)
-- refactor(property-value): extract PropertyValueRepository [`22a44a7`](https://github.com/Whytalik/nucleus/commit/22a44a7b86f45648eb083fb41d3f99ea6caf0d7c)
-- refactor(property): extract PropertyRepository and inject into PropertyService [`b29a3c6`](https://github.com/Whytalik/nucleus/commit/b29a3c60ceaba9fdb95e2f00f8a2537a166d2c64)
-- refactor(database): extract DatabaseRepository and inject into DatabaseService [`ca1cbad`](https://github.com/Whytalik/nucleus/commit/ca1cbadcf466397d650e99df4a664a27d55596ad)
-- refactor(settings): extract SettingsRepository and SettingsCategory enum [`d6d828f`](https://github.com/Whytalik/nucleus/commit/d6d828f0e2be6c87058dfdc373eb8b72e5e89832)
-- refactor(user): extract UserRepository and inject into UserService [`c62172a`](https://github.com/Whytalik/nucleus/commit/c62172ac2d1708662aa6b32af0602373713bfec7)
-- refactor(common): add parse-json query param utility [`ae472c1`](https://github.com/Whytalik/nucleus/commit/ae472c115b0b5970a12ee1bf4d4a45227e5ca35a)
+- refactor(record): extract RecordRepository [`2f6c847`](https://github.com/Whytalik/fix-space/commit/2f6c8473862079b40b743016790998cbe4dee918)
+- refactor(space): extract SpaceRepository and SectionRepository [`6ecd70a`](https://github.com/Whytalik/fix-space/commit/6ecd70a7741c9d3ff69b75f4d1e8a12759f43df7)
+- refactor(template-property-value): extract TemplatePropertyValueRepository [`87a6088`](https://github.com/Whytalik/fix-space/commit/87a6088e8b03c16a13b2f4e36ebaba8ab6d90004)
+- refactor(template): extract TemplateRepository [`8c4825e`](https://github.com/Whytalik/fix-space/commit/8c4825e3caddeebb624d801b0b4b594347bdd44c)
+- refactor(property-value): extract PropertyValueRepository [`22a44a7`](https://github.com/Whytalik/fix-space/commit/22a44a7b86f45648eb083fb41d3f99ea6caf0d7c)
+- refactor(property): extract PropertyRepository and inject into PropertyService [`b29a3c6`](https://github.com/Whytalik/fix-space/commit/b29a3c60ceaba9fdb95e2f00f8a2537a166d2c64)
+- refactor(database): extract DatabaseRepository and inject into DatabaseService [`ca1cbad`](https://github.com/Whytalik/fix-space/commit/ca1cbadcf466397d650e99df4a664a27d55596ad)
+- refactor(settings): extract SettingsRepository and SettingsCategory enum [`d6d828f`](https://github.com/Whytalik/fix-space/commit/d6d828f0e2be6c87058dfdc373eb8b72e5e89832)
+- refactor(user): extract UserRepository and inject into UserService [`c62172a`](https://github.com/Whytalik/fix-space/commit/c62172ac2d1708662aa6b32af0602373713bfec7)
+- refactor(common): add parse-json query param utility [`ae472c1`](https://github.com/Whytalik/fix-space/commit/ae472c115b0b5970a12ee1bf4d4a45227e5ca35a)
 
 ### Chores
 
-- chore(ci): fix pre-push hook recursion and force-push GitLab mirror [`e225eda`](https://github.com/Whytalik/nucleus/commit/e225eda1e12c3c4b115dd5971e24c56e62d7eef0)
+- chore(ci): fix pre-push hook recursion and force-push GitLab mirror [`e225eda`](https://github.com/Whytalik/fix-space/commit/e225eda1e12c3c4b115dd5971e24c56e62d7eef0)
 
 ## 2026-03-15
 
