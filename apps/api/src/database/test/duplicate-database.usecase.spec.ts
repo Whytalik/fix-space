@@ -1,18 +1,9 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { NotFoundException } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
-
-jest.mock("@nucleus/database", () => ({
-  prisma: {
-    database: {
-      findUnique: jest.fn<any>(),
-    },
-    $transaction: jest.fn<any>(),
-  },
-}));
-
-import { prisma } from "@nucleus/database";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { DatabaseRepository } from "../database.repository";
 import { DuplicateDatabaseUseCase } from "../providers/duplicate-database.usecase";
 
 const mockLogger = {
@@ -21,6 +12,11 @@ const mockLogger = {
   debug: jest.fn<any>(),
   warn: jest.fn<any>(),
   error: jest.fn<any>(),
+};
+
+const mockDatabaseRepo = {
+  findByIdForDuplicate: jest.fn<any>(),
+  transaction: jest.fn<any>(),
 };
 
 const mockSourceDb = {
@@ -51,7 +47,11 @@ describe("DuplicateDatabaseUseCase", () => {
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [DuplicateDatabaseUseCase, { provide: AppLogger, useValue: mockLogger }],
+      providers: [
+        DuplicateDatabaseUseCase,
+        { provide: AppLogger, useValue: mockLogger },
+        { provide: DatabaseRepository, useValue: mockDatabaseRepo },
+      ],
     }).compile();
 
     useCase = module.get<DuplicateDatabaseUseCase>(DuplicateDatabaseUseCase);
@@ -59,14 +59,20 @@ describe("DuplicateDatabaseUseCase", () => {
 
   describe("execute", () => {
     it("should throw NotFoundException when source database is not found", async () => {
-      (prisma.database.findUnique as jest.Mock<any>).mockResolvedValue(null);
+      mockDatabaseRepo.findByIdForDuplicate.mockResolvedValue(null);
 
-      await expect(useCase.execute("db-missing")).rejects.toThrow(NotFoundException);
-      await expect(useCase.execute("db-missing")).rejects.toThrow("Database not found");
+      await expect(useCase.execute("db-missing", "user-1")).rejects.toThrow(NotFoundException);
+      await expect(useCase.execute("db-missing", "user-1")).rejects.toThrow("Database not found");
+    });
+
+    it("should throw NotFoundException when database belongs to another user", async () => {
+      mockDatabaseRepo.findByIdForDuplicate.mockResolvedValue(null);
+
+      await expect(useCase.execute("db-1", "user-other")).rejects.toThrow(NotFoundException);
     });
 
     it("should create new DB, properties, records and values in a transaction", async () => {
-      (prisma.database.findUnique as jest.Mock<any>).mockResolvedValue(mockSourceDb);
+      mockDatabaseRepo.findByIdForDuplicate.mockResolvedValue(mockSourceDb);
 
       const newDb = {
         id: "db-new",
@@ -88,11 +94,11 @@ describe("DuplicateDatabaseUseCase", () => {
         propertyValue: { create: jest.fn<any>().mockResolvedValue(newValue) },
       };
 
-      (prisma.$transaction as jest.Mock<any>).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+      mockDatabaseRepo.transaction.mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
         cb(mockTx),
       );
 
-      await useCase.execute("db-1");
+      await useCase.execute("db-1", "user-1");
 
       expect(mockTx.database.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -121,7 +127,7 @@ describe("DuplicateDatabaseUseCase", () => {
         ],
       };
 
-      (prisma.database.findUnique as jest.Mock<any>).mockResolvedValue(sourceWithOrphan);
+      mockDatabaseRepo.findByIdForDuplicate.mockResolvedValue(sourceWithOrphan);
 
       const newDb = { id: "db-new", title: "My DB Copy" };
       const newRecord = { id: "rec-new" };
@@ -133,19 +139,19 @@ describe("DuplicateDatabaseUseCase", () => {
         propertyValue: { create: jest.fn<any>() },
       };
 
-      (prisma.$transaction as jest.Mock<any>).mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
+      mockDatabaseRepo.transaction.mockImplementation(async (cb: (tx: typeof mockTx) => Promise<unknown>) =>
         cb(mockTx),
       );
 
-      await useCase.execute("db-1");
+      await useCase.execute("db-1", "user-1");
 
       expect(mockTx.propertyValue.create).not.toHaveBeenCalled();
     });
 
     it("should rethrow unknown errors", async () => {
-      (prisma.database.findUnique as jest.Mock<any>).mockRejectedValue(new Error("DB error"));
+      mockDatabaseRepo.findByIdForDuplicate.mockRejectedValue(new Error("DB error"));
 
-      await expect(useCase.execute("db-1")).rejects.toThrow("DB error");
+      await expect(useCase.execute("db-1", "user-1")).rejects.toThrow("DB error");
     });
   });
 });

@@ -1,11 +1,15 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma } from "@nucleus/database";
 import { CreateSectionDto, SectionOperationDto, SectionOperationType, SectionResponseDto } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { SectionRepository } from "./section.repository";
 
 @Injectable()
 export class SectionService {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly sectionRepo: SectionRepository,
+  ) {
     this.logger.setContext(SectionService.name);
   }
 
@@ -15,8 +19,12 @@ export class SectionService {
       name: dto.name,
     });
 
-    const section = await prisma.section.create({
-      data: { name: dto.name, position: dto.position, icon: dto.icon, color: dto.color, spaceId },
+    const section = await this.sectionRepo.create({
+      name: dto.name,
+      position: dto.position,
+      icon: dto.icon,
+      color: dto.color,
+      spaceId,
     });
     this.logger.log("Section created", { sectionId: section.id, spaceId });
     return new SectionResponseDto(section);
@@ -45,23 +53,20 @@ export class SectionService {
 
     let position = operation.create.position;
     if (position === undefined) {
-      const last = await tx.section.findFirst({
-        where: { spaceId },
-        orderBy: { position: "desc" },
-        select: { position: true },
-      });
-      position = last?.position != null ? last.position + 1 : 0;
+      const last = await this.sectionRepo.findLastPosition(spaceId, tx);
+      position = last !== null ? last.position + 1 : 0;
     }
 
-    await tx.section.create({
-      data: {
+    await this.sectionRepo.create(
+      {
         name: operation.create.name,
         position,
         icon: operation.create.icon,
         color: operation.create.color,
         spaceId,
       },
-    });
+      tx,
+    );
   }
 
   private async updateInternal(tx: Prisma.TransactionClient, spaceId: string, operation: SectionOperationDto) {
@@ -69,11 +74,7 @@ export class SectionService {
       throw new BadRequestException('UPDATE operation requires "id" field');
     }
 
-    const section = await tx.section.findUnique({
-      where: {
-        id: operation.id,
-      },
-    });
+    const section = await this.sectionRepo.findById(operation.id, tx);
 
     if (!section) {
       throw new NotFoundException(`Section with id ${operation.id} not found`);
@@ -84,15 +85,7 @@ export class SectionService {
     }
 
     if (operation.update?.name) {
-      const duplicate = await tx.section.findFirst({
-        where: {
-          name: operation.update.name,
-          spaceId,
-          id: {
-            not: operation.id,
-          },
-        },
-      });
+      const duplicate = await this.sectionRepo.findDuplicate(operation.update.name, spaceId, operation.id, tx);
 
       if (duplicate) {
         this.logger.warn("Duplicate section name", {
@@ -103,19 +96,16 @@ export class SectionService {
       }
     }
 
-    await tx.section.update({
-      where: {
-        id: operation.id,
-      },
-      data: {
+    await this.sectionRepo.update(
+      operation.id,
+      {
         name: operation.update?.name,
         position: operation.update?.position,
         icon: operation.update?.icon,
-        color: operation.update?.color !== undefined
-          ? (operation.update.color || null)
-          : undefined,
+        color: operation.update?.color !== undefined ? operation.update.color || null : undefined,
       },
-    });
+      tx,
+    );
   }
 
   private async deleteInternal(tx: Prisma.TransactionClient, spaceId: string, operation: SectionOperationDto) {
@@ -123,11 +113,7 @@ export class SectionService {
       throw new BadRequestException('DELETE operation requires "id" field');
     }
 
-    const section = await tx.section.findUnique({
-      where: {
-        id: operation.id,
-      },
-    });
+    const section = await this.sectionRepo.findById(operation.id, tx);
 
     if (!section) {
       throw new NotFoundException(`Section with id ${operation.id} not found`);
@@ -137,11 +123,7 @@ export class SectionService {
       throw new BadRequestException(`Section with id ${operation.id} does not belong to this space`);
     }
 
-    await tx.section.delete({
-      where: {
-        id: operation.id,
-      },
-    });
+    await this.sectionRepo.delete(operation.id, tx);
 
     this.logger.log("Section deleted", {
       sectionId: operation.id,
