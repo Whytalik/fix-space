@@ -1,5 +1,5 @@
-import { Database } from "../../database/entities/database.entity";
-import { PropertyValue } from "../../property-value/entities/property-value.entity";
+import type { Database } from "../../database/entities/database.entity";
+import type { PropertyValue } from "../../property-value/entities/property-value.entity";
 
 export class DatabaseRecord {
   id: string;

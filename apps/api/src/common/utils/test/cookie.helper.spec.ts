@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
+import type { Response } from "express";
 
 import { clearAuthCookies, parseDurationToMs, setAccessTokenCookie, setRefreshTokenCookie } from "../cookie.helper";
 
@@ -16,7 +17,7 @@ describe("cookie.helper", () => {
 
   describe("setAccessTokenCookie", () => {
     it("should call res.cookie with access_token and correct options", () => {
-      setAccessTokenCookie(res as any, "my-token", 900000, { domain: "localhost", secure: false });
+      setAccessTokenCookie(res as unknown as Response, "my-token", 900000, { domain: "localhost", secure: false });
 
       expect(resCookie).toHaveBeenCalledWith("access_token", "my-token", {
         httpOnly: true,
@@ -31,7 +32,7 @@ describe("cookie.helper", () => {
 
   describe("setRefreshTokenCookie", () => {
     it("should call res.cookie with refresh_token and path /auth", () => {
-      setRefreshTokenCookie(res as any, "ref-token", 604800000, { domain: "localhost", secure: true });
+      setRefreshTokenCookie(res as unknown as Response, "ref-token", 604800000, { domain: "localhost", secure: true });
 
       expect(resCookie).toHaveBeenCalledWith("refresh_token", "ref-token", {
         httpOnly: true,
@@ -46,7 +47,7 @@ describe("cookie.helper", () => {
 
   describe("clearAuthCookies", () => {
     it("should call res.clearCookie for both tokens", () => {
-      clearAuthCookies(res as any, { domain: "localhost", secure: false });
+      clearAuthCookies(res as unknown as Response, { domain: "localhost", secure: false });
 
       expect(resClearCookie).toHaveBeenCalledWith("access_token", expect.objectContaining({ path: "/" }));
       expect(resClearCookie).toHaveBeenCalledWith("refresh_token", expect.objectContaining({ path: "/auth" }));

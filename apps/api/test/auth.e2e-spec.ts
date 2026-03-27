@@ -1,6 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "@jest/globals";
-import { INestApplication, ValidationPipe } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { INestApplication} from "@nestjs/common";
+import { ValidationPipe } from "@nestjs/common";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { prisma } from "@nucleus/database";
 import cookieParser from "cookie-parser";
 import type { Server } from "http";
