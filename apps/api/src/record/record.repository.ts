@@ -1,5 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma, prisma, RecordContent } from "@nucleus/database";
+import { ContainerBlock } from "@nucleus/domain";
+
+export type RecordContentData = Omit<RecordContent, "content"> & { content: ContainerBlock };
 
 @Injectable()
 export class RecordRepository {
@@ -136,5 +139,21 @@ export class RecordRepository {
 
   async transaction<T>(callback: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
     return prisma.$transaction(callback);
+  }
+
+  async findContent(recordId: string): Promise<RecordContentData | null> {
+    const result = await prisma.recordContent.findUnique({ where: { recordId } });
+    if (!result) return null;
+    return { ...result, content: result.content as unknown as ContainerBlock };
+  }
+
+  async upsertContent(recordId: string, content: ContainerBlock): Promise<RecordContentData> {
+    const json = content as unknown as Prisma.InputJsonValue;
+    const result = await prisma.recordContent.upsert({
+      where: { recordId },
+      update: { content: json },
+      create: { recordId, content: json },
+    });
+    return { ...result, content: result.content as unknown as ContainerBlock };
   }
 }
