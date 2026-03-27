@@ -4,6 +4,10 @@ import * as nodemailer from "nodemailer";
 import { Transporter } from "nodemailer";
 import { AppLogger } from "../common/logger/app-logger.service";
 
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 @Injectable()
 export class MailService implements OnModuleInit {
   private transporter: Transporter;
@@ -58,7 +62,7 @@ export class MailService implements OnModuleInit {
 
   async sendVerificationEmail(to: string, username: string, token: string): Promise<void> {
     const appUrl = this.configService.get<string>("APP_URL", "http://localhost:3001");
-    const verificationLink = `${appUrl}/auth/verify?token=${token}`;
+    const verificationLink = `${appUrl}/auth/verify?token=${encodeURIComponent(token)}`;
     const from = this.configService.get<string>("MAIL_FROM", "noreply@nucleus.app");
 
     const mailOptions = {
@@ -143,7 +147,7 @@ export class MailService implements OnModuleInit {
                             <h1 style="margin:0 0 6px 0;font-size:21px;font-weight:700;color:#e8e8f0;letter-spacing:-0.02em;line-height:1.2;">Verify your email address</h1>
                             <p style="margin:0 0 28px 0;font-size:14px;color:#888888;line-height:1.6;">Confirm your identity to activate your account.</p>
 
-                            <p style="margin:0 0 16px 0;font-size:15px;color:#e8e8f0;line-height:1.7;">Hey <strong>${username}</strong>,</p>
+                            <p style="margin:0 0 16px 0;font-size:15px;color:#e8e8f0;line-height:1.7;">Hey <strong>${escapeHtml(username)}</strong>,</p>
                             <p style="margin:0 0 28px 0;font-size:15px;color:#888888;line-height:1.7;">
                               Welcome to Nucleus! Click the button below to verify your email address. This link will expire in <strong style="color:#e8e8f0;">24 hours</strong>.
                             </p>
@@ -192,55 +196,62 @@ export class MailService implements OnModuleInit {
       `,
     };
 
-    const info = await this.transporter.sendMail(mailOptions);
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Verification email sent to ${to}`);
 
-    this.logger.log(`Verification email sent to ${to}`);
-
-    // In development with Ethereal, log the preview URL
-    const smtpHost = this.configService.get<string>("SMTP_HOST");
-    if (!smtpHost) {
-      const previewUrl = nodemailer.getTestMessageUrl(info as Parameters<typeof nodemailer.getTestMessageUrl>[0]);
-      this.logger.log(`📧 Ethereal email preview: ${previewUrl || "Preview URL not available"}`);
+      // In development with Ethereal, log the preview URL
+      const smtpHost = this.configService.get<string>("SMTP_HOST");
+      if (!smtpHost) {
+        const previewUrl = nodemailer.getTestMessageUrl(info as Parameters<typeof nodemailer.getTestMessageUrl>[0]);
+        this.logger.log(`Ethereal email preview: ${previewUrl || "Preview URL not available"}`);
+      }
+    } catch (err) {
+      this.logger.error(`Failed to send verification email to ${to}`, { error: (err as Error).message });
     }
   }
 
   async sendPasswordResetEmail(to: string, token: string): Promise<void> {
     const appUrl = this.configService.get<string>("APP_URL", "http://localhost:3001");
-    const resetLink = `${appUrl}/reset-password?token=${token}`;
+    const resetLink = `${appUrl}/reset-password?token=${encodeURIComponent(token)}`;
     const from = this.configService.get<string>("MAIL_FROM", "noreply@nucleus.app");
 
-    const info = await this.transporter.sendMail({
-      from,
-      to,
-      subject: "Reset your Nucleus password",
-      text: `You requested a password reset.\n\nClick the link below to set a new password:\n\n${resetLink}\n\nThis link expires in 1 hour.\n\nIf you did not request a password reset, you can safely ignore this email.`,
-      html: `
-        <body style="margin:0;padding:0;background-color:#0f0f11;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f0f11;">
-            <tr><td align="center" style="padding:48px 20px;">
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
-                <tr><td style="background-color:#18181d;border:1px solid #2a2a35;border-radius:12px;padding:36px 40px;">
-                  <h1 style="margin:0 0 8px 0;font-size:21px;font-weight:700;color:#e8e8f0;letter-spacing:-0.02em;">Reset your password</h1>
-                  <p style="margin:0 0 28px 0;font-size:14px;color:#888888;line-height:1.7;">Click the button below to set a new password. This link expires in <strong style="color:#e8e8f0;">1 hour</strong>.</p>
-                  <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
-                    <tr><td style="border-radius:8px;background-color:#5865f2;">
-                      <a href="${resetLink}" style="display:inline-block;padding:13px 28px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:8px;">Reset Password</a>
-                    </td></tr>
-                  </table>
-                  <p style="margin:0;font-size:12px;color:#888888;">If you didn't request this, you can safely ignore this email.</p>
-                </td></tr>
-              </table>
-            </td></tr>
-          </table>
-        </body>`,
-    });
+    try {
+      const info = await this.transporter.sendMail({
+        from,
+        to,
+        subject: "Reset your Nucleus password",
+        text: `You requested a password reset.\n\nClick the link below to set a new password:\n\n${resetLink}\n\nThis link expires in 1 hour.\n\nIf you did not request a password reset, you can safely ignore this email.`,
+        html: `
+          <body style="margin:0;padding:0;background-color:#0f0f11;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f0f11;">
+              <tr><td align="center" style="padding:48px 20px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+                  <tr><td style="background-color:#18181d;border:1px solid #2a2a35;border-radius:12px;padding:36px 40px;">
+                    <h1 style="margin:0 0 8px 0;font-size:21px;font-weight:700;color:#e8e8f0;letter-spacing:-0.02em;">Reset your password</h1>
+                    <p style="margin:0 0 28px 0;font-size:14px;color:#888888;line-height:1.7;">Click the button below to set a new password. This link expires in <strong style="color:#e8e8f0;">1 hour</strong>.</p>
+                    <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+                      <tr><td style="border-radius:8px;background-color:#5865f2;">
+                        <a href="${resetLink}" style="display:inline-block;padding:13px 28px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:8px;">Reset Password</a>
+                      </td></tr>
+                    </table>
+                    <p style="margin:0;font-size:12px;color:#888888;">If you didn't request this, you can safely ignore this email.</p>
+                  </td></tr>
+                </table>
+              </td></tr>
+            </table>
+          </body>`,
+      });
 
-    this.logger.log(`Password reset email sent to ${to}`);
+      this.logger.log(`Password reset email sent to ${to}`);
 
-    const smtpHost = this.configService.get<string>("SMTP_HOST");
-    if (!smtpHost) {
-      const previewUrl = nodemailer.getTestMessageUrl(info as Parameters<typeof nodemailer.getTestMessageUrl>[0]);
-      this.logger.log(`📧 Ethereal email preview: ${previewUrl || "Preview URL not available"}`);
+      const smtpHost = this.configService.get<string>("SMTP_HOST");
+      if (!smtpHost) {
+        const previewUrl = nodemailer.getTestMessageUrl(info as Parameters<typeof nodemailer.getTestMessageUrl>[0]);
+        this.logger.log(`Ethereal email preview: ${previewUrl || "Preview URL not available"}`);
+      }
+    } catch (err) {
+      this.logger.error(`Failed to send password reset email to ${to}`, { error: (err as Error).message });
     }
   }
 }

@@ -17,9 +17,7 @@ coverage
 .nyc_output
 blob-report/
 test-results/
-playwright/.cache/
-playwright-report/
-.history/
+
 
 # Misc
 .DS_Store
@@ -50,6 +48,10 @@ CLAUDE.md
 *.swp
 *.swo
 *~
+
+# Uploaded files
+apps/api/public/avatars/*
+!apps/api/public/avatars/.gitkeep
 scripts/
 .playwright-mcp/
 
@@ -75,3 +77,7 @@ pnpm-debug.log*
 *.tmp
 .cache/
 .vscode-test
+
+# User-uploaded files (runtime data)
+apps/api/public/avatars/*
+!apps/api/public/avatars/.gitkeep

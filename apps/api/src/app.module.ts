@@ -15,15 +15,15 @@ import { PropertyModule } from "./property/property.module";
 import { RecordModule } from "./record/record.module";
 import { SettingsModule } from "./settings/settings.module";
 import { SpaceModule } from "./space/space.module";
-import { TemplateModule } from "./template/template.module";
 import { TemplatePropertyValueModule } from "./template-property-value/template-property-value.module";
+import { TemplateModule } from "./template/template.module";
 import { UserModule } from "./user/user.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [`../../.env.${process.env.NODE_ENV || "development"}`, "../../.env"],
+      envFilePath: [`../../.env.${process.env.NODE_ENV ?? "development"}`, "../../.env"],
       validate,
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 200 }]),

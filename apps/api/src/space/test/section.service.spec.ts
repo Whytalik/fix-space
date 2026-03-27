@@ -1,19 +1,12 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
-import { Prisma, prisma } from "@nucleus/database";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+import type { Prisma } from "@nucleus/database";
 import { SectionOperationType } from "@nucleus/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { SectionRepository } from "../providers/section.repository";
 import { SectionService } from "../providers/section.service";
-
-jest.mock("@nucleus/database", () => ({
-  prisma: {
-    section: {
-      create: jest.fn<any>(),
-      findFirst: jest.fn<any>(),
-    },
-  },
-}));
 
 const mockLogger = {
   setContext: jest.fn<any>(),
@@ -21,6 +14,15 @@ const mockLogger = {
   log: jest.fn<any>(),
   warn: jest.fn<any>(),
   error: jest.fn<any>(),
+};
+
+const mockSectionRepo = {
+  create: jest.fn<any>(),
+  findById: jest.fn<any>(),
+  findLastPosition: jest.fn<any>(),
+  findDuplicate: jest.fn<any>(),
+  update: jest.fn<any>(),
+  delete: jest.fn<any>(),
 };
 
 const mockSection = {
@@ -32,17 +34,7 @@ const mockSection = {
   spaceId: "space-123",
 };
 
-const mockTxSection = {
-  findUnique: jest.fn<any>(),
-  findFirst: jest.fn<any>(),
-  create: jest.fn<any>(),
-  update: jest.fn<any>(),
-  delete: jest.fn<any>(),
-};
-
-const mockTx = {
-  section: mockTxSection,
-} as unknown as Prisma.TransactionClient;
+const mockTx = {} as unknown as Prisma.TransactionClient;
 
 describe("SectionService", () => {
   let service: SectionService;
@@ -51,7 +43,11 @@ describe("SectionService", () => {
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SectionService, { provide: AppLogger, useValue: mockLogger }],
+      providers: [
+        SectionService,
+        { provide: AppLogger, useValue: mockLogger },
+        { provide: SectionRepository, useValue: mockSectionRepo },
+      ],
     }).compile();
 
     service = module.get<SectionService>(SectionService);
@@ -67,13 +63,17 @@ describe("SectionService", () => {
         color: null,
         spaceId: "space-123",
       };
-      (prisma.section.create as jest.Mock<any>).mockResolvedValue(sectionData);
+      mockSectionRepo.create.mockResolvedValue(sectionData);
 
       const result = await service.create("space-123", { name: "New Section", position: 1 });
 
       expect(result).toEqual(expect.objectContaining({ id: "section-new", name: "New Section" }));
-      expect(prisma.section.create).toHaveBeenCalledWith({
-        data: { name: "New Section", position: 1, icon: undefined, color: undefined, spaceId: "space-123" },
+      expect(mockSectionRepo.create).toHaveBeenCalledWith({
+        name: "New Section",
+        position: 1,
+        icon: undefined,
+        color: undefined,
+        spaceId: "space-123",
       });
       expect(mockLogger.log).toHaveBeenCalledWith("Section created", {
         sectionId: "section-new",
@@ -85,7 +85,7 @@ describe("SectionService", () => {
   describe("processOperations", () => {
     describe("CREATE operation", () => {
       it("should create a section via transaction", async () => {
-        mockTxSection.create.mockResolvedValue({ ...mockSection, id: "section-new" });
+        mockSectionRepo.create.mockResolvedValue({ ...mockSection, id: "section-new" });
 
         await service.processOperations(mockTx, "space-123", [
           {
@@ -94,17 +94,18 @@ describe("SectionService", () => {
           },
         ]);
 
-        expect(mockTxSection.create).toHaveBeenCalledWith({
-          data: expect.objectContaining({
+        expect(mockSectionRepo.create).toHaveBeenCalledWith(
+          expect.objectContaining({
             name: "New Section",
             spaceId: "space-123",
           }),
-        });
+          mockTx,
+        );
       });
 
       it("should auto-assign position when not provided", async () => {
-        mockTxSection.findFirst.mockResolvedValue({ position: 2 });
-        mockTxSection.create.mockResolvedValue(mockSection);
+        mockSectionRepo.findLastPosition.mockResolvedValue({ position: 2 });
+        mockSectionRepo.create.mockResolvedValue(mockSection);
 
         await service.processOperations(mockTx, "space-123", [
           {
@@ -113,9 +114,10 @@ describe("SectionService", () => {
           },
         ]);
 
-        expect(mockTxSection.create).toHaveBeenCalledWith({
-          data: expect.objectContaining({ position: 3 }),
-        });
+        expect(mockSectionRepo.create).toHaveBeenCalledWith(
+          expect.objectContaining({ position: 3 }),
+          mockTx,
+        );
       });
 
       it("should throw BadRequestException when create field is missing", async () => {
@@ -130,9 +132,9 @@ describe("SectionService", () => {
 
     describe("UPDATE operation", () => {
       it("should update a section via transaction", async () => {
-        mockTxSection.findUnique.mockResolvedValue(mockSection);
-        mockTxSection.findFirst.mockResolvedValue(null);
-        mockTxSection.update.mockResolvedValue({ ...mockSection, name: "Updated" });
+        mockSectionRepo.findById.mockResolvedValue(mockSection);
+        mockSectionRepo.findDuplicate.mockResolvedValue(null);
+        mockSectionRepo.update.mockResolvedValue({ ...mockSection, name: "Updated" });
 
         await service.processOperations(mockTx, "space-123", [
           {
@@ -142,15 +144,16 @@ describe("SectionService", () => {
           },
         ]);
 
-        expect(mockTxSection.update).toHaveBeenCalledWith({
-          where: { id: "section-123" },
-          data: {
+        expect(mockSectionRepo.update).toHaveBeenCalledWith(
+          "section-123",
+          {
             name: "Updated",
             position: undefined,
             icon: undefined,
             color: undefined,
           },
-        });
+          mockTx,
+        );
       });
 
       it("should throw BadRequestException when id is missing", async () => {
@@ -160,7 +163,7 @@ describe("SectionService", () => {
       });
 
       it("should throw NotFoundException when section not found", async () => {
-        mockTxSection.findUnique.mockResolvedValue(null);
+        mockSectionRepo.findById.mockResolvedValue(null);
 
         await expect(
           service.processOperations(mockTx, "space-123", [
@@ -170,7 +173,7 @@ describe("SectionService", () => {
       });
 
       it("should throw BadRequestException when section belongs to different space", async () => {
-        mockTxSection.findUnique.mockResolvedValue({ ...mockSection, spaceId: "other-space" });
+        mockSectionRepo.findById.mockResolvedValue({ ...mockSection, spaceId: "other-space" });
 
         await expect(
           service.processOperations(mockTx, "space-123", [
@@ -180,8 +183,8 @@ describe("SectionService", () => {
       });
 
       it("should throw BadRequestException on duplicate section name", async () => {
-        mockTxSection.findUnique.mockResolvedValue(mockSection);
-        mockTxSection.findFirst.mockResolvedValue({ id: "other-section", name: "Duplicate" });
+        mockSectionRepo.findById.mockResolvedValue(mockSection);
+        mockSectionRepo.findDuplicate.mockResolvedValue({ id: "other-section", name: "Duplicate" });
 
         await expect(
           service.processOperations(mockTx, "space-123", [
@@ -197,14 +200,14 @@ describe("SectionService", () => {
 
     describe("DELETE operation", () => {
       it("should delete a section via transaction", async () => {
-        mockTxSection.findUnique.mockResolvedValue(mockSection);
-        mockTxSection.delete.mockResolvedValue(mockSection);
+        mockSectionRepo.findById.mockResolvedValue(mockSection);
+        mockSectionRepo.delete.mockResolvedValue(mockSection);
 
         await service.processOperations(mockTx, "space-123", [
           { operation: SectionOperationType.DELETE, id: "section-123" },
         ]);
 
-        expect(mockTxSection.delete).toHaveBeenCalledWith({ where: { id: "section-123" } });
+        expect(mockSectionRepo.delete).toHaveBeenCalledWith("section-123", mockTx);
         expect(mockLogger.log).toHaveBeenCalledWith("Section deleted", {
           sectionId: "section-123",
           spaceId: "space-123",
@@ -218,7 +221,7 @@ describe("SectionService", () => {
       });
 
       it("should throw NotFoundException when section not found", async () => {
-        mockTxSection.findUnique.mockResolvedValue(null);
+        mockSectionRepo.findById.mockResolvedValue(null);
 
         await expect(
           service.processOperations(mockTx, "space-123", [
@@ -228,7 +231,7 @@ describe("SectionService", () => {
       });
 
       it("should throw BadRequestException when section belongs to different space", async () => {
-        mockTxSection.findUnique.mockResolvedValue({ ...mockSection, spaceId: "other-space" });
+        mockSectionRepo.findById.mockResolvedValue({ ...mockSection, spaceId: "other-space" });
 
         await expect(
           service.processOperations(mockTx, "space-123", [

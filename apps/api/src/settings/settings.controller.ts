@@ -10,81 +10,102 @@ import {
   SpaceSettings,
 } from "@nucleus/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
+import { SettingsCategory } from "./settings.constants";
 import { SettingsService } from "./settings.service";
 
 @Controller("settings")
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
-  @Get("space")
+  @Get(SettingsCategory.SPACE)
   getSpaceSettings(
     @CurrentUser("userId")
     userId: string,
   ) {
-    return this.settingsService.getSettings(userId, "space", DEFAULT_SPACE_SETTINGS);
+    return this.settingsService.getSettings(userId, SettingsCategory.SPACE, DEFAULT_SPACE_SETTINGS);
   }
 
-  @Patch("space")
+  @Patch(SettingsCategory.SPACE)
   updateSpaceSettings(
     @CurrentUser("userId")
     userId: string,
     @Body()
     updateSettingsDto: Partial<SpaceSettings>,
   ) {
-    return this.settingsService.updateSettings(userId, "space", updateSettingsDto, DEFAULT_SPACE_SETTINGS);
+    return this.settingsService.updateSettings(
+      userId,
+      SettingsCategory.SPACE,
+      updateSettingsDto,
+      DEFAULT_SPACE_SETTINGS,
+    );
   }
 
-  @Get("database")
+  @Get(SettingsCategory.DATABASE)
   getDatabaseSettings(
     @CurrentUser("userId")
     userId: string,
   ) {
-    return this.settingsService.getSettings(userId, "database", DEFAULT_DATABASE_SETTINGS);
+    return this.settingsService.getSettings(userId, SettingsCategory.DATABASE, DEFAULT_DATABASE_SETTINGS);
   }
 
-  @Patch("database")
+  @Patch(SettingsCategory.DATABASE)
   updateDatabaseSettings(
     @CurrentUser("userId")
     userId: string,
     @Body()
     updateSettingsDto: Partial<DatabaseSettings>,
   ) {
-    return this.settingsService.updateSettings(userId, "database", updateSettingsDto, DEFAULT_DATABASE_SETTINGS);
+    return this.settingsService.updateSettings(
+      userId,
+      SettingsCategory.DATABASE,
+      updateSettingsDto,
+      DEFAULT_DATABASE_SETTINGS,
+    );
   }
 
-  @Get("section")
+  @Get(SettingsCategory.SECTION)
   getSectionSettings(
     @CurrentUser("userId")
     userId: string,
   ) {
-    return this.settingsService.getSettings(userId, "section", DEFAULT_SECTION_SETTINGS);
+    return this.settingsService.getSettings(userId, SettingsCategory.SECTION, DEFAULT_SECTION_SETTINGS);
   }
 
-  @Patch("section")
+  @Patch(SettingsCategory.SECTION)
   updateSectionSettings(
     @CurrentUser("userId")
     userId: string,
     @Body()
     updateSettingsDto: Partial<SectionSettings>,
   ) {
-    return this.settingsService.updateSettings(userId, "section", updateSettingsDto, DEFAULT_SECTION_SETTINGS);
+    return this.settingsService.updateSettings(
+      userId,
+      SettingsCategory.SECTION,
+      updateSettingsDto,
+      DEFAULT_SECTION_SETTINGS,
+    );
   }
 
-  @Get("record")
+  @Get(SettingsCategory.RECORD)
   getRecordSettings(
     @CurrentUser("userId")
     userId: string,
   ) {
-    return this.settingsService.getSettings(userId, "record", DEFAULT_RECORD_SETTINGS);
+    return this.settingsService.getSettings(userId, SettingsCategory.RECORD, DEFAULT_RECORD_SETTINGS);
   }
 
-  @Patch("record")
+  @Patch(SettingsCategory.RECORD)
   updateRecordSettings(
     @CurrentUser("userId")
     userId: string,
     @Body()
     updateSettingsDto: Partial<RecordSettings>,
   ) {
-    return this.settingsService.updateSettings(userId, "record", updateSettingsDto, DEFAULT_RECORD_SETTINGS);
+    return this.settingsService.updateSettings(
+      userId,
+      SettingsCategory.RECORD,
+      updateSettingsDto,
+      DEFAULT_RECORD_SETTINGS,
+    );
   }
 }

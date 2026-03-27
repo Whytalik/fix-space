@@ -1,5 +1,19 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Patch } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  ParseFilePipe,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { ChangePasswordDto, UpdateUserDto } from "@nucleus/domain";
+import { memoryStorage } from "multer";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { UserService } from "./user.service";
 
@@ -23,6 +37,26 @@ export class UserController {
     updateUserDto: UpdateUserDto,
   ) {
     return this.userService.update(userId, updateUserDto);
+  }
+
+  @Post("me/avatar")
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor("avatar", { storage: memoryStorage() }))
+  uploadAvatar(
+    @CurrentUser("userId")
+    userId: string,
+    @UploadedFile(new ParseFilePipe({ fileIsRequired: true }))
+    file: Express.Multer.File,
+  ) {
+    return this.userService.updateAvatar(userId, file);
+  }
+
+  @Delete("me/avatar")
+  removeAvatar(
+    @CurrentUser("userId")
+    userId: string,
+  ) {
+    return this.userService.removeAvatar(userId);
   }
 
   @Patch("me/password")

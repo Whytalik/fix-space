@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { Reflector } from "@nestjs/core";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+import type { Request } from "express";
+import type { LoginUserDto, RegisterUserDto, VerifyEmailDto } from "@nucleus/domain";
 import { AuthCookiesInterceptor } from "../../common/interceptors/auth-cookies.interceptor";
 import { AuthController } from "../auth.controller";
 import { AuthService } from "../auth.service";
@@ -49,7 +52,7 @@ describe("AuthController", () => {
       const expected = { message: "Registered" };
       mockRegisterUserUseCase.register.mockResolvedValue(expected);
 
-      const result = await controller.register(dto as any);
+      const result = await controller.register(dto as unknown as RegisterUserDto);
 
       expect(result).toEqual(expected);
       expect(mockRegisterUserUseCase.register).toHaveBeenCalledWith(dto);
@@ -62,7 +65,7 @@ describe("AuthController", () => {
       const expected = { message: "Email verified successfully" };
       mockAuthService.verifyEmail.mockResolvedValue(expected);
 
-      const result = await controller.verify(dto as any);
+      const result = await controller.verify(dto as unknown as VerifyEmailDto);
 
       expect(result).toEqual(expected);
       expect(mockAuthService.verifyEmail).toHaveBeenCalledWith(dto.token);
@@ -75,7 +78,7 @@ describe("AuthController", () => {
       const expected = { message: "Login successful", accessToken: "at", refreshToken: "rt" };
       mockAuthService.login.mockResolvedValue(expected);
 
-      const result = await controller.login(dto as any);
+      const result = await controller.login(dto as unknown as LoginUserDto);
 
       expect(result).toEqual(expected);
       expect(mockAuthService.login).toHaveBeenCalledWith(dto);
@@ -84,7 +87,7 @@ describe("AuthController", () => {
 
   describe("refresh", () => {
     it("should read refresh_token cookie and call authService.refresh", async () => {
-      const req = { cookies: { refresh_token: "tok" } } as any;
+      const req = { cookies: { refresh_token: "tok" } } as unknown as Request;
       const expected = { message: "Token refreshed successfully", accessToken: "at", refreshToken: "rt" };
       mockAuthService.refresh.mockResolvedValue(expected);
 
@@ -95,7 +98,7 @@ describe("AuthController", () => {
     });
 
     it("should pass undefined to authService.refresh when no cookie present", async () => {
-      const req = { cookies: {} } as any;
+      const req = { cookies: {} } as unknown as Request;
       mockAuthService.refresh.mockResolvedValue({ message: "ok" });
 
       await controller.refresh(req);
@@ -106,7 +109,7 @@ describe("AuthController", () => {
 
   describe("logout", () => {
     it("should read refresh_token cookie and call authService.logout", async () => {
-      const req = { cookies: { refresh_token: "tok" } } as any;
+      const req = { cookies: { refresh_token: "tok" } } as unknown as Request;
       const expected = { message: "Logged out successfully", clearCookies: true };
       mockAuthService.logout.mockResolvedValue(expected);
 

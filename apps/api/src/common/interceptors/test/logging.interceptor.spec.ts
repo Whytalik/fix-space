@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { CallHandler, ExecutionContext } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { CallHandler, ExecutionContext } from "@nestjs/common";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { of } from "rxjs";
 import { lastValueFrom } from "rxjs";
 
@@ -81,6 +82,16 @@ describe("LoggingInterceptor", () => {
       await lastValueFrom(interceptor.intercept(ctx, makeHandler()));
 
       expect(mockLogger.debug).toHaveBeenCalledWith(expect.stringContaining('"name":"Test"'));
+    });
+
+    it("should redact sensitive fields in body logs", async () => {
+      const ctx = makeContext({ body: { email: "user@example.com", password: "secret123" } });
+      await lastValueFrom(interceptor.intercept(ctx, makeHandler()));
+
+      const debugCall = (mockLogger.debug as jest.Mock<any>).mock.calls[0][0] as string;
+      expect(debugCall).toContain('"email":"user@example.com"');
+      expect(debugCall).toContain('"password":"[REDACTED]"');
+      expect(debugCall).not.toContain("secret123");
     });
 
     it("should not call logger.debug when body is empty", async () => {

@@ -7,6 +7,7 @@ export type StatusOptionColor = (typeof STATUS_OPTION_COLOR_VALUES)[number];
 export interface StatusOption {
   name: string;
   color: StatusOptionColor;
+  icon?: string;
 }
 
 export interface StatusCategoryConfig {
