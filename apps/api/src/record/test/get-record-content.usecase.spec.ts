@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { NotFoundException } from "@nestjs/common";
+import { BlockType } from "@nucleus/domain";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import { AppLogger } from "../../common/logger/app-logger.service";
@@ -132,7 +133,7 @@ describe("GetRecordContentUseCase", () => {
 
       const result = await useCase.execute("record-1", "user-1");
 
-      expect(mockRecordRepo.upsertContent).toHaveBeenCalledWith("record-1", {});
+      expect(mockRecordRepo.upsertContent).toHaveBeenCalledWith("record-1", { id: "record-1", type: BlockType.BLOCK, children: [] });
       expect(result.id).toBe("rc-new");
       expect(result.recordId).toBe("record-1");
       expect(result.content).toEqual({});
@@ -147,7 +148,7 @@ describe("GetRecordContentUseCase", () => {
       await useCase.execute("record-1", "user-1");
 
       expect(mockRecordRepo.upsertContent).toHaveBeenCalledTimes(1);
-      expect(mockRecordRepo.upsertContent).toHaveBeenCalledWith("record-1", {});
+      expect(mockRecordRepo.upsertContent).toHaveBeenCalledWith("record-1", { id: "record-1", type: BlockType.BLOCK, children: [] });
     });
   });
 
