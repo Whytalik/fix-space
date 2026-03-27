@@ -3,8 +3,10 @@ import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import type { RecordResponseDto } from "@nucleus/domain";
 import { FilterLogic } from "@nucleus/domain";
+import { GetRecordContentUseCase } from "../providers/get-record-content.usecase";
 import { FindRecordsUseCase } from "../providers/find-records.usecase";
 import { SearchRecordsUseCase } from "../providers/search-records.usecase";
+import { UpdateRecordContentUseCase } from "../providers/update-record-content.usecase";
 import { RecordController } from "../record.controller";
 import { RecordService } from "../record.service";
 
@@ -34,6 +36,8 @@ describe("RecordController", () => {
 
   const mockFindRecordsUseCase = { execute: jest.fn<any>() };
   const mockSearchRecordsUseCase = { execute: jest.fn<any>() };
+  const mockGetRecordContentUseCase = { execute: jest.fn<any>() };
+  const mockUpdateRecordContentUseCase = { execute: jest.fn<any>() };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -52,6 +56,14 @@ describe("RecordController", () => {
         {
           provide: SearchRecordsUseCase,
           useValue: mockSearchRecordsUseCase,
+        },
+        {
+          provide: GetRecordContentUseCase,
+          useValue: mockGetRecordContentUseCase,
+        },
+        {
+          provide: UpdateRecordContentUseCase,
+          useValue: mockUpdateRecordContentUseCase,
         },
       ],
     }).compile();
