@@ -1,4 +1,4 @@
-import 'reflect-metadata';
+import "reflect-metadata";
 import { beforeEach, describe, expect, it } from "@jest/globals";
 import { FORMULA_OUTPUT_TYPE_VALUES } from "@nucleus/domain";
 import { FormulaHandler } from "../formula.handler";
