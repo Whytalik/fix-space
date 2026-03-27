@@ -16,14 +16,29 @@ export class TokenService {
     this.logger.setContext(TokenService.name);
   }
 
+  private generateTokenPair(): { rawToken: string; tokenHash: string } {
+    const rawToken = generateRandomToken();
+    return { rawToken, tokenHash: hashToken(rawToken) };
+  }
+
+  private resolveTokenRecord(
+    record: { id: string; userId: string } | null,
+    type: string,
+  ): { userId: string; tokenId: string } | null {
+    if (!record) {
+      this.logger.warn(`Invalid or expired ${type} token`);
+      return null;
+    }
+    return { userId: record.userId, tokenId: record.id };
+  }
+
   generateAccessToken(userId: string, username: string): string {
     const payload = { sub: userId, username };
     return this.jwtService.sign(payload);
   }
 
   async createRefreshToken(userId: string): Promise<string> {
-    const rawToken = generateRandomToken();
-    const tokenHash = hashToken(rawToken);
+    const { rawToken, tokenHash } = this.generateTokenPair();
     const expiresAt = new Date(Date.now() + parseDurationToMs(this.configService.get("JWT_REFRESH_EXPIRATION", "7d")));
 
     await prisma.refreshToken.create({
@@ -31,26 +46,16 @@ export class TokenService {
     });
 
     this.logger.debug("Refresh token created", { userId });
-
     return rawToken;
   }
 
   async validateRefreshToken(rawToken: string): Promise<{ userId: string; tokenId: string } | null> {
     const tokenHash = hashToken(rawToken);
     const record = await prisma.refreshToken.findFirst({
-      where: {
-        tokenHash,
-        revokedAt: null,
-        expiresAt: { gt: new Date() },
-      },
+      where: { tokenHash, revokedAt: null, expiresAt: { gt: new Date() } },
     });
 
-    if (!record) {
-      this.logger.warn("Invalid or expired refresh token");
-      return null;
-    }
-
-    return { userId: record.userId, tokenId: record.id };
+    return this.resolveTokenRecord(record, "refresh");
   }
 
   async rotateRefreshToken(oldTokenId: string, userId: string): Promise<string> {
@@ -60,7 +65,6 @@ export class TokenService {
     });
 
     this.logger.debug("Old refresh token revoked", { tokenId: oldTokenId });
-
     return this.createRefreshToken(userId);
   }
 
@@ -84,8 +88,7 @@ export class TokenService {
   }
 
   async createVerificationToken(userId: string): Promise<string> {
-    const rawToken = generateRandomToken();
-    const tokenHash = hashToken(rawToken);
+    const { rawToken, tokenHash } = this.generateTokenPair();
     const hours = this.configService.get<number>("VERIFICATION_TOKEN_EXPIRATION_HOURS", 24);
     const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
 
@@ -94,26 +97,16 @@ export class TokenService {
     });
 
     this.logger.debug("Verification token created", { userId });
-
     return rawToken;
   }
 
   async validateVerificationToken(rawToken: string): Promise<{ userId: string; tokenId: string } | null> {
     const tokenHash = hashToken(rawToken);
     const record = await prisma.emailVerificationToken.findFirst({
-      where: {
-        tokenHash,
-        usedAt: null,
-        expiresAt: { gt: new Date() },
-      },
+      where: { tokenHash, usedAt: null, expiresAt: { gt: new Date() } },
     });
 
-    if (!record) {
-      this.logger.warn("Invalid or expired verification token");
-      return null;
-    }
-
-    return { userId: record.userId, tokenId: record.id };
+    return this.resolveTokenRecord(record, "verification");
   }
 
   async markVerificationTokenUsed(tokenId: string): Promise<void> {
@@ -126,8 +119,7 @@ export class TokenService {
   }
 
   async createPasswordResetToken(userId: string): Promise<string> {
-    const rawToken = generateRandomToken();
-    const tokenHash = hashToken(rawToken);
+    const { rawToken, tokenHash } = this.generateTokenPair();
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
     await prisma.passwordResetToken.create({
@@ -135,26 +127,16 @@ export class TokenService {
     });
 
     this.logger.debug("Password reset token created", { userId });
-
     return rawToken;
   }
 
   async validatePasswordResetToken(rawToken: string): Promise<{ userId: string; tokenId: string } | null> {
     const tokenHash = hashToken(rawToken);
     const record = await prisma.passwordResetToken.findFirst({
-      where: {
-        tokenHash,
-        usedAt: null,
-        expiresAt: { gt: new Date() },
-      },
+      where: { tokenHash, usedAt: null, expiresAt: { gt: new Date() } },
     });
 
-    if (!record) {
-      this.logger.warn("Invalid or expired password reset token");
-      return null;
-    }
-
-    return { userId: record.userId, tokenId: record.id };
+    return this.resolveTokenRecord(record, "password reset");
   }
 
   async markPasswordResetTokenUsed(tokenId: string): Promise<void> {
