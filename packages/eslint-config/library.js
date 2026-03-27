@@ -1,4 +1,5 @@
-import { config as baseConfig } from './base.js';
+import globals from "globals";
+import { config as baseConfig } from "./base.js";
 
 /**
  * A custom ESLint configuration for Node.js libraries.
@@ -9,28 +10,24 @@ export const libraryConfig = [
   ...baseConfig,
   {
     languageOptions: {
-      globals: {
-        React: true,
-        JSX: true,
-      },
       parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
+        ecmaVersion: "latest",
+        sourceType: "module",
       },
-    },
-    env: {
-      node: true,
+      globals: {
+        ...globals.node,
+      },
     },
     settings: {
-      'import/resolver': {
+      "import/resolver": {
         typescript: {
-          project: './tsconfig.json',
+          project: "./tsconfig.json",
         },
       },
     },
   },
   {
-    ignores: ['.*.js', 'node_modules/', 'dist/'],
+    ignores: [".*.js", "node_modules/", "dist/"],
   },
 ];
 
