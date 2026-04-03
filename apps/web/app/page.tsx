@@ -1,13 +1,27 @@
 "use client";
 
 import { Sidebar } from "@/components/navigation/sidebar/sidebar";
-import { LogoIcon } from "@/components/ui/brand/logo-icon";
+import { Spinner } from "@/components/ui/primitives/spinner";
 import { useAppContext } from "@/context/app-context";
+import { CtaSection } from "./_components/landing/cta-section";
+import { FeaturesSection } from "./_components/landing/features-section";
+import { HeroSection } from "./_components/landing/hero-section";
+import { HowItWorksSection } from "./_components/landing/how-it-works-section";
+import { ImportSection } from "./_components/landing/import-section";
+import { LandingBackground } from "./_components/landing/landing-background";
+import { SpecializedSection } from "./_components/landing/specialized-section";
+import { TemplatesSection } from "./_components/landing/templates-section";
 
 export default function Home() {
   const { user, isLoading } = useAppContext();
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <Spinner size="md" />
+      </div>
+    );
+  }
 
   if (user) {
     return (
@@ -21,19 +35,15 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center flex-1 gap-5 px-6 text-center">
-      <LogoIcon size={72} />
-
-      <h1 className="text-[clamp(40px,6vw,72px)] font-extrabold tracking-[-0.05em] text-ink leading-none">Nucleus</h1>
-
-      <p className="text-base leading-relaxed text-ink-secondary max-w-90">
-        A platform for collecting and working with data during the trading process. Track deals, routine, mistakes, and
-        performance.
-      </p>
-
-      <div className="mt-3 px-5 py-2.5 rounded-full border border-stroke bg-surface text-[13px] font-semibold text-ink-secondary tracking-[0.02em]">
-        In development
-      </div>
-    </main>
+    <div className="relative flex flex-col">
+      <LandingBackground />
+      <HeroSection />
+      <SpecializedSection />
+      <FeaturesSection />
+      <TemplatesSection />
+      <HowItWorksSection />
+      <ImportSection />
+      <CtaSection />
+    </div>
   );
 }

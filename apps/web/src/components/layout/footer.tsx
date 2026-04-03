@@ -4,12 +4,12 @@ import { Logo } from "@/components/ui/brand/logo";
 import { useAppContext } from "@/context/app-context";
 
 export function Footer() {
-  const { user, isLoading } = useAppContext();
+  const { user } = useAppContext();
 
-  if (isLoading || user) return null;
+  if (user) return null;
 
   return (
-    <footer className="px-6 py-8 border-t border-stroke">
+    <footer className="px-6 py-8">
       <div className="flex items-center justify-between gap-4 mx-auto max-w-180">
         <Logo size={20} />
 
