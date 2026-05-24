@@ -9,6 +9,7 @@ node_modules
 .env
 .env.development
 .env.production
+.env.test
 packages/database/.env
 apps/web/.env
 
@@ -33,6 +34,9 @@ yarn-error.log*
 
 # Vercel
 .vercel
+
+# AI assistant configs
+GEMINI.md
 
 # IDEs and editors
 .vscode/
