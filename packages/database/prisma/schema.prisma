@@ -1,12 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 datasource db {
   provider = "postgresql"
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/client"
 }
 
@@ -23,14 +20,48 @@ enum PropertyType {
   STATUS
   RELATION
   FORMULA
+  RATING
+  PROGRESS
 }
 
 enum AutomationTrigger {
   ON_RECORD_CREATE
 }
 
+enum AutomationStatus {
+  SUCCESS
+  FAILURE
+  SKIPPED
+}
+
+enum NotificationType {
+  SYSTEM
+  ALERT
+}
+
+enum IntegrationService {
+  BINANCE
+  BYBIT
+  OKX
+  METATRADER5
+  CTRADER
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 // ==============================
-// Core models
+// Auth models
 // ==============================
 
 model User {
@@ -42,11 +73,14 @@ model User {
   isVerified   Boolean  @default(false)
   createdAt    DateTime @default(now())
 
-  spaces              Space[]
-  settings            Settings[]
-  refreshTokens       RefreshToken[]
-  verificationTokens  EmailVerificationToken[]
-  passwordResetTokens PasswordResetToken[]
+  spaces                 Space[]
+  settings               Settings[]
+  refreshTokens          RefreshToken[]
+  verificationTokens     EmailVerificationToken[]
+  passwordResetTokens    PasswordResetToken[]
+  googleAccount          GoogleAccount?
+  notifications          Notification[]
+  integrationConnections IntegrationConnection[]
 
   @@index([email])
 }
@@ -94,6 +128,25 @@ model PasswordResetToken {
   @@index([tokenHash])
 }
 
+model GoogleAccount {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  googleId       String   @unique
+  email          String
+  accessToken    String
+  refreshToken   String
+  tokenExpiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([googleId])
+}
+
+// ==============================
+// User data models
+// ==============================
+
 model Settings {
   id       String @id @default(uuid())
   userId   String
@@ -108,6 +161,42 @@ model Settings {
   @@index([category])
 }
 
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  type      NotificationType
+  text      String
+  isRead    Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model IntegrationConnection {
+  id         String             @id @default(uuid())
+  userId     String
+  service    IntegrationService
+  name       String
+  credentials Json
+  status     IntegrationStatus  @default(ACTIVE)
+  lastSyncAt DateTime?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([service])
+}
+
+// ==============================
+// Workspace models
+// ==============================
+
 model Space {
   id        String   @id @default(uuid())
   ownerId   String
@@ -119,7 +208,6 @@ model Space {
   owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   databases Database[]
   sections  Section[]
-  //workflowCanvases WorkflowCanvas[]
 
   @@unique([ownerId, name])
   @@index([ownerId])
@@ -144,6 +232,10 @@ model Section {
   @@index([position])
 }
 
+// ==============================
+// Core data models
+// ==============================
+
 model Database {
   id                 String   @id @default(uuid())
   spaceId            String
@@ -152,19 +244,20 @@ model Database {
   title              String
   icon               String?
   recordLimit        Int?
+  isPreset           Boolean  @default(false)
+  isLocked           Boolean  @default(false)
   useDefaultTemplate Boolean  @default(true)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  space      Space      @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  section    Section?   @relation(fields: [sectionId], references: [id], onDelete: SetNull)
-  properties Property[]
-  records    Record[]
-  //importMappings   ImportMapping[]
-  //workflowCanvases WorkflowCanvas[]
-  //views       View[]
-  //automations Automation[]
-  templates  Template[]
+  space          Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  section        Section?       @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  properties     Property[]
+  records        Record[]
+  templates      Template[]
+  views          View[]
+  automations    Automation[]
+  importMappings ImportMapping[]
 
   @@unique([spaceId, name])
   @@index([spaceId])
@@ -172,19 +265,20 @@ model Database {
 }
 
 model Property {
-  id         String       @id @default(uuid())
-  databaseId String
-  name       String
-  type       PropertyType
-  position   Int
-  icon       String?
-  hint       String?
-  group      String?
-  isRequired Boolean      @default(false)
-  isVisible  Boolean      @default(true)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  config     Json?
+  id          String       @id @default(uuid())
+  databaseId  String
+  name        String
+  type        PropertyType
+  position    Int
+  icon        String?
+  hint        String?
+  group       String?
+  isRequired  Boolean      @default(false)
+  isVisible   Boolean      @default(true)
+  isProtected Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  config      Json?
 
   database       Database                @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   values         PropertyValue[]
@@ -195,13 +289,14 @@ model Property {
 }
 
 model Record {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   databaseId String
   templateId String?
-  name       String   @default("Untitled")
+  name       String    @default("Untitled")
   icon       String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   database       Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   sourceTemplate Template?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
@@ -211,6 +306,7 @@ model Record {
   @@index([databaseId])
   @@index([templateId])
   @@index([createdAt])
+  @@index([deletedAt])
 }
 
 model PropertyValue {
@@ -236,6 +332,10 @@ model RecordContent {
 
   record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
 }
+
+// ==============================
+// Template models
+// ==============================
 
 model Template {
   id          String   @id @default(uuid())
@@ -272,96 +372,93 @@ model TemplatePropertyValue {
   @@index([propertyId])
 }
 
-/**
- * model ImportMapping {
- * id           String   @id @default(uuid())
- * databaseId   String
- * name         String
- * sourceType   String
- * mappingRules Json
- * createdAt    DateTime @default(now())
- * updatedAt    DateTime @updatedAt
- * database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
- * imports  ImportHistory[]
- * @@index([databaseId])
- * }
- * model ImportHistory {
- * id              String    @id @default(uuid())
- * importMappingId String
- * status          String
- * recordsCreated  Int       @default(0)
- * recordsFailed   Int       @default(0)
- * errorLog        Json?
- * sourceFileInfo  Json
- * createdAt       DateTime  @default(now())
- * completedAt     DateTime?
- * importMapping ImportMapping @relation(fields: [importMappingId], references: [id], onDelete: Cascade)
- * @@index([importMappingId])
- * @@index([status])
- * }
- * model Formula {
- * id           String   @id @default(uuid())
- * propertyId   String   @unique
- * name         String
- * expression   String
- * canvasData   Json
- * dependencies Json
- * createdAt    DateTime @default(now())
- * updatedAt    DateTime @updatedAt
- * property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
- * @@index([propertyId])
- * }
- * model WorkflowCanvas {
- * id          String   @id @default(uuid())
- * spaceId     String?
- * databaseId  String?
- * name        String
- * description String?
- * nodes       Json
- * edges       Json
- * variables   Json?
- * createdAt   DateTime @default(now())
- * updatedAt   DateTime @updatedAt
- * space    Space?    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
- * database Database? @relation(fields: [databaseId], references: [id], onDelete: Cascade)
- * @@index([spaceId])
- * @@index([databaseId])
- * }
- * model Template {
- * id          String   @id @default(uuid())
- * databaseId  String
- * name        String
- * description String?
- * icon        String?
- * color       String?
- * isDefault   Boolean  @default(false)
- * position    Int      @default(0)
- * createdAt   DateTime @default(now())
- * updatedAt   DateTime @updatedAt
- * config      Json?
- * database      Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
- * blocks        Block[]
- * recordsUsedBy Record[]
- * @@unique([databaseId, name])
- * @@index([databaseId])
- * @@index([position])
- * }
- */
+// ==============================
+// Views & Automation models
+// ==============================
 
-/**
- * model Automation {
- * id         String            @id @default(uuid())
- * databaseId String
- * name       String
- * trigger    AutomationTrigger
- * condition  Json?
- * action     Json?
- * active     Boolean           @default(true)
- * createdAt  DateTime          @default(now())
- * updatedAt  DateTime          @updatedAt
- * config     Json?
- * database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
- * @@index([databaseId])
- * @@index([active])
- * }
- */
+model View {
+  id            String   @id @default(uuid())
+  databaseId    String
+  name          String
+  isDefault     Boolean  @default(false)
+  isLocked      Boolean  @default(false)
+  filters       Json?
+  sort          Json?
+  groupBy       String?
+  hiddenColumns String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+
+  @@index([databaseId])
+}
+
+model Automation {
+  id         String            @id @default(uuid())
+  databaseId String
+  name       String
+  trigger    AutomationTrigger
+  condition  Json?
+  actions    Json
+  active     Boolean           @default(true)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  config     Json?
+
+  database Database       @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  logs     AutomationLog[]
+
+  @@index([databaseId])
+  @@index([active])
+}
+
+model AutomationLog {
+  id             String           @id @default(uuid())
+  automationId   String
+  sourceRecordId String?
+  status         AutomationStatus
+  result         String?
+  createdAt      DateTime         @default(now())
+
+  automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([automationId])
+  @@index([status])
+}
+
+// ==============================
+// Import models
+// ==============================
+
+model ImportMapping {
+  id           String   @id @default(uuid())
+  databaseId   String
+  name         String
+  sourceType   String
+  mappingRules Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  imports  ImportHistory[]
+
+  @@index([databaseId])
+}
+
+model ImportHistory {
+  id              String       @id @default(uuid())
+  importMappingId String
+  status          ImportStatus
+  recordsCreated  Int          @default(0)
+  recordsFailed   Int          @default(0)
+  errorLog        Json?
+  sourceFileInfo  Json
+  createdAt       DateTime     @default(now())
+  completedAt     DateTime?
+
+  importMapping ImportMapping @relation(fields: [importMappingId], references: [id], onDelete: Cascade)
+
+  @@index([importMappingId])
+  @@index([status])
+}
