@@ -19,6 +19,7 @@ Foundation for all other configs. Sets the strictest and most modern defaults:
 For NestJS API apps (`apps/api`) and shared packages compiled with tsc.
 
 Overrides from base:
+
 - `module: commonjs` — NestJS runtime expects CJS
 - `moduleResolution: Node10` — matches CJS resolution
 - `emitDecoratorMetadata: true` + `experimentalDecorators: true` — required for NestJS dependency injection
@@ -32,6 +33,7 @@ Used by: `apps/api`, `packages/domain`, `packages/database`, `packages/jest-conf
 For the Next.js frontend (`apps/web`).
 
 Overrides from base:
+
 - `module: ESNext` + `moduleResolution: Bundler` — Next.js uses its own bundler (webpack/Turbopack)
 - `noEmit: true` — Next.js handles compilation, tsc is for type-checking only
 - `jsx: preserve` — Next.js transforms JSX itself
@@ -43,6 +45,7 @@ Used by: `apps/web`
 For Jest test files inside NestJS packages.
 
 Extends `nestjs.json` and relaxes strict rules that are impractical in tests:
+
 - `noImplicitAny: false` — mock objects often have loose types
 - `strictNullChecks: false` — test assertions don't need null safety
 
@@ -53,6 +56,6 @@ Used by: `apps/api/tsconfig.test.json`
 ```jsonc
 // tsconfig.json in any app or package
 {
-  "extends": "@nucleus/typescript-config/nestjs.json"
+  "extends": "@nucleus/typescript-config/nestjs.json",
 }
 ```
