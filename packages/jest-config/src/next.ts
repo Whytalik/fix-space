@@ -1,18 +1,20 @@
 import type { Config } from "jest";
-// unfortunately, need to disambiguate the `Config` namespace @jest/types uses (via next/jest) and the `Config` type we want for typing our config here
 import type { Config as ConfigNamespace } from "@jest/types";
 import nextJest from "next/jest";
-import { config as baseConfig } from "./base";
 
 const createJestConfig = nextJest({
   dir: "./",
 });
 
-const config = {
-  ...baseConfig,
-  moduleFileExtensions: [...baseConfig.moduleFileExtensions, "jsx", "tsx"],
-} as const satisfies Config;
+const config: Config = {
+  coverageProvider: "v8",
+  collectCoverage: false,
+  testEnvironment: "jsdom",
+  moduleFileExtensions: ["js", "ts", "json", "jsx", "tsx"],
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+};
 
-const nextConfig = createJestConfig(config);
-
-export default nextConfig;
+export default createJestConfig(config);
