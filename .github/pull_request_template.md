@@ -16,7 +16,7 @@
 - [ ] Web: UI works, responsive layout intact
 - [ ] Database: migrations apply (`turbo db:generate`)
 - [ ] Lint: `turbo lint` — no errors
-- [ ] Types: `pnpm --filter @nucleus/web check-types` — no errors
+- [ ] Types: `pnpm --filter @fixspace/web check-types` — no errors
 - [ ] Tests: `turbo test` — green
 
 ## Documentation

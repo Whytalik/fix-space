@@ -96,7 +96,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: nucleus_test
+          POSTGRES_DB: fixspace_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -105,7 +105,7 @@ jobs:
         ports:
           - 5432:5432
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nucleus_test?schema=public
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fixspace_test?schema=public
       NODE_ENV: test
     steps:
       - uses: actions/checkout@v4
@@ -123,13 +123,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build domain package
-        run: pnpm --filter @nucleus/domain build
+        run: pnpm --filter @fixspace/domain build
 
       - name: Run migrations
-        run: pnpm --filter @nucleus/database exec prisma migrate deploy
+        run: pnpm --filter @fixspace/database exec prisma migrate deploy
 
       - name: E2E tests
-        run: pnpm --filter @nucleus/api test:e2e
+        run: pnpm --filter @fixspace/api test:e2e
 
   build:
     name: Build
@@ -169,10 +169,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build API image
-        run: docker build -t nucleus-api:${{ github.sha }} -f apps/api/Dockerfile .
+        run: docker build -t fixspace-api:${{ github.sha }} -f apps/api/Dockerfile .
 
       - name: Show image info
-        run: docker images nucleus-api
+        run: docker images fixspace-api
 
   deploy-staging:
     name: Deploy (Staging)

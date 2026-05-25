@@ -4,13 +4,13 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: nucleus
+      POSTGRES_DB: fixspace
     ports:
       - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d nucleus"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d fixspace"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,7 +20,7 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/nucleus?schema=public
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/fixspace?schema=public
       - JWT_SECRET=${JWT_SECRET:-super-secret-key-for-diploma-project}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-super-refresh-secret-key-for-diploma-project}
       - PORT=3000
@@ -50,7 +50,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: nucleus_test
+      POSTGRES_DB: fixspace_test
     ports:
       - '5433:5432'
     volumes:
