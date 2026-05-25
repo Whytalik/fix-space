@@ -1,0 +1,227 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9.15.1'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm turbo lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: pnpm turbo test
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: '**/coverage/'
+          retention-days: 7
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
+        continue-on-error: true
+
+  test-e2e:
+    name: Test (E2E)
+    runs-on: ubuntu-latest
+    needs: [test]
+    environment:
+      name: staging
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nucleus_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nucleus_test?schema=public
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build domain package
+        run: pnpm --filter @nucleus/domain build
+
+      - name: Run migrations
+        run: pnpm --filter @nucleus/database exec prisma migrate deploy
+
+      - name: E2E tests
+        run: pnpm --filter @nucleus/api test:e2e
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm turbo build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            apps/api/dist/
+            apps/web/.next/
+          retention-days: 1
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build -t nucleus-api:${{ github.sha }} -f apps/api/Dockerfile .
+
+      - name: Show image info
+        run: docker images nucleus-api
+
+  deploy-staging:
+    name: Deploy (Staging)
+    runs-on: ubuntu-latest
+    needs: [docker]
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+    steps:
+      - name: Create deployment manifest
+        run: |
+          mkdir -p deployment
+          echo "Environment: staging"                          > deployment/manifest.txt
+          echo "Branch: ${{ github.ref_name }}"              >> deployment/manifest.txt
+          echo "Commit: ${{ github.sha }}"                   >> deployment/manifest.txt
+          echo "Actor: ${{ github.actor }}"                  >> deployment/manifest.txt
+          echo "Run ID: ${{ github.run_id }}"                >> deployment/manifest.txt
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"  >> deployment/manifest.txt
+          cat deployment/manifest.txt
+          echo "Deployment to staging: SIMULATED SUCCESSFULLY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deployment-manifest
+          path: deployment/
+          retention-days: 30
+
+  deploy-production:
+    name: Deploy (Production)
+    runs-on: ubuntu-latest
+    needs: [docker]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+    steps:
+      - name: Create deployment manifest
+        run: |
+          mkdir -p deployment
+          echo "Environment: production"                      > deployment/manifest.txt
+          echo "Branch: ${{ github.ref_name }}"              >> deployment/manifest.txt
+          echo "Commit: ${{ github.sha }}"                   >> deployment/manifest.txt
+          echo "Actor: ${{ github.actor }}"                  >> deployment/manifest.txt
+          echo "Run ID: ${{ github.run_id }}"                >> deployment/manifest.txt
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"  >> deployment/manifest.txt
+          cat deployment/manifest.txt
+          echo "Deployment to production: SIMULATED SUCCESSFULLY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deployment-manifest-prod
+          path: deployment/
+          retention-days: 30
