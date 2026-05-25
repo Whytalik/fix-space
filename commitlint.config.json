@@ -4,13 +4,49 @@
     "type-enum": [
       2,
       "always",
-      ["feat", "fix", "refactor", "chore", "docs", "test", "ci", "style", "perf", "revert"]
+      [
+        "feat",
+        "fix",
+        "refactor",
+        "chore",
+        "docs",
+        "test",
+        "ci",
+        "style",
+        "perf",
+        "revert"
+      ]
     ],
     "scope-enum": [
       2,
       "always",
-      ["auth", "workspace", "database", "property", "record", "view", "template", "content", "formula", "automation", "statistics", "settings", "onboarding", "notification", "search", "import-export", "integration", "section", "api", "web", "deps"]
+      [
+        "auth",
+        "workspace",
+        "database",
+        "domain",
+        "property",
+        "record",
+        "view",
+        "template",
+        "content",
+        "formula",
+        "automation",
+        "statistics",
+        "settings",
+        "onboarding",
+        "notification",
+        "search",
+        "import-export",
+        "integration",
+        "section",
+        "api",
+        "web",
+        "deps",
+        "ci"
+      ]
     ],
+    "scope-empty": [2, "never"],
     "subject-case": [0],
     "subject-empty": [2, "never"],
     "type-empty": [2, "never"]
