@@ -1,16 +1,49 @@
 services:
   db:
     image: postgres:16
-    env_file:
-      - .env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: nucleus
     ports:
       - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d nucleus"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/nucleus?schema=public
+      - JWT_SECRET=${JWT_SECRET:-super-secret-key-for-diploma-project}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-super-refresh-secret-key-for-diploma-project}
+      - PORT=3000
+      - NODE_ENV=production
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:3000
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+    ports:
+      - '3001:3001'
+    depends_on:
+      - api
 
   db-test:
     image: postgres:16

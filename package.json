@@ -21,6 +21,9 @@
     "db:push": "turbo run db:push",
     "db:generate": "turbo run db:generate",
     "db:reset": "docker-compose down -v && docker-compose up -d && pnpm --filter @nucleus/database db:migrate:dev",
+    "docker:up": "docker compose up -d",
+    "docker:up:build": "docker compose up --build -d",
+    "docker:down": "docker compose down",
     "prepare": "husky"
   },
   "devDependencies": {
