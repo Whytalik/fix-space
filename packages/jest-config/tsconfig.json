@@ -9,7 +9,10 @@
     "module": "commonjs",
     "moduleResolution": "Node10",
     "outDir": "dist",
-    "baseUrl": "src"
+    "rootDir": "src",
+    "baseUrl": ".",
+    "target": "ES2022",
+    "lib": ["es2022"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
