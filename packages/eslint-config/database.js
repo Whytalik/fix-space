@@ -55,13 +55,7 @@ export const databaseConfig = [
     },
   },
   {
-    ignores: [
-      ".turbo/",
-      "node_modules/",
-      "dist/",
-      // Ignore all generated files
-      "generated/",
-    ],
+    ignores: [".turbo/", "node_modules/", "dist/", "generated/", "prisma.config.ts"],
   },
 ];
 
