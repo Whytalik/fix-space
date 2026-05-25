@@ -2,9 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
+    "rootDir": ".",
     "declaration": true,
     "emitDeclarationOnly": false,
     "noEmit": false
   },
-  "include": ["src/client.ts"]
+  "include": ["src/client.ts", "generated/**/*.ts"]
 }
