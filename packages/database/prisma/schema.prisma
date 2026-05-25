@@ -7,9 +7,9 @@ generator client {
   output   = "../generated/client"
 }
 
-// ==============================
+// -----------------------------------------------------------------------------
 // Enums
-// ==============================
+// -----------------------------------------------------------------------------
 
 enum PropertyType {
   TEXT
@@ -22,10 +22,14 @@ enum PropertyType {
   FORMULA
   RATING
   PROGRESS
+  DURATION
+  BUTTON
 }
 
 enum AutomationTrigger {
   ON_RECORD_CREATE
+  ON_FIELD_CHANGE
+  ON_SCHEDULE
 }
 
 enum AutomationStatus {
@@ -37,6 +41,7 @@ enum AutomationStatus {
 enum NotificationType {
   SYSTEM
   ALERT
+  INTEGRATION
 }
 
 enum IntegrationService {
@@ -60,9 +65,9 @@ enum ImportStatus {
   FAILED
 }
 
-// ==============================
-// Auth models
-// ==============================
+// -----------------------------------------------------------------------------
+// Auth Models
+// -----------------------------------------------------------------------------
 
 model User {
   id           String   @id @default(uuid())
@@ -81,6 +86,8 @@ model User {
   googleAccount          GoogleAccount?
   notifications          Notification[]
   integrationConnections IntegrationConnection[]
+  contentBlockLibrary    ContentBlockLibrary[]
+  onboardingProgress     OnboardingProgress?
 
   @@index([email])
 }
@@ -143,9 +150,9 @@ model GoogleAccount {
   @@index([googleId])
 }
 
-// ==============================
-// User data models
-// ==============================
+// -----------------------------------------------------------------------------
+// User Data Models
+// -----------------------------------------------------------------------------
 
 model Settings {
   id       String @id @default(uuid())
@@ -177,25 +184,31 @@ model Notification {
 }
 
 model IntegrationConnection {
-  id         String             @id @default(uuid())
-  userId     String
-  service    IntegrationService
-  name       String
-  credentials Json
-  status     IntegrationStatus  @default(ACTIVE)
-  lastSyncAt DateTime?
-  createdAt  DateTime           @default(now())
-  updatedAt  DateTime           @updatedAt
+  id                    String             @id @default(uuid())
+  userId                String
+  service               IntegrationService
+  name                  String
+  credentials           Json
+  status                IntegrationStatus  @default(ACTIVE)
+  syncInterval          Int                @default(5)
+  marketType            String?
+  externalAccountId     String?
+  lastSyncAt            DateTime?
+  lastSyncError         String?
+  consecutiveFailures   Int                @default(0)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([service])
+  @@index([status])
 }
 
-// ==============================
-// Workspace models
-// ==============================
+// -----------------------------------------------------------------------------
+// Workspace Models
+// -----------------------------------------------------------------------------
 
 model Space {
   id        String   @id @default(uuid())
@@ -203,7 +216,9 @@ model Space {
   name      String
   icon      String?
   isDefault Boolean  @default(false)
+  isDemo    Boolean  @default(false)
   createdAt DateTime @default(now())
+  config    Json?
 
   owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   databases Database[]
@@ -218,6 +233,7 @@ model Section {
   id        String   @id @default(uuid())
   spaceId   String
   name      String
+  key       String?
   position  Int      @default(0)
   icon      String?
   color     String?
@@ -232,9 +248,9 @@ model Section {
   @@index([position])
 }
 
-// ==============================
-// Core data models
-// ==============================
+// -----------------------------------------------------------------------------
+// Core Data Models
+// -----------------------------------------------------------------------------
 
 model Database {
   id                 String   @id @default(uuid())
@@ -242,16 +258,21 @@ model Database {
   sectionId          String?
   name               String
   title              String
+  type               String?
+  key                String?
   icon               String?
   recordLimit        Int?
   isPreset           Boolean  @default(false)
   isLocked           Boolean  @default(false)
   useDefaultTemplate Boolean  @default(true)
+  enableStats        Boolean  @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  config             Json?
 
-  space          Space          @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  section        Section?       @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  space          Space           @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  section        Section?        @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  propertyGroups PropertyGroup[]
   properties     Property[]
   records        Record[]
   templates      Template[]
@@ -264,9 +285,26 @@ model Database {
   @@index([sectionId])
 }
 
+model PropertyGroup {
+  id           String   @id @default(uuid())
+  databaseId   String
+  name         String
+  position     Int      @default(0)
+  visibility   Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  database   Database   @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  properties Property[]
+
+  @@index([databaseId])
+  @@index([position])
+}
+
 model Property {
   id          String       @id @default(uuid())
   databaseId  String
+  groupId     String?
   name        String
   type        PropertyType
   position    Int
@@ -281,32 +319,42 @@ model Property {
   config      Json?
 
   database       Database                @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  propertyGroup  PropertyGroup?          @relation(fields: [groupId], references: [id], onDelete: SetNull)
   values         PropertyValue[]
   templateValues TemplatePropertyValue[]
 
   @@index([databaseId])
   @@index([position])
+  @@index([groupId])
 }
 
 model Record {
-  id         String    @id @default(uuid())
-  databaseId String
-  templateId String?
-  name       String    @default("Untitled")
-  icon       String?
-  deletedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id                  String    @id @default(uuid())
+  databaseId          String
+  templateId          String?
+  sourceIntegrationId String?
+  sourceLabel         String?
+  sourcePositionId    String?
+  sourceCurrency      String?
+  name                String    @default("Untitled")
+  icon                String?
+  config              Json?
+  deletedAt           DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  database       Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
-  sourceTemplate Template?       @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  database       Database            @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  sourceTemplate Template?           @relation(fields: [templateId], references: [id], onDelete: SetNull)
   values         PropertyValue[]
   content        RecordContent?
+  buttonExecutions ButtonExecution[]
 
   @@index([databaseId])
   @@index([templateId])
   @@index([createdAt])
   @@index([deletedAt])
+  @@index([sourceIntegrationId])
+  @@index([sourcePositionId])
 }
 
 model PropertyValue {
@@ -330,12 +378,26 @@ model RecordContent {
   content      Json     @default("{}")
   lastEditedAt DateTime @default(now()) @updatedAt
 
-  record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  record    Record                  @relation(fields: [recordId], references: [id], onDelete: Cascade)
+  snapshots RecordContentSnapshot[]
 }
 
-// ==============================
-// Template models
-// ==============================
+model ButtonExecution {
+  id          String   @id @default(uuid())
+  recordId    String
+  propertyId  String
+  executedAt  DateTime @default(now())
+
+  record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@index([recordId])
+  @@index([propertyId])
+  @@index([executedAt])
+}
+
+// -----------------------------------------------------------------------------
+// Template Models
+// -----------------------------------------------------------------------------
 
 model Template {
   id          String   @id @default(uuid())
@@ -343,6 +405,8 @@ model Template {
   name        String   @default("Untitled")
   description String?
   icon        String?
+  namePattern String?
+  content     Json     @default("{}")
   isDefault   Boolean  @default(false)
   position    Int      @default(0)
   createdAt   DateTime @default(now())
@@ -372,9 +436,9 @@ model TemplatePropertyValue {
   @@index([propertyId])
 }
 
-// ==============================
-// Views & Automation models
-// ==============================
+// -----------------------------------------------------------------------------
+// Views & Automation Models
+// -----------------------------------------------------------------------------
 
 model View {
   id            String   @id @default(uuid())
@@ -382,10 +446,14 @@ model View {
   name          String
   isDefault     Boolean  @default(false)
   isLocked      Boolean  @default(false)
+  pageSize      Int      @default(50)
   filters       Json?
   sort          Json?
   groupBy       String?
   hiddenColumns String[]
+  columnWidths  Json?
+  textWrap      Boolean  @default(false)
+  searchQuery   String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -406,7 +474,7 @@ model Automation {
   updatedAt  DateTime          @updatedAt
   config     Json?
 
-  database Database       @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   logs     AutomationLog[]
 
   @@index([databaseId])
@@ -427,9 +495,9 @@ model AutomationLog {
   @@index([status])
 }
 
-// ==============================
-// Import models
-// ==============================
+// -----------------------------------------------------------------------------
+// Import Models
+// -----------------------------------------------------------------------------
 
 model ImportMapping {
   id           String   @id @default(uuid())
@@ -461,4 +529,55 @@ model ImportHistory {
 
   @@index([importMappingId])
   @@index([status])
+}
+
+// -----------------------------------------------------------------------------
+// Content & Library Models
+// -----------------------------------------------------------------------------
+
+model RecordContentSnapshot {
+  id              String   @id @default(uuid())
+  recordContentId String
+  content         Json
+  createdAt       DateTime @default(now())
+
+  recordContent RecordContent @relation(fields: [recordContentId], references: [id], onDelete: Cascade)
+
+  @@index([recordContentId])
+  @@index([createdAt])
+}
+
+model ContentBlockLibrary {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  content   Json
+  isSystem  Boolean  @default(false)
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// -----------------------------------------------------------------------------
+// Onboarding Models
+// -----------------------------------------------------------------------------
+
+model OnboardingProgress {
+  id               String   @id @default(uuid())
+  userId           String
+  tourStep         Int      @default(0)
+  tourCompleted    Boolean  @default(false)
+  checklistItems   Json     @default("[]")
+  contextualTips   String[] @default([])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@index([userId])
 }

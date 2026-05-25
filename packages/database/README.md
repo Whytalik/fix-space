@@ -33,28 +33,41 @@ generator client {
 
 ### Models
 
-| Model                    | Purpose                                       |
-| ------------------------ | --------------------------------------------- |
-| `User`                   | User accounts with email/username auth        |
-| `RefreshToken`           | JWT refresh tokens with bcrypt hashing        |
-| `EmailVerificationToken` | Email verification flow tokens                |
-| `PasswordResetToken`     | Password reset flow tokens                    |
-| `Settings`               | User-level key-value settings (JSON)          |
-| `Space`                  | Top-level workspace (owned by user)           |
-| `Section`                | Organizational sections within a space        |
-| `Database`               | Data containers within a space/section        |
-| `Property`               | Typed columns (TEXT, NUMBER, DATE, etc.)      |
-| `Record`                 | Data rows within a database                   |
-| `PropertyValue`          | JSON values for record-property pairs         |
-| `RecordContent`          | Rich text content (Editor.js JSON) per record |
-| `Template`               | Pre-filled record templates                   |
-| `TemplatePropertyValue`  | Default values for template properties        |
+| Model                    | Purpose                                               |
+| ------------------------ | ----------------------------------------------------- |
+| `User`                   | User accounts with email/username auth                |
+| `RefreshToken`           | JWT refresh tokens with bcrypt hashing                |
+| `EmailVerificationToken` | Email verification flow tokens                        |
+| `PasswordResetToken`     | Password reset flow tokens                            |
+| `GoogleAccount`          | Linked Google OAuth account                           |
+| `Settings`               | User-level key-value settings (JSON)                  |
+| `Notification`           | In-app notifications (SYSTEM, ALERT, INTEGRATION)     |
+| `IntegrationConnection`  | External broker/exchange API connections              |
+| `Space`                  | Top-level workspace (owned by user)                   |
+| `Section`                | Organizational sections within a space                |
+| `Database`               | Data containers within a space/section                |
+| `PropertyGroup`          | Named property groups with conditional visibility     |
+| `Property`               | Typed columns (TEXT, NUMBER, DATE, etc.)              |
+| `Record`                 | Data rows within a database                           |
+| `PropertyValue`          | JSON values for record-property pairs                 |
+| `RecordContent`          | Rich text content (Editor.js JSON) per record         |
+| `RecordContentSnapshot`  | Versioned snapshots of record content                 |
+| `ButtonExecution`        | Tracks last successful button execution per record    |
+| `Template`               | Pre-filled record templates                           |
+| `TemplatePropertyValue`  | Default values for template properties                |
+| `View`                   | Saved view configurations (filters, sort, grouping)   |
+| `Automation`             | Server-side automation rules per database             |
+| `AutomationLog`          | Execution history for automations                     |
+| `ImportMapping`          | Saved CSV field-mapping presets                       |
+| `ImportHistory`          | CSV import job history                                |
+| `ContentBlockLibrary`    | Reusable content blocks (system presets + user saved) |
+| `OnboardingProgress`     | Per-user tour state, checklist, contextual tips       |
 
 ### Property types
 
 The `PropertyType` enum defines available column types:
 
-`TEXT`, `NUMBER`, `DATE`, `CHECKBOX`, `SELECT`, `STATUS`, `RELATION`, `FORMULA`
+`TEXT`, `NUMBER`, `DATE`, `CHECKBOX`, `SELECT`, `STATUS`, `RELATION`, `FORMULA`, `RATING`, `PROGRESS`, `DURATION`, `BUTTON`
 
 ## Client usage
 

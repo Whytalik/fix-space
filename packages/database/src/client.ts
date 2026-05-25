@@ -13,7 +13,7 @@ dotenv.config({
 
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import { PrismaClient } from "../generated/client/index.js";
+import { PrismaClient } from "../generated/client/client.js";
 
 const globalForPrisma = global as unknown as {
   prisma: PrismaClient;
@@ -37,4 +37,4 @@ export const prisma =
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-export * from "../generated/client/index.js";
+export * from "../generated/client/client.js";
