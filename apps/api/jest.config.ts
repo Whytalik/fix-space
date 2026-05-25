@@ -1,3 +1,3 @@
-import { nestConfig } from "@nucleus/jest-config";
+import { nestConfig } from "@fixspace/jest-config";
 
 export default nestConfig;

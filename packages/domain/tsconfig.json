@@ -1,5 +1,5 @@
 {
-  "extends": "@nucleus/typescript-config/nestjs.json",
+  "extends": "@fixspace/typescript-config/nestjs.json",
   "compilerOptions": {
     "allowJs": true,
     "paths": {

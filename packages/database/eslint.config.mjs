@@ -1,3 +1,3 @@
-import { databaseConfig } from "@nucleus/eslint-config/database";
+import { databaseConfig } from "@fixspace/eslint-config/database";
 
 export default databaseConfig;

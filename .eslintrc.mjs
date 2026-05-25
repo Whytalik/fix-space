@@ -1,4 +1,4 @@
-import { libraryConfig } from "@nucleus/eslint-config/library";
+import { libraryConfig } from "@fixspace/eslint-config/library";
 
 export default [
   {

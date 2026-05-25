@@ -1,5 +1,5 @@
 {
-  "name": "@nucleus/api",
+  "name": "@fixspace/api",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -16,6 +16,8 @@
     "format": "prettier --write \"{src,apps,libs,test}/**/*.ts\""
   },
   "dependencies": {
+    "@fixspace/database": "workspace:^",
+    "@fixspace/domain": "workspace:*",
     "@nestjs/common": "^11.1.11",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.11",
@@ -24,11 +26,10 @@
     "@nestjs/platform-express": "^11.1.11",
     "@nestjs/swagger": "^11.4.4",
     "@nestjs/throttler": "^6.5.0",
-    "@nucleus/database": "workspace:^",
-    "@nucleus/domain": "workspace:*",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
+    "multer": "^2.1.1",
     "nestjs-i18n": "^10.7.5",
     "nodemailer": "^8.0.1",
     "passport-jwt": "^4.0.1",
@@ -38,13 +39,13 @@
   },
   "devDependencies": {
     "@compodoc/compodoc": "^1.2.1",
+    "@fixspace/eslint-config": "workspace:*",
+    "@fixspace/jest-config": "workspace:*",
+    "@fixspace/typescript-config": "workspace:*",
     "@jest/globals": "^29.7.0",
     "@nestjs/cli": "^11.0.14",
     "@nestjs/schematics": "^11.0.9",
     "@nestjs/testing": "^11.1.11",
-    "@nucleus/eslint-config": "workspace:*",
-    "@nucleus/jest-config": "workspace:*",
-    "@nucleus/typescript-config": "workspace:*",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^4.17.25",
