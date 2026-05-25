@@ -1,132 +1,134 @@
-# `@nucleus/jest-config`
+# @nucleus/jest-config
 
-Shared Jest configurations for the Nucleus monorepo. All configs are compiled from TypeScript and exported as JavaScript.
+Shared Jest configurations for the Nucleus monorepo. All configs are written in
+TypeScript, compiled to `dist/` via `tsc`, and consumed by apps via the package's
+`exports` map.
 
 ## Available configs
 
-### `base` — Base shared rules
+### `base` — Foundation
 
-Foundation config that all others extend from. Provides:
+Internal base layer that all other configs extend from. Not exported directly.
 
-- `testEnvironment: "node"` — Node.js environment (not jsdom)
-- `coverageProvider: "v8"` — Modern coverage engine (faster, more accurate than babel)
-- `collectCoverage: false` — Coverage is off by default; enable with `-- --coverage`
-- `moduleNameMapper` — Resolves `@/*` imports to `<rootDir>/src/*` (matches tsconfig `paths`)
-- `moduleFileExtensions: ["js", "ts", "json"]`
+Defaults:
 
-Not meant to be used directly — always extended by a more specific config.
+- `testEnvironment: "node"` — Node.js environment
+- `coverageProvider: "v8"` — faster, more accurate than Babel coverage
+- `collectCoverage: false` — off by default; enable per-run with `--coverage`
+- `moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" }` — resolves `@/` path alias
 
-### `nest` — NestJS backend
+---
 
-For NestJS unit tests in `apps/api`. Extends `base` with:
+### `nest` — NestJS unit tests
 
-- `testEnvironment: "node"` (explicit override)
-- `transform` — `ts-jest` with `<rootDir>/../tsconfig.test.json` (relaxed strictness for tests)
-- `testRegex: ".*\\.spec\\.ts$"` — Matches only `.spec.ts` files
-- `collectCoverageFrom: ["**/*.(t|j)s"]` — Collects from all TS/JS files
-- `coverageDirectory: "../coverage"` — Outputs to `apps/api/coverage/`
-- `rootDir: "src"` — Test root is the `src/` directory
+For `*.spec.ts` files inside `apps/api/src/`. Uses `ts-jest` for TypeScript
+transformation and targets the relaxed `tsconfig.test.json` (which disables
+`noImplicitAny` and `strictNullChecks`), making mocks and spy types less painful
+to write.
+
+| Option              | Value                               |
+| ------------------- | ----------------------------------- |
+| `testEnvironment`   | `"node"`                            |
+| `testRegex`         | `".*\\.spec\\.ts$"`                 |
+| `rootDir`           | `"src"`                             |
+| `transform`         | `ts-jest` → `../tsconfig.test.json` |
+| `coverageDirectory` | `"../coverage"`                     |
 
 Used by: `apps/api/jest.config.ts`
 
-### `e2e` — E2E integration tests
+---
 
-For end-to-end API tests with Supertest. Extends `base` with:
+### `next` — Next.js component tests
 
-- `testEnvironment: "node"`
-- `transform` — `ts-jest` (no custom tsconfig, uses default)
-- `testRegex: ".e2e-spec.ts$"` — Matches only `.e2e-spec.ts` files
-- `collectCoverage: false` — E2E tests never collect coverage
-- `moduleFileExtensions: ["js", "json", "ts"]`
+For React component and hook tests in `apps/web/`. Wraps the config with
+`next/jest`'s `createJestConfig`, which automatically sets up SWC transformation,
+CSS and image mocking, and `.env` file loading — removing the need for manual
+transform configuration.
 
-Used by: `apps/api/test/jest-e2e.json`
+| Option                 | Value                                |
+| ---------------------- | ------------------------------------ |
+| `testEnvironment`      | `"jsdom"`                            |
+| `coverageProvider`     | `"v8"`                               |
+| `moduleFileExtensions` | `["js", "ts", "json", "jsx", "tsx"]` |
+| `moduleNameMapper`     | `"^@/(.*)$"` → `"<rootDir>/src/$1"`  |
+| `setupFilesAfterEnv`   | `["<rootDir>/jest.setup.ts"]`        |
 
-### `domain` — Domain package (DTO tests)
-
-For `@nucleus/domain` package unit tests. Extends `base` with:
-
-- `testEnvironment: "node"`
-- `transform` — `ts-jest` with `<rootDir>/../tsconfig.json`
-- `testRegex: ".*\\.spec\\.ts$"` — Matches only `.spec.ts` files
-- `collectCoverageFrom: ["**/*.ts"]` — Collects from all TS files
-- `coverageDirectory: "../coverage"` — Outputs to `packages/domain/coverage/`
-- `rootDir: "src"` — Test root is the `src/` directory
-- `moduleFileExtensions: ["ts", "js", "json"]`
-
-Used by: `packages/domain` (future — no tests yet)
-
-### `next` — Next.js frontend
-
-For Next.js React component tests. Wraps config with `next/jest`:
-
-- `next/jest` integration — SWC transform, CSS/image mocking, `.env` loading
-- `testEnvironment: "jsdom"` — Browser-like environment for React components
-- `moduleFileExtensions` — adds `jsx`, `tsx` to base extensions
-- `setupFilesAfterEnv` — loads `jest.setup.ts` for `@testing-library/jest-dom` matchers
-- `@/*` path alias support via `moduleNameMapper`
+The `setupFilesAfterEnv` path resolves to the consuming app's own `jest.setup.ts`,
+which is expected to import `@testing-library/jest-dom` matchers.
 
 Used by: `apps/web/jest.config.ts`
 
-## Path alias support
+---
 
-All configs resolve `@/*` imports to `<rootDir>/src/*` via `moduleNameMapper`. This matches the `paths` config in `tsconfig.json` files:
+### `e2e` — E2E API tests
 
-```json
-// tsconfig.json
-{
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
-}
-```
+For end-to-end tests with Supertest in `apps/api/test/`. Coverage is always
+disabled here — e2e tests exist to verify integration paths, not coverage numbers.
+
+| Option            | Value             |
+| ----------------- | ----------------- |
+| `testEnvironment` | `"node"`          |
+| `testRegex`       | `".e2e-spec.ts$"` |
+| `collectCoverage` | `false`           |
+
+Used by: `apps/api/test/jest-e2e.json`
+
+---
+
+### `domain` — Domain package tests
+
+For `*.spec.ts` files inside `packages/domain/src/`. Currently no tests exist,
+but the config is in place for future DTO validation tests.
+
+| Option              | Value               |
+| ------------------- | ------------------- |
+| `testEnvironment`   | `"node"`            |
+| `testRegex`         | `".*\\.spec\\.ts$"` |
+| `rootDir`           | `"src"`             |
+| `coverageDirectory` | `"../coverage"`     |
+
+Used by: `packages/domain/jest.config.ts` (when tests are added)
+
+---
 
 ## Usage
 
-### API / NestJS unit tests
-
 ```ts
 // apps/api/jest.config.ts
-import { nestConfig } from "@nucleus/jest-config";
-
+import { nestConfig } from "@nucleus/jest-config/nest";
 export default nestConfig;
 ```
 
-### E2E tests
-
-```json
-// apps/api/test/jest-e2e.json
-{
-  "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
-  "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
-  "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  },
-  "collectCoverage": false
-}
-```
-
-### Domain package (DTO tests)
-
 ```ts
-// packages/domain/jest.config.ts
-import { domainConfig } from "@nucleus/jest-config";
-
-export default domainConfig;
+// apps/web/jest.config.ts
+import nextConfig from "@nucleus/jest-config/next";
+export default nextConfig;
 ```
 
-### Running with coverage
+The `next` config is a default export because `createJestConfig` from `next/jest`
+returns a function result, not a plain object — it can't be destructured as a
+named export.
 
-Coverage is off by default for faster test execution. Enable it explicitly:
+## Running tests
 
 ```bash
+# Unit tests (API)
+pnpm --filter @nucleus/api test
+
+# Unit tests in watch mode
+pnpm --filter @nucleus/api test:watch
+
+# With coverage report
 pnpm --filter @nucleus/api test -- --coverage
+
+# E2E tests
+pnpm --filter @nucleus/api test:e2e
+
+# Web component tests
+pnpm --filter @nucleus/web test
 ```
 
-### Writing component tests
+## Writing component tests
 
 ```tsx
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -134,15 +136,13 @@ import { Button } from "@/components/ui/primitives/button";
 
 describe("Button", () => {
   it("renders with correct text", () => {
-    render(<Button>Click me</Button>);
-    expect(
-      screen.getByRole("button", { name: /click me/i }),
-    ).toBeInTheDocument();
+    render(<Button>Save</Button>);
+    expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
   });
 
   it("calls onClick when clicked", () => {
     const handleClick = jest.fn();
-    render(<Button onClick={handleClick}>Click me</Button>);
+    render(<Button onClick={handleClick}>Save</Button>);
     fireEvent.click(screen.getByRole("button"));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
