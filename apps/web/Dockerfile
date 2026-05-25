@@ -8,7 +8,7 @@ WORKDIR /app
 FROM base AS pruner
 RUN npm install -g turbo@2
 COPY . .
-RUN turbo prune @nucleus/web --docker
+RUN turbo prune @fixspace/web --docker
 
 # Stage 2: install
 FROM base AS installer
@@ -20,30 +20,25 @@ RUN pnpm install --frozen-lockfile
 FROM installer AS builder
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
-# Next.js build needs API URL at build time for some features (SSG/ISR)
 ARG NEXT_PUBLIC_API_URL=http://localhost:3000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-RUN pnpm turbo build --filter=@nucleus/web
+RUN pnpm turbo build --filter=@fixspace/web
 
 # Stage 4: runner
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 USER nextjs
 
 COPY --from=builder /app/apps/web/public ./apps/web/public
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 
 EXPOSE 3001
 ENV PORT=3001
 
-# Next.js standalone server
 CMD ["node", "apps/web/server.js"]
