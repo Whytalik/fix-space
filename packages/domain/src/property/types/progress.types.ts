@@ -36,11 +36,4 @@ export class ProgressProperty {
   thresholds: ProgressThreshold[];
 }
 
-export const DEFAULT_PROGRESS_PROPERTY: ProgressProperty = {
-  defaultValue: null,
-  min: 0,
-  max: 100,
-  step: 1,
-  showLabel: true,
-  thresholds: [],
-};
+export { DEFAULT_PROGRESS_PROPERTY } from "./progress.constants";

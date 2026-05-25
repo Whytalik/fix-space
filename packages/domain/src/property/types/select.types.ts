@@ -39,7 +39,4 @@ export class SelectProperty {
   categories: SelectCategory[];
 }
 
-export const DEFAULT_SELECT_PROPERTY: SelectProperty = {
-  isMultiSelect: false,
-  categories: [],
-};
+export { DEFAULT_SELECT_PROPERTY } from "./select.constants";

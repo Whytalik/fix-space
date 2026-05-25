@@ -3,18 +3,8 @@ import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 
-export enum GroupField {
-  PROPERTY = "property",
-  CREATED_AT = "createdAt",
-  UPDATED_AT = "updatedAt",
-}
-
-export enum DateGroupGranularity {
-  DAY = "day",
-  WEEK = "week",
-  MONTH = "month",
-  YEAR = "year",
-}
+export { GroupField, DateGroupGranularity } from "./record-group.enums";
+import { GroupField, DateGroupGranularity } from "./record-group.enums";
 
 export class RecordGroupDto {
   @IsEnum(GroupField, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })

@@ -76,7 +76,4 @@ export class FormulaProperty {
   output: FormulaOutput;
 }
 
-export const DEFAULT_FORMULA_PROPERTY: FormulaProperty = {
-  formula: "",
-  output: { type: "text" } as FormulaOutputText,
-};
+export { DEFAULT_FORMULA_PROPERTY } from "./formula.constants";

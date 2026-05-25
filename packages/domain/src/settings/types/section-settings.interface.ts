@@ -11,7 +11,4 @@ export class SectionSettings {
   defaultSectionColor: string;
 }
 
-export const DEFAULT_SECTION_SETTINGS: SectionSettings = {
-  defaultSectionIcon: "icon:FolderOpen",
-  defaultSectionColor: "transparent",
-};
+export { DEFAULT_SECTION_SETTINGS } from "./section-settings.constants";

@@ -18,8 +18,4 @@ export class RatingProperty {
   allowHalf: boolean;
 }
 
-export const DEFAULT_RATING_PROPERTY: RatingProperty = {
-  defaultValue: null,
-  maxStars: 5,
-  allowHalf: false,
-};
+export { DEFAULT_RATING_PROPERTY } from "./rating.constants";

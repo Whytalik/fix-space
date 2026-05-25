@@ -8,6 +8,4 @@ export class CheckboxProperty {
   defaultValue: boolean;
 }
 
-export const DEFAULT_CHECKBOX_PROPERTY: CheckboxProperty = {
-  defaultValue: false,
-};
+export { DEFAULT_CHECKBOX_PROPERTY } from "./checkbox.constants";

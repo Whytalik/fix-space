@@ -22,6 +22,11 @@
       "import": "./dist/entry.js",
       "require": "./dist/entry.js"
     },
+    "./enums": {
+      "types": "./dist/enums.d.ts",
+      "import": "./dist/enums.js",
+      "require": "./dist/enums.js"
+    },
     "./*": {
       "types": "./dist/*/index.d.ts",
       "import": "./dist/*/index.js",

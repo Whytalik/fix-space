@@ -12,7 +12,4 @@ export class RelationProperty {
   multiple: boolean;
 }
 
-export const DEFAULT_RELATION_PROPERTY: RelationProperty = {
-  relatedEntityId: "",
-  multiple: true,
-};
+export { DEFAULT_RELATION_PROPERTY } from "./relation.constants";

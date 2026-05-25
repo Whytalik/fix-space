@@ -4,11 +4,8 @@ import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 
-export const DATA_FORMATS_VALUES = ["DD.MM.YYYY", "MM/DD/YYYY", "YYYY-MM-DD"] as const;
-export type DataFormat = (typeof DATA_FORMATS_VALUES)[number];
-
-export const TIME_FORMATS_VALUES = ["HH:mm", "hh:mm A"] as const;
-export type TimeFormat = (typeof TIME_FORMATS_VALUES)[number];
+import { DATA_FORMATS_VALUES, type DataFormat, TIME_FORMATS_VALUES, type TimeFormat } from "./date.constants";
+export { DATA_FORMATS_VALUES, type DataFormat, TIME_FORMATS_VALUES, type TimeFormat } from "./date.constants";
 
 export class DateProperty {
   @IsOptional()
@@ -26,9 +23,4 @@ export class DateProperty {
   timeFormat: TimeFormat;
 }
 
-export const DEFAULT_DATE_PROPERTY: DateProperty = {
-  defaultValue: null,
-  format: DATA_FORMATS_VALUES[0],
-  includeTime: false,
-  timeFormat: TIME_FORMATS_VALUES[0],
-};
+export { DEFAULT_DATE_PROPERTY } from "./date.constants";

@@ -3,8 +3,8 @@ import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 
-export const NUMBER_FORMAT_VALUES = ["integer", "float", "currency", "percentage"] as const;
-export type NumberFormat = (typeof NUMBER_FORMAT_VALUES)[number];
+import { NUMBER_FORMAT_VALUES, type NumberFormat } from "./number.constants";
+export { NUMBER_FORMAT_VALUES, type NumberFormat } from "./number.constants";
 
 export class NumberProperty {
   @IsNumber({}, { message: i18nValidationMessage<I18nTranslations>("validation.IS_NUMBER") })
@@ -23,9 +23,4 @@ export class NumberProperty {
   currencySymbol?: string;
 }
 
-export const DEFAULT_NUMBER_PROPERTY: NumberProperty = {
-  defaultValue: 0,
-  format: "float",
-  decimalPlaces: 2,
-  currencySymbol: "$",
-};
+export { DEFAULT_NUMBER_PROPERTY } from "./number.constants";

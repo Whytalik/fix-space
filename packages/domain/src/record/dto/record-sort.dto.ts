@@ -3,16 +3,8 @@ import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 
-export enum SortDirection {
-  ASC = "asc",
-  DESC = "desc",
-}
-
-export enum SortField {
-  CREATED_AT = "createdAt",
-  UPDATED_AT = "updatedAt",
-  PROPERTY = "property",
-}
+export { SortDirection, SortField } from "./record-sort.enums";
+import { SortDirection, SortField } from "./record-sort.enums";
 
 export class RecordSortDto {
   @IsEnum(SortField, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })

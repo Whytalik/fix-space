@@ -14,6 +14,7 @@ import {
 import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
+import { PropertyType } from "../property-type.enum";
 import {
   ButtonProperty,
   CheckboxProperty,
@@ -29,20 +30,7 @@ import {
   TextProperty,
 } from "../types";
 
-export enum PropertyType {
-  TEXT = "TEXT",
-  NUMBER = "NUMBER",
-  DATE = "DATE",
-  CHECKBOX = "CHECKBOX",
-  DURATION = "DURATION",
-  SELECT = "SELECT",
-  STATUS = "STATUS",
-  RELATION = "RELATION",
-  FORMULA = "FORMULA",
-  RATING = "RATING",
-  PROGRESS = "PROGRESS",
-  BUTTON = "BUTTON",
-}
+export { PropertyType } from "../property-type.enum";
 
 export class CreatePropertyDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
