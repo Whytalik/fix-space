@@ -1,5 +1,6 @@
 import type { Config } from "jest";
 import type { Config as ConfigNamespace } from "@jest/types";
+// @ts-ignore
 import nextJest from "next/jest";
 
 const createJestConfig = nextJest({
