@@ -1,5 +1,5 @@
 {
   "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && turbo build --filter=@nucleus/web",
+  "buildCommand": "cd ../.. && turbo build --filter=@fixspace/web",
   "outputDirectory": ".next"
 }

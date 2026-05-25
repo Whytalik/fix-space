@@ -1,3 +1,3 @@
-import nextConfig from "@nucleus/jest-config/next";
+import nextConfig from "@fixspace/jest-config/next";
 
 export default nextConfig;

@@ -16,10 +16,10 @@ importers:
       '@nestjs/throttler':
         specifier: ^6.5.0
         version: 6.5.0(@nestjs/common@11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.13(@nestjs/common@11.1.13(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)
-      '@nucleus/database':
+      '@fixspace/database':
         specifier: workspace:^
         version: link:../../packages/database
-      '@nucleus/domain':
+      '@fixspace/domain':
         specifier: workspace:*
         version: link:../../packages/domain
       cookie-parser:
@@ -35,13 +35,13 @@ importers:
         specifier: ^7.8.2
         version: 7.8.2
     devDependencies:
-      '@nucleus/eslint-config':
+      '@fixspace/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@nucleus/jest-config':
+      '@fixspace/jest-config':
         specifier: workspace:*
         version: link:../../packages/jest-config
-      '@nucleus/typescript-config':
+      '@fixspace/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
       '@types/cookie-parser':

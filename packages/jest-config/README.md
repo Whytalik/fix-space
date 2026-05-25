@@ -1,6 +1,6 @@
-# @nucleus/jest-config
+# @fixspace/jest-config
 
-Shared Jest configurations for the Nucleus monorepo. All configs are written in
+Shared Jest configurations for the FIX Space monorepo. All configs are written in
 TypeScript, compiled to `dist/` via `tsc`, and consumed by apps via the package's
 `exports` map.
 
@@ -95,13 +95,13 @@ Used by: `packages/domain/jest.config.ts` (when tests are added)
 
 ```ts
 // apps/api/jest.config.ts
-import { nestConfig } from "@nucleus/jest-config/nest";
+import { nestConfig } from "@fixspace/jest-config/nest";
 export default nestConfig;
 ```
 
 ```ts
 // apps/web/jest.config.ts
-import nextConfig from "@nucleus/jest-config/next";
+import nextConfig from "@fixspace/jest-config/next";
 export default nextConfig;
 ```
 
@@ -113,19 +113,19 @@ named export.
 
 ```bash
 # Unit tests (API)
-pnpm --filter @nucleus/api test
+pnpm --filter @fixspace/api test
 
 # Unit tests in watch mode
-pnpm --filter @nucleus/api test:watch
+pnpm --filter @fixspace/api test:watch
 
 # With coverage report
-pnpm --filter @nucleus/api test -- --coverage
+pnpm --filter @fixspace/api test -- --coverage
 
 # E2E tests
-pnpm --filter @nucleus/api test:e2e
+pnpm --filter @fixspace/api test:e2e
 
 # Web component tests
-pnpm --filter @nucleus/web test
+pnpm --filter @fixspace/web test
 ```
 
 ## Writing component tests

@@ -1,5 +1,5 @@
 {
-  "name": "@nucleus/domain",
+  "name": "@fixspace/domain",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -42,8 +42,8 @@
   },
   "devDependencies": {
     "@nestjs/swagger": "^11.4.4",
-    "@nucleus/eslint-config": "workspace:*",
-    "@nucleus/typescript-config": "workspace:*",
+    "@fixspace/eslint-config": "workspace:*",
+    "@fixspace/typescript-config": "workspace:*",
     "@types/node": "^22.10.7",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.2",

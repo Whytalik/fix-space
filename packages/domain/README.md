@@ -1,13 +1,13 @@
-# @nucleus/domain
+# @fixspace/domain
 
-Shared DTOs, entities, enums, and property-type interfaces for the Nucleus monorepo.
+Shared DTOs, entities, enums, and property-type interfaces for the FIX Space monorepo.
 Acts as the typed contract between the API and the web layers — the API validates
 and produces these shapes; the web consumes them.
 
 The package compiles to `dist/` via `tsc` and exposes two export paths:
 
-- `@nucleus/domain` — all DTOs, entities, and types (main entry)
-- `@nucleus/domain/enums` — enums and runtime constants without class-validator overhead
+- `@fixspace/domain` — all DTOs, entities, and types (main entry)
+- `@fixspace/domain/enums` — enums and runtime constants without class-validator overhead
 
 ## Structure
 
@@ -71,7 +71,7 @@ packages/domain/src/
 
 ## Enums
 
-Available from both `@nucleus/domain` and `@nucleus/domain/enums`:
+Available from both `@fixspace/domain` and `@fixspace/domain/enums`:
 
 | Enum                   | Values                                                                                                                                                                      |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -114,7 +114,7 @@ Each property type has a typed `config` object used in `CreatePropertyDto` and
 
 ## Constants exported from `enums.ts`
 
-The secondary export path (`@nucleus/domain/enums`) exposes runtime constants
+The secondary export path (`@fixspace/domain/enums`) exposes runtime constants
 alongside the enums — useful in client-side code where importing class-validator
 decorators would add unnecessary bundle weight:
 
@@ -129,7 +129,7 @@ import {
   NUMBER_FORMAT_VALUES,
   DATA_FORMATS_VALUES,
   DEFAULT_SECTION_SETTINGS,
-} from "@nucleus/domain/enums";
+} from "@fixspace/domain/enums";
 ```
 
 ## Usage
@@ -140,13 +140,13 @@ import {
   CreatePropertyDto,
   PropertyResponseDto,
   PropertyType,
-} from "@nucleus/domain";
+} from "@fixspace/domain";
 
 // Web — type-only import (devDependency; no runtime bundle cost)
-import type { RecordResponseDto, ViewResponseDto } from "@nucleus/domain";
+import type { RecordResponseDto, ViewResponseDto } from "@fixspace/domain";
 
 // Web — enum/constant import (values needed at runtime in browser)
-import { FilterLogic, PropertyType } from "@nucleus/domain/enums";
+import { FilterLogic, PropertyType } from "@fixspace/domain/enums";
 ```
 
 ## Validation
@@ -166,13 +166,13 @@ Key rules:
 
 ```bash
 # Build (required before first dev session if dist/ is missing)
-pnpm --filter @nucleus/domain build
+pnpm --filter @fixspace/domain build
 
 # Watch-compile on save — run alongside turbo dev
-pnpm --filter @nucleus/domain dev
+pnpm --filter @fixspace/domain dev
 
 # Lint
-pnpm --filter @nucleus/domain lint
+pnpm --filter @fixspace/domain lint
 ```
 
 The `dist/` directory is git-ignored. Always rebuild after pulling changes that

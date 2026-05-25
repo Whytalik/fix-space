@@ -1,6 +1,6 @@
-# @nucleus/database
+# @fixspace/database
 
-Prisma ORM configuration and client for the Nucleus monorepo. Provides a singleton
+Prisma ORM configuration and client for the FIX Space monorepo. Provides a singleton
 `PrismaClient` instance backed by a PostgreSQL connection pool via the `@prisma/adapter-pg`
 driver adapter, and re-exports all Prisma-generated types.
 
@@ -81,7 +81,7 @@ The `PropertyType` enum defines available column types for the `Property` model:
 connection pools from being created during hot-reload in development:
 
 ```ts
-import { prisma } from "@nucleus/database";
+import { prisma } from "@fixspace/database";
 
 const users = await prisma.user.findMany();
 ```
@@ -109,7 +109,7 @@ paths relative to the monorepo root:
 1. `.env.{NODE_ENV}` (e.g. `.env.development`, `.env.production`)
 2. `.env` — fallback
 
-This means importing `@nucleus/database` in any context will automatically
+This means importing `@fixspace/database` in any context will automatically
 load the correct env file without any additional setup in the consuming app.
 
 ### Re-exports
@@ -120,7 +120,7 @@ load the correct env file without any additional setup in the consuming app.
 export * from "../generated/client/client.js";
 ```
 
-This means `@nucleus/database` is the single import point for both the `prisma`
+This means `@fixspace/database` is the single import point for both the `prisma`
 instance and all generated types (`Prisma`, model types, enums, etc.).
 
 ## Commands
@@ -129,25 +129,25 @@ All commands use `dotenv-cli` to load env vars from `.env.development` and `.env
 
 ```bash
 # Regenerate Prisma Client after schema changes (required before dev/build)
-pnpm --filter @nucleus/database db:generate
+pnpm --filter @fixspace/database db:generate
 
 # Create and apply a new migration (development only)
-pnpm --filter @nucleus/database db:migrate:dev
+pnpm --filter @fixspace/database db:migrate:dev
 
 # Apply pending migrations without creating new ones (production)
-pnpm --filter @nucleus/database db:migrate:deploy
+pnpm --filter @fixspace/database db:migrate:deploy
 
 # Push schema changes without a migration file (prototyping only)
-pnpm --filter @nucleus/database db:push
+pnpm --filter @fixspace/database db:push
 
 # Open Prisma Studio (visual database browser)
-pnpm --filter @nucleus/database studio
+pnpm --filter @fixspace/database studio
 
 # Format schema.prisma
-pnpm --filter @nucleus/database format
+pnpm --filter @fixspace/database format
 
 # Seed the database
-pnpm --filter @nucleus/database db:seed
+pnpm --filter @fixspace/database db:seed
 ```
 
 Or via the root monorepo shortcuts:
@@ -160,7 +160,7 @@ turbo db:migrate:dev
 ## Environment
 
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/nucleus?schema=public
+DATABASE_URL=postgresql://user:password@localhost:5432/fixspace?schema=public
 ```
 
 Required in `.env.development` (local) or as an environment variable in production.

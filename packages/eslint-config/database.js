@@ -2,7 +2,7 @@ import globals from "globals";
 import { config as baseConfig } from "./base.js";
 
 /**
- * ESLint configuration for the @nucleus/database package.
+ * ESLint configuration for the @fixspace/database package.
  * Handles Prisma generated files properly.
  *
  * @type {import("eslint").Linter.Config[]}

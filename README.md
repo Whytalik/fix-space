@@ -2,27 +2,27 @@
 
 [![CI](https://github.com/Whytalik/fix-space/actions/workflows/ci.yml/badge.svg)](https://github.com/Whytalik/fix-space/actions/workflows/ci.yml)
 
-> Персоналізована веб-платформа для професійної організації діяльності CFD-трейдера.
+> A personalized web platform for professional organization of CFD trader activity.
 
-Приватний трейдер розподіляє інформацію між 4–7 незалежними сервісами — Excel, Notion, TradingView, брокерські виписки, паперові нотатки. Це призводить до інформаційної фрагментації: втрата до 40% продуктивності через переключення контексту, неможливість ретроспективного аналізу, приховані поведінкові патерни.
+Private traders distribute information across 4–7 independent services — Excel, Notion, TradingView, broker statements, paper notes. This leads to information fragmentation: up to 40% productivity loss from context switching, inability to perform retrospective analysis, hidden behavioral patterns.
 
-FIX Space вирішує це — єдине централізоване середовище, де кожен аспект діяльності трейдера пов'язаний в єдину модель даних.
-
----
-
-## Можливості
-
-- **Журнал угод** — повна фіксація параметрів (PnL, RR, MAE/MFE, комісії) з автоматичним розрахунком Net PnL та відхилення від плану
-- **Аналіз рутин** — бази `Daily Routine` та `Routine Library` для передсесійної підготовки та пост-сесійного огляду
-- **Трекер помилок** — база `Mistakes` з алгоритмом автоматичного визначення Severity на основі частоти та фінансового впливу
-- **Динамічна структура** — власні типи властивостей, формули та автоматизації без написання коду
-- **Контентна область** — редактор для розборів угод з вбудованими графіками, скріншотами та калькуляторами ризику
+FIX Space solves this — a single centralized environment where every aspect of a trader's activity is connected into a unified data model.
 
 ---
 
-## Стек
+## Features
 
-| Шар        | Технологія                                                                                  |
+- **Trade journal** — full parameter logging (PnL, RR, MAE/MFE, commissions) with automatic Net PnL calculation and plan deviation tracking
+- **Routine analysis** — `Daily Routine` and `Routine Library` databases for pre-session preparation and post-session review
+- **Mistake tracker** — `Mistakes` database with an algorithm for automatic Severity determination based on frequency and financial impact
+- **Dynamic structure** — custom property types, formulas, and automations without writing code
+- **Content area** — editor for trade breakdowns with embedded charts, screenshots, and risk calculators
+
+---
+
+## Stack
+
+| Layer      | Technology                                                                                  |
 | :--------- | :------------------------------------------------------------------------------------------ |
 | Frontend   | [Next.js 16](https://nextjs.org/) + [React 19](https://react.dev/) · App Router · Turbopack |
 | Backend    | [NestJS 11](https://nestjs.com/) · Modular Monolith                                         |
@@ -34,7 +34,7 @@ FIX Space вирішує це — єдине централізоване сер
 
 ---
 
-## Структура
+## Structure
 
 ```
 .
@@ -42,36 +42,36 @@ FIX Space вирішує це — єдине централізоване сер
 │   ├── api/          NestJS REST API (port 3000, OpenAPI/Swagger)
 │   └── web/          Next.js Frontend (port 3001)
 ├── packages/
-│   ├── domain/       @nucleus/domain — shared DTOs & entities
-│   ├── database/     @nucleus/database — Prisma schema & migrations
+│   ├── domain/       @fixspace/domain — shared DTOs & entities
+│   ├── database/     @fixspace/database — Prisma schema & migrations
 │   ├── eslint-config/
 │   ├── jest-config/
 │   └── typescript-config/
-└── docs/             архітектура, тестування, розгортання
+└── docs/             architecture, testing, deployment
 ```
 
 ---
 
-## Швидкий старт
+## Quick Start
 
 > [!WARNING]
-> Для локального запуску потрібен Docker Desktop — він використовується для PostgreSQL контейнера.
+> Docker Desktop is required for local development — it runs the PostgreSQL container.
 
 ```bash
-# 1. Встановлення
+# 1. Install
 git clone <repository-url>
 pnpm install
 
-# 2. Середовище
+# 2. Environment
 cp .env.example .env.development
-# заповніть змінні у .env.development
+# fill in variables in .env.development
 
-# 3. База даних
+# 3. Database
 docker-compose up -d
 turbo db:generate
 turbo db:migrate:dev
 
-# 4. Розробка
+# 4. Development
 turbo dev
 ```
 
@@ -79,35 +79,35 @@ turbo dev
 
 ## CI/CD Pipeline
 
-Запускається автоматично при кожному PR та push до `develop`.
+Runs automatically on every PR and push to `develop`.
 
-| Етап | Джоб       | Що робить                                         |
-| :--: | :--------- | :------------------------------------------------ |
-|  1   | `lint`     | ESLint по всіх пакетах монорепо                   |
-|  2   | `test`     | Юніт-тести · 682 кейси · збереження coverage      |
-|  2   | `security` | `pnpm audit` — вразливості залежностей            |
-|  3   | `build`    | Збірка API `dist/` та Web `.next/`                |
-|  4   | `docker`   | Збірка Docker-образу API                          |
-|  5   | `deploy`   | Розгортання на staging (тільки push до `develop`) |
+| Step | Job        | Description                                |
+| :--: | :--------- | :----------------------------------------- |
+|  1   | `lint`     | ESLint across all monorepo packages        |
+|  2   | `test`     | Unit tests · 682 cases · coverage saved    |
+|  2   | `security` | `pnpm audit` — dependency vulnerabilities  |
+|  3   | `build`    | Build API `dist/` and Web `.next/`         |
+|  4   | `docker`   | Build API Docker image                     |
+|  5   | `deploy`   | Deploy to staging (push to `develop` only) |
 
-Детальний опис: [`docs/08-deployment/ci-cd.md`](docs/08-deployment/ci-cd.md)
+Full description: [`docs/08-deployment/ci-cd.md`](docs/08-deployment/ci-cd.md)
 
 ---
 
-## Документація
+## Documentation
 
-| Документ                                                         | Опис                                 |
-| :--------------------------------------------------------------- | :----------------------------------- |
-| [Алгоритми та бізнес-логіка](docs/03-architecture/algorithms.md) | Ключові алгоритми системи            |
-| [Проєктування бази даних](docs/03-architecture/database.md)      | Схема та модель даних                |
-| [Модель безпеки](docs/03-architecture/security.md)               | Auth, JWT, захист ресурсів           |
-| [Архітектура фронтенду](docs/03-architecture/frontend-state.md)  | State management, компоненти         |
-| [План тестування](docs/06-testing/strategy.md)                   | Стратегія, типи, coverage            |
-| [Посібник користувача](docs/07-user-guide/index.md)              | Інструкція для кінцевого користувача |
+| Document                                                          | Description                    |
+| :---------------------------------------------------------------- | :----------------------------- |
+| [Algorithms & Business Logic](docs/03-architecture/algorithms.md) | Core system algorithms         |
+| [Database Design](docs/03-architecture/database.md)               | Schema and data model          |
+| [Security Model](docs/03-architecture/security.md)                | Auth, JWT, resource protection |
+| [Frontend Architecture](docs/03-architecture/frontend-state.md)   | State management, components   |
+| [Test Plan](docs/06-testing/strategy.md)                          | Strategy, types, coverage      |
+| [User Guide](docs/07-user-guide/index.md)                         | End-user instructions          |
 
 ---
 
 > [!NOTE]
-> Проєкт у активній розробці. Деплой: API → Railway · Web → Vercel.
+> Project under active development. Deploy: API → Railway · Web → Vercel.
 
-_Дипломна робота · Спеціальність 121 · Житомирська політехніка · 2026_
+_Thesis project · Specialty 121 · Zhytomyr Polytechnic · 2026_

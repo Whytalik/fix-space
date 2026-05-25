@@ -1,6 +1,6 @@
-# @nucleus/eslint-config
+# @fixspace/eslint-config
 
-Shared ESLint configurations for the Nucleus monorepo. All configs use the
+Shared ESLint configurations for the FIX Space monorepo. All configs use the
 **ESLint flat config format** (ESLint 9+) and are plain `.js` files that export
 arrays of config objects.
 
@@ -75,7 +75,7 @@ Used by: `apps/web`
 
 ### `database` → `databaseConfig`
 
-For the `@nucleus/database` package. Extends `base` with special handling for
+For the `@fixspace/database` package. Extends `base` with special handling for
 Prisma-generated files, which contain patterns that would normally trigger
 type-safety warnings.
 
@@ -134,7 +134,7 @@ Used by: all `.prettierrc.mjs` files across the monorepo (root, api, web, domain
 
 ```js
 // apps/api/eslint.config.mjs
-import { nestJsConfig } from "@nucleus/eslint-config/nest";
+import { nestJsConfig } from "@fixspace/eslint-config/nest";
 
 export default [
   ...nestJsConfig,
@@ -144,7 +144,7 @@ export default [
 
 ```js
 // apps/web/eslint.config.mjs
-import { nextJsConfig } from "@nucleus/eslint-config/next";
+import { nextJsConfig } from "@fixspace/eslint-config/next";
 
 export default [
   ...nextJsConfig,
@@ -154,7 +154,7 @@ export default [
 
 ```js
 // .prettierrc.mjs (root or any app)
-import prettierBase from "@nucleus/eslint-config/prettier-base";
+import prettierBase from "@fixspace/eslint-config/prettier-base";
 
 export default prettierBase;
 ```

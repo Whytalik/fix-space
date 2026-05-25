@@ -1,6 +1,6 @@
-# @nucleus/typescript-config
+# @fixspace/typescript-config
 
-Shared TypeScript configurations for every app and package in the Nucleus monorepo.
+Shared TypeScript configurations for every app and package in the FIX Space monorepo.
 All configs target **TypeScript 6** and use `ignoreDeprecations: "6.0"` to suppress
 warnings from fields renamed between TS 5 and TS 6.
 
@@ -94,7 +94,7 @@ Used by: `apps/api` (via `tsconfig.test.json` pointed to by `ts-jest`)
 ```jsonc
 // tsconfig.json in any app or package
 {
-  "extends": "@nucleus/typescript-config/nestjs.json",
+  "extends": "@fixspace/typescript-config/nestjs.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
@@ -106,7 +106,7 @@ Used by: `apps/api` (via `tsconfig.test.json` pointed to by `ts-jest`)
 ```jsonc
 // apps/web/tsconfig.json
 {
-  "extends": "@nucleus/typescript-config/nextjs.json",
+  "extends": "@fixspace/typescript-config/nextjs.json",
   "compilerOptions": {
     "plugins": [{ "name": "next" }],
     "paths": { "@/*": ["./src/*"] },

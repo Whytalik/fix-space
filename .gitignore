@@ -35,8 +35,6 @@ yarn-error.log*
 # Vercel
 .vercel
 
-# AI assistant configs
-GEMINI.md
 
 # IDEs and editors
 .vscode/

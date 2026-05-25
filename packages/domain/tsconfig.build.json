@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "paths": {
-      "@nucleus/domain": ["./entry.ts"]
+      "@fixspace/domain": ["./entry.ts"]
     }
   }
 }
