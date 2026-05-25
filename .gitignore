@@ -56,7 +56,6 @@ CLAUDE.md
 # Uploaded files
 apps/api/public/avatars/*
 !apps/api/public/avatars/.gitkeep
-scripts/
 .playwright-mcp/
 
 # OS
