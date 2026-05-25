@@ -1,25 +1,20 @@
 import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { i18nValidationMessage } from "nestjs-i18n";
+
+import { I18nTranslations } from "../../generated/i18n.generated";
 
 export class CreateSpaceDto {
-  @IsString()
-  @IsNotEmpty({
-    message: "Space name is required",
-  })
-  @MinLength(1, {
-    message: "Space name must be at least 1 character",
-  })
-  @MaxLength(120, {
-    message: "Space name must not exceed 120 characters",
-  })
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
+  @MinLength(1, { message: i18nValidationMessage<I18nTranslations>("validation.MIN_LENGTH") })
+  @MaxLength(120, { message: i18nValidationMessage<I18nTranslations>("validation.MAX_LENGTH") })
   name: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   icon?: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
   isDefault?: boolean;
 }
-
-

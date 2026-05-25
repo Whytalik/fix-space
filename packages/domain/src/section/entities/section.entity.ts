@@ -5,6 +5,7 @@ export class Section {
   id: string;
   spaceId: string;
   name: string;
+  key?: string;
   position: number;
   icon?: string;
   color?: string;

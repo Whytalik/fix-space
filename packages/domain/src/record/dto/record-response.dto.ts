@@ -10,10 +10,28 @@ export class RecordResponseDto {
   databaseId: string;
 
   @Expose()
+  templateId: string | null;
+
+  @Expose()
+  sourceIntegrationId: string | null;
+
+  @Expose()
+  sourceLabel: string | null;
+
+  @Expose()
+  sourcePositionId: string | null;
+
+  @Expose()
+  sourceCurrency: string | null;
+
+  @Expose()
   name: string;
 
   @Expose()
   icon: string | null;
+
+  @Expose()
+  deletedAt: Date | null;
 
   @Expose()
   createdAt: Date;

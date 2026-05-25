@@ -1,27 +1,30 @@
 import { IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { i18nValidationMessage } from "nestjs-i18n";
+
+import { I18nTranslations } from "../../generated/i18n.generated";
 
 export class UpdateUserDto {
   @IsOptional()
-  @IsEmail({}, { message: "Please provide a valid email address" })
+  @IsEmail({}, { message: i18nValidationMessage<I18nTranslations>("validation.INVALID_EMAIL") })
   email?: string;
 
   @IsOptional()
-  @IsString()
-  @MinLength(3, { message: "Username must be at least 3 characters" })
-  @MaxLength(50, { message: "Username must not exceed 50 characters" })
-  @Matches(/^[a-zA-Z0-9_-]+$/, { message: "Username can only contain letters, numbers, underscores and hyphens" })
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  @MinLength(3, { message: i18nValidationMessage<I18nTranslations>("validation.MIN_LENGTH") })
+  @MaxLength(50, { message: i18nValidationMessage<I18nTranslations>("validation.MAX_LENGTH") })
+  @Matches(/^[a-zA-Z0-9_-]+$/, { message: i18nValidationMessage<I18nTranslations>("validation.INVALID_USERNAME") })
   username?: string;
 
   @IsOptional()
-  @IsString()
-  @MinLength(8, { message: "Password must be at least 8 characters" })
-  @MaxLength(128, { message: "Password must not exceed 128 characters" })
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  @MinLength(8, { message: i18nValidationMessage<I18nTranslations>("validation.MIN_LENGTH") })
+  @MaxLength(128, { message: i18nValidationMessage<I18nTranslations>("validation.MAX_LENGTH") })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
-    message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+    message: i18nValidationMessage<I18nTranslations>("validation.INVALID_PASSWORD"),
   })
   password?: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   icon?: string;
 }

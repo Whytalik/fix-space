@@ -6,6 +6,8 @@ export class Template {
   name: string;
   description?: string;
   icon?: string;
+  namePattern?: string;
+  content: unknown;
   isDefault: boolean;
   position: number;
   createdAt: Date;

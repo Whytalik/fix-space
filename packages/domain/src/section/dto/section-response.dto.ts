@@ -13,6 +13,9 @@ export class SectionResponseDto {
   name: string;
 
   @Expose()
+  key: string | null;
+
+  @Expose()
   position: number;
 
   @Expose()

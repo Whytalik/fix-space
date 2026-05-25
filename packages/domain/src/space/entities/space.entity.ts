@@ -8,6 +8,7 @@ export class Space {
   name: string;
   icon?: string;
   isDefault: boolean;
+  isDemo: boolean;
   createdAt: Date;
   config?: Record<string, unknown>;
 
@@ -19,5 +20,3 @@ export class Space {
     Object.assign(this, partial);
   }
 }
-
-

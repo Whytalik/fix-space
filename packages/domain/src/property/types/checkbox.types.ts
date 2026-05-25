@@ -1,7 +1,13 @@
-export interface CheckboxProperty {
+import { IsBoolean } from "class-validator";
+import { i18nValidationMessage } from "nestjs-i18n";
+
+import { I18nTranslations } from "../../generated/i18n.generated";
+
+export class CheckboxProperty {
+  @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
   defaultValue: boolean;
 }
 
-export const DEFAULT_CHECKBOX_PROPERTY = {
+export const DEFAULT_CHECKBOX_PROPERTY: CheckboxProperty = {
   defaultValue: false,
-} satisfies CheckboxProperty;
+};

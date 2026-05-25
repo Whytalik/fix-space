@@ -1,55 +1,27 @@
 import { IsArray, IsEnum, IsOptional, IsString, ValidateIf } from "class-validator";
+import { i18nValidationMessage } from "nestjs-i18n";
 
-export enum FilterField {
-  PROPERTY = "property",
-  CREATED_AT = "createdAt",
-  UPDATED_AT = "updatedAt",
-}
+import { I18nTranslations } from "../../generated/i18n.generated";
+import { FilterField, FilterOperator } from "./record-filter.enums";
 
-export enum FilterOperator {
-  EQUALS = "equals",
-  NOT_EQUALS = "notEquals",
-  CONTAINS = "contains",
-  NOT_CONTAINS = "notContains",
-  STARTS_WITH = "startsWith",
-  ENDS_WITH = "endsWith",
-  IS_EMPTY = "isEmpty",
-  IS_NOT_EMPTY = "isNotEmpty",
-  GREATER_THAN = "greaterThan",
-  LESS_THAN = "lessThan",
-  GREATER_THAN_OR_EQUAL = "greaterThanOrEqual",
-  LESS_THAN_OR_EQUAL = "lessThanOrEqual",
-  BEFORE = "before",
-  AFTER = "after",
-  ON_OR_BEFORE = "onOrBefore",
-  ON_OR_AFTER = "onOrAfter",
-  IS_CHECKED = "isChecked",
-  IS_UNCHECKED = "isUnchecked",
-  IN = "in",
-  NOT_IN = "notIn",
-}
-
-export enum FilterLogic {
-  AND = "AND",
-  OR = "OR",
-}
+export { FilterField, FilterLogic, FilterOperator } from "./record-filter.enums";
 
 export class RecordFilterDto {
   @IsOptional()
-  @IsEnum(FilterField)
+  @IsEnum(FilterField, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   field?: FilterField;
 
   @ValidateIf((o: RecordFilterDto) => !o.field || o.field === FilterField.PROPERTY)
-  @IsString()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   propertyId: string;
 
-  @IsEnum(FilterOperator)
+  @IsEnum(FilterOperator, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   operator: FilterOperator;
 
   @IsOptional()
   value?: string | number | boolean | null;
 
   @IsOptional()
-  @IsArray()
+  @IsArray({ message: i18nValidationMessage<I18nTranslations>("validation.IS_ARRAY") })
   values?: string[];
 }

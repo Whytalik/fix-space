@@ -2,7 +2,10 @@
   "extends": "@nucleus/typescript-config/nestjs.json",
   "compilerOptions": {
     "allowJs": true,
-    "baseUrl": "src",
+    "paths": {
+      "*": ["./src/*"]
+    },
+    "rootDir": "src",
     "esModuleInterop": true,
     "incremental": false,
     "outDir": "dist",

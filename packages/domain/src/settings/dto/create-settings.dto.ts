@@ -1,23 +1,31 @@
-import { IsNotEmpty, IsObject, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsNotEmpty, IsString, ValidateNested } from "class-validator";
+import { i18nValidationMessage } from "nestjs-i18n";
+
+import { I18nTranslations } from "../../generated/i18n.generated";
+import { DatabaseSettings, RecordSettings, SectionSettings, SpaceSettings } from "../types";
 
 export class CreateSettingsDto {
-  @IsString()
-  @IsNotEmpty({
-    message: "Key is required",
-  })
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   key: string;
 
-  @IsObject({
-    message: "Value must be an object",
+  @ValidateNested()
+  @Type(() => Object, {
+    keepDiscriminatorProperty: true,
+    discriminator: {
+      property: "category",
+      subTypes: [
+        { value: SpaceSettings, name: "workspace" },
+        { value: SectionSettings, name: "sections" },
+        { value: DatabaseSettings, name: "databases" },
+        { value: RecordSettings, name: "records" },
+      ],
+    },
   })
-  @IsNotEmpty({
-    message: "Value is required",
-  })
-  value: Record<string, unknown>;
+  value: SpaceSettings | SectionSettings | DatabaseSettings | RecordSettings | Record<string, unknown>;
 
-  @IsString()
-  @IsNotEmpty({
-    message: "Category is required",
-  })
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   category: string;
 }

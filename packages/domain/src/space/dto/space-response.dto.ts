@@ -1,6 +1,7 @@
 import { Exclude, Expose, Type } from "class-transformer";
 import { DatabaseResponseDto } from "../../database/dto/database-response.dto";
 import { SectionResponseDto } from "../../section/dto/section-response.dto";
+import { SpaceConfigDto } from "./space-config.dto";
 
 @Exclude()
 export class SpaceResponseDto {
@@ -20,10 +21,14 @@ export class SpaceResponseDto {
   isDefault: boolean;
 
   @Expose()
+  isDemo: boolean;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()
-  config?: unknown;
+  @Type(() => SpaceConfigDto)
+  config?: SpaceConfigDto;
 
   @Expose()
   @Type(() => SectionResponseDto)
@@ -37,5 +42,3 @@ export class SpaceResponseDto {
     Object.assign(this, partial);
   }
 }
-
-

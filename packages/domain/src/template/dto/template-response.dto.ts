@@ -19,6 +19,12 @@ export class TemplateResponseDto {
   icon: string | null;
 
   @Expose()
+  namePattern: string | null;
+
+  @Expose()
+  content: unknown;
+
+  @Expose()
   isDefault: boolean;
 
   @Expose()

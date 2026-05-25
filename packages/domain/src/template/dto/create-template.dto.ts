@@ -1,29 +1,39 @@
 import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from "class-validator";
+import { i18nValidationMessage } from "nestjs-i18n";
+
+import { I18nTranslations } from "../../generated/i18n.generated";
 
 export class CreateTemplateDto {
-  @IsString()
-  @IsNotEmpty({ message: "Database ID is required" })
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   databaseId: string;
 
   @IsOptional()
-  @IsString()
-  @MaxLength(255)
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  @MaxLength(255, { message: i18nValidationMessage<I18nTranslations>("validation.MAX_LENGTH") })
   name?: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   description?: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   icon?: string;
 
   @IsOptional()
-  @IsBoolean()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  namePattern?: string;
+
+  @IsOptional()
+  content?: unknown;
+
+  @IsOptional()
+  @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
   isDefault?: boolean;
 
   @IsOptional()
-  @IsInt()
-  @Min(0)
+  @IsInt({ message: i18nValidationMessage<I18nTranslations>("validation.IS_INT") })
+  @Min(0, { message: i18nValidationMessage<I18nTranslations>("validation.MIN") })
   position?: number;
 }

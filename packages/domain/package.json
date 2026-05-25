@@ -32,14 +32,16 @@
     "@nestjs/common": "^11.1.11",
     "@nestjs/mapped-types": "*",
     "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.3"
+    "class-validator": "^0.14.3",
+    "nestjs-i18n": "^10.7.5"
   },
   "devDependencies": {
+    "@nestjs/swagger": "^11.4.4",
     "@nucleus/eslint-config": "workspace:*",
     "@nucleus/typescript-config": "workspace:*",
     "@types/node": "^22.10.7",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.2",
-    "typescript": "5.5.4"
+    "typescript": "6.0.2"
   }
 }
