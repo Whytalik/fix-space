@@ -1,6 +1,6 @@
 "use client";
 
-import type { RecordResponseDto } from "@nucleus/domain";
+import type { RecordResponseDto } from "@fixspace/domain";
 
 interface RelationInputProps {
   records: RecordResponseDto[];

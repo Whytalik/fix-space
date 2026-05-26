@@ -1,10 +1,17 @@
-import type { DatabaseResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function updateDatabase(
   spaceId: string,
   databaseId: string,
-  data: { name?: string; title?: string; icon?: string; sectionId?: string | null },
+  data: {
+    name?: string;
+    title?: string;
+    icon?: string;
+    sectionId?: string | null;
+    recordLimit?: number | null;
+    useDefaultTemplate?: boolean;
+  },
 ) {
   return apiFetch<DatabaseResponseDto>(`/databases/${databaseId}`, {
     method: "PATCH",

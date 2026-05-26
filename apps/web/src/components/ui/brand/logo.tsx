@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { LogoIcon } from "./logo-icon";
 
+export { LogoIcon };
+
 interface LogoProps {
   size?: number;
   href?: string;
@@ -15,7 +17,7 @@ export function Logo({ size = 28, href, className }: LogoProps) {
         className="font-extrabold tracking-[-0.04em] leading-none text-ink"
         style={{ fontSize: Math.round(size * 0.57) }}
       >
-        Nucleus
+        FIX Space
       </span>
     </>
   );

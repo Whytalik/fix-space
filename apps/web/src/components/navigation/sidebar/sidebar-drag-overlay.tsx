@@ -2,7 +2,7 @@
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { DragOverlay } from "@dnd-kit/core";
-import type { DatabaseResponseDto, SectionResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto, SectionResponseDto } from "@fixspace/domain";
 import { ChevronRight } from "lucide-react";
 
 interface SidebarDragOverlayProps {

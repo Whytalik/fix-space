@@ -1,4 +1,4 @@
-import type { SectionResponseDto, SpaceResponseDto } from "@nucleus/domain";
+import type { SectionResponseDto, SpaceResponseDto } from "@fixspace/domain";
 
 type ApplyPatch = (fn: (s: SpaceResponseDto) => SpaceResponseDto) => void;
 
@@ -10,7 +10,7 @@ export function useSectionMutations(applyPatch: ApplyPatch) {
   function removeSectionFromSpace(sectionId: string) {
     applyPatch((prev) => {
       const section = (prev.sections ?? []).find((s) => s.id === sectionId);
-      const freedDbs = (section?.databases ?? []).map((d) => ({ ...d, sectionId: undefined }));
+      const freedDbs = (section?.databases ?? []).map((d) => ({ ...d, sectionId: null }));
       return {
         ...prev,
         sections: (prev.sections ?? []).filter((s) => s.id !== sectionId),

@@ -14,29 +14,32 @@ import { useMutation } from "@/hooks/useMutation";
 import { parseApiError } from "@/lib/api/client";
 import { getSpaceSettings, updateSpaceSettings } from "@/lib/api/settings";
 import { deleteSpace, duplicateSpace, updateSpace } from "@/lib/api/space";
-import type { SpaceSettings } from "@nucleus/domain";
+import type { SpaceSettings as SpaceSettingsDto } from "@fixspace/domain";
 import { Copy, Globe, Pencil, Trash } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
-const SPACE_TABS: TabItem<"sidebar" | "datetime">[] = [
-  { id: "sidebar", label: "Sidebar" },
-  { id: "datetime", label: "Date & Time" },
-];
-
-const TIME_FORMAT_TABS: TabItem<"12h" | "24h">[] = [
-  { id: "12h", label: "12h" },
-  { id: "24h", label: "24h" },
-];
-
-const START_OF_WEEK_TABS: TabItem<"0" | "1">[] = [
-  { id: "1", label: "Monday" },
-  { id: "0", label: "Sunday" },
-];
-
 export function SpaceSettings() {
+  const t = useTranslations("SpaceSettingsComp");
   const { spaces, updateSpaceInList, addSpace, removeSpace } = useAppContext();
+
+  const spaceTabs: TabItem<"sidebar" | "datetime">[] = [
+    { id: "sidebar", label: t("sidebar") },
+    { id: "datetime", label: t("datetime") },
+  ];
+
+  const timeFormatTabs: TabItem<"12h" | "24h">[] = [
+    { id: "12h", label: t("timeFormat12h") },
+    { id: "24h", label: t("timeFormat24h") },
+  ];
+
+  const startOfWeekTabs: TabItem<"0" | "1">[] = [
+    { id: "1", label: t("monday") },
+    { id: "0", label: t("sunday") },
+  ];
+
   const [activeTab, setActiveTab] = useState<"sidebar" | "datetime">("sidebar");
-  const [form, setForm] = useState<SpaceSettings | null>(null);
+  const [form, setForm] = useState<SpaceSettingsDto | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSettingDefault, setIsSettingDefault] = useState<string | null>(null);
@@ -58,7 +61,7 @@ export function SpaceSettings() {
       const prevDefault = spaces.find((s) => s.isDefault && s.id !== spaceId);
       if (prevDefault) updateSpaceInList({ ...prevDefault, isDefault: false });
       updateSpaceInList(updated);
-      setToast({ message: "Default space updated.", variant: "success" });
+      setToast({ message: t("defaultUpdated"), variant: "success" });
     } catch (err) {
       setToast({ message: parseApiError(err), variant: "error" });
     } finally {
@@ -104,7 +107,7 @@ export function SpaceSettings() {
     try {
       const duplicated = await duplicateSpace(spaceId);
       addSpace(duplicated);
-      setToast({ message: "Space duplicated.", variant: "success" });
+      setToast({ message: t("spaceDuplicated"), variant: "success" });
     } catch (err) {
       setToast({ message: parseApiError(err), variant: "error" });
     } finally {
@@ -117,7 +120,7 @@ export function SpaceSettings() {
       await deleteSpace(spaceId);
       removeSpace(spaceId);
       setConfirmDeleteId(null);
-      setToast({ message: "Space deleted.", variant: "success" });
+      setToast({ message: t("spaceDeleted"), variant: "success" });
     } catch (err) {
       setToast({ message: parseApiError(err), variant: "error" });
       setConfirmDeleteId(null);
@@ -136,7 +139,7 @@ export function SpaceSettings() {
     try {
       const updated = await updateSpaceSettings(form);
       setForm(updated);
-      setToast({ message: "Settings saved.", variant: "success" });
+      setToast({ message: t("settingsSaved"), variant: "success" });
     } catch (err) {
       setToast({ message: parseApiError(err), variant: "error" });
     } finally {
@@ -151,13 +154,13 @@ export function SpaceSettings() {
   return (
     <div>
       <div className="mb-6">
-        <TabSwitcher items={SPACE_TABS} active={activeTab} onChange={setActiveTab} />
+        <TabSwitcher items={spaceTabs} active={activeTab} onChange={setActiveTab} />
       </div>
 
       {activeTab === "sidebar" && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-ink-secondary">Spaces</label>
+            <label className="text-sm text-ink-secondary">{t("spaces")}</label>
             <div className="flex flex-col rounded-lg border border-stroke overflow-hidden">
               {spaces.map((s, i) =>
                 editingId === s.id ? (
@@ -196,10 +199,10 @@ export function SpaceSettings() {
                         autoFocus
                       />
                       <Button size="sm" onClick={handleSaveEdit} disabled={!editName.trim() || isSavingEdit}>
-                        {isSavingEdit ? "Saving…" : "Save"}
+                        {isSavingEdit ? t("saving") : t("save")}
                       </Button>
                       <Button variant="ghost" size="sm" onClick={handleEditCancel}>
-                        Cancel
+                        {t("cancel")}
                       </Button>
                     </div>
                     {editError && <p className="text-xs text-error">{editError}</p>}
@@ -213,16 +216,16 @@ export function SpaceSettings() {
                       {s.icon ? <IconDisplay value={s.icon} size={18} /> : <Globe size={18} />}
                     </span>
                     <span className="flex-1">{s.name}</span>
-                    {s.isDefault && <Badge variant="accent">Default</Badge>}
+                    {s.isDefault && <Badge variant="accent">{t("default")}</Badge>}
                     <Button
                       variant="ghost"
                       size="sm"
                       disabled={s.isDefault || isSettingDefault !== null}
                       onClick={() => handleSetDefault(s.id)}
                     >
-                      {isSettingDefault === s.id ? "Saving…" : "Set as default"}
+                      {isSettingDefault === s.id ? t("saving") : t("setAsDefault")}
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleEditStart(s)} title="Edit">
+                    <Button variant="ghost" size="icon" onClick={() => handleEditStart(s)} title={t("edit")}>
                       <Pencil size={13} />
                     </Button>
                     <Button
@@ -230,7 +233,7 @@ export function SpaceSettings() {
                       size="icon"
                       onClick={() => handleDuplicate(s.id)}
                       disabled={duplicatingId === s.id}
-                      title="Duplicate"
+                      title={t("duplicate")}
                     >
                       <Copy size={13} />
                     </Button>
@@ -239,7 +242,7 @@ export function SpaceSettings() {
                       size="icon"
                       onClick={() => setConfirmDeleteId(s.id)}
                       disabled={spaces.length === 1 || s.isDefault}
-                      title={s.isDefault ? "Cannot delete the default space" : "Delete"}
+                      title={s.isDefault ? t("cannotDeleteDefault") : t("delete")}
                       className="hover:text-red-400 disabled:hover:text-ink-secondary"
                     >
                       <Trash size={13} />
@@ -250,7 +253,7 @@ export function SpaceSettings() {
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-ink-secondary">Default icon</label>
+            <label className="text-sm text-ink-secondary">{t("defaultIcon")}</label>
             <div>
               <button
                 ref={iconButtonRef}
@@ -266,7 +269,7 @@ export function SpaceSettings() {
                     </span>
                   </span>
                 ) : (
-                  <span className="text-ink-muted">Choose an icon…</span>
+                  <span className="text-ink-muted">{t("chooseIcon")}</span>
                 )}
               </button>
               {showIconPicker && (
@@ -284,7 +287,7 @@ export function SpaceSettings() {
           </div>
           <div className="flex justify-end">
             <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Saving…" : "Save changes"}
+              {isSaving ? t("saving") : t("saveChanges")}
             </Button>
           </div>
         </div>
@@ -293,32 +296,32 @@ export function SpaceSettings() {
       {activeTab === "datetime" && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-ink-secondary">Time format</label>
+            <label className="text-sm text-ink-secondary">{t("timeFormat")}</label>
             <TabSwitcher
-              items={TIME_FORMAT_TABS}
+              items={timeFormatTabs}
               active={form.timeFormat}
               onChange={(v) => setForm((p) => (p ? { ...p, timeFormat: v } : p))}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-ink-secondary">Start of week</label>
+            <label className="text-sm text-ink-secondary">{t("startOfWeek")}</label>
             <TabSwitcher
-              items={START_OF_WEEK_TABS}
+              items={startOfWeekTabs}
               active={String(form.startOfWeek) as "0" | "1"}
               onChange={(v) => setForm((p) => (p ? { ...p, startOfWeek: Number(v) as 0 | 1 } : p))}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-ink-secondary">Date format</label>
+            <label className="text-sm text-ink-secondary">{t("dateFormat")}</label>
             <TextInput
               value={form.dateFormat}
               onChange={(v) => setForm((p) => (p ? { ...p, dateFormat: v } : p))}
-              placeholder="e.g. DD/MM/YYYY"
+              placeholder={t("placeholderDateFormat")}
             />
           </div>
           <div className="flex justify-end">
             <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? "Saving…" : "Save changes"}
+              {isSaving ? t("saving") : t("saveChanges")}
             </Button>
           </div>
         </div>
@@ -326,9 +329,9 @@ export function SpaceSettings() {
 
       {confirmDeleteId && (
         <ConfirmDialog
-          title="Delete space"
-          description="All databases and records inside will be permanently deleted. This action cannot be undone."
-          confirmLabel="Delete"
+          title={t("deleteSpace")}
+          description={t("deleteSpaceDesc")}
+          confirmLabel={t("delete")}
           variant="danger"
           onConfirm={() => handleDelete(confirmDeleteId)}
           onCancel={() => setConfirmDeleteId(null)}

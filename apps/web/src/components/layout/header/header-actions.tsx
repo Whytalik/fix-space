@@ -3,10 +3,10 @@
 import { Avatar } from "@/components/ui/primitives/avatar";
 import { useAppContext } from "@/context/app-context";
 import { useEscape } from "@/hooks/useEscape";
-import { logout } from "@/lib/api/auth";
+import { useLogout } from "@/hooks/useLogout";
 import { LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
 
 const AUTH_PAGES = ["/login", "/register"];
@@ -14,8 +14,8 @@ const AUTH_PAGES = ["/login", "/register"];
 export function HeaderActions() {
   const pathname = usePathname();
   const { user, isLoading, clearSession } = useAppContext();
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const logout = useLogout();
 
   useEscape(
     useCallback(() => {
@@ -25,9 +25,8 @@ export function HeaderActions() {
 
   async function handleLogout() {
     setIsOpen(false);
-    await logout().catch(() => {});
     clearSession();
-    router.push("/");
+    await logout();
   }
 
   if (AUTH_PAGES.includes(pathname)) return null;

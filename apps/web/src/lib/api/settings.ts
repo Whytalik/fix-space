@@ -1,4 +1,4 @@
-import type { DatabaseSettings, SectionSettings, SpaceSettings } from "@nucleus/domain";
+import type { DatabaseSettings, RecordSettings, SectionSettings, SpaceSettings } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getSpaceSettings() {
@@ -23,4 +23,12 @@ export function updateDatabaseSettings(data: Partial<DatabaseSettings>) {
 
 export function updateSectionSettings(data: Partial<SectionSettings>) {
   return apiFetch<SectionSettings>("/settings/section", { method: "PATCH", body: data });
+}
+
+export function getRecordSettings() {
+  return apiFetch<RecordSettings>("/settings/record");
+}
+
+export function updateRecordSettings(data: Partial<RecordSettings>) {
+  return apiFetch<RecordSettings>("/settings/record", { method: "PATCH", body: data });
 }

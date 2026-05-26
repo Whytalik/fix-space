@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@source "../**/*.{ts,tsx}";
+
+/* UI layers */
+@import "../styles/tokens.css";
+@import "../styles/base.css";
+@import "../styles/components.css";
+@import "../styles/utilities.css";
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { translate: 0 0; }
+  50%       { translate: 0 -10px; }
+}
+
+@keyframes float {
+  0%, 100% { translate: 0 0; }
+  50%       { translate: 0 -10px; }
+}

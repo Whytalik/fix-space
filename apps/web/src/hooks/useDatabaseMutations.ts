@@ -1,4 +1,4 @@
-import type { DatabaseResponseDto, SpaceResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto, SpaceResponseDto } from "@fixspace/domain";
 
 type ApplyPatch = (fn: (s: SpaceResponseDto) => SpaceResponseDto) => void;
 
@@ -48,7 +48,7 @@ export function useDatabaseMutations(applyPatch: ApplyPatch, space: SpaceRespons
       });
 
       if (!movedDb) return prev;
-      const updatedDb = { ...movedDb, sectionId: targetSectionId ?? undefined };
+      const updatedDb = { ...movedDb, sectionId: targetSectionId ?? null };
 
       if (targetSectionId) {
         return {

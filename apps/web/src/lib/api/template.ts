@@ -1,4 +1,4 @@
-import type { TemplatePropertyValueResponseDto, TemplateResponseDto } from "@nucleus/domain";
+import type { TemplatePropertyValueResponseDto, TemplateResponseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getTemplates(databaseId: string) {

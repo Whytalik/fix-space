@@ -1,5 +1,5 @@
 import { storage } from "@/lib/storage";
-import type { SpaceResponseDto } from "@nucleus/domain";
+import type { SpaceResponseDto } from "@fixspace/domain";
 import type { Dispatch } from "react";
 import type { SpaceAction } from "@/types/space";
 
