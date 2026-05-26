@@ -1,0 +1,868 @@
+{
+  "HomePage": {
+    "title": "Welcome to FIX Space",
+    "description": "Your personal space for trading and analytics",
+    "startForFree": "Start for free",
+    "signIn": "Sign in"
+  },
+  "Auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to your FIX Space account",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "signingIn": "Signing in…",
+    "signIn": "Sign in",
+    "createAccount": "Create an account",
+    "createAccountSubtitle": "Start using FIX Space today",
+    "alreadyHaveAccount": "Already have an account?",
+    "creatingAccount": "Creating account…",
+    "createAccountBtn": "Create account",
+    "username": "Username",
+    "usernameHint": "Letters, numbers, underscores and hyphens only",
+    "passwordHint": "Min 8 chars · uppercase · lowercase · number · special character",
+    "forgotPasswordTitle": "Forgot password",
+    "forgotPasswordSubtitle": "Enter your email and we'll send you a reset link",
+    "remembered": "Remembered it?",
+    "backToSignIn": "Back to sign in",
+    "sendResetLink": "Send reset link",
+    "sending": "Sending…",
+    "checkEmail": "Check your email",
+    "checkEmailDesc": "We sent a verification link to",
+    "clickToActivate": ". Click it to activate your account.",
+    "verifyInstantlyDev": "Verify instantly (dev)",
+    "verifyingDev": "Verifying…",
+    "goToSignIn": "Go to sign in",
+    "resetEmailDesc": "If",
+    "resetEmailDesc2": "is registered, you'll receive a password reset link shortly.",
+    "placeholderEmail": "you@example.com",
+    "placeholderUsername": "your_username",
+    "placeholderPassword": "••••••••"
+  },
+  "Dashboard": {
+    "welcome": "Welcome",
+    "tradingOverview": "Here is your trading overview for today.",
+    "dailyWorkflow": "Daily Workflow",
+    "planRoutine": "1. Plan Routine",
+    "executeTrade": "2. Execute Trade",
+    "reflectNotes": "3. Reflect & Notes",
+    "logMistakes": "4. Log Mistakes",
+    "today": "Today",
+    "overview": "Overview",
+    "tradingJournal": "Trading Journal",
+    "dailyRoutine": "Daily Routine",
+    "sessionRoutine": "Session Routine",
+    "notes": "Notes",
+    "mistakes": "Mistakes",
+    "recordsToday": "records today",
+    "noRecordsToday": "No records for today",
+    "untitled": "Untitled",
+    "pnlCurve": "PnL Curve",
+    "winRateDynamics": "Win Rate Dynamics",
+    "rrDeviation": "RR Deviation",
+    "loadingDate": "Loading date…",
+    "closed": "Closed",
+    "next": "Next",
+    "at": "at"
+  },
+  "Header": {
+    "logIn": "Log in",
+    "getStarted": "Get started",
+    "profile": "Profile",
+    "logOut": "Log out"
+  },
+  "LandingNav": {
+    "focus": "Focus",
+    "workspace": "Workspace",
+    "templates": "Templates",
+    "workflow": "Workflow",
+    "import": "Import"
+  },
+  "Footer": {
+    "diplomaProject": "Diploma project"
+  },
+  "Sidebar": {
+    "search": "Search",
+    "addSection": "Add section",
+    "addDatabase": "Add database",
+    "pinSidebar": "Pin sidebar",
+    "unpinSidebar": "Unpin sidebar",
+    "profile": "Profile",
+    "statistics": "Statistics",
+    "settings": "Settings",
+    "logOut": "Log out",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar"
+  },
+  "Landing": {
+    "focus": "Focus",
+    "builtForTraders": {
+      "title": "Built for traders, not for everyone",
+      "description": "Generic tools give you flexibility but no domain knowledge. Specialized journals know trading but lock you into a rigid structure. FIX Space is the first tool that offers both — a purpose-built trading workspace you can adapt to your own style."
+    },
+    "genericTools": "Generic tools",
+    "notionGoogleSheets": "Notion / Google Sheets",
+    "noTradingModel": "No trading model — build databases, properties, and formulas from scratch.",
+    "noNativeConcepts": "No native concepts of P&L, risk, setups, or session structure.",
+    "noBrokerImport": "No broker import — every trade entered manually.",
+    "fullyFlexible": "Fully flexible structure, free to use.",
+    "specializedJournals": "Specialized Journals",
+    "exampleGeneric": "e.g. TraderSync, Edgewonk",
+    "readyDataModel": "Ready data model and analytics oriented around trading.",
+    "autoImport": "Auto-import from brokers, built-in statistics and charts.",
+    "fixedStructure": "Fixed structure — can't adapt the system to your workflow.",
+    "paidOnly": "Paid only, starting from $30/month. No free tier.",
+    "purposeBuilt": "Purpose-built & flexible",
+    "FIX SpaceDescription": "The FIX Space: Seven pre-configured databases ready on day one — journal, routines, strategies.",
+    "advancedRelations": "Advanced data model with Relations: link insights to specific trades or sessions.",
+    "richMedia": "Rich media content: embed charts, screenshots, and detailed analysis directly in records.",
+    "fullyCustomizable": "Fully customizable — adapt the structure to your unique trading style and edge.",
+    "workspace": "Workspace",
+    "everythingTrader": {
+      "title": "Everything a CFD trader needs",
+      "description": "Seven databases with trade-aware properties, formula fields, and default templates — created automatically when you register. No blank canvas, no setup."
+    },
+    "features": {
+      "tradingJournal": {
+        "title": "Trading Journal",
+        "description": "Log every trade with full context — instrument, direction, entry/exit, lot size, P&L, R:R, and setups. Your history becomes your best teacher."
+      },
+      "dailyRoutine": {
+        "title": "Daily Routine",
+        "description": "Structure your pre-session prep and post-session review with checklists. Build habits that compound into systemic performance."
+      },
+      "knowledgeBase": {
+        "title": "Knowledge Base",
+        "description": "Capture market observations, research, and insights in categorized records. Build your own library of market edge."
+      },
+      "mistakesPsychology": {
+        "title": "Mistakes & Psychology",
+        "description": "Track recurring behavioral errors and discipline breaks. Identify psychological patterns before they affect your capital."
+      },
+      "accountsManagement": {
+        "title": "Accounts Management",
+        "description": "Monitor balances, drawdowns, and leverage across all your broker accounts. A complete financial overview in one place."
+      },
+      "smartDatabases": {
+        "title": "Smart Databases",
+        "description": "Define your own properties: text, numbers, dates, and relations. Link an error to a specific session with a single click."
+      },
+      "tradingSystem": {
+        "title": "Trading System",
+        "description": "Document your strategy rules, entry criteria, and risk parameters. Version and evaluate your edge as the market evolves."
+      }
+    },
+    "templates": "Templates",
+    "neverBlankPage": {
+      "title": "Never start from a blank page",
+      "description": "FIX Space ships with pre-built templates for trade logs, session reviews, and strategy documents. When creating a new record, a template is applied automatically — you get a ready-made page structure and can start filling it immediately. Build your own templates to match your personal workflow."
+    },
+    "newRecordTemplate": "New record from template",
+    "postTradeAnalysis": "Post-Trade Analysis",
+    "newSetupIdea": "New Setup Idea",
+    "weeklyReview": "Weekly Review",
+    "workflow": "Workflow",
+    "howItWorks": {
+      "title": "How it works",
+      "description": "From raw trade data to structured habits and measurable improvement — in three steps."
+    },
+    "howItWorksSteps": {
+      "step1": {
+        "title": "Capture every detail",
+        "description": "Log trades manually or via broker import. Apply templates for session reviews, attach screenshots, and link records to specific setup rules."
+      },
+      "step2": {
+        "title": "Analyze with precision",
+        "description": "Filter your journal by any custom property. Use formula fields and relations to identify which setups and market conditions drive your P&L."
+      },
+      "step3": {
+        "title": "Compound your edge",
+        "description": "Follow systematic routines and track psychological errors. Refine your Trading System based on hard data rather than intuition."
+      }
+    },
+    "import": "Import",
+    "automaticImport": {
+      "title": "Automatic import in seconds",
+      "description": "Upload your export file and FIX Space maps the fields, validates the data, and populates your Trading Journal automatically — no manual entry needed."
+    },
+    "unifiedWorkspace": "Unified trading workspace",
+    "importsInto": "imports into",
+    "allTradesSynced": "All trades synced",
+    "autoPnLCalculation": "Auto P&L calculation",
+    "linkedToJournal": "Linked to journal",
+    "cta": {
+      "title": "Turn your experience into capital.",
+      "description": "Stop losing edge to chaos. Start building your trading system on the foundation of FIX Space today. Free to start.",
+      "createAccount": "Create free account",
+      "signIn": "Sign in"
+    }
+  },
+  "Settings": {
+    "appearance": {
+      "theme": {
+        "title": "Theme",
+        "description": "Customize the appearance of your workspace.",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "language": {
+        "title": "Language",
+        "description": "Choose your interface language."
+      }
+    }
+  },
+  "Verify": {
+    "missingToken": "Verification token is missing.",
+    "verifying": "Verifying your email...",
+    "failedTitle": "Verification Failed",
+    "failedGeneric": "Failed to verify email.",
+    "goToLogin": "Go to login",
+    "successTitle": "Email Verified!",
+    "redirecting": "Redirecting you to the dashboard..."
+  },
+  "ResetPassword": {
+    "invalidLinkTitle": "Invalid link",
+    "invalidLinkDesc": "This password reset link is missing or invalid.",
+    "requestNewDesc": "Please request a new reset link from the login page.",
+    "successTitle": "Password updated",
+    "successDesc": "Your password has been changed successfully.",
+    "readyToGo": "Ready to go?",
+    "signInWithNewPassword": "You can now sign in with your new password.",
+    "goToSignIn": "Go to sign in",
+    "setTitle": "Set new password",
+    "setSubtitle": "Enter and confirm your new password",
+    "remembered": "Remembered it?",
+    "backToSignIn": "Back to sign in",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "passwordsNotMatch": "Passwords do not match.",
+    "updating": "Updating…",
+    "updatePassword": "Update password"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "Looks like this page went off-chart. Double-check the link or head back to your workspace.",
+    "goToWorkspace": "Go to workspace"
+  },
+  "Search": {
+    "placeholder": "Search records...",
+    "hint": "Start typing to search across your space",
+    "noResults": "No results for",
+    "error": "Search failed. Please try again."
+  },
+  "AddSection": {
+    "title": "New Section",
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "placeholder": "Section name",
+    "creating": "Creating...",
+    "add": "Add section"
+  },
+  "AddDatabase": {
+    "title": "New Database",
+    "chooseIcon": "Choose icon",
+    "placeholder": "Database name",
+    "creating": "Creating…",
+    "add": "Add database"
+  },
+  "SectionEdit": {
+    "title": "Edit Section",
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "placeholder": "Section name",
+    "saving": "Saving...",
+    "save": "Save changes"
+  },
+  "RecordModal": {
+    "editTitle": "Edit record",
+    "newTitle": "New record",
+    "noEditableProperties": "No editable properties.",
+    "cancel": "Cancel",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "create": "Create"
+  },
+  "SettingsModal": {
+    "title": "Settings",
+    "profile": "Profile",
+    "appearance": "Appearance",
+    "space": "Space",
+    "database": "Database",
+    "section": "Section",
+    "record": "Record",
+    "manageSettings": "Manage your"
+  },
+  "Breadcrumbs": {
+    "database": "Database"
+  },
+  "DatabaseToolbar": {
+    "search": "Search",
+    "searchPlaceholder": "Search records…",
+    "sort": "Sort",
+    "filter": "Filter",
+    "group": "Group"
+  },
+  "DatabaseTable": {
+    "noProperties": "No properties defined for this database.",
+    "noRecords": "No records yet.",
+    "untitled": "Untitled",
+    "recordsOf": "{from}–{to} of {total} records",
+    "rowsPerPage": "Rows per page:",
+    "refresh": "Refresh database",
+    "previousPage": "Previous page",
+    "nextPage": "Next page"
+  },
+  "SortPanel": {
+    "title": "Sort",
+    "clearAll": "Clear all",
+    "noRules": "No sort rules. Add one below.",
+    "selectField": "Select field…",
+    "addSort": "+ Add sort",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "asc": "ASC",
+    "desc": "DESC"
+  },
+  "FilterPanel": {
+    "title": "Filter",
+    "clearAll": "Clear all",
+    "noRules": "No filter rules. Add one below.",
+    "selectProperty": "Select property…",
+    "addFilter": "+ Add filter",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "pickValues": "Pick values…",
+    "pickStatus": "Pick status…",
+    "pickOption": "Pick option…",
+    "value": "Value…",
+    "operators": {
+      "equals": "equals",
+      "notEquals": "not equals",
+      "contains": "contains",
+      "notContains": "does not contain",
+      "startsWith": "starts with",
+      "endsWith": "ends with",
+      "isEmpty": "is empty",
+      "isNotEmpty": "is not empty",
+      "greaterThan": ">",
+      "lessThan": "<",
+      "greaterThanOrEqual": ">=",
+      "lessThanOrEqual": "<=",
+      "on": "on",
+      "before": "before",
+      "after": "after",
+      "onOrBefore": "on or before",
+      "onOrAfter": "on or after",
+      "isChecked": "is checked",
+      "isUnchecked": "is unchecked",
+      "isExactly": "is exactly",
+      "isNotExactly": "is not exactly",
+      "isOneOf": "is one of",
+      "isNotOneOf": "is not one of"
+    }
+  },
+  "GroupPanel": {
+    "groupBy": "Group by",
+    "noGrouping": "No grouping",
+    "selectField": "Select field…",
+    "selectProperty": "Select property…",
+    "selectGranularity": "Select granularity…",
+    "groups": "Groups",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
+    "property": "Property",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "year": "Year",
+    "changeColor": "Change color",
+    "showGroup": "Show group",
+    "hideGroup": "Hide group"
+  },
+  "RelationInput": {
+    "searchRecords": "Search records…"
+  },
+  "IconPicker": {
+    "searchIcons": "Search icons…",
+    "noIconsFound": "No icons found"
+  },
+  "ColorPicker": {
+    "hexPlaceholder": "rrggbb",
+    "invalidHex": "Invalid hex color",
+    "save": "Save"
+  },
+  "PropertyInput": {
+    "enterText": "Enter text…",
+    "checked": "Checked",
+    "none": "— None —"
+  },
+  "Combobox": {
+    "search": "Search…",
+    "addMore": "Add more…"
+  },
+  "RecordPage": {
+    "noProperties": "No properties defined for this database.",
+    "untitled": "Untitled",
+    "changeIcon": "Change icon"
+  },
+  "TemplatePage": {
+    "noProperties": "No properties defined for this database.",
+    "untitledTemplate": "Untitled template",
+    "deleteDescription": "\"{name}\" will be permanently deleted.",
+    "changeIcon": "Change icon",
+    "defaultTemplate": "Default"
+  },
+  "EditPage": {
+    "noProperties": "No properties defined for this database."
+  },
+  "ProfilePage": {
+    "title": "Profile",
+    "subtitle": "Manage your account settings and view your activity.",
+    "accountInfo": "Account Information",
+    "username": "Username",
+    "emailAddress": "Email Address",
+    "statsComingSoon": "Statistics and activity history will be implemented in future updates."
+  },
+  "SessionIndicator": {
+    "tokyo": "Tokyo",
+    "tokyoLunch": "Tokyo (Lunch)",
+    "frankfurt": "Frankfurt",
+    "london": "London",
+    "londonLunch": "London (Lunch)",
+    "ny": "NY",
+    "nyLunch": "NY (Lunch)",
+    "newYork": "New York",
+    "next": "Next",
+    "at": "at",
+    "closed": "Closed",
+    "loadingDate": "Loading date…"
+  },
+  "SpaceSwitcher": {
+    "spaces": "Spaces",
+    "newSpace": "New space",
+    "default": "Default",
+    "manageSpaces": "Manage spaces",
+    "newSpaceTitle": "New Space",
+    "addSpace": "Add space",
+    "creating": "Creating..."
+  },
+  "SpaceSettings": {
+    "sidebar": "Sidebar",
+    "datetime": "Date & Time",
+    "defaultSpace": "Default space",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "setAsDefault": "Set as default",
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "cannotDeleteDefault": "Cannot delete the default space",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "saveChanges": "Save changes",
+    "timeFormat": "Time format",
+    "startOfWeek": "Start of week",
+    "monday": "Monday",
+    "sunday": "Sunday",
+    "dateFormat": "Date format",
+    "deleteSpace": "Delete space",
+    "deleteSpaceDesc": "All databases and records inside will be permanently deleted. This action cannot be undone.",
+    "spaceDuplicated": "Space duplicated.",
+    "spaceDeleted": "Space deleted.",
+    "defaultUpdated": "Default space updated.",
+    "settingsSaved": "Settings saved.",
+    "placeholderDateFormat": "e.g. DD/MM/YYYY"
+  },
+  "ProfileSettings": {
+    "general": "General",
+    "security": "Security",
+    "profilePhoto": "Profile photo",
+    "photoDesc": "JPEG, PNG or WebP · max 5 MB",
+    "username": "Username",
+    "placeholderUsername": "Enter username",
+    "profileUpdated": "Profile updated successfully.",
+    "currentPassword": "Current password",
+    "placeholderCurrentPassword": "Enter current password",
+    "newPassword": "New password",
+    "placeholderNewPassword": "Enter new password",
+    "confirmPassword": "Confirm new password",
+    "placeholderConfirmPassword": "Confirm new password",
+    "passwordChanged": "Password changed successfully.",
+    "allFieldsRequired": "All fields are required.",
+    "passwordsNotMatch": "New passwords do not match.",
+    "changePassword": "Change password",
+    "changing": "Changing…"
+  },
+  "DatabaseEdit": {
+    "title": "Edit database",
+    "general": "General",
+    "properties": "Properties",
+    "templates": "Templates",
+    "limits": "Limits",
+    "view": "View",
+    "recordLimit": "Record limit",
+    "recordLimitDesc": "Maximum number of records allowed in this database, or no limit.",
+    "noLimit": "No limit",
+    "useDefaultTemplate": "Use default template",
+    "useDefaultTemplateDesc": "Automatically apply the default template when creating new records.",
+    "wrapCells": "Wrap cell content",
+    "wrapCellsDesc": "Allow cell text to wrap to multiple lines instead of being truncated.",
+    "internalName": "Internal name",
+    "placeholderTitle": "e.g. Trading Journal",
+    "icon": "Icon",
+    "title": "Title",
+    "chooseIcon": "Choose an icon…"
+  },
+  "PropertyEdit": {
+    "properties": "Properties",
+    "record": "Record",
+    "table": "Table",
+    "addGroup": "Add group",
+    "addProperty": "Add property",
+    "groupName": "Group name…",
+    "noProperties": "No properties yet.",
+    "deleteProperty": "Delete property?",
+    "deletePropertyDesc": "This will permanently remove the property and all its values. This action cannot be undone.",
+    "delete": "Delete"
+  },
+  "TemplateEdit": {
+    "untitledTemplate": "Untitled template",
+    "noTemplates": "No templates yet",
+    "template": "template",
+    "templates": "templates",
+    "templatesDesc": "Templates let you pre-fill field values when creating new records.",
+    "creating": "Creating…",
+    "addTemplate": "Add template",
+    "default": "Default",
+    "editTemplate": "Edit template",
+    "deleteTemplate": "Delete template",
+    "deleteDescription": "\"{name}\" will be permanently deleted.",
+    "deleting": "Deleting…",
+    "delete": "Delete"
+  },
+  "PropertyForm": {
+    "newProperty": "New property",
+    "viewProperty": "View property",
+    "editProperty": "Edit property",
+    "general": "General",
+    "type": "Type",
+    "change": "Change",
+    "icon": "Icon (optional)",
+    "name": "Name",
+    "namePlaceholder": "Property name…",
+    "group": "Group (optional)",
+    "groupPlaceholder": "Assign to a group…",
+    "hint": "Hint (optional)",
+    "hintPlaceholder": "Shown below the field label…",
+    "required": "Required field",
+    "settings": "settings",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "addProperty": "Add property",
+    "chooseType": "choose type",
+    "saveChanges": "Save changes"
+  },
+  "Statistics": {
+    "title": "Statistics",
+    "subtitle": "Comprehensive analytics of your trading performance",
+    "keyMetrics": "Key Metrics",
+    "performance": "Performance",
+    "advancedStats": "Advanced Stats",
+    "charts": "Charts",
+    "tradeDistribution": "Trade Distribution",
+    "winRate": "Win Rate",
+    "profitFactor": "Profit Factor",
+    "avgRR": "Avg R:R",
+    "expectancy": "Expectancy",
+    "totalPnL": "Total P&L",
+    "avgWin": "Avg Win",
+    "avgLoss": "Avg Loss",
+    "totalTrades": "Total Trades",
+    "largestWin": "Largest Win",
+    "largestLoss": "Largest Loss",
+    "consecutiveWins": "Consecutive Wins",
+    "consecutiveLosses": "Consecutive Losses",
+    "equityCurve": "Equity Curve",
+    "monthlyPnL": "Monthly P&L",
+    "assetPerformance": "Asset Performance",
+    "weeklyActivity": "Weekly Activity",
+    "wins": "Wins",
+    "losses": "Losses",
+    "breakeven": "Breakeven",
+    "filters": "Filters",
+    "filterAccount": "Account",
+    "filterPeriod": "Time Period",
+    "filterAssets": "Assets",
+    "compareMode": "Compare Mode",
+    "compareOn": "Comparing",
+    "compareOff": "Enable Compare",
+    "allAccounts": "All Accounts",
+    "tabOverview": "Overview",
+    "tabPatterns": "Patterns",
+    "tabBehavior": "Behavior",
+    "tabAccounts": "Accounts",
+    "pnlCurve": "P&L Curve",
+    "summaryKpi": "Summary KPIs",
+    "avgPnlPerTrade": "Avg P&L/Trade",
+    "avgActualRR": "Avg Actual RR",
+    "avgHoldTime": "Avg Hold Time",
+    "bestTrade": "Best Trade",
+    "worstTrade": "Worst Trade",
+    "pnl": "P&L",
+    "asset": "Asset",
+    "rr": "RR",
+    "date": "Date",
+    "viewTrade": "View Trade",
+    "byAsset": "By Asset",
+    "byEntryModel": "By Entry Model",
+    "byPointA": "By Point A",
+    "byPointB": "By Point B",
+    "byNarrativeTF": "By Narrative Timeframe",
+    "byDayOfWeek": "By Day of Week",
+    "bySession": "By Session",
+    "name": "Name",
+    "avgPnl": "Avg P&L",
+    "tradeCount": "Trade Count",
+    "entryQualityOverTime": "Entry Quality Over Time",
+    "exitQualityOverTime": "Exit Quality Over Time",
+    "ruleAdherenceOverTime": "Rule Adherence Over Time",
+    "rrDeviationCurve": "RR Deviation Curve",
+    "mistakesTable": "Mistakes Ranked by Cost",
+    "mistake": "Mistake",
+    "frequency": "Frequency",
+    "totalCost": "Total Cost",
+    "rulesVsPnl": "Rules Adherence vs P&L",
+    "selectAccount": "Select Account",
+    "balanceDynamics": "Balance Dynamics",
+    "drawdownCurve": "Drawdown Curve",
+    "maxDrawdown": "Max Drawdown",
+    "dailyLimitUsage": "Daily Limit Usage",
+    "comparePeriod": "Compare Period"
+  },
+  "SidebarActions": {
+    "addSection": "Add section",
+    "addDatabase": "Add database",
+    "newSection": "New Section",
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "sectionName": "Section name",
+    "creating": "Creating...",
+    "addSectionBtn": "Add section"
+  },
+  "SearchModal": {
+    "searchFailed": "Search failed. Please try again.",
+    "searchRecords": "Search records...",
+    "startTyping": "Start typing to search across your space",
+    "noResults": "No results for"
+  },
+  "SpaceSwitcher": {
+    "deleteSpace": "Delete space",
+    "deleteSpaceDesc": "All databases and records inside will be permanently deleted. This action cannot be undone.",
+    "delete": "Delete",
+    "spaces": "Spaces",
+    "default": "Default",
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "cannotDeleteDefault": "Cannot delete the default space",
+    "newSpace": "New space",
+    "newSpaceTitle": "New Space",
+    "addSpace": "Add space",
+    "creating": "Creating...",
+    "editSpace": "Edit Space",
+    "saveChanges": "Save changes",
+    "saving": "Saving...",
+    "spaceName": "Space name",
+    "chooseIcon": "Choose icon"
+  },
+  "DatabaseItem": {
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "deleteDatabase": "Delete database",
+    "deleteDatabaseDesc": "This database and all its records will be permanently deleted.",
+    "deleting": "Deleting…"
+  },
+  "SectionItem": {
+    "addDatabase": "Add database",
+    "edit": "Edit",
+    "delete": "Delete",
+    "editSection": "Edit Section",
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "sectionName": "Section name",
+    "saving": "Saving...",
+    "saveChanges": "Save changes",
+    "deleteSection": "Delete section",
+    "deleteSectionDesc": "The section will be removed. Databases inside will become unsectioned.",
+    "deleting": "Deleting..."
+  },
+  "SettingsModal": {
+    "profile": "Profile",
+    "space": "Space",
+    "database": "Database",
+    "section": "Section",
+    "settings": "Settings",
+    "manageSettings": "Manage your"
+  },
+  "ProfileSettingsComp": {
+    "general": "General",
+    "security": "Security",
+    "username": "Username",
+    "placeholderUsername": "Enter username",
+    "profileUpdated": "Profile updated successfully.",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "currentPassword": "Current password",
+    "placeholderCurrentPassword": "Enter current password",
+    "newPassword": "New password",
+    "placeholderNewPassword": "Enter new password",
+    "confirmPassword": "Confirm new password",
+    "placeholderConfirmPassword": "Confirm new password",
+    "passwordChanged": "Password changed successfully.",
+    "allFieldsRequired": "All fields are required.",
+    "passwordsNotMatch": "New passwords do not match.",
+    "changePassword": "Change password",
+    "changing": "Changing…"
+  },
+  "SpaceSettingsComp": {
+    "sidebar": "Sidebar",
+    "datetime": "Date & Time",
+    "timeFormat12h": "12h",
+    "timeFormat24h": "24h",
+    "monday": "Monday",
+    "sunday": "Sunday",
+    "defaultUpdated": "Default space updated.",
+    "spaceDuplicated": "Space duplicated.",
+    "spaceDeleted": "Space deleted.",
+    "settingsSaved": "Settings saved.",
+    "spaces": "Spaces",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "setAsDefault": "Set as default",
+    "default": "Default",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "saveChanges": "Save changes",
+    "timeFormat": "Time format",
+    "startOfWeek": "Start of week",
+    "dateFormat": "Date format",
+    "placeholderDateFormat": "e.g. DD/MM/YYYY",
+    "deleteSpace": "Delete space",
+    "deleteSpaceDesc": "All databases and records inside will be permanently deleted. This action cannot be undone.",
+    "delete": "Delete"
+  },
+  "DatabaseSettingsComp": {
+    "settingsSaved": "Settings saved.",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "saving": "Saving…",
+    "saveChanges": "Save changes"
+  },
+  "SectionSettingsComp": {
+    "settingsSaved": "Settings saved.",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "defaultColor": "Default color",
+    "saving": "Saving…",
+    "saveChanges": "Save changes"
+  },
+  "RecordSettingsComp": {
+    "settingsSaved": "Settings saved.",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "saving": "Saving…",
+    "saveChanges": "Save changes"
+  },
+  "AddDatabaseModal": {
+    "addDatabase": "New Database",
+    "icon": "Icon",
+    "chooseIcon": "Choose an icon…",
+    "title": "Title",
+    "placeholderTitle": "e.g. Trading Journal",
+    "internalName": "Internal name:",
+    "cancel": "Cancel",
+    "creating": "Creating…",
+    "createDatabase": "Create database"
+  },
+  "DatabasePage": {
+    "retry": "Retry"
+  },
+  "DatabaseTable": {
+    "noColumnsDefined": "No columns defined. Add properties in the database settings.",
+    "noRecords": "No records yet.",
+    "untitled": "Untitled"
+  },
+  "DatabaseHeader": {
+    "edit": "Edit",
+    "addItem": "Add Item"
+  },
+  "TemplatePickerModal": {
+    "chooseTemplate": "Choose a template",
+    "chooseTemplateDesc": "Select a template to apply to the new record.",
+    "noTemplate": "No template",
+    "default": "Default"
+  },
+  "EditActions": {
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel"
+  },
+  "EditTableView": {
+    "primary": "Primary",
+    "showColumn": "Show column",
+    "hideColumn": "Hide column",
+    "noPropertiesYet": "No properties yet."
+  },
+  "TemplateEditModal": {
+    "templateName": "Template name",
+    "default": "Default",
+    "noPropertiesDefined": "No properties defined for this database.",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "TemplatePageComp": {
+    "templateNotFound": "Template not found.",
+    "noPropertiesDefined": "No properties defined for this database.",
+    "deleteTemplate": "Delete template",
+    "deleteDescription": "\"{name}\" will be permanently deleted.",
+    "deleting": "Deleting…",
+    "delete": "Delete",
+    "setDefault": "Set as default",
+    "setDefaultTitle": "Change default template?",
+    "setDefaultDesc": "This will replace the current default template. All new records will use this template by default.",
+    "removeDefault": "Remove default",
+    "removeDefaultTitle": "Remove default status?",
+    "removeDefaultDesc": "Another template will automatically become the default. New records will still use a template."
+  },
+  "RecordPageComp": {
+    "recordNotFound": "Record not found.",
+    "deleteRecord": "Delete record",
+    "deleteRecordDesc": "This record will be permanently deleted.",
+    "deleting": "Deleting…",
+    "delete": "Delete"
+  },
+  "RecordHeaderComp": {
+    "hideProperties": "Hide properties",
+    "showProperties": "Show properties",
+    "saving": "Saving…",
+    "viewMode": "View mode",
+    "editMode": "Edit mode",
+    "deleteRecord": "Delete record"
+  },
+  "SectionEditModal": {
+    "editSection": "Edit Section",
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "sectionName": "Section name",
+    "saving": "Saving...",
+    "saveChanges": "Save changes"
+  }
+}

@@ -8,13 +8,15 @@ import { Toast } from "@/components/ui/primitives/toast";
 import { ColorPicker } from "@/components/ui/color-picker/color-picker";
 import { getAllIcons, IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import type { SectionSettings } from "@nucleus/domain";
+import type { SectionSettings as SectionSettingsDto } from "@fixspace/domain";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 type ToastState = { message: string; variant: "success" | "error" } | null;
 
 export function SectionSettings() {
-  const [form, setForm] = useState<SectionSettings | null>(null);
+  const t = useTranslations("SectionSettingsComp");
+  const [form, setForm] = useState<SectionSettingsDto | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
@@ -35,7 +37,7 @@ export function SectionSettings() {
     try {
       const updated = await updateSectionSettings(form);
       setForm(updated);
-      setToast({ message: "Settings saved.", variant: "success" });
+      setToast({ message: t("settingsSaved"), variant: "success" });
     } catch (err) {
       setToast({ message: parseApiError(err), variant: "error" });
     } finally {
@@ -51,7 +53,7 @@ export function SectionSettings() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-ink-secondary">Default icon</label>
+          <label className="text-sm text-ink-secondary">{t("defaultIcon")}</label>
           <div>
             <button
               ref={iconButtonRef}
@@ -67,7 +69,7 @@ export function SectionSettings() {
                   </span>
                 </span>
               ) : (
-                <span className="text-ink-muted">Choose an icon…</span>
+                <span className="text-ink-muted">{t("chooseIcon")}</span>
               )}
             </button>
             {showIconPicker && (
@@ -84,7 +86,7 @@ export function SectionSettings() {
           </div>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-ink-secondary">Default color</label>
+          <label className="text-sm text-ink-secondary">{t("defaultColor")}</label>
           <button
             ref={swatchRef}
             type="button"
@@ -111,7 +113,7 @@ export function SectionSettings() {
       {toast && <Toast message={toast.message} variant={toast.variant} onDismiss={() => setToast(null)} />}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? "Saving…" : "Save changes"}
+          {isSaving ? t("saving") : t("saveChanges")}
         </Button>
       </div>
     </div>

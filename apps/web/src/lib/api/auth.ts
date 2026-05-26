@@ -1,4 +1,4 @@
-import type { AuthResponseDto, LoginUserDto, RegisterUserDto } from "@nucleus/domain";
+import type { AuthResponseDto, LoginUserDto, RegisterUserDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function login(dto: LoginUserDto) {
@@ -51,5 +51,11 @@ export function devVerifyUser(email: string) {
   }>("/auth/dev/verify-user", {
     method: "POST",
     body: { email },
+  });
+}
+
+export function verifyEmail(token: string) {
+  return apiFetch<{ message: string }>(`/auth/verify-email?token=${token}`, {
+    method: "POST",
   });
 }

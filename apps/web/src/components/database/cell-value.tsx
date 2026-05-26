@@ -1,7 +1,7 @@
 "use client";
 
-import { PropertyType } from "@nucleus/domain";
-import type { RecordResponseDto } from "@nucleus/domain";
+import { PropertyType } from "@fixspace/domain/enums";
+import type { RecordResponseDto } from "@fixspace/domain";
 import { Badge } from "@/components/ui/primitives/badge";
 
 interface CellValueProps {

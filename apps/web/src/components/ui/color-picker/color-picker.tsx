@@ -1,67 +1,41 @@
 "use client";
 
+import { hexToRgb, rgbToHsv, isValidHex, hexFromHsv } from "@/lib/utils/color";
 import { useEscape } from "@/hooks/useEscape";
 import { getPopoverStyle } from "@/utils/popover";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-
-// ─── color math ───────────────────────────────────────────────────────────────
-
-function hsvToRgb(h: number, s: number, v: number): [number, number, number] {
-  const f = (n: number) => {
-    const k = (n + h / 60) % 6;
-    return v - v * s * Math.max(0, Math.min(k, 4 - k, 1));
-  };
-  return [Math.round(f(5) * 255), Math.round(f(3) * 255), Math.round(f(1) * 255)];
-}
-
-function rgbToHex(r: number, g: number, b: number): string {
-  return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("");
-}
-
-function hexToRgb(hex: string): [number, number, number] | null {
-  const m = /^#([0-9a-f]{6})$/i.exec(hex);
-  if (!m || !m[1]) return null;
-  const n = parseInt(m[1], 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-
-function rgbToHsv(r: number, g: number, b: number): [number, number, number] {
-  const rr = r / 255,
-    gg = g / 255,
-    bb = b / 255;
-  const max = Math.max(rr, gg, bb),
-    min = Math.min(rr, gg, bb);
-  const v = max;
-  const s = max === 0 ? 0 : (max - min) / max;
-  let h = 0;
-  if (max !== min) {
-    const d = max - min;
-    if (max === rr) h = ((gg - bb) / d + (gg < bb ? 6 : 0)) / 6;
-    else if (max === gg) h = ((bb - rr) / d + 2) / 6;
-    else h = ((rr - gg) / d + 4) / 6;
-  }
-  return [h * 360, s, v];
-}
-
-function isValidHex(v: string): boolean {
-  return /^#[0-9a-fA-F]{6}$/.test(v);
-}
-
-function hexFromHsv(h: number, s: number, v: number): string {
-  return rgbToHex(...hsvToRgb(h, s, v));
-}
-
-// ─── component ────────────────────────────────────────────────────────────────
 
 interface ColorPickerProps {
   value: string;
   onChange: (value: string) => void;
   onClose: () => void;
   anchorEl?: HTMLElement | null;
+  showSwatches?: boolean;
 }
 
-export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerProps) {
+export const COLOR_SWATCHES = [
+  "#ef4444",
+  "#f97316",
+  "#f59e0b",
+  "#eab308",
+  "#84cc16",
+  "#22c55e",
+  "#10b981",
+  "#14b8a6",
+  "#06b6d4",
+  "#3b82f6",
+  "#6366f1",
+  "#8b5cf6",
+  "#a855f7",
+  "#d946ef",
+  "#ec4899",
+  "#f43f5e",
+];
+
+export function ColorPicker({ value, onChange, onClose, anchorEl, showSwatches = false }: ColorPickerProps) {
+  const t = useTranslations("ColorPicker");
   function initHsv(): [number, number, number] {
     const rgb = value ? hexToRgb(value) : null;
     return rgb ? rgbToHsv(...rgb) : [0, 1, 1];
@@ -73,18 +47,15 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
   const [hex, setHex] = useState(value ?? "");
   const [hexError, setHexError] = useState(false);
 
-  // current preview hex (follows drag in real-time)
   const currentHex = hexFromHsv(hue, sat, val);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // cached rects — captured once at pointerdown, reused throughout drag
   const svRectRef = useRef<DOMRect | null>(null);
   const hueRectRef = useRef<DOMRect | null>(null);
   const svRef = useRef<HTMLDivElement>(null);
   const hueSliderRef = useRef<HTMLDivElement>(null);
 
-  // sync external value → internal state (only when value prop actually changes)
   const prevValueRef = useRef(value);
   useEffect(() => {
     if (value === prevValueRef.current) return;
@@ -100,7 +71,6 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
     }
   }, [value]);
 
-  // close on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (!containerRef.current) return;
@@ -114,8 +84,6 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
 
   useEscape(onClose);
 
-  // ── S/V gradient drag ─────────────────────────────────────────────────────
-
   function calcSV(clientX: number, clientY: number, rect: DOMRect) {
     const s = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     const v = Math.max(0, Math.min(1, 1 - (clientY - rect.top) / rect.height));
@@ -127,7 +95,7 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
 
   function handleSVPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     e.currentTarget.setPointerCapture(e.pointerId);
-    svRectRef.current = e.currentTarget.getBoundingClientRect(); // capture rect once
+    svRectRef.current = e.currentTarget.getBoundingClientRect();
     calcSV(e.clientX, e.clientY, svRectRef.current);
   }
 
@@ -140,8 +108,6 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
     svRectRef.current = null;
   }
 
-  // ── Hue slider drag ───────────────────────────────────────────────────────
-
   function calcHue(clientX: number, rect: DOMRect) {
     const h = Math.max(0, Math.min(360, ((clientX - rect.left) / rect.width) * 360));
     setHue(h);
@@ -151,7 +117,7 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
 
   function handleHuePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     e.currentTarget.setPointerCapture(e.pointerId);
-    hueRectRef.current = e.currentTarget.getBoundingClientRect(); // capture rect once
+    hueRectRef.current = e.currentTarget.getBoundingClientRect();
     calcHue(e.clientX, hueRectRef.current);
   }
 
@@ -163,8 +129,6 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
   function handleHuePointerUp() {
     hueRectRef.current = null;
   }
-
-  // ── Hex input ─────────────────────────────────────────────────────────────
 
   function handleHexChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.value;
@@ -189,14 +153,10 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
     }
   }
 
-  // ── Save ──────────────────────────────────────────────────────────────────
-
   function handleSave() {
     onChange(currentHex);
     onClose();
   }
-
-  // ── derived ───────────────────────────────────────────────────────────────
 
   const hueColor = `hsl(${hue}, 100%, 50%)`;
   const cursorLeft = `${sat * 100}%`;
@@ -266,13 +226,30 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
             onChange={handleHexChange}
             onBlur={handleHexBlur}
             maxLength={6}
-            placeholder="rrggbb"
+            placeholder={t("hexPlaceholder")}
             spellCheck={false}
             className="flex-1 min-w-0 bg-transparent text-xs text-ink outline-none placeholder:text-ink-muted font-mono"
           />
         </div>
-        {hexError && <p className="text-[11px] text-error px-0.5">Invalid hex color</p>}
+        {hexError && <p className="text-[11px] text-error px-0.5">{t("invalidHex")}</p>}
       </div>
+
+      {showSwatches && (
+        <div className="flex flex-wrap gap-1.5">
+          {COLOR_SWATCHES.map((swatch) => (
+            <button
+              key={swatch}
+              type="button"
+              onClick={() => {
+                onChange(swatch);
+                onClose();
+              }}
+              className="w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform"
+              style={{ backgroundColor: swatch, borderColor: value === swatch ? "white" : "transparent" }}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded-md border border-stroke/50 shrink-0" style={{ backgroundColor: currentHex }} />
@@ -280,7 +257,7 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
           onClick={handleSave}
           className="flex-1 rounded-lg bg-accent text-white text-xs font-semibold py-1.5 hover:bg-accent-hover transition-colors"
         >
-          Save
+          {t("save")}
         </button>
       </div>
     </div>

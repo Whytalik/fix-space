@@ -1,4 +1,4 @@
-import type { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@nucleus/domain";
+import type { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getMe() {
@@ -23,4 +23,14 @@ export function changePassword(payload: ChangePasswordDto) {
     method: "PATCH",
     body: payload,
   });
+}
+
+export function uploadAvatar(file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  return apiFetch<UserResponseDto>("/users/me/avatar", { method: "POST", body: form });
+}
+
+export function deleteAvatar() {
+  return apiFetch<UserResponseDto>("/users/me/avatar", { method: "DELETE" });
 }

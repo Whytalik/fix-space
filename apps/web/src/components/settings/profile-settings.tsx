@@ -6,6 +6,7 @@ import { parseApiError } from "@/lib/api/client";
 import { Avatar } from "@/components/ui/primitives/avatar";
 import { Button } from "@/components/ui/primitives/button";
 import { FormField } from "@/components/ui/form/form-field";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 interface ProfileSettingsProps {
@@ -13,6 +14,7 @@ interface ProfileSettingsProps {
 }
 
 export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
+  const t = useTranslations("ProfileSettingsComp");
   const { user, updateUser } = useAppContext();
 
   const [activeTab, setActiveTab] = useState<"general" | "security">("general");
@@ -49,11 +51,11 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
     setPasswordError(null);
     setPasswordSuccess(false);
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setPasswordError("All fields are required.");
+      setPasswordError(t("allFieldsRequired"));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError("New passwords do not match.");
+      setPasswordError(t("passwordsNotMatch"));
       return;
     }
     setIsChangingPassword(true);
@@ -91,10 +93,10 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
 
       <div className="mb-6 flex border-b border-stroke">
         <button className={tabClass("general")} onClick={() => setActiveTab("general")}>
-          General
+          {t("general")}
         </button>
         <button className={tabClass("security")} onClick={() => setActiveTab("security")}>
-          Security
+          {t("security")}
         </button>
       </div>
 
@@ -102,23 +104,23 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
         <div className="flex flex-col gap-4">
           <FormField
             id="username"
-            label="Username"
+            label={t("username")}
             value={username}
             onChange={(e) => {
               setUsername(e.target.value);
               setGeneralSuccess(false);
               setGeneralError(null);
             }}
-            placeholder="Enter username"
+            placeholder={t("placeholderUsername")}
           />
           {generalError && <p className="text-sm text-red-500">{generalError}</p>}
-          {generalSuccess && <p className="text-sm text-green-500">Profile updated successfully.</p>}
+          {generalSuccess && <p className="text-sm text-green-500">{t("profileUpdated")}</p>}
           <div className="flex justify-end">
             <Button
               onClick={handleUpdateProfile}
               disabled={isUpdating || !username.trim() || username === user?.username}
             >
-              {isUpdating ? "Saving…" : "Save changes"}
+              {isUpdating ? t("saving") : t("saveChanges")}
             </Button>
           </div>
         </div>
@@ -128,7 +130,7 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
         <div className="flex flex-col gap-4">
           <FormField
             id="current-password"
-            label="Current password"
+            label={t("currentPassword")}
             type="password"
             value={currentPassword}
             onChange={(e) => {
@@ -136,11 +138,11 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
               setPasswordError(null);
               setPasswordSuccess(false);
             }}
-            placeholder="Enter current password"
+            placeholder={t("placeholderCurrentPassword")}
           />
           <FormField
             id="new-password"
-            label="New password"
+            label={t("newPassword")}
             type="password"
             value={newPassword}
             onChange={(e) => {
@@ -148,11 +150,11 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
               setPasswordError(null);
               setPasswordSuccess(false);
             }}
-            placeholder="Enter new password"
+            placeholder={t("placeholderNewPassword")}
           />
           <FormField
             id="confirm-password"
-            label="Confirm new password"
+            label={t("confirmPassword")}
             type="password"
             value={confirmPassword}
             onChange={(e) => {
@@ -160,13 +162,13 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
               setPasswordError(null);
               setPasswordSuccess(false);
             }}
-            placeholder="Confirm new password"
+            placeholder={t("placeholderConfirmPassword")}
           />
           {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
-          {passwordSuccess && <p className="text-sm text-green-500">Password changed successfully.</p>}
+          {passwordSuccess && <p className="text-sm text-green-500">{t("passwordChanged")}</p>}
           <div className="flex justify-end">
             <Button onClick={handleChangePassword} disabled={isChangingPassword}>
-              {isChangingPassword ? "Changing…" : "Change password"}
+              {isChangingPassword ? t("changing") : t("changePassword")}
             </Button>
           </div>
         </div>

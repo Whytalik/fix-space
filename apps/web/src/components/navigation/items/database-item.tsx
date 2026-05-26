@@ -8,9 +8,10 @@ import { useMutation } from "@/hooks/useMutation";
 import { deleteDatabase as deleteDatabaseApi, duplicateDatabase } from "@/lib/api/database";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { DatabaseResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto } from "@fixspace/domain";
 import { Button } from "@/components/ui/primitives/button";
 import { Copy, MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -24,6 +25,7 @@ interface DatabaseItemProps {
 }
 
 export function DatabaseItem({ spaceId, db, collapsed, sectionId, sectionColor }: DatabaseItemProps) {
+  const t = useTranslations("DatabaseItem");
   const pathname = usePathname();
   const router = useRouter();
   const isActive = pathname.startsWith(`/database/${db.id}`);
@@ -135,10 +137,10 @@ export function DatabaseItem({ spaceId, db, collapsed, sectionId, sectionColor }
           anchorEl={menuButtonRef.current}
           onClose={() => setShowMenu(false)}
           items={[
-            { label: "Edit", icon: <Pencil size={13} />, onClick: handleDatabaseEdit },
-            { label: "Duplicate", icon: <Copy size={13} />, onClick: handleDatabaseDuplicate },
+            { label: t("edit"), icon: <Pencil size={13} />, onClick: handleDatabaseEdit },
+            { label: t("duplicate"), icon: <Copy size={13} />, onClick: handleDatabaseDuplicate },
             {
-              label: "Delete",
+              label: t("delete"),
               icon: <Trash size={13} />,
               variant: "danger",
               onClick: handleDatabaseDelete,
@@ -148,9 +150,9 @@ export function DatabaseItem({ spaceId, db, collapsed, sectionId, sectionColor }
       )}
       {showDeleteConfirm && (
         <ConfirmDialog
-          title="Delete database"
-          description="This database and all its records will be permanently deleted."
-          confirmLabel={isDeleting ? "Deleting…" : "Delete"}
+          title={t("deleteDatabase")}
+          description={t("deleteDatabaseDesc")}
+          confirmLabel={isDeleting ? t("deleting") : t("delete")}
           variant="danger"
           onConfirm={handleConfirmDelete}
           onCancel={() => setShowDeleteConfirm(false)}

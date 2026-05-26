@@ -3,6 +3,7 @@
 import { useEscape } from "@/hooks/useEscape";
 import { getPopoverStyle } from "@/utils/popover";
 import { Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getAllIcons } from "./icon-display";
@@ -15,6 +16,7 @@ interface IconPickerProps {
 }
 
 export function IconPicker({ value, onChange, onClose, anchorEl }: IconPickerProps) {
+  const t = useTranslations("IconPicker");
   const [search, setSearch] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -60,7 +62,7 @@ export function IconPicker({ value, onChange, onClose, anchorEl }: IconPickerPro
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search icons…"
+            placeholder={t("searchIcons")}
             className="flex-1 bg-transparent text-xs text-ink outline-none placeholder:text-ink-muted min-w-0"
           />
           {search && (
@@ -73,7 +75,7 @@ export function IconPicker({ value, onChange, onClose, anchorEl }: IconPickerPro
 
       <div className="scrollbar overflow-y-auto px-2 pb-2.5" style={{ maxHeight: "180px" }}>
         {filteredIcons.length === 0 ? (
-          <p className="py-8 text-center text-xs text-ink-muted">No icons found</p>
+          <p className="py-8 text-center text-xs text-ink-muted">{t("noIconsFound")}</p>
         ) : (
           <div className="grid grid-cols-7 gap-0.5">
             {filteredIcons.map(({ name, displayName, icon: Icon }) => {

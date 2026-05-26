@@ -11,7 +11,7 @@ import { clearCached, getCached, setCached } from "@/lib/cache";
 import { storage } from "@/lib/storage";
 import type { SpaceAction, SpaceState } from "@/types/space";
 import { CACHE_KEY_SPACES, CACHE_KEY_USER } from "@/utils/constants";
-import type { DatabaseResponseDto, SectionResponseDto, SpaceResponseDto, UserResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto, SectionResponseDto, SpaceResponseDto, UserResponseDto } from "@fixspace/domain";
 import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
 
 function spaceReducer(state: SpaceState, action: SpaceAction): SpaceState {
@@ -60,6 +60,8 @@ interface AppContextValue {
   setCurrentDatabaseId: (id: string | null) => void;
   currentRecordName: string | null;
   setCurrentRecordName: (name: string | null) => void;
+  currentRecordIcon: string | null;
+  setCurrentRecordIcon: (icon: string | null) => void;
 }
 
 const AppContext = createContext<AppContextValue>({
@@ -86,6 +88,8 @@ const AppContext = createContext<AppContextValue>({
   setCurrentDatabaseId: () => {},
   currentRecordName: null,
   setCurrentRecordName: () => {},
+  currentRecordIcon: null,
+  setCurrentRecordIcon: () => {},
 });
 
 function resolveInitialSpaceId(list: SpaceResponseDto[]): string | null {
@@ -93,11 +97,18 @@ function resolveInitialSpaceId(list: SpaceResponseDto[]): string | null {
   return (lastId && list.some((s) => s.id === lastId) ? lastId : null) ?? list[0]?.id ?? null;
 }
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<UserResponseDto | null>(null);
+export function AppProvider({
+  children,
+  initialUser = null,
+}: {
+  children: React.ReactNode;
+  initialUser?: UserResponseDto | null;
+}) {
+  const [user, setUser] = useState<UserResponseDto | null>(initialUser);
   const [isLoading, setIsLoading] = useState(true);
   const [currentDatabaseId, setCurrentDatabaseId] = useState<string | null>(null);
   const [currentRecordName, setCurrentRecordName] = useState<string | null>(null);
+  const [currentRecordIcon, setCurrentRecordIcon] = useState<string | null>(null);
   const [{ spaces, currentSpaceId }, dispatch] = useReducer(spaceReducer, {
     spaces: [],
     currentSpaceId: null,
@@ -213,6 +224,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setCurrentDatabaseId,
         currentRecordName,
         setCurrentRecordName,
+        currentRecordIcon,
+        setCurrentRecordIcon,
       }}
     >
       {children}
