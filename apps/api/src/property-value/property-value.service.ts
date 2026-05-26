@@ -1,11 +1,11 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@nucleus/database";
+import { Prisma } from "@fixspace/database";
 import {
   CreatePropertyValueDto,
   PropertyType,
   PropertyValueResponseDto,
   UpdatePropertyValueDto,
-} from "@nucleus/domain";
+} from "@fixspace/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 import { PropertyTypeRegistry } from "../property/types";
 import { PropertyValueRepository } from "./property-value.repository";

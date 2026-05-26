@@ -1,5 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_FORMULA_PROPERTY, FORMULA_OUTPUT_TYPE_VALUES, FormulaOutputType, PropertyType } from "@nucleus/domain";
+import {
+  DEFAULT_FORMULA_PROPERTY,
+  FORMULA_OUTPUT_TYPE_VALUES,
+  FormulaOutputType,
+  PropertyType,
+} from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { type User } from "@nucleus/database";
-import { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@nucleus/domain";
+import { type User } from "@fixspace/database";
+import { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 import { comparePassword, hashPassword } from "../common/utils/password";
 import { StorageService } from "./storage.service";

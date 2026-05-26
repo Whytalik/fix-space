@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { ContainerBlock, RecordContentResponseDto } from "@nucleus/domain";
+import { ContainerBlock, RecordContentResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { RecordRepository } from "../record.repository";
 

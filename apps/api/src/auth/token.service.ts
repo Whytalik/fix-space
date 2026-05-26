@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { prisma } from "@nucleus/database";
+import { prisma } from "@fixspace/database";
 import { AppLogger } from "../common/logger/app-logger.service";
 import { parseDurationToMs } from "../common/utils/cookie.helper";
 import { generateRandomToken, hashToken } from "../common/utils/token.helper";
@@ -120,7 +120,7 @@ export class TokenService {
 
   async createPasswordResetToken(userId: string): Promise<string> {
     const { rawToken, tokenHash } = this.generateTokenPair();
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
     await prisma.passwordResetToken.create({
       data: { userId, tokenHash, expiresAt },

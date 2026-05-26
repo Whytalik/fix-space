@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import * as nodemailer from "nodemailer";
 import { Transporter } from "nodemailer";
 import { AppLogger } from "../common/logger/app-logger.service";
+import { t } from "../common/utils/i18n.helper";
 
 function escapeHtml(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -63,20 +64,20 @@ export class MailService implements OnModuleInit {
   async sendVerificationEmail(to: string, username: string, token: string): Promise<void> {
     const appUrl = this.configService.get<string>("APP_URL", "http://localhost:3001");
     const verificationLink = `${appUrl}/auth/verify?token=${encodeURIComponent(token)}`;
-    const from = this.configService.get<string>("MAIL_FROM", "noreply@nucleus.app");
+    const from = this.configService.get<string>("MAIL_FROM", "noreply@fixspace.app");
 
     const mailOptions = {
       from,
       to,
-      subject: "Verify your Nucleus account",
-      text: `Hello ${username},\n\nPlease verify your email address by clicking the link below:\n\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you did not create this account, you can safely ignore this email.\n\nBest regards,\nThe Nucleus Team`,
+      subject: t("emails.verification.subject"),
+      text: t("emails.verification.body", { link: verificationLink }),
       html: `
         <!DOCTYPE html>
         <html lang="en">
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Verify your Nucleus account</title>
+          <title>${t("emails.verification.htmlTitle")}</title>
         </head>
         <body style="margin:0;padding:0;background-color:#0f0f11;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f0f11;">
@@ -121,7 +122,7 @@ export class MailService implements OnModuleInit {
                             </svg>
                           </td>
                           <td style="vertical-align:middle;">
-                            <span style="font-size:17px;font-weight:800;color:#e8e8f0;letter-spacing:-0.04em;line-height:1;">Nucleus</span>
+                            <span style="font-size:17px;font-weight:800;color:#e8e8f0;letter-spacing:-0.04em;line-height:1;">FIX Space</span>
                           </td>
                         </tr>
                       </table>
@@ -144,12 +145,12 @@ export class MailService implements OnModuleInit {
                         <tr>
                           <td style="padding:36px 40px 40px;">
 
-                            <h1 style="margin:0 0 6px 0;font-size:21px;font-weight:700;color:#e8e8f0;letter-spacing:-0.02em;line-height:1.2;">Verify your email address</h1>
-                            <p style="margin:0 0 28px 0;font-size:14px;color:#888888;line-height:1.6;">Confirm your identity to activate your account.</p>
+                            <h1 style="margin:0 0 6px 0;font-size:21px;font-weight:700;color:#e8e8f0;letter-spacing:-0.02em;line-height:1.2;">${t("emails.verification.htmlTitle")}</h1>
+                            <p style="margin:0 0 28px 0;font-size:14px;color:#888888;line-height:1.6;">${t("emails.verification.htmlSubtitle")}</p>
 
-                            <p style="margin:0 0 16px 0;font-size:15px;color:#e8e8f0;line-height:1.7;">Hey <strong>${escapeHtml(username)}</strong>,</p>
+                            <p style="margin:0 0 16px 0;font-size:15px;color:#e8e8f0;line-height:1.7;">${t("emails.verification.greeting")} <strong>${escapeHtml(username)}</strong>,</p>
                             <p style="margin:0 0 28px 0;font-size:15px;color:#888888;line-height:1.7;">
-                              Welcome to Nucleus! Click the button below to verify your email address. This link will expire in <strong style="color:#e8e8f0;">24 hours</strong>.
+                              ${t("emails.verification.htmlWelcome")} ${t("emails.verification.htmlExpiry")}
                             </p>
 
                             <!-- CTA button -->
@@ -157,7 +158,7 @@ export class MailService implements OnModuleInit {
                               <tr>
                                 <td style="border-radius:8px;background-color:#5865f2;">
                                   <a href="${verificationLink}" style="display:inline-block;padding:13px 28px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.01em;border-radius:8px;">
-                                    Verify Email Address
+                                    ${t("emails.verification.htmlButton")}
                                   </a>
                                 </td>
                               </tr>
@@ -169,7 +170,7 @@ export class MailService implements OnModuleInit {
                             </table>
 
                             <!-- Fallback link -->
-                            <p style="margin:0 0 6px 0;font-size:12px;color:#888888;line-height:1.5;">If the button doesn't work, copy and paste this link into your browser:</p>
+                            <p style="margin:0 0 6px 0;font-size:12px;color:#888888;line-height:1.5;">${t("emails.verification.htmlFallback")}</p>
                             <p style="margin:0;font-size:11px;color:#5865f2;word-break:break-all;line-height:1.6;">${verificationLink}</p>
 
                           </td>
@@ -182,7 +183,7 @@ export class MailService implements OnModuleInit {
                   <tr>
                     <td align="center" style="padding-top:24px;">
                       <p style="margin:0;font-size:12px;color:#444444;line-height:1.6;">
-                        If you didn't create a Nucleus account, you can safely ignore this email.
+                        ${t("emails.verification.htmlIgnore")}
                       </p>
                     </td>
                   </tr>
@@ -214,28 +215,28 @@ export class MailService implements OnModuleInit {
   async sendPasswordResetEmail(to: string, token: string): Promise<void> {
     const appUrl = this.configService.get<string>("APP_URL", "http://localhost:3001");
     const resetLink = `${appUrl}/reset-password?token=${encodeURIComponent(token)}`;
-    const from = this.configService.get<string>("MAIL_FROM", "noreply@nucleus.app");
+    const from = this.configService.get<string>("MAIL_FROM", "noreply@fixspace.app");
 
     try {
       const info = await this.transporter.sendMail({
         from,
         to,
-        subject: "Reset your Nucleus password",
-        text: `You requested a password reset.\n\nClick the link below to set a new password:\n\n${resetLink}\n\nThis link expires in 1 hour.\n\nIf you did not request a password reset, you can safely ignore this email.`,
+        subject: t("emails.passwordReset.subject"),
+        text: t("emails.passwordReset.body", { link: resetLink }),
         html: `
           <body style="margin:0;padding:0;background-color:#0f0f11;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
             <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f0f11;">
               <tr><td align="center" style="padding:48px 20px;">
                 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
                   <tr><td style="background-color:#18181d;border:1px solid #2a2a35;border-radius:12px;padding:36px 40px;">
-                    <h1 style="margin:0 0 8px 0;font-size:21px;font-weight:700;color:#e8e8f0;letter-spacing:-0.02em;">Reset your password</h1>
-                    <p style="margin:0 0 28px 0;font-size:14px;color:#888888;line-height:1.7;">Click the button below to set a new password. This link expires in <strong style="color:#e8e8f0;">1 hour</strong>.</p>
+                    <h1 style="margin:0 0 8px 0;font-size:21px;font-weight:700;color:#e8e8f0;letter-spacing:-0.02em;">${t("emails.passwordReset.htmlTitle")}</h1>
+                    <p style="margin:0 0 28px 0;font-size:14px;color:#888888;line-height:1.7;">${t("emails.passwordReset.htmlSubtitle")}</p>
                     <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
                       <tr><td style="border-radius:8px;background-color:#5865f2;">
-                        <a href="${resetLink}" style="display:inline-block;padding:13px 28px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:8px;">Reset Password</a>
+                        <a href="${resetLink}" style="display:inline-block;padding:13px 28px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:8px;">${t("emails.passwordReset.htmlButton")}</a>
                       </td></tr>
                     </table>
-                    <p style="margin:0;font-size:12px;color:#888888;">If you didn't request this, you can safely ignore this email.</p>
+                    <p style="margin:0;font-size:12px;color:#888888;">${t("emails.passwordReset.htmlIgnore")}</p>
                   </td></tr>
                 </table>
               </td></tr>

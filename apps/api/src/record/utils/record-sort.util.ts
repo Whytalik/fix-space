@@ -1,5 +1,5 @@
-import type { RecordSortDto} from "@nucleus/domain";
-import { SortDirection, SortField } from "@nucleus/domain";
+import type { RecordSortDto } from "@fixspace/domain";
+import { SortDirection, SortField } from "@fixspace/domain";
 import type { RecordWithValues } from "./record-filter.util";
 
 export function compareRecords(recordA: RecordWithValues, recordB: RecordWithValues, sorts: RecordSortDto[]): number {

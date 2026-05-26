@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { SpaceSearchResultDto } from "@nucleus/domain";
+import { SpaceSearchResultDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { SpaceRepository } from "../../space/space.repository";
 import { RecordRepository } from "../record.repository";
@@ -25,7 +25,6 @@ export class SearchRecordsUseCase {
     }
 
     const records = await this.recordRepo.findAllBySpaceForSearch(spaceId, userId);
-
     const matched = records.filter((record) => matchesSearch(record, q));
 
     this.logger.debug("Space search complete", { spaceId, total: records.length, matched: matched.length });

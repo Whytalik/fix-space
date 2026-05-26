@@ -20,7 +20,7 @@ export const envSchema = z.object({
   SMTP_PORT: z.coerce.number().default(587),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  MAIL_FROM: z.string().default("noreply@nucleus.app"),
+  MAIL_FROM: z.string().default("noreply@fixspace.app"),
   APP_URL: z.string().default("http://localhost:3001"),
 
   CORS_ORIGIN: z.string().default("http://localhost:3001"),

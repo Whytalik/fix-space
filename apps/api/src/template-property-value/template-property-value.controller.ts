@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
-import { CreateTemplatePropertyValueDto, UpdateTemplatePropertyValueDto } from "@nucleus/domain";
+import { CreateTemplatePropertyValueDto, UpdateTemplatePropertyValueDto } from "@fixspace/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { TemplatePropertyValueService } from "./template-property-value.service";
 

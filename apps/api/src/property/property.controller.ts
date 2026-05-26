@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
-import { CreatePropertyDto, UpdatePropertyDto } from "@nucleus/domain";
+import { CreatePropertyDto, UpdatePropertyDto } from "@fixspace/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { PropertyService } from "./property.service";
 

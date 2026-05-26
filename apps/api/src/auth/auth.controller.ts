@@ -8,7 +8,7 @@ import {
   RegisterUserDto,
   ResetPasswordDto,
   VerifyEmailDto,
-} from "@nucleus/domain";
+} from "@fixspace/domain";
 import { Request } from "express";
 import { AuthCookiesInterceptor } from "../common/interceptors/auth-cookies.interceptor";
 import { AuthService } from "./auth.service";

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma, prisma } from "@fixspace/database";
 
 @Injectable()
 export class PropertyValueRepository {
@@ -27,12 +27,7 @@ export class PropertyValueRepository {
     });
   }
 
-  async upsert(
-    recordId: string,
-    propertyId: string,
-    value: Prisma.InputJsonValue,
-    computed: boolean,
-  ) {
+  async upsert(recordId: string, propertyId: string, value: Prisma.InputJsonValue, computed: boolean) {
     return prisma.propertyValue.upsert({
       where: { recordId_propertyId: { recordId, propertyId } },
       update: { value, computed },

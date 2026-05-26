@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { prisma } from "@nucleus/database";
+import { prisma } from "@fixspace/database";
 import {
   PRISMA_MODEL_NAMES,
   PrismaModelKey,

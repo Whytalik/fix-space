@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
-import { CreateTemplateDto, UpdateTemplateDto } from "@nucleus/domain";
+import { CreateTemplateDto, UpdateTemplateDto } from "@fixspace/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { DuplicateTemplateUseCase } from "./providers/duplicate-template.usecase";
 import { TemplateService } from "./template.service";

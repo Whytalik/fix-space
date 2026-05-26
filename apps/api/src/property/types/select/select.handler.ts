@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_SELECT_PROPERTY, PropertyType, SelectCategory, SelectOption, SelectProperty } from "@nucleus/domain";
+import { DEFAULT_SELECT_PROPERTY, PropertyType, SelectCategory, SelectOption, SelectProperty } from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()
@@ -35,13 +35,23 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
           } else {
             for (const rawOption of category.options as unknown[]) {
               if (typeof rawOption === "string") continue; // backward compat
-              if (typeof rawOption !== "object" || rawOption === null || typeof (rawOption as SelectOption).value !== "string") {
+              if (
+                typeof rawOption !== "object" ||
+                rawOption === null ||
+                typeof (rawOption as SelectOption).value !== "string"
+              ) {
                 errors.push("each option must be an object with a string value");
               } else {
-                if ((rawOption as SelectOption).color !== undefined && typeof (rawOption as SelectOption).color !== "string") {
+                if (
+                  (rawOption as SelectOption).color !== undefined &&
+                  typeof (rawOption as SelectOption).color !== "string"
+                ) {
                   errors.push("option color must be a string");
                 }
-                if ((rawOption as SelectOption).icon !== undefined && typeof (rawOption as SelectOption).icon !== "string") {
+                if (
+                  (rawOption as SelectOption).icon !== undefined &&
+                  typeof (rawOption as SelectOption).icon !== "string"
+                ) {
                   errors.push("option icon must be a string");
                 }
               }
@@ -60,7 +70,9 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
     const { categories, isMultiSelect: isMulti } = this.parseConfig(config);
 
     const allOptions = categories
-      ? categories.flatMap((category) => category.options.map((option) => (typeof option === "string" ? option : option.value)))
+      ? categories.flatMap((category) =>
+          category.options.map((option) => (typeof option === "string" ? option : option.value)),
+        )
       : [];
 
     function extractLabel(v: unknown): string | null {

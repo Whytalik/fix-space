@@ -8,7 +8,7 @@ import {
   SpaceSearchResultDto,
   UpdateRecordContentDto,
   UpdateRecordDto,
-} from "@nucleus/domain";
+} from "@fixspace/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { parseJson } from "../common/utils/parse-json";
 import { FindRecordsUseCase } from "./providers/find-records.usecase";
@@ -102,10 +102,7 @@ export class RecordController {
   }
 
   @Get(":id/content")
-  getContent(
-    @Param("id") id: string,
-    @CurrentUser("userId") userId: string,
-  ): Promise<RecordContentResponseDto> {
+  getContent(@Param("id") id: string, @CurrentUser("userId") userId: string): Promise<RecordContentResponseDto> {
     return this.getRecordContentUseCase.execute(id, userId);
   }
 

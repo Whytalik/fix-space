@@ -1,4 +1,4 @@
-import { PropertyType } from "@nucleus/domain";
+import { PropertyType } from "@fixspace/domain";
 
 type SearchableRecord = {
   name?: string | null;

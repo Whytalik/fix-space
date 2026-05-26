@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { prisma } from "@nucleus/database";
-import { LoginUserDto } from "@nucleus/domain";
+import { prisma } from "@fixspace/database";
+import { LoginUserDto } from "@fixspace/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
+import { t } from "../common/utils/i18n.helper";
 import { MailService } from "../mail/mail.service";
 import { comparePassword, hashPassword } from "../common/utils/password";
 import { UserService } from "../user/user.service";
@@ -29,7 +30,7 @@ export class AuthService {
       this.logger.warn("Login failed: user not found", {
         email: loginUserDto.email,
       });
-      throw new UnauthorizedException("Invalid credentials");
+      throw new UnauthorizedException(t("errors.INVALID_CREDENTIALS"));
     }
 
     const isPasswordValid = await comparePassword(loginUserDto.password, user.passwordHash);
@@ -39,7 +40,7 @@ export class AuthService {
         email: loginUserDto.email,
         userId: user.id,
       });
-      throw new UnauthorizedException("Invalid credentials");
+      throw new UnauthorizedException(t("errors.INVALID_CREDENTIALS"));
     }
 
     if (!user.isVerified) {
@@ -47,7 +48,7 @@ export class AuthService {
         userId: user.id,
         email: user.email,
       });
-      throw new UnauthorizedException("Please verify your email before logging in");
+      throw new UnauthorizedException(t("errors.EMAIL_NOT_VERIFIED"));
     }
 
     const accessToken = this.tokenService.generateAccessToken(user.id, user.username);
@@ -59,7 +60,7 @@ export class AuthService {
     });
 
     return {
-      message: "Login successful",
+      message: t("errors.LOGIN_SUCCESS"),
       accessToken,
       refreshToken,
     };
@@ -67,13 +68,13 @@ export class AuthService {
 
   async refresh(refreshTokenRaw: string) {
     if (!refreshTokenRaw) {
-      throw new UnauthorizedException("Refresh token not provided");
+      throw new UnauthorizedException(t("errors.REFRESH_TOKEN_NOT_PROVIDED"));
     }
 
     const validated = await this.tokenService.validateRefreshToken(refreshTokenRaw);
 
     if (!validated) {
-      throw new UnauthorizedException("Invalid or expired refresh token");
+      throw new UnauthorizedException(t("errors.INVALID_REFRESH_TOKEN"));
     }
 
     const user = await this.userService.findById(validated.userId);
@@ -84,7 +85,7 @@ export class AuthService {
     this.logger.log("Token refreshed successfully", { userId: user.id });
 
     return {
-      message: "Token refreshed successfully",
+      message: t("errors.TOKEN_REFRESHED"),
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     };
@@ -98,7 +99,7 @@ export class AuthService {
     this.logger.log("Logout successful");
 
     return {
-      message: "Logged out successfully",
+      message: t("errors.LOGOUT_SUCCESS"),
       clearCookies: true,
     };
   }
@@ -107,7 +108,7 @@ export class AuthService {
     const validated = await this.tokenService.validateVerificationToken(token);
 
     if (!validated) {
-      throw new BadRequestException("Invalid or expired verification token");
+      throw new BadRequestException(t("errors.INVALID_VERIFICATION_TOKEN"));
     }
 
     await prisma.$transaction(async (tx) => {
@@ -126,21 +127,21 @@ export class AuthService {
       userId: validated.userId,
     });
 
-    return { message: "Email verified successfully" };
+    return { message: t("errors.EMAIL_VERIFIED") };
   }
 
   async devResetTestData(email: string) {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      return { message: `No user found for ${email} — nothing to reset` };
+      return { message: t("errors.DEV_USER_NOT_FOUND", { email }) };
     }
 
     await prisma.user.delete({ where: { email } });
 
     this.logger.log("Dev: test data reset", { email });
 
-    return { message: `Test data for ${email} deleted (cascade)` };
+    return { message: t("errors.DEV_DATA_RESET", { email }) };
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {
@@ -148,10 +149,9 @@ export class AuthService {
 
     const user = await prisma.user.findUnique({ where: { email } });
 
-    // Always return success to avoid user enumeration
     if (!user) {
       this.logger.warn("Forgot password: user not found, returning generic response", { email });
-      return { message: "If this email is registered, you will receive a password reset link." };
+      return { message: t("errors.PASSWORD_RESET_GENERIC") };
     }
 
     const rawToken = await this.tokenService.createPasswordResetToken(user.id);
@@ -159,7 +159,7 @@ export class AuthService {
 
     this.logger.log("Password reset email sent", { userId: user.id });
 
-    return { message: "If this email is registered, you will receive a password reset link." };
+    return { message: t("errors.PASSWORD_RESET_GENERIC") };
   }
 
   async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
@@ -168,7 +168,7 @@ export class AuthService {
     const validated = await this.tokenService.validatePasswordResetToken(token);
 
     if (!validated) {
-      throw new BadRequestException("Invalid or expired password reset token");
+      throw new BadRequestException(t("errors.INVALID_PASSWORD_RESET_TOKEN"));
     }
 
     const passwordHash = await hashPassword(newPassword);
@@ -187,14 +187,14 @@ export class AuthService {
 
     this.logger.log("Password reset successful", { userId: validated.userId });
 
-    return { message: "Password reset successfully" };
+    return { message: t("errors.PASSWORD_RESET_SUCCESS") };
   }
 
   async devVerifyUser(email: string) {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      throw new NotFoundException(`User with email ${email} not found`);
+      throw new NotFoundException(t("errors.USER_NOT_FOUND"));
     }
 
     await prisma.user.update({
@@ -204,6 +204,6 @@ export class AuthService {
 
     this.logger.log("Dev: user verified", { userId: user.id, email });
 
-    return { message: `User ${email} verified successfully` };
+    return { message: t("errors.DEV_USER_VERIFIED", { email }) };
   }
 }

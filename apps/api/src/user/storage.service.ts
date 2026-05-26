@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, OnModuleInit } from "@nestjs/common";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { AppLogger } from "../common/logger/app-logger.service";
+import { t } from "../common/utils/i18n.helper";
 
 const ALLOWED_MIME_TYPES: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -34,10 +35,10 @@ export class StorageService implements OnModuleInit {
 
     const ext = ALLOWED_MIME_TYPES[file.mimetype];
     if (!ext) {
-      throw new BadRequestException("Invalid file type. Allowed: JPEG, PNG, WebP.");
+      throw new BadRequestException(t("errors.INVALID_FILE_TYPE", { allowedTypes: "JPEG, PNG, WebP" }));
     }
     if (file.size > MAX_FILE_SIZE) {
-      throw new BadRequestException("File too large. Maximum size is 5 MB.");
+      throw new BadRequestException(t("errors.FILE_TOO_LARGE", { maxSize: 5 }));
     }
 
     await this.removeAvatarFiles(userId);

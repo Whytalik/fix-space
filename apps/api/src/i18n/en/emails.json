@@ -1,0 +1,22 @@
+{
+  "verification": {
+    "subject": "Verify your FIX Space account",
+    "greeting": "Hello",
+    "body": "Please verify your email address by clicking the link below:\n\n{link}\n\nThis link will expire in 24 hours.\n\nIf you did not create this account, you can safely ignore this email.\n\nBest regards,\nThe FIX Space Team",
+    "htmlTitle": "Verify your email address",
+    "htmlSubtitle": "Confirm your identity to activate your account.",
+    "htmlWelcome": "Welcome to FIX Space!",
+    "htmlExpiry": "This link will expire in <strong>24 hours</strong>.",
+    "htmlButton": "Verify Email Address",
+    "htmlFallback": "If the button doesn't work, copy and paste this link into your browser:",
+    "htmlIgnore": "If you didn't create a FIX Space account, you can safely ignore this email."
+  },
+  "passwordReset": {
+    "subject": "Reset your FIX Space password",
+    "body": "You requested a password reset.\n\nClick the link below to set a new password:\n\n{link}\n\nThis link expires in 1 hour.\n\nIf you did not request a password reset, you can safely ignore this email.",
+    "htmlTitle": "Reset your password",
+    "htmlSubtitle": "Click the button below to set a new password. This link expires in <strong>1 hour</strong>.",
+    "htmlButton": "Reset Password",
+    "htmlIgnore": "If you didn't request this, you can safely ignore this email."
+  }
+}

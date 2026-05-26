@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
-import { CreateDatabaseDto, UpdateDatabaseDto } from "@nucleus/domain";
+import { CreateDatabaseDto, UpdateDatabaseDto } from "@fixspace/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { DatabaseService } from "./database.service";
 import { DuplicateDatabaseUseCase } from "./providers/duplicate-database.usecase";

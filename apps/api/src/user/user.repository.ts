@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, prisma, type User } from "@nucleus/database";
+import { Prisma, prisma, type User } from "@fixspace/database";
 
 @Injectable()
 export class UserRepository {
