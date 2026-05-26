@@ -1,7 +1,8 @@
 import { ConflictException, Injectable } from "@nestjs/common";
-import { prisma } from "@nucleus/database";
-import { RegisterUserDto } from "@nucleus/domain";
+import { prisma } from "@fixspace/database";
+import { RegisterUserDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { t } from "../../common/utils/i18n.helper";
 import { hashPassword } from "../../common/utils/password";
 import { MailService } from "../../mail/mail.service";
 import { InitializeUserSpaceUseCase } from "../../space/providers/initialize-user-space.usecase";
@@ -32,7 +33,7 @@ export class RegisterUserUseCase {
       this.logger.warn("Registration failed: email taken", {
         email: registerUserDto.email,
       });
-      throw new ConflictException("User with this email already exists");
+      throw new ConflictException(t("errors.USER_EMAIL_EXISTS"));
     }
 
     const existingByUsername = await prisma.user.findUnique({
@@ -43,7 +44,7 @@ export class RegisterUserUseCase {
       this.logger.warn("Registration failed: username taken", {
         username: registerUserDto.username,
       });
-      throw new ConflictException("User with this username already exists");
+      throw new ConflictException(t("errors.USER_USERNAME_EXISTS"));
     }
 
     const passwordHash = await hashPassword(registerUserDto.password);
@@ -72,7 +73,7 @@ export class RegisterUserUseCase {
     });
 
     return {
-      message: "Registration successful. Please check your email to verify your account.",
+      message: t("errors.REGISTRATION_SUCCESS"),
     };
   }
 }

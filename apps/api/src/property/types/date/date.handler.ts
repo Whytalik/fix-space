@@ -6,7 +6,7 @@ import {
   PropertyType,
   TIME_FORMATS_VALUES,
   TimeFormat,
-} from "@nucleus/domain";
+} from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()

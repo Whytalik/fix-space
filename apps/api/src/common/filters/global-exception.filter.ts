@@ -3,16 +3,17 @@ import { Request, Response } from "express";
 
 import { getRequestContext } from "../context/request-context";
 import { AppLogger } from "../logger/app-logger.service";
+import { t } from "../utils/i18n.helper";
 
-const PRISMA_ERROR_MAP: Record<string, { status: number; message: string }> = {
-  P2000: { status: HttpStatus.BAD_REQUEST, message: "Input value too long for field" },
-  P2002: { status: HttpStatus.CONFLICT, message: "Resource already exists" },
-  P2003: { status: HttpStatus.BAD_REQUEST, message: "Referenced resource not found" },
-  P2005: { status: HttpStatus.BAD_REQUEST, message: "Invalid value for field" },
-  P2006: { status: HttpStatus.BAD_REQUEST, message: "Invalid value provided" },
-  P2009: { status: HttpStatus.BAD_REQUEST, message: "Query validation failed" },
-  P2025: { status: HttpStatus.NOT_FOUND, message: "Resource not found" },
-  P2026: { status: HttpStatus.BAD_REQUEST, message: "Database query limit exceeded" },
+const PRISMA_ERROR_MAP: Record<string, { status: number; i18nKey: string }> = {
+  P2000: { status: HttpStatus.BAD_REQUEST, i18nKey: "errors.INPUT_TOO_LONG" },
+  P2002: { status: HttpStatus.CONFLICT, i18nKey: "errors.RESOURCE_EXISTS" },
+  P2003: { status: HttpStatus.BAD_REQUEST, i18nKey: "errors.RESOURCE_NOT_FOUND" },
+  P2005: { status: HttpStatus.BAD_REQUEST, i18nKey: "errors.INVALID_VALUE" },
+  P2006: { status: HttpStatus.BAD_REQUEST, i18nKey: "errors.INVALID_INPUT" },
+  P2009: { status: HttpStatus.BAD_REQUEST, i18nKey: "errors.QUERY_VALIDATION_FAILED" },
+  P2025: { status: HttpStatus.NOT_FOUND, i18nKey: "errors.NOT_FOUND" },
+  P2026: { status: HttpStatus.BAD_REQUEST, i18nKey: "errors.QUERY_LIMIT_EXCEEDED" },
 };
 
 @Catch()
@@ -61,18 +62,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
       if (mapped) {
         status = mapped.status;
-        message = mapped.message;
+        message = t(mapped.i18nKey);
         this.logger.warn(`${errorType} ${prismaCode} | ${method} ${url} | ${message}`);
       } else {
         status = HttpStatus.INTERNAL_SERVER_ERROR;
-        message = "Internal server error";
+        message = t("errors.INTERNAL_ERROR");
         this.logger.error(`${errorType} ${prismaCode} | ${method} ${url} | Unhandled Prisma error`, {
           stack: (exception as Error).stack,
         });
       }
     } else {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
-      message = "Internal server error";
+      message = t("errors.INTERNAL_ERROR");
       errorType = "UNKNOWN";
 
       this.logger.error(`${errorType} | ${method} ${url} | ${(exception as Error)?.message || "Unknown error"}`, {

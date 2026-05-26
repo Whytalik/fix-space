@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
-import { CreateSpaceDto, UpdateSpaceDto } from "@nucleus/domain";
+import { CreateSpaceDto, UpdateSpaceDto } from "@fixspace/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { RequireOwnership } from "../auth/decorators/required-ownership.decorator";
 import { ResourceOwnerGuard } from "../auth/guards/resource-owner.guard";

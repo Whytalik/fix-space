@@ -1,10 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateSpaceDto, SectionOperationDto, SpaceResponseDto, UpdateSpaceDto } from "@nucleus/domain";
+import { CreateSpaceDto, SectionOperationDto, SpaceResponseDto, UpdateSpaceDto } from "@fixspace/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
+import { t } from "../common/utils/i18n.helper";
 import { SettingsService } from "../settings/settings.service";
 import { SectionService } from "./providers/section.service";
 import { SpaceRepository } from "./space.repository";
 import { sectionsInclude } from "./space.constants";
+import { toSpaceResponseDto } from "./utils/to-space-response.dto";
 
 @Injectable()
 export class SpaceService {
@@ -40,13 +42,13 @@ export class SpaceService {
     });
 
     this.logger.log("Space created", { spaceId: space.id, ownerId });
-    return new SpaceResponseDto(space);
+    return toSpaceResponseDto(space);
   }
 
   async findAll(ownerId: string): Promise<SpaceResponseDto[]> {
     this.logger.debug("Finding all spaces", { ownerId });
     const spaces = await this.spaceRepo.findAll(ownerId, sectionsInclude);
-    return spaces.map((space) => new SpaceResponseDto(space));
+    return spaces.map(toSpaceResponseDto);
   }
 
   async findOne(id: string): Promise<SpaceResponseDto> {
@@ -55,10 +57,10 @@ export class SpaceService {
     const space = await this.spaceRepo.findOne(id, sectionsInclude);
 
     if (!space) {
-      throw new NotFoundException(`Space with id ${id} not found`);
+      throw new NotFoundException(t("errors.SPACE_NOT_FOUND_ID", { id }));
     }
 
-    return new SpaceResponseDto(space);
+    return toSpaceResponseDto(space);
   }
 
   async update(id: string, dto: UpdateSpaceDto): Promise<SpaceResponseDto> {
@@ -97,7 +99,7 @@ export class SpaceService {
       );
 
       this.logger.log("Space updated", { spaceId: id });
-      return new SpaceResponseDto(space);
+      return toSpaceResponseDto(space);
     });
   }
 
@@ -106,11 +108,11 @@ export class SpaceService {
 
     const existing = await this.spaceRepo.findOwner(id);
     if (existing?.isDefault) {
-      throw new BadRequestException("Cannot delete the default space");
+      throw new BadRequestException(t("errors.CANNOT_DELETE_DEFAULT_SPACE"));
     }
 
     const space = await this.spaceRepo.delete(id);
     this.logger.log("Space removed", { id });
-    return new SpaceResponseDto(space);
+    return toSpaceResponseDto(space);
   }
 }

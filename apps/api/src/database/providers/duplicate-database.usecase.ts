@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@nucleus/database";
-import { DatabaseResponseDto } from "@nucleus/domain";
+import { Prisma } from "@fixspace/database";
+import { DatabaseConfigDto, DatabaseResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { DatabaseRepository } from "../database.repository";
 
@@ -73,7 +73,7 @@ export class DuplicateDatabaseUseCase {
         }
       }
 
-      return new DatabaseResponseDto(newDb);
+      return new DatabaseResponseDto({ ...newDb, config: newDb.config as unknown as DatabaseConfigDto });
     });
   }
 }

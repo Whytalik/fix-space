@@ -2,6 +2,8 @@ import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from "nestjs-i18n";
+import * as path from "path";
 
 import { AuthModule } from "./auth/auth.module";
 import { RequestContextMiddleware } from "./common/context/request-context.middleware";
@@ -25,6 +27,18 @@ import { UserModule } from "./user/user.module";
       isGlobal: true,
       envFilePath: [`../../.env.${process.env.NODE_ENV ?? "development"}`, "../../.env"],
       validate,
+    }),
+    I18nModule.forRoot({
+      fallbackLanguage: "en",
+      loaderOptions: {
+        path: path.join(__dirname, "i18n/"),
+        watch: true,
+      },
+      resolvers: [
+        new QueryResolver(["lang", "locale"]),
+        new HeaderResolver(["x-custom-lang", "accept-language"]),
+        new AcceptLanguageResolver(),
+      ],
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 200 }]),
     LoggerModule,

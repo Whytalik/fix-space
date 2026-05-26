@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable, OnModuleInit } from "@nestjs/common";
-import { PropertyType } from "@nucleus/domain";
+import { PropertyType } from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyValueHandler } from "./handler.interface";
 import { PROPERTY_TYPE_HANDLERS } from "./property-type.tokens";
 

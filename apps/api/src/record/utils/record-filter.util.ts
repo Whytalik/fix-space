@@ -1,6 +1,6 @@
-import { type Prisma } from "@nucleus/database";
-import type { RecordFilterDto } from "@nucleus/domain";
-import { FilterField, FilterOperator, PropertyType } from "@nucleus/domain";
+import { type Prisma } from "@fixspace/database";
+import type { RecordFilterDto } from "@fixspace/domain";
+import { FilterField, FilterOperator, PropertyType } from "@fixspace/domain";
 
 export type RecordWithValues = Prisma.RecordGetPayload<{
   include: {
@@ -8,6 +8,40 @@ export type RecordWithValues = Prisma.RecordGetPayload<{
     content: true;
   };
 }>;
+
+function isValidDate(date: Date | null): boolean {
+  return date !== null && !isNaN(date.getTime());
+}
+
+function compareDates(dateValue: Date | null, filterDateValue: Date | null, operator: FilterOperator): boolean {
+  if (!isValidDate(dateValue) || !isValidDate(filterDateValue)) return false;
+  const a = dateValue!.getTime();
+  const b = filterDateValue!.getTime();
+  switch (operator) {
+    case FilterOperator.EQUALS:
+      return a === b;
+    case FilterOperator.NOT_EQUALS:
+      return a !== b;
+    case FilterOperator.BEFORE:
+      return a < b;
+    case FilterOperator.AFTER:
+      return a > b;
+    case FilterOperator.ON_OR_BEFORE:
+      return a <= b;
+    case FilterOperator.ON_OR_AFTER:
+      return a >= b;
+    default:
+      return true;
+  }
+}
+
+function checkEmpty(rawValue: unknown): boolean {
+  const resolved =
+    rawValue !== null && typeof rawValue === "object" && !Array.isArray(rawValue)
+      ? ((rawValue as Record<string, unknown>).label ?? null)
+      : rawValue;
+  return resolved === null || resolved === "" || (Array.isArray(resolved) && resolved.length === 0);
+}
 
 export function getPropertyValue(record: RecordWithValues, propertyId: string): unknown {
   const propertyValue = record.values.find((pv) => pv.propertyId === propertyId);
@@ -32,50 +66,13 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
     const metaDate = filter.field === FilterField.CREATED_AT ? record.createdAt : record.updatedAt;
     const dateValue = metaDate ?? null;
     const filterDateValue = value !== null ? new Date(String(value)) : null;
-    const isInvalidDate = (date: Date | null) => date === null || isNaN(date.getTime());
     switch (operator) {
-      case FilterOperator.EQUALS:
-        return (
-          !isInvalidDate(dateValue) &&
-          !isInvalidDate(filterDateValue) &&
-          dateValue!.getTime() === filterDateValue!.getTime()
-        );
-      case FilterOperator.NOT_EQUALS:
-        return (
-          !isInvalidDate(dateValue) &&
-          !isInvalidDate(filterDateValue) &&
-          dateValue!.getTime() !== filterDateValue!.getTime()
-        );
-      case FilterOperator.BEFORE:
-        return (
-          !isInvalidDate(dateValue) &&
-          !isInvalidDate(filterDateValue) &&
-          dateValue!.getTime() < filterDateValue!.getTime()
-        );
-      case FilterOperator.AFTER:
-        return (
-          !isInvalidDate(dateValue) &&
-          !isInvalidDate(filterDateValue) &&
-          dateValue!.getTime() > filterDateValue!.getTime()
-        );
-      case FilterOperator.ON_OR_BEFORE:
-        return (
-          !isInvalidDate(dateValue) &&
-          !isInvalidDate(filterDateValue) &&
-          dateValue!.getTime() <= filterDateValue!.getTime()
-        );
-      case FilterOperator.ON_OR_AFTER:
-        return (
-          !isInvalidDate(dateValue) &&
-          !isInvalidDate(filterDateValue) &&
-          dateValue!.getTime() >= filterDateValue!.getTime()
-        );
       case FilterOperator.IS_EMPTY:
         return dateValue === null;
       case FilterOperator.IS_NOT_EMPTY:
         return dateValue !== null;
       default:
-        return true;
+        return compareDates(dateValue, filterDateValue, operator);
     }
   }
 
@@ -85,14 +82,7 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
 
   if (propertyType === null) return true;
 
-  const resolvedForEmpty =
-    rawValue !== null && typeof rawValue === "object" && !Array.isArray(rawValue)
-      ? ((rawValue as Record<string, unknown>).label ?? null)
-      : rawValue;
-  const isEmpty =
-    resolvedForEmpty === null ||
-    resolvedForEmpty === "" ||
-    (Array.isArray(resolvedForEmpty) && resolvedForEmpty.length === 0);
+  const isEmpty = checkEmpty(rawValue);
 
   switch (propertyType) {
     case PropertyType.TEXT:
@@ -149,50 +139,14 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
     case PropertyType.DATE: {
       const dateValue = rawValue !== null ? new Date(rawValue as string) : null;
       const filterDateValue = value !== null ? new Date(String(value)) : null;
-      const isInvalidDate = (date: Date | null) => date === null || isNaN(date.getTime());
+      const isEmpty = checkEmpty(rawValue);
       switch (operator) {
-        case FilterOperator.EQUALS:
-          return (
-            !isInvalidDate(dateValue) &&
-            !isInvalidDate(filterDateValue) &&
-            dateValue!.getTime() === filterDateValue!.getTime()
-          );
-        case FilterOperator.NOT_EQUALS:
-          return (
-            !isInvalidDate(dateValue) &&
-            !isInvalidDate(filterDateValue) &&
-            dateValue!.getTime() !== filterDateValue!.getTime()
-          );
-        case FilterOperator.BEFORE:
-          return (
-            !isInvalidDate(dateValue) &&
-            !isInvalidDate(filterDateValue) &&
-            dateValue!.getTime() < filterDateValue!.getTime()
-          );
-        case FilterOperator.AFTER:
-          return (
-            !isInvalidDate(dateValue) &&
-            !isInvalidDate(filterDateValue) &&
-            dateValue!.getTime() > filterDateValue!.getTime()
-          );
-        case FilterOperator.ON_OR_BEFORE:
-          return (
-            !isInvalidDate(dateValue) &&
-            !isInvalidDate(filterDateValue) &&
-            dateValue!.getTime() <= filterDateValue!.getTime()
-          );
-        case FilterOperator.ON_OR_AFTER:
-          return (
-            !isInvalidDate(dateValue) &&
-            !isInvalidDate(filterDateValue) &&
-            dateValue!.getTime() >= filterDateValue!.getTime()
-          );
         case FilterOperator.IS_EMPTY:
           return isEmpty;
         case FilterOperator.IS_NOT_EMPTY:
           return !isEmpty;
         default:
-          return true;
+          return compareDates(dateValue, filterDateValue, operator);
       }
     }
 
@@ -210,7 +164,6 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
 
     case PropertyType.SELECT:
     case PropertyType.STATUS: {
-      // STATUS is stored as { label, color } — extract label for comparison
       const resolvedRaw =
         rawValue !== null && typeof rawValue === "object" && !Array.isArray(rawValue)
           ? ((rawValue as Record<string, unknown>).label ?? "")

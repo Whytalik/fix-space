@@ -1,8 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, prisma, RecordContent } from "@nucleus/database";
-import { ContainerBlock } from "@nucleus/domain";
+import { Prisma, prisma } from "@fixspace/database";
+import type { RecordContent } from "@fixspace/database";
+import { ContainerBlock } from "@fixspace/domain";
 
-export type RecordContentData = Omit<RecordContent, "content"> & { content: ContainerBlock };
+type DbRecordContent = RecordContent;
+export type RecordContentData = Omit<DbRecordContent, "content"> & { content: ContainerBlock };
 
 @Injectable()
 export class RecordRepository {
@@ -59,12 +61,7 @@ export class RecordRepository {
     });
   }
 
-  async findPagedByDatabase(
-    databaseId: string,
-    userId: string,
-    skip: number,
-    take: number,
-  ) {
+  async findPagedByDatabase(databaseId: string, userId: string, skip: number, take: number) {
     const where = { databaseId, database: { space: { ownerId: userId } } };
     return Promise.all([
       prisma.record.findMany({

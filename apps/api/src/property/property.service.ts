@@ -1,9 +1,11 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@nucleus/database";
-import { CreatePropertyDto, PropertyResponseDto, PropertyType, UpdatePropertyDto } from "@nucleus/domain";
+import { Prisma } from "@fixspace/database";
+import { CreatePropertyDto, PropertyResponseDto, PropertyType, UpdatePropertyDto } from "@fixspace/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
+import { t } from "../common/utils/i18n.helper";
 import { PropertyRepository } from "./property.repository";
 import { PropertyTypeRegistry } from "./types";
+import { toPropertyResponseDto } from "./utils/to-property-response.dto";
 
 @Injectable()
 export class PropertyService {
@@ -24,7 +26,7 @@ export class PropertyService {
     const database = await this.propertyRepo.findDatabaseByOwner(databaseId, userId);
 
     if (!database) {
-      throw new NotFoundException(`Database not found`);
+      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
     }
 
     const isPropertyNameTaken = await this.propertyRepo.findByNameInDatabase(createPropertyDto.name, databaseId);
@@ -34,7 +36,7 @@ export class PropertyService {
         databaseId,
         name: createPropertyDto.name,
       });
-      throw new ConflictException("Property name is already taken in this database.");
+      throw new ConflictException(t("errors.PROPERTY_NAME_TAKEN"));
     }
 
     const handler = this.typeRegistry.getConfigHandler(createPropertyDto.type);
@@ -48,7 +50,9 @@ export class PropertyService {
 
     const configErrors = handler.validateConfig(mergedConfig);
     if (configErrors) {
-      throw new BadRequestException(`Invalid config for ${createPropertyDto.type}: ${configErrors.join("; ")}`);
+      throw new BadRequestException(
+        t("errors.INVALID_CONFIG", { type: createPropertyDto.type, errors: configErrors.join("; ") }),
+      );
     }
 
     const [property] = await this.propertyRepo.transaction(async (tx) => {
@@ -95,13 +99,13 @@ export class PropertyService {
       propertyId: property.id,
       databaseId,
     });
-    return new PropertyResponseDto({ ...property, type: property.type as PropertyType });
+    return toPropertyResponseDto(property);
   }
 
   async findAll(databaseId: string, userId: string): Promise<PropertyResponseDto[]> {
     this.logger.debug("Finding all properties", { databaseId });
     const properties = await this.propertyRepo.findAllByDatabase(databaseId, userId);
-    return properties.map((property) => new PropertyResponseDto({ ...property, type: property.type as PropertyType }));
+    return properties.map(toPropertyResponseDto);
   }
 
   async findOne(id: string, userId: string): Promise<PropertyResponseDto> {
@@ -110,10 +114,10 @@ export class PropertyService {
     const property = await this.propertyRepo.findByIdWithOwner(id, userId);
 
     if (!property) {
-      throw new NotFoundException(`Property with id ${id} not found`);
+      throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id }));
     }
 
-    return new PropertyResponseDto({ ...property, type: property.type as PropertyType });
+    return toPropertyResponseDto(property);
   }
 
   async update(id: string, updatePropertyDto: UpdatePropertyDto, userId: string): Promise<PropertyResponseDto> {
@@ -122,7 +126,7 @@ export class PropertyService {
     const existingProperty = await this.propertyRepo.findByIdWithOwner(id, userId);
 
     if (!existingProperty) {
-      throw new NotFoundException(`Property with id ${id} not found`);
+      throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id }));
     }
 
     if (updatePropertyDto.name && updatePropertyDto.name !== existingProperty.name) {
@@ -137,7 +141,7 @@ export class PropertyService {
           id,
           name: updatePropertyDto.name,
         });
-        throw new ConflictException("Property name is already taken in this database.");
+        throw new ConflictException(t("errors.PROPERTY_NAME_TAKEN"));
       }
     }
 
@@ -157,7 +161,9 @@ export class PropertyService {
       };
       const configErrors = handler.validateConfig(merged);
       if (configErrors) {
-        throw new BadRequestException(`Invalid config for ${effectiveType}: ${configErrors.join("; ")}`);
+        throw new BadRequestException(
+          t("errors.INVALID_CONFIG", { type: effectiveType, errors: configErrors.join("; ") }),
+        );
       }
       configToSave = merged;
     }
@@ -190,7 +196,7 @@ export class PropertyService {
     });
 
     this.logger.log("Property updated", { id });
-    return new PropertyResponseDto({ ...property, type: property.type as PropertyType });
+    return toPropertyResponseDto(property);
   }
 
   async remove(id: string, userId: string): Promise<PropertyResponseDto> {
@@ -199,12 +205,12 @@ export class PropertyService {
     const existingProperty = await this.propertyRepo.findByIdWithOwner(id, userId);
 
     if (!existingProperty) {
-      throw new NotFoundException(`Property with id ${id} not found`);
+      throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id }));
     }
 
     const property = await this.propertyRepo.delete(id);
 
     this.logger.log("Property removed", { id });
-    return new PropertyResponseDto({ ...property, type: property.type as PropertyType });
+    return toPropertyResponseDto(property);
   }
 }

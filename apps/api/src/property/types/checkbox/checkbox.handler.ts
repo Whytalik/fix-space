@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_CHECKBOX_PROPERTY, PropertyType } from "@nucleus/domain";
+import { DEFAULT_CHECKBOX_PROPERTY, PropertyType } from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()

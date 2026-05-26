@@ -1,6 +1,6 @@
-import type { CreateDatabaseDto, CreatePropertyDto, CreateSectionDto, DatabaseType} from "@nucleus/domain";
-import { PropertyType } from "@nucleus/domain";
-import type { SeedRecord} from "./initialization.seeds";
+import type { CreateDatabaseDto, CreatePropertyDto, CreateSectionDto, DatabaseType } from "@fixspace/domain";
+import { PropertyType } from "@fixspace/domain";
+import type { SeedRecord } from "./initialization.seeds";
 import { seedsByDatabaseType } from "./initialization.seeds";
 
 type TemplateDefinition = {
@@ -11,9 +11,13 @@ type TemplateDefinition = {
   position?: number;
 };
 
+type InitPropertyDef = Omit<CreatePropertyDto, "databaseId" | "config"> & {
+  config?: Record<string, unknown>;
+};
+
 type DatabaseTemplate = Omit<CreateDatabaseDto, "spaceId" | "properties"> & {
   type?: DatabaseType;
-  properties?: Omit<CreatePropertyDto, "databaseId">[];
+  properties?: InitPropertyDef[];
   seeds?: SeedRecord[];
   templates?: TemplateDefinition[];
 };
@@ -23,7 +27,7 @@ export interface InitializationConfig {
   spaceIcon: string;
   sections: CreateSectionDto[];
   databases: DatabaseTemplate[];
-  defaultDatabaseProperties: Omit<CreatePropertyDto, "databaseId">[];
+  defaultDatabaseProperties: InitPropertyDef[];
 }
 
 const colors = {
@@ -109,7 +113,7 @@ const DATE_CONFIG = {
   format: "DD.MM.YYYY",
   includeTime: false,
   timeFormat: "HH:mm",
-};
+} as const;
 
 const FORMULA_TEXT = { formula: "", output: { type: "text" } };
 

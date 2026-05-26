@@ -1,4 +1,4 @@
-import type { PropertyType } from "@nucleus/domain";
+import type { PropertyType } from "@fixspace/domain";
 
 export interface PropertyConfigHandler {
   readonly type: PropertyType;

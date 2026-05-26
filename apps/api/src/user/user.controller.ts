@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { ChangePasswordDto, UpdateUserDto } from "@nucleus/domain";
+import { ChangePasswordDto, UpdateUserDto } from "@fixspace/domain";
 import { memoryStorage } from "multer";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { UserService } from "./user.service";

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_RELATION_PROPERTY, PropertyType, RelationProperty } from "@nucleus/domain";
+import { DEFAULT_RELATION_PROPERTY, PropertyType, RelationProperty } from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()

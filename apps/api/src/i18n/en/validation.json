@@ -1,0 +1,21 @@
+{
+  "INVALID_EMAIL": "Invalid email format",
+  "IS_NOT_EMPTY": "This field is required",
+  "MIN_LENGTH": "Minimum length is {constraints.0} characters",
+  "MAX_LENGTH": "Maximum length is {constraints.0} characters",
+  "INVALID_USERNAME": "Username can only contain letters, numbers, underscores and hyphens",
+  "INVALID_PASSWORD": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+  "IS_STRING": "Must be a string",
+  "IS_BOOLEAN": "Must be a boolean value",
+  "IS_INT": "Must be an integer",
+  "IS_NUMBER": "Must be a number",
+  "IS_ARRAY": "Must be an array",
+  "IS_OBJECT": "Must be an object",
+  "IS_UUID": "Must be a valid UUID",
+  "IS_DATE": "Must be a valid date",
+  "IS_ENUM": "Invalid value",
+  "IS_IN": "Must be one of the allowed values",
+  "MIN": "Must be at least {constraints.0}",
+  "MAX": "Must not exceed {constraints.0}",
+  "ARRAY_MIN_SIZE": "Must contain at least {constraints.0} item(s)"
+}

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@nucleus/database";
-import { CreateRecordDto, RecordResponseDto, UpdateRecordDto } from "@nucleus/domain";
+import { Prisma } from "@fixspace/database";
+import { CreateRecordDto, RecordResponseDto, UpdateRecordDto } from "@fixspace/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
 import { RecordRepository } from "./record.repository";
 
@@ -62,7 +62,6 @@ export class RecordService {
       });
 
       const createdRecord = await this.recordRepo.findUniqueOrThrowWithValues(record.id, tx);
-
       return new RecordResponseDto(createdRecord);
     });
   }

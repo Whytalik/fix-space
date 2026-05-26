@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@nucleus/database";
-import { SpaceResponseDto } from "@nucleus/domain";
+import { Prisma } from "@fixspace/database";
+import { SpaceResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { sectionsInclude } from "../space.constants";
 import { SpaceRepository } from "../space.repository";
@@ -34,7 +34,6 @@ export class DuplicateSpaceUseCase {
     const newName = options?.newName ?? this.generateUniqueName(sourceSpace.name);
 
     return this.spaceRepo.transaction(async (tx) => {
-      // Create new space
       const newSpace = await tx.space.create({
         data: {
           name: newName,
@@ -43,10 +42,8 @@ export class DuplicateSpaceUseCase {
         },
       });
 
-      // Map old section IDs to new section IDs
       const sectionIdMap = new Map<string, string>();
 
-      // Duplicate sections
       for (const section of sourceSpace.sections) {
         const newSection = await tx.section.create({
           data: {
@@ -60,9 +57,7 @@ export class DuplicateSpaceUseCase {
         sectionIdMap.set(section.id, newSection.id);
       }
 
-      // Duplicate databases with their properties, records, and values
       for (const database of sourceSpace.databases) {
-        // Map old property IDs to new property IDs
         const propertyIdMap = new Map<string, string>();
 
         const newDatabase = await tx.database.create({
@@ -86,7 +81,6 @@ export class DuplicateSpaceUseCase {
           },
         });
 
-        // Duplicate properties
         for (const property of database.properties) {
           const newProperty = await tx.property.create({
             data: {
@@ -103,7 +97,6 @@ export class DuplicateSpaceUseCase {
           propertyIdMap.set(property.id, newProperty.id);
         }
 
-        // Duplicate records with their values and content
         for (const record of database.records) {
           const newRecord = await tx.record.create({
             data: {
@@ -113,7 +106,6 @@ export class DuplicateSpaceUseCase {
             },
           });
 
-          // Duplicate property values
           for (const value of record.values) {
             const newPropertyId = propertyIdMap.get(value.propertyId);
             if (newPropertyId) {
@@ -128,7 +120,6 @@ export class DuplicateSpaceUseCase {
             }
           }
 
-          // Duplicate record content if exists
           if (record.content) {
             await tx.recordContent.create({
               data: {
@@ -145,7 +136,6 @@ export class DuplicateSpaceUseCase {
         ownerId,
       });
 
-      // Fetch the complete new space with sections
       const result = await tx.space.findUnique({
         where: {
           id: newSpace.id,
@@ -156,7 +146,7 @@ export class DuplicateSpaceUseCase {
       if (!result) {
         throw new InternalServerErrorException(`Failed to fetch duplicated space ${newSpace.id}`);
       }
-      return new SpaceResponseDto(result);
+      return new SpaceResponseDto(result as unknown as Partial<SpaceResponseDto>);
     });
   }
 

@@ -8,7 +8,7 @@ import {
   RecordSettings,
   SectionSettings,
   SpaceSettings,
-} from "@nucleus/domain";
+} from "@fixspace/domain";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { SettingsCategory } from "./settings.constants";
 import { SettingsService } from "./settings.service";

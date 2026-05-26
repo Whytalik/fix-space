@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma, prisma } from "@nucleus/database";
+import { Prisma, prisma } from "@fixspace/database";
 
 @Injectable()
 export class PropertyRepository {

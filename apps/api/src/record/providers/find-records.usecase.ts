@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { Prisma } from "@nucleus/database";
+import { Prisma } from "@fixspace/database";
 import {
   FilterField,
   FilterLogic,
@@ -9,7 +9,7 @@ import {
   RecordSortDto,
   SortDirection,
   SortField,
-} from "@nucleus/domain";
+} from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { RecordRepository } from "../record.repository";
 import { matchesFilter, RecordWithValues } from "../utils/record-filter.util";
@@ -118,7 +118,8 @@ export class FindRecordsUseCase {
     }
 
     // In-memory filters: OR logic uses all filters; AND logic uses only unpushed filters
-    const inMemoryFilters = filterLogic === FilterLogic.OR ? allFilters : allFilters.filter((filterDto) => !pushedToDb.has(filterDto));
+    const inMemoryFilters =
+      filterLogic === FilterLogic.OR ? allFilters : allFilters.filter((filterDto) => !pushedToDb.has(filterDto));
 
     if (inMemoryFilters.length > 0) {
       filtered = filtered.filter((record) => {

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_TEXT_PROPERTY, PropertyType, TextProperty, URL_HANDLING_VALUES, UrlHandling } from "@nucleus/domain";
+import { DEFAULT_TEXT_PROPERTY, PropertyType, TextProperty, URL_HANDLING_VALUES, UrlHandling } from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
 
 @Injectable()

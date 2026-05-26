@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { Prisma } from "@nucleus/database";
-import { CreateSpaceDto, PropertyType, SpaceResponseDto } from "@nucleus/domain";
+import { Prisma } from "@fixspace/database";
+import { CreatePropertyDto, CreateSpaceDto, PropertyType, SpaceResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { InitializationConfigService } from "../../config/initialization-config.service";
 import { DatabaseService } from "../../database/database.service";
@@ -34,7 +34,6 @@ export class InitializeUserSpaceUseCase {
   async seedContent(spaceId: string, userId: string): Promise<void> {
     const config = this.configService.getConfig();
 
-    // Pass 1 - Create sections in parallel, track key → sectionId
     const sectionByKey = new Map<string, string>();
     const sortedSections = [...config.sections].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
@@ -52,7 +51,6 @@ export class InitializeUserSpaceUseCase {
       }),
     );
 
-    // Pass 2 - Create databases in parallel without properties, track type → databaseId
     const databaseByType = new Map<string, string>();
 
     await Promise.all(
@@ -76,7 +74,6 @@ export class InitializeUserSpaceUseCase {
       }),
     );
 
-    // Pass 3 — Create all properties in parallel, resolving RELATION symbolic refs
     await Promise.all(
       config.databases.map(async (dbDef) => {
         const databaseId = dbDef.type ? databaseByType.get(dbDef.type) : undefined;
@@ -107,14 +104,16 @@ export class InitializeUserSpaceUseCase {
               propConfig = { ...rest, relatedEntityId };
             }
 
-            await this.propertyService.create(databaseId, { ...propDef, databaseId, config: propConfig }, userId);
+            await this.propertyService.create(
+              databaseId,
+              { ...propDef, databaseId, config: propConfig as unknown as CreatePropertyDto["config"] },
+              userId,
+            );
           }),
         );
       }),
     );
 
-    // Pass 4 — Seed sample records
-    // Sub-pass 4a: create all records + scalar values in parallel per database, track name → id per database type
     type PropCache = {
       properties: { id: string; name: string }[];
       propByName: Map<string, { id: string; name: string }>;
@@ -160,7 +159,6 @@ export class InitializeUserSpaceUseCase {
         }),
     );
 
-    // Sub-pass 4b: resolve and set RELATION values
     for (const dbDef of config.databases) {
       if (!dbDef.seeds?.length || !dbDef.type) continue;
 
@@ -194,7 +192,6 @@ export class InitializeUserSpaceUseCase {
       }
     }
 
-    // Pass 4 — Create templates for each database
     for (const dbDef of config.databases) {
       const databaseId = dbDef.type ? databaseByType.get(dbDef.type) : undefined;
       if (!databaseId || !dbDef.templates?.length) continue;

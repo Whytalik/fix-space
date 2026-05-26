@@ -1,4 +1,4 @@
-import type { DatabaseType } from "@nucleus/domain";
+import type { DatabaseType } from "@fixspace/domain";
 
 export interface SeedRelation {
   type: DatabaseType;

@@ -1,7 +1,14 @@
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@nucleus/database";
-import { CreateDatabaseDto, DatabaseResponseDto, PropertyType, UpdateDatabaseDto } from "@nucleus/domain";
+import { Prisma } from "@fixspace/database";
+import {
+  CreateDatabaseDto,
+  DatabaseConfigDto,
+  DatabaseResponseDto,
+  PropertyType,
+  UpdateDatabaseDto,
+} from "@fixspace/domain";
 import { AppLogger } from "../common/logger/app-logger.service";
+import { t } from "../common/utils/i18n.helper";
 import { defaultInitializationConfig } from "../config/initialization.config";
 import { PropertyTypeRegistry } from "../property/types";
 import { DatabaseRepository } from "./database.repository";
@@ -25,7 +32,7 @@ export class DatabaseService {
     const space = await this.databaseRepo.findSpaceByOwner(spaceId, userId);
 
     if (!space) {
-      throw new NotFoundException(`Space not found`);
+      throw new NotFoundException(t("errors.SPACE_NOT_FOUND"));
     }
 
     const isDatabaseNameTaken = await this.databaseRepo.findByNameInSpace(createDatabaseDto.name, spaceId);
@@ -35,7 +42,7 @@ export class DatabaseService {
         spaceId,
         name: createDatabaseDto.name,
       });
-      throw new ConflictException("Database name is already taken in this space.");
+      throw new ConflictException(t("errors.DATABASE_NAME_TAKEN"));
     }
 
     return await this.databaseRepo.transaction(async (tx) => {
@@ -51,8 +58,7 @@ export class DatabaseService {
         tx,
       );
 
-      const propertiesToCreate =
-        createDatabaseDto.properties ?? defaultInitializationConfig.defaultDatabaseProperties;
+      const propertiesToCreate = createDatabaseDto.properties ?? defaultInitializationConfig.defaultDatabaseProperties;
 
       for (const propertyDef of propertiesToCreate) {
         const handler = this.typeRegistry.getConfigHandler(propertyDef.type as PropertyType);
@@ -79,14 +85,16 @@ export class DatabaseService {
         propertyCount: propertiesToCreate.length,
       });
 
-      return new DatabaseResponseDto(database);
+      return new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto });
     });
   }
 
   async findAll(spaceId: string, userId: string): Promise<DatabaseResponseDto[]> {
     this.logger.debug("Finding all databases", { spaceId });
     const databases = await this.databaseRepo.findAllBySpace(spaceId, userId);
-    return databases.map((database) => new DatabaseResponseDto(database));
+    return databases.map(
+      (database) => new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto }),
+    );
   }
 
   async findOne(id: string, userId: string): Promise<DatabaseResponseDto> {
@@ -95,10 +103,10 @@ export class DatabaseService {
     const database = await this.databaseRepo.findByIdWithOwner(id, userId);
 
     if (!database) {
-      throw new NotFoundException(`Database with id ${id} not found`);
+      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id }));
     }
 
-    return new DatabaseResponseDto(database);
+    return new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto });
   }
 
   async update(id: string, updateDatabaseDto: UpdateDatabaseDto, userId: string): Promise<DatabaseResponseDto> {
@@ -107,16 +115,13 @@ export class DatabaseService {
     const existingDatabase = await this.databaseRepo.findByIdWithOwner(id, userId);
 
     if (!existingDatabase) {
-      throw new NotFoundException(`Database with id ${id} not found`);
+      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id }));
     }
 
     if (updateDatabaseDto.sectionId) {
-      const section = await this.databaseRepo.findSectionInSpace(
-        updateDatabaseDto.sectionId,
-        existingDatabase.spaceId,
-      );
+      const section = await this.databaseRepo.findSectionInSpace(updateDatabaseDto.sectionId, existingDatabase.spaceId);
       if (!section) {
-        throw new NotFoundException(`Section not found in this space`);
+        throw new NotFoundException(t("errors.SECTION_NOT_FOUND"));
       }
     }
 
@@ -132,7 +137,7 @@ export class DatabaseService {
     });
 
     this.logger.log("Database updated", { id });
-    return new DatabaseResponseDto(database);
+    return new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto });
   }
 
   async remove(id: string, userId: string): Promise<DatabaseResponseDto> {
@@ -141,12 +146,12 @@ export class DatabaseService {
     const existingDatabase = await this.databaseRepo.findByIdWithOwner(id, userId);
 
     if (!existingDatabase) {
-      throw new NotFoundException(`Database with id ${id} not found`);
+      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id }));
     }
 
     const database = await this.databaseRepo.delete(id);
 
     this.logger.log("Database removed", { id });
-    return new DatabaseResponseDto(database);
+    return new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto });
   }
 }
