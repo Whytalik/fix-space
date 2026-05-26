@@ -1,0 +1,52 @@
+@startuml System_Context
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam nodesep 50
+skinparam ranksep 60
+
+skinparam actorBackgroundColor #FFFFFF
+skinparam actorBorderColor #2563eb
+skinparam actorArrowColor #2563eb
+skinparam componentBackgroundColor #FFFFFF
+skinparam componentBorderColor #2563eb
+skinparam componentArrowColor #2563eb
+skinparam rectangleBackgroundColor #FFFFFF
+skinparam rectangleBorderColor #2563eb
+
+title Контекстна діаграма системи
+
+actor "Трейдер" as User
+
+rectangle "FIX Space" as System_Box #E3F2FD {
+  component "FIX Space\nWeb Application" as System
+}
+
+rectangle "Зовнішні системи" as External_Box #FFF9C4 {
+  component "Google OAuth 2.0" as Google
+  component "SMTP Server" as SMTP
+  component "Binance API" as Binance
+  component "Bybit API" as Bybit
+  component "OKX API" as OKX
+  component "MT5 Server" as MT5
+  component "cTrader API" as cTrader
+}
+
+User --> System : Реєстрація, вхід,\nуправління просторами,\nробота з базами даних,\nаналітика трейдингу
+
+User ..> Google : Авторизація через\nGoogle-акаунт
+
+Google ..> System : OAuth callback:\ntoken, email, profile
+
+System ..> SMTP : Email-розсилка:\nверифікація, скидання пароля,\nнотифікації
+
+System ..> Binance : Імпорт даних\nпро торгівлю
+System ..> Bybit : Імпорт даних\nпро торгівлю
+System ..> OKX : Імпорт даних\nпро торгівлю
+System ..> MT5 : Синхронізація\nугод та історії
+System ..> cTrader : Синхронізація\nугод та історії
+
+@enduml

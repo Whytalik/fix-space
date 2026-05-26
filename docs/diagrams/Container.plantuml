@@ -1,0 +1,79 @@
+@startuml Container
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam nodesep 30
+skinparam ranksep 40
+
+skinparam componentBackgroundColor #FFFFFF
+skinparam componentBorderColor #2563eb
+skinparam componentArrowColor #2563eb
+skinparam packageBorderColor #2563eb
+skinparam databaseBackgroundColor #FFFFFF
+skinparam databaseBorderColor #2563eb
+skinparam componentTextAlignment center
+
+top to bottom direction
+
+title Діаграма контейнерів
+
+package "Зовнішні сервіси" as Ext_Box #FFF9C4 {
+  component "Google OAuth 2.0" as Google
+  component "SMTP Server" as SMTP
+}
+
+package "Клієнт (Next.js 16, порт 3001)" as Client_Box #FFFFFF {
+  component "UI\n(React 19)" as UI
+  component "State\n(AppContext)" as State
+  component "API Client\n(apiFetch)" as Client
+}
+
+package "Сервер (NestJS 11, порт 3000)" as Server_Box {
+  package "Модулі" as Modules_Box #F8F9FA {
+    component "Auth" as Auth
+    component "User" as User
+    component "Space" as Space
+    component "Database" as DBModule
+    component "Property" as Property
+    component "Record" as Record
+    component "PropertyValue" as PropValue
+    component "Template" as Template
+    component "Settings" as Settings
+    component "View" as View
+    component "Automation" as Automation
+    component "Integration" as Integration
+  }
+
+  package "Інфраструктура" as Infra_Box #E8F5E9 {
+    component "Mail\n(Nodemailer)" as Mail
+    component "JWT Guard" as JWTGuard
+    component "Throttler" as Throttler
+    component "Exception Filter" as Filter
+  }
+}
+
+package "Data Access" as Data_Box #F8F9FA {
+  component "Prisma Client\n(ORM)" as Prisma
+}
+
+database "PostgreSQL 16" as DB
+
+Ext_Box -[hidden]right-> Client_Box
+
+UI --> State
+State --> Client
+
+Client ..> Server_Box : HTTPS / REST
+
+Server_Box ..> Prisma : Виклики ORM
+
+Prisma ..> DB : SQL
+
+Google <.. Auth : OAuth 2.0
+
+SMTP <.. Mail : Email delivery
+
+@enduml

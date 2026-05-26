@@ -1,0 +1,295 @@
+@startuml ER_Diagram
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam padding 3
+skinparam titlePadding 4
+
+skinparam class {
+  BackgroundColor White
+  BorderColor #2563eb
+  AttributeFontName monospace
+  AttributeFontSize 11
+  FontSize 12
+  ArrowColor #2563eb
+}
+
+skinparam nodesep 18
+skinparam ranksep 25
+skinparam defaultFontSize 12
+
+top to bottom direction
+
+title ER-діаграма бази даних
+
+package "Auth" #E3F2FD {
+  class User {
+    +id: String [PK]
+    +email: String [UK]
+    +username: String [UK]
+    +passwordHash: String?
+    +isVerified: Boolean
+  }
+
+  together {
+    class RefreshToken {
+      +id: String [PK]
+      +userId: String [FK]
+      +tokenHash: String
+      +expiresAt: Timestamp
+      +revokedAt: Timestamp?
+    }
+
+    class EmailVerificationToken {
+      +id: String [PK]
+      +userId: String [FK]
+      +tokenHash: String
+      +expiresAt: Timestamp
+      +usedAt: Timestamp?
+    }
+
+    class PasswordResetToken {
+      +id: String [PK]
+      +userId: String [FK]
+      +tokenHash: String
+      +expiresAt: Timestamp
+      +usedAt: Timestamp?
+    }
+
+    class GoogleAccount {
+      +id: String [PK]
+      +userId: String [FK]
+      +googleId: String [UK]
+      +email: String
+      +accessToken: String
+      +refreshToken: String
+      +tokenExpiresAt: Timestamp
+    }
+  }
+}
+
+package "User Data" #FFF3E0 {
+  class Settings {
+    +id: String [PK]
+    +userId: String [FK]
+    +key: String
+    +value: JSONB
+    +category: String
+  }
+
+  class Notification {
+    +id: String [PK]
+    +userId: String [FK]
+    +type: NotificationType
+    +text: String
+    +isRead: Boolean
+    +link: String?
+  }
+
+  class IntegrationConnection {
+    +id: String [PK]
+    +userId: String [FK]
+    +service: IntegrationService
+    +name: String
+    +credentials: JSONB
+    +status: IntegrationStatus
+    +lastSyncAt: Timestamp?
+  }
+
+  class ContentBlockLibrary {
+    +id: String [PK]
+    +userId: String [FK]
+    +name: String
+    +content: JSONB
+  }
+}
+
+package "Workspace" #E8F5E9 {
+  class Space {
+    +id: String [PK]
+    +ownerId: String [FK]
+    +name: String
+    +isDefault: Boolean
+  }
+
+  class Section {
+    +id: String [PK]
+    +spaceId: String [FK]
+    +name: String
+    +position: Int
+  }
+}
+
+package "Data Core" #F3E5F5 {
+  class Database {
+    +id: String [PK]
+    +spaceId: String [FK]
+    +sectionId: String? [FK]
+    +name: String
+    +title: String
+    +recordLimit: Int?
+    +isPreset: Boolean
+    +isLocked: Boolean
+  }
+
+  together {
+    class Property {
+      +id: String [PK]
+      +databaseId: String [FK]
+      +name: String
+      +type: PropertyType
+      +position: Int
+      +isRequired: Boolean
+      +isVisible: Boolean
+      +isProtected: Boolean
+    }
+
+    class Record {
+      +id: String [PK]
+      +databaseId: String [FK]
+      +templateId: String? [FK]
+      +name: String
+      +deletedAt: Timestamp?
+    }
+  }
+
+  together {
+    class PropertyValue {
+      +id: String [PK]
+      +recordId: String [FK]
+      +propertyId: String [FK]
+      +value: JSONB?
+      +computed: Boolean
+    }
+
+    class RecordContent {
+      +id: String [PK]
+      +recordId: String [FK]
+      +content: JSONB
+      +lastEditedAt: Timestamp
+    }
+
+    class RecordContentSnapshot {
+      +id: String [PK]
+      +recordContentId: String [FK]
+      +content: JSONB
+      +createdAt: Timestamp
+    }
+  }
+}
+
+package "Templates" #FFF9C4 {
+  class Template {
+    +id: String [PK]
+    +databaseId: String [FK]
+    +name: String
+    +description: String?
+    +content: JSONB
+    +isDefault: Boolean
+    +position: Int
+  }
+
+  class TemplatePropertyValue {
+    +id: String [PK]
+    +templateId: String [FK]
+    +propertyId: String [FK]
+    +value: JSONB?
+  }
+}
+
+package "Views & Automation" #FFEBEE {
+  class View {
+    +id: String [PK]
+    +databaseId: String [FK]
+    +name: String
+    +isDefault: Boolean
+    +isLocked: Boolean
+    +pageSize: Int
+    +filters: JSONB?
+    +sort: JSONB?
+    +groupBy: String?
+    +hiddenColumns: String[]
+    +config: JSONB?
+  }
+
+  class Automation {
+    +id: String [PK]
+    +databaseId: String [FK]
+    +name: String
+    +trigger: AutomationTrigger
+    +condition: JSONB?
+    +actions: JSONB
+    +active: Boolean
+  }
+
+  class AutomationLog {
+    +id: String [PK]
+    +automationId: String [FK]
+    +sourceRecordId: String?
+    +status: AutomationStatus
+    +result: String?
+  }
+}
+
+package "Import" #E0F2F1 {
+  class ImportMapping {
+    +id: String [PK]
+    +databaseId: String [FK]
+    +name: String
+    +sourceType: String
+    +mappingRules: JSONB
+  }
+
+  class ImportHistory {
+    +id: String [PK]
+    +importMappingId: String [FK]
+    +status: ImportStatus
+    +recordsCreated: Int
+    +recordsFailed: Int
+    +errorLog: JSONB?
+  }
+}
+
+' Layout hierarchy
+User -[hidden]-> Space
+Space -[hidden]-> Database
+Database -[hidden]-> Property
+GoogleAccount -[hidden]r-> Settings
+
+' Relationships
+User -- Space
+User -- Settings
+User -- RefreshToken
+User -- EmailVerificationToken
+User -- PasswordResetToken
+User -- Notification
+User -- IntegrationConnection
+User -- GoogleAccount
+User -- ContentBlockLibrary
+
+Space -- Section
+Space -- Database
+Section -- Database
+
+Database -- Property
+Database -- Record
+Database -- Template
+Database -- View
+Database -- Automation
+Database -- ImportMapping
+
+Property -- PropertyValue
+Property -- TemplatePropertyValue
+
+Record -- PropertyValue
+Record -- RecordContent
+RecordContent -- RecordContentSnapshot
+Template -- Record
+Template -- TemplatePropertyValue
+
+Automation -- AutomationLog
+
+ImportMapping -- ImportHistory
+
+@enduml
