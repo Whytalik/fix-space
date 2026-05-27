@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FIX Space — Design System</title>
+  <script src="https://unpkg.com/lucide@0.475.0/dist/umd/lucide.min.js"></script>
+  <style>
+    /* ─── TOKENS (dark default) ───────────────────────────────── */
+    :root, [data-theme="dark"] {
+      --color-canvas:        #0f0f11;
+      --color-surface:       #18181d;
+      --color-elevated:      #222228;
+      --color-hover:         #1a1a21;
+      --color-stroke:        #2a2a35;
+      --color-stroke-subtle: #1e1e28;
+      --color-accent:        #2563eb;
+      --color-accent-hover:  #1d4ed8;
+      --color-accent-muted:  rgba(37, 99, 235, 0.15);
+      --color-ink:           #e8e8f0;
+      --color-ink-secondary: #9494a8;
+      --color-ink-muted:     #808098;
+      --color-success:       #57f287;
+      --color-success-bg:    rgba(87, 242, 135, 0.12);
+      --color-warning:       #fee75c;
+      --color-warning-bg:    rgba(254, 231, 92, 0.12);
+      --color-error:         #ed4245;
+      --color-error-bg:      rgba(237, 66, 69, 0.12);
+      --shadow-sm:           0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md:           0 4px 12px rgba(0,0,0,0.4);
+      --shadow-lg:           0 8px 24px rgba(0,0,0,0.5);
+      --shadow-accent:       0 4px 15px rgba(37,99,235,0.35);
+      --overlay-bg:          rgba(15,15,17,0.55);
+    }
+
+    [data-theme="light"] {
+      --color-canvas:        #f2f2f5;
+      --color-surface:       #ffffff;
+      --color-elevated:      #e8e8ed;
+      --color-hover:         #f0f0f5;
+      --color-stroke:        #d1d1db;
+      --color-stroke-subtle: #e1e1e8;
+      --color-accent:        #2563eb;
+      --color-accent-hover:  #1d4ed8;
+      --color-accent-muted:  rgba(37, 99, 235, 0.10);
+      --color-ink:           #1a1a1e;
+      --color-ink-secondary: #585866;
+      --color-ink-muted:     #666677;
+      --color-success:       #15803d;
+      --color-success-bg:    rgba(21, 128, 61, 0.12);
+      --color-warning:       #92400e;
+      --color-warning-bg:    rgba(146, 64, 14, 0.10);
+      --color-error:         #b91c1c;
+      --color-error-bg:      rgba(185, 28, 28, 0.12);
+      --shadow-sm:           0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md:           0 4px 6px rgba(0,0,0,0.08);
+      --shadow-lg:           0 10px 15px rgba(0,0,0,0.10);
+      --shadow-accent:       0 4px 15px rgba(37,99,235,0.15);
+      --overlay-bg:          rgba(242,242,245,0.55);
+    }
+
+    /* ─── RESET & BASE ────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      font-size: 13.5px;
+      background: var(--color-canvas);
+      color: var(--color-ink);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: var(--color-accent); text-decoration: none; }
+    code {
+      font-family: 'Geist Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      background: var(--color-elevated);
+      color: var(--color-ink-secondary);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    /* ─── LAYOUT ──────────────────────────────────────────────── */
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--color-canvas);
+      border-bottom: 1px solid var(--color-stroke);
+      backdrop-filter: blur(3px);
+      padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 52px;
+    }
+    .navbar-brand { font-size: 13px; font-weight: 700; color: var(--color-ink); letter-spacing: -0.2px; }
+    .navbar-brand span { color: var(--color-accent); }
+    .navbar-links { display: flex; gap: 20px; }
+    .navbar-links a { font-size: 12px; color: var(--color-ink-muted); transition: color 0.15s; }
+    .navbar-links a:hover { color: var(--color-ink); }
+
+    .main { max-width: 1100px; margin: 0 auto; padding: 48px 32px 96px; }
+    .section { margin-bottom: 64px; }
+    .section-title {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--color-ink-muted);
+      margin-bottom: 24px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--color-stroke-subtle);
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+    .col { display: flex; flex-direction: column; gap: 12px; }
+    .label {
+      font-size: 10px; color: var(--color-ink-muted);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
+    }
+    .group { display: flex; flex-direction: column; gap: 4px; }
+
+    /* ─── THEME TOGGLE ────────────────────────────────────────── */
+    .theme-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 6px;
+      border: 1px solid var(--color-stroke);
+      background: var(--color-surface);
+      color: var(--color-ink-secondary);
+      font-size: 12px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .theme-btn:hover { background: var(--color-hover); color: var(--color-ink); }
+
+    /* ─── COLOR SWATCHES ──────────────────────────────────────── */
+    .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .swatch {
+      border-radius: 8px; overflow: hidden;
+      border: 1px solid var(--color-stroke-subtle);
+      background: var(--color-surface);
+    }
+    .swatch-color { height: 56px; }
+    .swatch-info { padding: 8px 10px; }
+    .swatch-name { font-size: 11px; font-weight: 600; color: var(--color-ink); margin-bottom: 2px; }
+    .swatch-var  { font-size: 10px; color: var(--color-ink-muted); font-family: monospace; }
+    .swatch-hex  { font-size: 10px; color: var(--color-ink-secondary); font-family: monospace; }
+
+    /* ─── TYPOGRAPHY ──────────────────────────────────────────── */
+    .type-page-title  { font-size: 22px; font-weight: 700; color: var(--color-ink); }
+    .type-panel-title { font-size: 18px; font-weight: 700; color: var(--color-ink); }
+    .type-modal-title { font-size: 13.5px; font-weight: 700; color: var(--color-ink); }
+    .type-form-label  { font-size: 13px; font-weight: 600; color: var(--color-ink-secondary); }
+    .type-field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-ink-muted); }
+    .type-hint        { font-size: 11px; color: var(--color-ink-muted); }
+    .type-body        { font-size: 13.5px; color: var(--color-ink); }
+    .type-mono        { font-family: monospace; font-size: 13px; color: var(--color-ink); font-variant-numeric: tabular-nums; }
+
+    .type-row {
+      display: flex; align-items: baseline; gap: 16px;
+      padding: 12px 0; border-bottom: 1px solid var(--color-stroke-subtle);
+    }
+    .type-row:last-child { border-bottom: none; }
+    .type-meta { width: 180px; flex-shrink: 0; font-size: 10px; color: var(--color-ink-muted); font-family: monospace; }
+
+    /* ─── SHADOWS ─────────────────────────────────────────────── */
+    .shadow-demo {
+      background: var(--color-surface);
+      border: 1px solid var(--color-stroke);
+      border-radius: 10px;
+      padding: 20px 24px;
+      min-width: 160px; text-align: center;
+      font-size: 11px; color: var(--color-ink-secondary);
+    }
+
+    /* ─── BUTTONS ─────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-weight: 500; border-radius: 7px; cursor: pointer;
+      border: none; transition: all 0.15s; font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn-md  { padding: 7px 14px; font-size: 13.5px; }
+    .btn-sm  { padding: 4px 10px; font-size: 12px; }
+    .btn-icon { padding: 6px; }
+
+    .btn-primary { background: var(--color-accent); color: #fff; }
+    .btn-primary:hover { background: var(--color-accent-hover); }
+
+    .btn-secondary {
+      background: var(--color-surface);
+      border: 1px solid var(--color-stroke);
+      color: var(--color-ink-secondary);
+    }
+    .btn-secondary:hover { background: var(--color-hover); color: var(--color-ink); }
+
+    .btn-danger { background: var(--color-error); color: #fff; }
+    .btn-danger:hover { opacity: 0.9; }
+
+    .btn-ghost { background: transparent; color: var(--color-ink-secondary); }
+    .btn-ghost:hover { background: var(--color-hover); color: var(--color-ink); }
+
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ─── INPUTS ──────────────────────────────────────────────── */
+    .field-input {
+      width: 100%; border-radius: 8px;
+      border: 1px solid var(--color-stroke);
+      background: var(--color-canvas);
+      padding: 7px 12px; font-size: 13px;
+      color: var(--color-ink); outline: none;
+      transition: border-color 0.15s; font-family: inherit;
+    }
+    .field-input::placeholder { color: var(--color-ink-muted); }
+    .field-input:focus { border-color: var(--color-accent); }
+    .field-input.input-error { border-color: var(--color-error); }
+    .field-input:disabled { opacity: 0.45; cursor: not-allowed; }
+    .input-wrap { display: flex; flex-direction: column; gap: 5px; width: 240px; }
+    .input-error-msg { font-size: 11px; color: var(--color-error); }
+
+    /* ─── CARDS ───────────────────────────────────────────────── */
+    .card {
+      border: 1px solid var(--color-stroke);
+      border-radius: 12px; padding: 20px;
+    }
+    .card-flat    { background: var(--color-surface); box-shadow: var(--shadow-md); }
+    .card-convex  { background: var(--color-elevated); box-shadow: var(--shadow-md); }
+    .card-title   { font-size: 13px; font-weight: 600; color: var(--color-ink); margin-bottom: 6px; }
+    .card-body    { font-size: 12px; color: var(--color-ink-secondary); }
+
+    /* ─── BADGES ──────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 500; white-space: nowrap;
+    }
+    .badge-accent  { background: var(--color-accent-muted); color: var(--color-accent); }
+    .badge-success { background: var(--color-success-bg); color: var(--color-success); }
+    .badge-warning { background: var(--color-warning-bg); color: var(--color-warning); }
+    .badge-error   { background: var(--color-error-bg); color: var(--color-error); }
+    .badge-neutral { background: var(--color-hover); color: var(--color-ink-secondary); border: 1px solid var(--color-stroke); }
+
+    /* ─── STATUS PILLS ────────────────────────────────────────── */
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 5px;
+      font-size: 11px; font-weight: 500;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .status-not-started { background: var(--color-hover); color: var(--color-ink-muted); }
+    .status-not-started .status-dot { background: var(--color-ink-muted); }
+    .status-in-progress { background: var(--color-accent-muted); color: var(--color-accent); }
+    .status-in-progress .status-dot { background: var(--color-accent); }
+    .status-done { background: var(--color-success-bg); color: var(--color-success); }
+    .status-done .status-dot { background: var(--color-success); }
+
+    /* ─── TOGGLE ──────────────────────────────────────────────── */
+    .toggle-wrap { position: relative; display: inline-block; }
+    .toggle-input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      display: flex; align-items: center;
+      width: 36px; height: 20px; border-radius: 999px;
+      background: var(--color-stroke); cursor: pointer;
+      transition: background 0.15s; padding: 2px;
+    }
+    .toggle-input:checked + .toggle-track { background: var(--color-accent); }
+    .toggle-thumb {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #fff; transition: transform 0.15s;
+    }
+    .toggle-input:checked + .toggle-track .toggle-thumb { transform: translateX(16px); }
+
+    /* ─── SPINNER ─────────────────────────────────────────────── */
+    .spinner {
+      border: 2px solid var(--color-stroke);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    .spinner-sm { width: 14px; height: 14px; }
+    .spinner-md { width: 20px; height: 20px; }
+    .spinner-lg { width: 28px; height: 28px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── SKELETON ────────────────────────────────────────────── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--color-elevated) 25%, var(--color-hover) 50%, var(--color-elevated) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 5px;
+    }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    /* ─── DROPDOWN ────────────────────────────────────────────── */
+    .dropdown {
+      background: var(--color-elevated);
+      border: 1px solid var(--color-stroke);
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      padding: 4px;
+      min-width: 180px;
+    }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 5px;
+      font-size: 13px; color: var(--color-ink-secondary);
+      cursor: pointer; transition: all 0.1s;
+    }
+    .dropdown-item:hover { background: var(--color-hover); color: var(--color-ink); }
+    .dropdown-item.active { color: var(--color-accent); background: var(--color-accent-muted); }
+    .dropdown-sep { height: 1px; background: var(--color-stroke-subtle); margin: 4px 0; }
+    .dropdown-item.danger:hover { background: var(--color-error-bg); color: var(--color-error); }
+
+    /* ─── MODAL PREVIEW ───────────────────────────────────────── */
+    .modal-preview {
+      background: var(--color-surface);
+      border: 1px solid var(--color-stroke);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--color-stroke);
+    }
+    .modal-body { padding: 20px; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 8px;
+      padding: 14px 20px; border-top: 1px solid var(--color-stroke);
+    }
+
+    /* ─── ICONS ───────────────────────────────────────────────── */
+    .icon-grid { display: flex; flex-wrap: wrap; gap: 16px; }
+    .icon-item {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      color: var(--color-ink-secondary);
+    }
+    .icon-item .meta { font-size: 10px; color: var(--color-ink-muted); font-family: monospace; }
+
+    /* ─── ANIMATION DEMO ──────────────────────────────────────── */
+    .fade-demo {
+      padding: 20px 24px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-stroke);
+      border-radius: 10px;
+      text-align: center; font-size: 13px; color: var(--color-ink-secondary);
+    }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up { animation: fade-up 0.45s ease both; }
+
+    /* ─── SCROLLBAR DEMO ──────────────────────────────────────── */
+    .scroll-demo {
+      height: 100px; overflow-y: auto;
+      background: var(--color-surface);
+      border: 1px solid var(--color-stroke);
+      border-radius: 8px; padding: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-stroke) transparent;
+    }
+    .scroll-demo::-webkit-scrollbar { width: 4px; }
+    .scroll-demo::-webkit-scrollbar-track { background: transparent; }
+    .scroll-demo::-webkit-scrollbar-thumb { background: var(--color-stroke); border-radius: 999px; }
+
+    /* ─── TABLE ───────────────────────────────────────────────── */
+    .ds-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .ds-table th {
+      text-align: left; padding: 8px 12px;
+      background: var(--color-surface);
+      color: var(--color-ink-muted);
+      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--color-stroke);
+    }
+    .ds-table td {
+      padding: 9px 12px; border-bottom: 1px solid var(--color-stroke-subtle);
+      color: var(--color-ink-secondary);
+    }
+    .ds-table tr:last-child td { border-bottom: none; }
+    .ds-table tr:nth-child(odd) td { background: rgba(255,255,255,0.01); }
+    .ok  { color: var(--color-success); font-weight: 600; }
+    .err { color: var(--color-error); font-weight: 600; }
+    .warn { color: var(--color-warning); font-weight: 600; }
+
+    /* ─── MODAL SIZES RULER ───────────────────────────────────── */
+    .ruler-wrap { display: flex; flex-direction: column; gap: 10px; }
+    .ruler-bar {
+      display: flex; align-items: center;
+      height: 36px; border-radius: 6px;
+      background: var(--color-accent-muted);
+      border: 1px solid var(--color-accent);
+      font-size: 11px; color: var(--color-accent);
+      padding: 0 12px; font-weight: 500;
+    }
+
+    /* ─── TYPE NAV LABEL ─────────────────────────────────────── */
+    .type-nav-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-ink-muted); }
+
+    /* ─── FORM FIELD COMPOSITION ────────────────────────────── */
+    .form-field { display: flex; flex-direction: column; gap: 5px; width: 240px; }
+    .form-hint { font-size: 11px; color: var(--color-ink-muted); }
+    .form-error-msg { font-size: 11px; color: var(--color-error); }
+
+    /* ─── FINANCIAL / P&L ────────────────────────────────────── */
+    .pnl { font-family: 'Geist Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 18px; }
+    .pnl-positive { color: var(--color-success); }
+    .pnl-negative { color: var(--color-error); }
+    .pnl-neutral  { color: var(--color-ink-secondary); }
+    .metric-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-stroke);
+      border-radius: 10px;
+      padding: 16px 20px;
+      min-width: 160px;
+    }
+    .metric-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-ink-muted); margin-bottom: 8px; }
+
+    /* ─── FOCUS RING ─────────────────────────────────────────── */
+    .focus-demo:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+
+    /* ─── EMPTY STATE ────────────────────────────────────────── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 40px 24px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-stroke);
+      border-radius: 10px;
+      text-align: center; width: 280px;
+    }
+    .empty-state-title { font-size: 13px; font-weight: 500; color: var(--color-ink-secondary); }
+    .empty-state-hint { font-size: 12px; color: var(--color-ink-muted); }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <span class="navbar-brand">FIX <span>Space</span> — Design System</span>
+  <div class="navbar-links">
+    <a href="#colors">Colors</a>
+    <a href="#typography">Typography</a>
+    <a href="#shadows">Shadows</a>
+    <a href="#buttons">Buttons</a>
+    <a href="#inputs">Inputs</a>
+    <a href="#forms">Forms</a>
+    <a href="#cards">Cards</a>
+    <a href="#financial">Financial</a>
+    <a href="#badges">Badges</a>
+    <a href="#overlays">Overlays</a>
+    <a href="#icons">Icons</a>
+    <a href="#audit">Audit</a>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">
+    <i data-lucide="sun" width="13" height="13"></i>
+    <span id="theme-label">Light</span>
+  </button>
+</nav>
+
+<main class="main">
+
+  <!-- ── COLORS ─────────────────────────────────────────────── -->
+  <section class="section" id="colors">
+    <div class="section-title">Color Palette</div>
+
+    <div class="label" style="margin-bottom:12px">Backgrounds &amp; Elevation</div>
+    <div class="swatch-grid" style="margin-bottom:24px">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0f0f11"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Canvas</div>
+          <div class="swatch-var">--color-canvas</div>
+          <div class="swatch-hex">#0f0f11 / #f2f2f5</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#18181d"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Surface</div>
+          <div class="swatch-var">--color-surface</div>
+          <div class="swatch-hex">#18181d / #ffffff</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#222228"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Elevated</div>
+          <div class="swatch-var">--color-elevated</div>
+          <div class="swatch-hex">#222228 / #e8e8ed</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1a1a21"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Hover</div>
+          <div class="swatch-var">--color-hover</div>
+          <div class="swatch-hex">#1a1a21 / #f0f0f5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="label" style="margin-bottom:12px">Borders</div>
+    <div class="swatch-grid" style="margin-bottom:24px">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#2a2a35"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Stroke</div>
+          <div class="swatch-var">--color-stroke</div>
+          <div class="swatch-hex">#2a2a35 / #d1d1db</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1e1e28"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Stroke Subtle</div>
+          <div class="swatch-var">--color-stroke-subtle</div>
+          <div class="swatch-hex">#1e1e28 / #e1e1e8</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="label" style="margin-bottom:12px">Accent</div>
+    <div class="swatch-grid" style="margin-bottom:24px">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#2563eb"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Accent</div>
+          <div class="swatch-var">--color-accent</div>
+          <div class="swatch-hex">#2563eb</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1d4ed8"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Accent Hover</div>
+          <div class="swatch-var">--color-accent-hover</div>
+          <div class="swatch-hex">#1d4ed8</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:rgba(37,99,235,0.15)"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Accent Muted</div>
+          <div class="swatch-var">--color-accent-muted</div>
+          <div class="swatch-hex">rgba(37,99,235,0.15)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="label" style="margin-bottom:12px">Text (Ink)</div>
+    <div class="swatch-grid" style="margin-bottom:24px">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#e8e8f0"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Ink</div>
+          <div class="swatch-var">--color-ink</div>
+          <div class="swatch-hex">#e8e8f0 / #1a1a1e</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#9494a8"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Ink Secondary</div>
+          <div class="swatch-var">--color-ink-secondary</div>
+          <div class="swatch-hex">#9494a8 / #585866</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#808098"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Ink Muted</div>
+          <div class="swatch-var">--color-ink-muted</div>
+          <div class="swatch-hex">#808098 / #666677</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="label" style="margin-bottom:12px">Semantic</div>
+    <div class="swatch-grid">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#57f287"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Success</div>
+          <div class="swatch-var">--color-success</div>
+          <div class="swatch-hex">#57f287 dark / #15803d light</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:rgba(87,242,135,0.12)"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Success BG</div>
+          <div class="swatch-var">--color-success-bg</div>
+          <div class="swatch-hex">rgba(87,242,135,.12)</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#fee75c"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Warning</div>
+          <div class="swatch-var">--color-warning</div>
+          <div class="swatch-hex">#fee75c dark / #92400e light</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:rgba(254,231,92,0.12)"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Warning BG</div>
+          <div class="swatch-var">--color-warning-bg</div>
+          <div class="swatch-hex">rgba(254,231,92,.12)</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#ed4245"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Error</div>
+          <div class="swatch-var">--color-error</div>
+          <div class="swatch-hex">#ed4245 dark / #b91c1c light</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:rgba(237,66,69,0.12)"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Error BG</div>
+          <div class="swatch-var">--color-error-bg</div>
+          <div class="swatch-hex">rgba(237,66,69,.12)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TYPOGRAPHY ──────────────────────────────────────────── -->
+  <section class="section" id="typography">
+    <div class="section-title">Typography</div>
+    <div style="background:var(--color-surface);border:1px solid var(--color-stroke);border-radius:10px;overflow:hidden">
+      <div class="type-row">
+        <div class="type-meta">.type-page-title<br>22px / 700</div>
+        <div class="type-page-title">Торговий журнал</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">.type-panel-title<br>18px / 700</div>
+        <div class="type-panel-title">Щоденний аналіз</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">.type-modal-title<br>13.5px / 700</div>
+        <div class="type-modal-title">Редагувати запис</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">.type-form-label<br>13px / 600</div>
+        <div class="type-form-label">Назва бази даних</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">.type-field-label<br>11px / 600 / UPPER</div>
+        <div class="type-field-label">Тип властивості</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">.type-hint<br>11px / muted</div>
+        <div class="type-hint">Не більше 500 символів</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">Body<br>13.5px / regular</div>
+        <div class="type-body">Запис містить деталі угоди, коментарі та прикріплені файли.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">.type-nav-label<br>10px / 600 / UPPER</div>
+        <div class="type-nav-label">Spaces &amp; Sections</div>
+      </div>
+      <div class="type-row" style="border-bottom:none">
+        <div class="type-meta">Mono / tabular<br>13px / monospace</div>
+        <div class="type-mono">+2 340.00 USD&nbsp;&nbsp;14:35:22&nbsp;&nbsp;0.0012</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SHADOWS ─────────────────────────────────────────────── -->
+  <section class="section" id="shadows">
+    <div class="section-title">Elevation &amp; Shadows</div>
+    <div class="row">
+      <div class="group">
+        <div class="label">shadow-sm</div>
+        <div class="shadow-demo" style="box-shadow:var(--shadow-sm)">
+          <code>--shadow-sm</code><br>Minimal lift
+        </div>
+      </div>
+      <div class="group">
+        <div class="label">shadow-md</div>
+        <div class="shadow-demo" style="box-shadow:var(--shadow-md)">
+          <code>--shadow-md</code><br>Cards, panels
+        </div>
+      </div>
+      <div class="group">
+        <div class="label">shadow-lg</div>
+        <div class="shadow-demo" style="box-shadow:var(--shadow-lg)">
+          <code>--shadow-lg</code><br>Modals, dropdowns
+        </div>
+      </div>
+      <div class="group">
+        <div class="label">shadow-accent</div>
+        <div class="shadow-demo" style="box-shadow:var(--shadow-accent);border-color:var(--color-accent)">
+          <code>--shadow-accent</code><br>Focus / CTA
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px">
+      <div class="label" style="margin-bottom:12px">Modal widths</div>
+      <div class="ruler-wrap">
+        <div>
+          <div style="font-size:10px;color:var(--color-ink-muted);margin-bottom:4px">--spacing-modal-sm — 420px</div>
+          <div class="ruler-bar" style="width:420px">420px</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--color-ink-muted);margin-bottom:4px">--spacing-modal-md — 520px</div>
+          <div class="ruler-bar" style="width:520px">520px</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--color-ink-muted);margin-bottom:4px">--spacing-modal-lg — 640px</div>
+          <div class="ruler-bar" style="width:640px">640px</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── BUTTONS ─────────────────────────────────────────────── -->
+  <section class="section" id="buttons">
+    <div class="section-title">Buttons</div>
+
+    <div class="label" style="margin-bottom:10px">Variants — md size</div>
+    <div class="row" style="margin-bottom:24px">
+      <button class="btn btn-md btn-primary">
+        <i data-lucide="save" width="14" height="14"></i> Save
+      </button>
+      <button class="btn btn-md btn-secondary">
+        <i data-lucide="x" width="14" height="14"></i> Cancel
+      </button>
+      <button class="btn btn-md btn-danger">
+        <i data-lucide="trash-2" width="14" height="14"></i> Delete
+      </button>
+      <button class="btn btn-md btn-ghost">
+        <i data-lucide="settings" width="14" height="14"></i> Settings
+      </button>
+    </div>
+
+    <div class="label" style="margin-bottom:10px">sm size</div>
+    <div class="row" style="margin-bottom:24px">
+      <button class="btn btn-sm btn-primary">Save</button>
+      <button class="btn btn-sm btn-secondary">Cancel</button>
+      <button class="btn btn-sm btn-danger">Delete</button>
+      <button class="btn btn-sm btn-ghost">Settings</button>
+    </div>
+
+    <div class="label" style="margin-bottom:10px">Icon-only</div>
+    <div class="row" style="margin-bottom:24px">
+      <button class="btn btn-icon btn-primary"><i data-lucide="plus" width="16" height="16"></i></button>
+      <button class="btn btn-icon btn-secondary"><i data-lucide="pencil" width="16" height="16"></i></button>
+      <button class="btn btn-icon btn-danger"><i data-lucide="trash-2" width="16" height="16"></i></button>
+      <button class="btn btn-icon btn-ghost"><i data-lucide="more-horizontal" width="16" height="16"></i></button>
+    </div>
+
+    <div class="label" style="margin-bottom:10px">Disabled</div>
+    <div class="row">
+      <button class="btn btn-md btn-primary" disabled>Save</button>
+      <button class="btn btn-md btn-secondary" disabled>Cancel</button>
+      <button class="btn btn-md btn-danger" disabled>Delete</button>
+    </div>
+  </section>
+
+  <!-- ── INPUTS ─────────────────────────────────────────────── -->
+  <section class="section" id="inputs">
+    <div class="section-title">Inputs</div>
+    <div class="row">
+      <div class="input-wrap">
+        <div class="label">Default</div>
+        <input class="field-input" type="text" placeholder="Введіть назву..." />
+      </div>
+      <div class="input-wrap">
+        <div class="label">With value</div>
+        <input class="field-input" type="text" value="EURUSD Long" />
+      </div>
+      <div class="input-wrap">
+        <div class="label">Error state</div>
+        <input class="field-input input-error" type="text" value="invalid@" />
+        <span class="input-error-msg">Недійсне значення</span>
+      </div>
+      <div class="input-wrap">
+        <div class="label">Disabled</div>
+        <input class="field-input" type="text" value="Read only" disabled />
+      </div>
+      <div class="input-wrap" style="width:320px">
+        <div class="label">Textarea</div>
+        <textarea class="field-input" rows="3" placeholder="Коментар до угоди..."></textarea>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FORM COMPOSITION ──────────────────────────────────── -->
+  <section class="section" id="forms">
+    <div class="section-title">Form Field Composition</div>
+    <div class="row" style="align-items:flex-start">
+
+      <div class="form-field">
+        <div class="type-form-label">Назва угоди</div>
+        <input class="field-input" type="text" placeholder="напр. EURUSD Long" />
+        <div class="form-hint">Буде відображатися в таблиці та деталях запису</div>
+      </div>
+
+      <div class="form-field">
+        <div class="type-form-label">Обсяг позиції <span style="color:var(--color-error)">*</span></div>
+        <input class="field-input input-error" type="text" value="abc" />
+        <div class="form-error-msg">Введіть числове значення</div>
+      </div>
+
+      <div class="form-field">
+        <div class="type-form-label" style="color:var(--color-ink-muted)">API ключ</div>
+        <input class="field-input" type="text" value="sk-••••••••••••4b2f" disabled />
+        <div class="form-hint">Змінити можна в налаштуваннях інтеграцій</div>
+      </div>
+
+      <div class="form-field" style="width:320px">
+        <div class="type-form-label">Коментар</div>
+        <textarea class="field-input" rows="3" placeholder="Описіть причину входу..."></textarea>
+        <div class="form-hint">Макс. 500 символів</div>
+      </div>
+
+    </div>
+    <div style="margin-top:20px;font-size:12px;color:var(--color-ink-muted)">
+      Структура: <code>type-form-label</code> → <code>field-input</code> → <code>form-hint</code> або <code style="color:var(--color-error)">form-error-msg</code>
+    </div>
+  </section>
+
+  <!-- ── CARDS ──────────────────────────────────────────────── -->
+  <section class="section" id="cards">
+    <div class="section-title">Cards</div>
+    <div class="row">
+      <div class="card card-flat" style="width:240px">
+        <div class="card-title">Flat Card</div>
+        <div class="card-body">bg-surface + shadow-md. Основний контейнер для контенту.</div>
+      </div>
+      <div class="card card-convex" style="width:240px">
+        <div class="card-title">Convex Card</div>
+        <div class="card-body">bg-elevated + shadow-md. Для виділених панелей.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FINANCIAL DATA ────────────────────────────────────── -->
+  <section class="section" id="financial">
+    <div class="section-title">Financial Data Display</div>
+    <div class="label" style="margin-bottom:12px">P&amp;L — font-mono tabular-nums</div>
+    <div class="row" style="margin-bottom:28px">
+      <div class="metric-card">
+        <div class="metric-label">Прибуток</div>
+        <div class="pnl pnl-positive">+2 340.00</div>
+        <div style="font-size:11px;color:var(--color-ink-muted);margin-top:4px;font-family:monospace">USD</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Збиток</div>
+        <div class="pnl pnl-negative">−1 120.50</div>
+        <div style="font-size:11px;color:var(--color-ink-muted);margin-top:4px;font-family:monospace">USD</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Баланс</div>
+        <div class="pnl pnl-neutral">0.00</div>
+        <div style="font-size:11px;color:var(--color-ink-muted);margin-top:4px;font-family:monospace">USD</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Win Rate</div>
+        <div class="pnl pnl-positive">68.4%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Drawdown</div>
+        <div class="pnl pnl-negative">−4.2%</div>
+      </div>
+    </div>
+
+    <div class="label" style="margin-bottom:10px">Inline в таблиці</div>
+    <div style="background:var(--color-surface);border:1px solid var(--color-stroke);border-radius:8px;overflow:hidden;max-width:520px">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:var(--color-surface);border-bottom:1px solid var(--color-stroke)">
+            <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-ink-muted)">Інструмент</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-ink-muted)">P&amp;L</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-ink-muted)">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--color-stroke-subtle)">
+            <td style="padding:8px 12px;color:var(--color-ink)">EURUSD</td>
+            <td style="padding:8px 12px;text-align:right;font-family:monospace;font-variant-numeric:tabular-nums" class="pnl-positive">+1 240.00</td>
+            <td style="padding:8px 12px;text-align:right;font-family:monospace;font-variant-numeric:tabular-nums" class="pnl-positive">+2.48%</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--color-stroke-subtle)">
+            <td style="padding:8px 12px;color:var(--color-ink)">GBPJPY</td>
+            <td style="padding:8px 12px;text-align:right;font-family:monospace;font-variant-numeric:tabular-nums" class="pnl-negative">−380.00</td>
+            <td style="padding:8px 12px;text-align:right;font-family:monospace;font-variant-numeric:tabular-nums" class="pnl-negative">−0.76%</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;color:var(--color-ink)">XAUUSD</td>
+            <td style="padding:8px 12px;text-align:right;font-family:monospace;font-variant-numeric:tabular-nums" class="pnl-neutral">0.00</td>
+            <td style="padding:8px 12px;text-align:right;font-family:monospace;font-variant-numeric:tabular-nums" class="pnl-neutral">0.00%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── BADGES & STATUS ────────────────────────────────────── -->
+  <section class="section" id="badges">
+    <div class="section-title">Badges &amp; Status</div>
+
+    <div class="label" style="margin-bottom:10px">Badges</div>
+    <div class="row" style="margin-bottom:24px">
+      <span class="badge badge-accent">Активний</span>
+      <span class="badge badge-success">Виконано</span>
+      <span class="badge badge-warning">Очікує</span>
+      <span class="badge badge-error">Помилка</span>
+      <span class="badge badge-neutral">Нейтрально</span>
+    </div>
+
+    <div class="label" style="margin-bottom:10px">Status pills</div>
+    <div class="row">
+      <div class="status-pill status-not-started">
+        <div class="status-dot"></div> Not started
+      </div>
+      <div class="status-pill status-in-progress">
+        <div class="status-dot"></div> In progress
+      </div>
+      <div class="status-pill status-done">
+        <div class="status-dot"></div> Done
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TOGGLE, SPINNER, SKELETON ─────────────────────────── -->
+  <section class="section">
+    <div class="section-title">Controls &amp; States</div>
+    <div class="row" style="align-items:center">
+
+      <div class="group">
+        <div class="label">Toggle</div>
+        <div class="row" style="align-items:center;gap:16px">
+          <label class="toggle-wrap">
+            <input class="toggle-input" type="checkbox" />
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
+          <label class="toggle-wrap">
+            <input class="toggle-input" type="checkbox" checked />
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label">Spinner</div>
+        <div class="row" style="align-items:center;gap:12px">
+          <div class="spinner spinner-sm"></div>
+          <div class="spinner spinner-md"></div>
+          <div class="spinner spinner-lg"></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label">Skeleton</div>
+        <div style="display:flex;flex-direction:column;gap:6px;width:180px">
+          <div class="skeleton" style="height:12px;width:100%"></div>
+          <div class="skeleton" style="height:12px;width:75%"></div>
+          <div class="skeleton" style="height:12px;width:60%"></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label">Scrollbar</div>
+        <div class="scroll-demo" style="width:200px">
+          <div style="height:300px;padding-top:4px">
+            <p style="font-size:12px;color:var(--color-ink-secondary);margin-bottom:8px">Рядок 1 — дані угоди</p>
+            <p style="font-size:12px;color:var(--color-ink-secondary);margin-bottom:8px">Рядок 2 — відкрита позиція</p>
+            <p style="font-size:12px;color:var(--color-ink-secondary);margin-bottom:8px">Рядок 3 — EURUSD Long 0.1</p>
+            <p style="font-size:12px;color:var(--color-ink-secondary);margin-bottom:8px">Рядок 4 — закрита угода</p>
+            <p style="font-size:12px;color:var(--color-ink-secondary)">Рядок 5 — статистика</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── OVERLAYS ────────────────────────────────────────────── -->
+  <section class="section" id="overlays">
+    <div class="section-title">Overlays — Dropdown &amp; Modal</div>
+    <div class="row" style="align-items:flex-start">
+
+      <div class="group">
+        <div class="label">Dropdown menu</div>
+        <div class="dropdown">
+          <div class="dropdown-item active">
+            <i data-lucide="table" width="14" height="14"></i> Таблиця
+          </div>
+          <div class="dropdown-item">
+            <i data-lucide="layout-kanban" width="14" height="14"></i> Канбан
+          </div>
+          <div class="dropdown-item">
+            <i data-lucide="calendar" width="14" height="14"></i> Календар
+          </div>
+          <div class="dropdown-sep"></div>
+          <div class="dropdown-item">
+            <i data-lucide="settings" width="14" height="14"></i> Налаштування
+          </div>
+          <div class="dropdown-item danger">
+            <i data-lucide="trash-2" width="14" height="14"></i> Видалити
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label">Modal preview</div>
+        <div class="modal-preview" style="width:420px">
+          <div class="modal-header">
+            <span class="type-modal-title">Редагувати запис</span>
+            <button class="btn btn-icon btn-ghost" style="margin:-4px">
+              <i data-lucide="x" width="16" height="16"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div class="input-wrap" style="width:100%">
+                <div class="type-form-label" style="margin-bottom:5px">Назва</div>
+                <input class="field-input" type="text" value="EURUSD Long" style="width:100%" />
+              </div>
+              <div class="input-wrap" style="width:100%">
+                <div class="type-form-label" style="margin-bottom:5px">Коментар</div>
+                <textarea class="field-input" rows="2" style="width:100%" placeholder="Опишіть угоду..."></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-md btn-secondary">Скасувати</button>
+            <button class="btn btn-md btn-primary">Зберегти</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ICONS ──────────────────────────────────────────────── -->
+  <section class="section" id="icons">
+    <div class="section-title">Iconography — Lucide React</div>
+    <div class="label" style="margin-bottom:16px">Sizes by context</div>
+    <div class="icon-grid">
+      <div class="icon-item">
+        <i data-lucide="file-text" width="13" height="13"></i>
+        <span class="meta">13 — property type</span>
+      </div>
+      <div class="icon-item">
+        <i data-lucide="pencil" width="14" height="14"></i>
+        <span class="meta">14 — button icon</span>
+      </div>
+      <div class="icon-item">
+        <i data-lucide="layout-grid" width="16" height="16"></i>
+        <span class="meta">16 — navigation</span>
+      </div>
+      <div class="icon-item">
+        <i data-lucide="settings" width="18" height="18"></i>
+        <span class="meta">18 — icon-only btn</span>
+      </div>
+      <div class="icon-item">
+        <i data-lucide="database" width="32" height="32"></i>
+        <span class="meta">32 — empty state</span>
+      </div>
+      <div class="icon-item">
+        <i data-lucide="inbox" width="48" height="48"></i>
+        <span class="meta">48 — large empty</span>
+      </div>
+    </div>
+
+    <div style="margin-top:24px">
+      <div class="label" style="margin-bottom:12px">Common icons in this project</div>
+      <div class="icon-grid">
+        <div class="icon-item"><i data-lucide="plus" width="16" height="16"></i><span class="meta">plus</span></div>
+        <div class="icon-item"><i data-lucide="trash-2" width="16" height="16"></i><span class="meta">trash-2</span></div>
+        <div class="icon-item"><i data-lucide="pencil" width="16" height="16"></i><span class="meta">pencil</span></div>
+        <div class="icon-item"><i data-lucide="search" width="16" height="16"></i><span class="meta">search</span></div>
+        <div class="icon-item"><i data-lucide="filter" width="16" height="16"></i><span class="meta">filter</span></div>
+        <div class="icon-item"><i data-lucide="chevron-down" width="16" height="16"></i><span class="meta">chevron-down</span></div>
+        <div class="icon-item"><i data-lucide="chevron-right" width="16" height="16"></i><span class="meta">chevron-right</span></div>
+        <div class="icon-item"><i data-lucide="x" width="16" height="16"></i><span class="meta">x</span></div>
+        <div class="icon-item"><i data-lucide="check" width="16" height="16"></i><span class="meta">check</span></div>
+        <div class="icon-item"><i data-lucide="more-horizontal" width="16" height="16"></i><span class="meta">more-horizontal</span></div>
+        <div class="icon-item"><i data-lucide="grip-vertical" width="16" height="16"></i><span class="meta">grip-vertical</span></div>
+        <div class="icon-item"><i data-lucide="calendar" width="16" height="16"></i><span class="meta">calendar</span></div>
+        <div class="icon-item"><i data-lucide="table" width="16" height="16"></i><span class="meta">table</span></div>
+        <div class="icon-item"><i data-lucide="layout-kanban" width="16" height="16"></i><span class="meta">layout-kanban</span></div>
+        <div class="icon-item"><i data-lucide="database" width="16" height="16"></i><span class="meta">database</span></div>
+        <div class="icon-item"><i data-lucide="user" width="16" height="16"></i><span class="meta">user</span></div>
+        <div class="icon-item"><i data-lucide="log-out" width="16" height="16"></i><span class="meta">log-out</span></div>
+        <div class="icon-item"><i data-lucide="sun" width="16" height="16"></i><span class="meta">sun</span></div>
+        <div class="icon-item"><i data-lucide="moon" width="16" height="16"></i><span class="meta">moon</span></div>
+        <div class="icon-item"><i data-lucide="save" width="16" height="16"></i><span class="meta">save</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ANIMATION ──────────────────────────────────────────── -->
+  <section class="section">
+    <div class="section-title">Animation</div>
+    <div class="row" style="align-items:center">
+      <div class="group">
+        <div class="label">animate-fade-up (0.45s ease)</div>
+        <button class="btn btn-md btn-secondary" onclick="triggerFade()">
+          <i data-lucide="play" width="14" height="14"></i> Trigger
+        </button>
+      </div>
+      <div id="fade-target" class="fade-demo" style="display:none;width:200px">
+        Fade up!
+      </div>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--color-ink-muted)">
+      Transition for interactive states: <code>transition-colors duration-150</code> (150ms)
+    </div>
+  </section>
+
+  <!-- ── EMPTY STATES & FOCUS ──────────────────────────────── -->
+  <section class="section">
+    <div class="section-title">Empty States &amp; Accessibility</div>
+    <div class="row" style="align-items:flex-start">
+
+      <div class="group">
+        <div class="label">Empty state</div>
+        <div class="empty-state">
+          <i data-lucide="database" width="32" height="32" style="color:var(--color-ink-muted)"></i>
+          <div class="empty-state-title">Немає записів</div>
+          <div class="empty-state-hint">Додайте перший запис щоб почати</div>
+          <button class="btn btn-sm btn-secondary" style="margin-top:4px">
+            <i data-lucide="plus" width="14" height="14"></i> Додати запис
+          </button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label">Focus ring (Tab to test)</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-md btn-primary focus-demo" style="outline-offset:2px">Primary button</button>
+          <button class="btn btn-md btn-secondary focus-demo" style="outline-offset:2px">Secondary button</button>
+          <input class="field-input" type="text" placeholder="Натисніть Tab щоб побачити focus" style="width:220px" />
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--color-ink-muted)">
+          Inputs: <code>focus:border-accent</code><br>
+          Buttons: <code>focus-visible:ring-2 ring-accent</code>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="label">Contrast check</div>
+        <div style="background:var(--color-canvas);border:1px solid var(--color-stroke);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:200px">
+          <div style="color:var(--color-ink);font-size:13px">text-ink (~14:1) ✓ AAA</div>
+          <div style="color:var(--color-ink-secondary);font-size:13px">text-ink-secondary (~4.6:1) ✓ AA</div>
+          <div style="color:var(--color-ink-muted);font-size:13px">text-ink-muted (~2.8:1) — decorative</div>
+          <div style="color:var(--color-accent);font-size:13px">text-accent (~4.5:1) ✓ AA</div>
+          <div style="color:var(--color-success);font-size:13px">text-success — semantic</div>
+          <div style="color:var(--color-error);font-size:13px">text-error — semantic</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── AUDIT REPORT ────────────────────────────────────────── -->
+  <section class="section" id="audit">
+    <div class="section-title">Design System Audit</div>
+
+    <div style="margin-bottom:24px">
+      <div style="margin-bottom:12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-ink-muted)">WCAG contrast ratios — dark mode</div>
+      <table class="ds-table" style="margin-bottom:20px">
+        <thead><tr><th>Color token</th><th>On canvas</th><th>On surface</th><th>On elevated</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td><code>text-ink</code></td><td>15.7:1</td><td>14.5:1</td><td>13.0:1</td><td><span class="ok">✓ AAA</span></td></tr>
+          <tr><td><code>text-ink-secondary</code></td><td>6.4:1</td><td>5.9:1</td><td>5.3:1</td><td><span class="ok">✓ AA</span></td></tr>
+          <tr><td><code>text-ink-muted</code> (fixed)</td><td>5.0:1</td><td>4.6:1</td><td>4.1:1</td><td><span class="ok">✓ AA canvas/surface</span></td></tr>
+          <tr><td><code>text-accent</code></td><td>3.7:1</td><td>3.4:1</td><td>3.1:1</td><td><span class="warn">⚠ UI components only</span></td></tr>
+          <tr><td><code>text-success</code></td><td>13.2:1</td><td>12.2:1</td><td>10.9:1</td><td><span class="ok">✓ AAA</span></td></tr>
+          <tr><td><code>text-warning</code></td><td>15.3:1</td><td>14.2:1</td><td>12.7:1</td><td><span class="ok">✓ AAA</span></td></tr>
+          <tr><td><code>text-error</code></td><td>5.0:1</td><td>4.6:1</td><td>4.1:1</td><td><span class="ok">✓ AA canvas/surface</span></td></tr>
+        </tbody>
+      </table>
+      <div style="margin-bottom:12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-ink-muted)">WCAG contrast ratios — light mode (after fix)</div>
+      <table class="ds-table" style="margin-bottom:20px">
+        <thead><tr><th>Color token</th><th>On canvas</th><th>On surface</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td><code>text-ink</code></td><td>15.5:1</td><td>17.4:1</td><td><span class="ok">✓ AAA</span></td></tr>
+          <tr><td><code>text-ink-secondary</code></td><td>6.3:1</td><td>7.0:1</td><td><span class="ok">✓ AA</span></td></tr>
+          <tr><td><code>text-ink-muted</code> (fixed #666677)</td><td>5.0:1</td><td>5.6:1</td><td><span class="ok">✓ AA (was 3.04:1)</span></td></tr>
+          <tr><td><code>text-success</code> (fixed #15803d)</td><td>~4.8:1</td><td>~5.3:1</td><td><span class="ok">✓ AA (was 2.44:1)</span></td></tr>
+          <tr><td><code>text-warning</code> (fixed #92400e)</td><td>~8.1:1</td><td>~9.1:1</td><td><span class="ok">✓ AAA (was 2.32:1)</span></td></tr>
+          <tr><td><code>text-error</code> (fixed #b91c1c)</td><td>~5.8:1</td><td>~6.5:1</td><td><span class="ok">✓ AA (was 4.09:1)</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <table class="ds-table" style="margin-bottom:32px">
+      <thead>
+        <tr>
+          <th>Token</th>
+          <th>docs/design-system.md (old)</th>
+          <th>tokens.css (real)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>--color-accent</code></td>
+          <td>#5865f2 <span style="display:inline-block;width:12px;height:12px;background:#5865f2;border-radius:2px;vertical-align:middle;margin-left:4px"></span></td>
+          <td>#2563eb <span style="display:inline-block;width:12px;height:12px;background:#2563eb;border-radius:2px;vertical-align:middle;margin-left:4px"></span></td>
+          <td><span class="ok">✓ Fixed in doc</span></td>
+        </tr>
+        <tr>
+          <td><code>--color-ink-secondary</code></td>
+          <td>#888888</td>
+          <td>#9494a8</td>
+          <td><span class="ok">✓ Fixed in doc</span></td>
+        </tr>
+        <tr>
+          <td><code>--color-ink-muted</code></td>
+          <td>#444444</td>
+          <td>#64647a</td>
+          <td><span class="ok">✓ Fixed in doc</span></td>
+        </tr>
+        <tr>
+          <td>Modal standard width</td>
+          <td>w-120 (480px)</td>
+          <td>--spacing-modal-sm: 420px</td>
+          <td><span class="ok">✓ Fixed in doc</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-ink-muted)">CSS class gaps</div>
+    <table class="ds-table" style="margin-bottom:32px">
+      <thead>
+        <tr>
+          <th>Class</th>
+          <th>Problem</th>
+          <th>Fix</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>.type-nav-label</code></td>
+          <td>Documented in design-system.md but missing from components.css. Duplicate <code>.type-field-label</code> was present instead.</td>
+          <td>Added to components.css, removed duplicate</td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-ink-muted)">Accessibility fixes applied</div>
+    <table class="ds-table" style="margin-bottom:32px">
+      <thead>
+        <tr><th>Issue</th><th>WCAG rule</th><th>Fix</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>text-ink-muted</code> — insufficient contrast</td>
+          <td>1.4.3 (AA 4.5:1)</td>
+          <td>Dark #64647a→#808098 (3.3→5.0:1), Light #8a8a99→#666677 (3.0→5.0:1)</td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td>Light mode success/warning/error colors</td>
+          <td>1.4.3 (AA 4.5:1)</td>
+          <td>Success 2.4→4.8:1, Warning 2.3→8.1:1, Error 4.1→5.8:1</td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td>Toggle — color only conveyed state</td>
+          <td>1.4.1 (Color use)</td>
+          <td>Added <code>role="switch"</code> + <code>aria-checked</code>; thumb position is 2nd visual cue</td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td>Button — no focus ring</td>
+          <td>2.4.11 (WCAG 2.2)</td>
+          <td>Added <code>focus-visible:ring-2 ring-accent ring-offset-canvas</code></td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td>animate-fade-up ignores reduced motion</td>
+          <td>2.3.3 AAA / best practice</td>
+          <td>Added <code>@media (prefers-reduced-motion: reduce)</code> in utilities.css</td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td><code>text-accent</code> used as text color</td>
+          <td>1.4.3 (3.7:1 in dark, fails AA)</td>
+          <td>Documented as UI-component only; banned for body/label text</td>
+          <td><span class="ok">✓ Documented</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-bottom:12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-ink-muted)">Component violations</div>
+    <table class="ds-table">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Violation</th>
+          <th>Fix</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>ui/primitives/card.tsx</code></td>
+          <td>bg-[#202022] (convex variant)</td>
+          <td>bg-elevated</td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td><code>ui/primitives/progress-input.tsx</code></td>
+          <td>#3B82F6, #E5E7EB in gradient</td>
+          <td>var(--color-accent), var(--color-stroke)</td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td><code>ui/primitives/rating-input.tsx</code></td>
+          <td>#3B82F6, #E5E7EB in gradient</td>
+          <td>var(--color-accent), var(--color-stroke)</td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+        <tr>
+          <td><code>database/database-table.tsx</code></td>
+          <td>#6366f1 fallback group color</td>
+          <td>#2563eb (--color-accent)</td>
+          <td><span class="ok">✓ Fixed</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</main>
+
+<script>
+  lucide.createIcons();
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-label').textContent = isDark ? 'Dark' : 'Light';
+    const icon = document.querySelector('#theme-btn [data-lucide]');
+    icon.setAttribute('data-lucide', isDark ? 'moon' : 'sun');
+    lucide.createIcons();
+  }
+
+  function triggerFade() {
+    const el = document.getElementById('fade-target');
+    el.style.display = 'block';
+    el.classList.remove('animate-fade-up');
+    void el.offsetWidth;
+    el.classList.add('animate-fade-up');
+  }
+</script>
+</body>
+</html>

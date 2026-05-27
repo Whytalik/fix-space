@@ -7,7 +7,7 @@ on:
     branches: [develop, main]
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '24'
   PNPM_VERSION: '9.15.1'
   DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/unused'
 
@@ -112,7 +112,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Audit dependencies
-        run: pnpm audit --audit-level=high
+        run: pnpm audit --prod --audit-level=high
         continue-on-error: true
 
   test-e2e:

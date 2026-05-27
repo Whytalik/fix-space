@@ -1,0 +1,8 @@
+{
+  "info": {
+    "name": "FIX Space API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "FIX Space (FIX Space) API — REST endpoints for managing spaces, databases, templates, records, properties, and user settings."
+  },
+  "item": []
+}

@@ -1,0 +1,42 @@
+@startuml Sequence_RecordCreation
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title Record Creation from Template
+
+actor "User" as U
+participant "Browser\n(Next.js)" as FE
+participant "API\n(NestJS)" as API
+participant "RecordService" as RS
+participant "Database\n(PostgreSQL)" as DB
+
+U -> FE : Click "New record"\n(select template)
+FE -> API : POST /records\n{ databaseId, templateId }
+API -> API : Validate JWT\n(JwtAuthGuard)
+API -> RS : create(databaseId, dto, userId)
+
+RS -> DB : Verify user owns database\n(ResourceOwnerGuard)
+DB --> RS : Database record
+
+alt templateId provided
+  RS -> DB : Find Template + TemplatePropertyValues
+  DB --> RS : Template with property values
+  RS -> DB : INSERT Record\n(name from NamePattern, icon)
+  DB --> RS : New Record
+  RS -> DB : INSERT PropertyValues\n(copy from TemplatePropertyValues)
+  DB --> RS : PropertyValues created
+else no template
+  RS -> DB : INSERT Record\n(empty name, no icon)
+  DB --> RS : New Record
+  RS -> DB : INSERT PropertyValues\n(defaults per property type)
+  DB --> RS : PropertyValues created
+end
+
+RS --> API : RecordResponseDto
+API --> FE : 201 Created { record }
+FE --> U : Open new record page
+
+@enduml

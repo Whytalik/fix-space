@@ -1,0 +1,61 @@
+@startuml Sequence_AuthFlow
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title Auth Flow — Registration & Login
+
+actor "User" as U
+participant "Browser\n(Next.js)" as FE
+participant "API\n(NestJS)" as API
+participant "Database\n(PostgreSQL)" as DB
+participant "Mail\nService" as MAIL
+
+== Registration ==
+
+U -> FE : Fill registration form\n(email, username, password)
+FE -> API : POST /auth/register
+API -> API : Validate DTO\n(class-validator)
+API -> DB : Check email uniqueness
+DB --> API : OK / Conflict
+API -> API : Hash password (bcrypt)
+API -> DB : Create User (isVerified: false)
+API -> MAIL : Send verification email\n(token, TTL 24h)
+API --> FE : 201 Created
+FE --> U : "Check your email"
+
+== Email Verification ==
+
+U -> MAIL : Click verification link
+MAIL -> FE : GET /auth/verify?token=...
+FE -> API : POST /auth/verify { token }
+API -> DB : Find user by verificationToken\n(check expiry)
+DB --> API : User record
+API -> DB : Set isVerified: true,\nclear verificationToken
+API --> FE : 200 OK
+FE --> U : Redirect to login
+
+== Login ==
+
+U -> FE : Enter email + password
+FE -> API : POST /auth/login
+API -> DB : Find user by email
+DB --> API : User record
+API -> API : Compare password (bcrypt)
+API -> API : Generate accessToken (15 min)\n+ refreshToken (30 days)
+API -> DB : Store hashed refreshToken
+API --> FE : 200 OK\n+ Set HTTP-only cookies\n(access_token, refresh_token)
+FE --> U : Redirect to workspace
+
+== Token Refresh ==
+
+FE -> API : POST /auth/refresh\n(cookie: refresh_token)
+API -> DB : Validate refreshToken hash
+DB --> API : User record
+API -> API : Rotate refreshToken
+API -> DB : Update stored hash
+API --> FE : 200 OK\n+ New cookies
+
+@enduml

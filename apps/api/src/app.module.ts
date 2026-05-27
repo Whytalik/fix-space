@@ -37,7 +37,7 @@ import { UserModule } from "./user/user.module";
       },
       resolvers: [
         new QueryResolver(["lang", "locale"]),
-        new HeaderResolver(["x-custom-lang", "accept-language"]),
+        new HeaderResolver(["x-custom-lang"]),
         new AcceptLanguageResolver(),
       ],
     }),
