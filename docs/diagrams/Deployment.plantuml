@@ -1,0 +1,56 @@
+@startuml Deployment
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam nodesep 50
+skinparam ranksep 60
+
+skinparam nodeBackgroundColor #FFFFFF
+skinparam nodeBorderColor #2563eb
+skinparam nodeArrowColor #2563eb
+skinparam artifactBackgroundColor #FFFFFF
+skinparam artifactBorderColor #2563eb
+skinparam databaseBackgroundColor #FFFFFF
+skinparam databaseBorderColor #2563eb
+
+top to bottom direction
+
+title Діаграма розгортання
+
+node "Vercel" as Vercel_Node #F8F9FA {
+  artifact "Static Assets\n(JS, CSS, зображення)" as Static
+  artifact "SSR Pages\n(Next.js App Router)" as SSR
+  artifact "CDN Edge Cache" as CDN
+  artifact "Vercel Monitoring\n(Web Vitals, логи)" as Monitor
+}
+
+node "Railway" as Railway_Node #F8F9FA {
+  artifact "NestJS 11\n(порт 3000)" as NestJS
+  artifact "Змінні оточення\n(.env.development)" as Env
+  database "PostgreSQL 16\n(Prisma ORM 7)" as PgDB
+}
+
+node "Зовнішні сервіси" as Ext_Node #FFF9C4 {
+  artifact "Google OAuth 2.0" as Google
+  artifact "SMTP Server\n(Nodemailer)" as SMTP
+}
+
+Vercel_Node -[hidden]down-> Railway_Node
+Railway_Node -[hidden]right-> Ext_Node
+
+Static ..> NestJS : HTTPS REST API
+SSR ..> NestJS : HTTPS REST API (SSR)
+CDN ..> SSR : Edge-кешування
+
+NestJS ..> PgDB : Prisma ORM (SSL)
+NestJS ..> SMTP : SMTP
+NestJS ..> Google : OAuth 2.0
+
+SSR ..> Monitor : Web Vitals
+
+Env ..> NestJS : Конфігурація
+
+@enduml

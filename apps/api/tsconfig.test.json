@@ -2,6 +2,7 @@
   "extends": "@fixspace/typescript-config/test.json",
   "compilerOptions": {
     "baseUrl": "./",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "rootDir": "src"
   }
 }

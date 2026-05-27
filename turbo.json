@@ -8,10 +8,30 @@
   "globalEnv": [
     "NODE_ENV",
     "DATABASE_URL",
+    "DATABASE_PUBLIC_URL",
+    "DATABASE_POOL_SIZE",
     "JWT_SECRET",
     "JWT_REFRESH_SECRET",
+    "JWT_ACCESS_EXPIRATION",
+    "JWT_REFRESH_EXPIRATION",
     "PORT",
-    "CORS_ORIGIN"
+    "CORS_ORIGIN",
+    "APP_URL",
+    "COOKIE_DOMAIN",
+    "MAIL_FROM",
+    "SPACE_NAME_TEMPLATE",
+    "VERIFICATION_TOKEN_EXPIRATION_HOURS",
+    "POSTGRES_USER",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_DB",
+    "PGUSER",
+    "PGPASSWORD",
+    "PGDATABASE",
+    "PGHOST",
+    "PGPORT",
+    "PGDATA",
+    "SSL_CERT_DAYS",
+    "RAILWAY_DEPLOYMENT_DRAINING_SECONDS"
   ],
 
   "tasks": {
@@ -38,16 +58,17 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": []
+      "outputs": ["coverage/**"]
     },
     "test:e2e": {
       "dependsOn": ["^build"],
       "cache": false,
-      "outputs": []
+      "outputs": ["coverage/**"]
     },
     "db:generate": {
-      "cache": false,
-      "outputs": []
+      "inputs": ["prisma/schema.prisma"],
+      "outputs": ["generated/**"],
+      "cache": true
     },
     "db:migrate:dev": {
       "cache": false,

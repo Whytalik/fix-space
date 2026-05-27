@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "pnpm exec tsc -p tsconfig.build.json",
     "db:migrate:deploy": "dotenv -e ../../.env.production -e ../../.env -- prisma migrate deploy",
     "db:migrate:dev": "dotenv -e ../../.env.development -e ../../.env -- prisma migrate dev",
     "db:push": "dotenv -e ../../.env.development -e ../../.env -- prisma db push",

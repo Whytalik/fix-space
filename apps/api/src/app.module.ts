@@ -10,6 +10,7 @@ import { RequestContextMiddleware } from "./common/context/request-context.middl
 import { LoggerModule } from "./common/logger/logger.module";
 import { validate } from "./config/env.validation";
 import { DatabaseModule } from "./database/database.module";
+import { HealthModule } from "./health/health.module";
 import { JwtAuthGuard } from "./jwt/jwt-auth.guard";
 import { JwtModule } from "./jwt/jwt.module";
 import { PropertyValueModule } from "./property-value/property-value.module";
@@ -47,6 +48,7 @@ import { UserModule } from "./user/user.module";
     JwtModule,
     SpaceModule,
     DatabaseModule,
+    HealthModule,
     PropertyModule,
     RecordModule,
     PropertyValueModule,

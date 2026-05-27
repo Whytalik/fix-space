@@ -1,6 +1,16 @@
 # FIX Space
 
 [![CI](https://github.com/Whytalik/fix-space/actions/workflows/ci.yml/badge.svg)](https://github.com/Whytalik/fix-space/actions/workflows/ci.yml)
+[![Vercel Deployment](https://img.shields.io/badge/Deploy-Vercel-blue?logo=vercel&logoColor=white)](https://fix-space-web.vercel.app/uk)
+[![Railway Deployment](https://img.shields.io/badge/Deploy-Railway-darkviolet?logo=railway&logoColor=white)](https://fix-space-production.up.railway.app/)
+[![codecov](https://codecov.io/gh/Whytalik/fix-space/graph/badge.svg)](https://codecov.io/gh/Whytalik/fix-space)
+[![Uptime Status](https://img.shields.io/badge/Uptime-Monitor-brightgreen?logo=uptimerobot&logoColor=white)](https://stats.uptimerobot.com/hD2QZnY8tn)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Whytalik_fix-space&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Whytalik_fix-space)
+
+- **🚀 Live Web App:** [https://fix-space-web.vercel.app/uk](https://fix-space-web.vercel.app/uk)
+- **⚡ Live REST API:** [https://fix-space-production.up.railway.app/](https://fix-space-production.up.railway.app/)
+- **📖 API Documentation (Swagger):** [https://fix-space-production.up.railway.app/api/docs](https://fix-space-production.up.railway.app/api/docs)
+- **📊 Service Status Page (Uptime):** [https://stats.uptimerobot.com/hD2QZnY8tn](https://stats.uptimerobot.com/hD2QZnY8tn)
 
 > A personalized web platform for professional organization of CFD trader activity.
 
@@ -108,6 +118,6 @@ Full description: [`docs/08-deployment/ci-cd.md`](docs/08-deployment/ci-cd.md)
 ---
 
 > [!NOTE]
-> Project under active development. Deploy: API → Railway · Web → Vercel.
+> Project is successfully deployed! Live Web App is hosted on [Vercel](https://fix-space-web.vercel.app/uk) and REST API is hosted on [Railway](https://fix-space-production.up.railway.app/).
 
 _Thesis project · Specialty 121 · Zhytomyr Polytechnic · 2026_

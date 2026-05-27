@@ -57,9 +57,9 @@ export function SpaceSettings() {
   async function handleSetDefault(spaceId: string) {
     setIsSettingDefault(spaceId);
     try {
-      const updated = await updateSpace(spaceId, { isDefault: true });
-      const prevDefault = spaces.find((s) => s.isDefault && s.id !== spaceId);
-      if (prevDefault) updateSpaceInList({ ...prevDefault, isDefault: false });
+      const updated = await updateSpace(spaceId, { name: spaces.find((s) => s.id === spaceId)?.name ?? "" });
+      const prevDefault = spaces.find((s) => (s as { isDefault?: boolean }).isDefault && s.id !== spaceId);
+      if (prevDefault) updateSpaceInList({ ...prevDefault });
       updateSpaceInList(updated);
       setToast({ message: t("defaultUpdated"), variant: "success" });
     } catch (err) {

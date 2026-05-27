@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Stage 1: prune monorepo to only what @fixspace/api needs
 FROM base AS pruner
-RUN npm install -g turbo@2
+RUN npm install -g turbo@2.8.0 --ignore-scripts
 COPY . .
 RUN turbo prune @fixspace/api --docker
 
@@ -14,14 +14,19 @@ RUN turbo prune @fixspace/api --docker
 FROM base AS installer
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Stage 3: build
 FROM installer AS builder
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 
-RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres" pnpm --filter @fixspace/database db:generate
+# Placeholder for Prisma 7 config validation
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/unused"
+
+WORKDIR /app/packages/database
+RUN pnpm exec prisma generate
+WORKDIR /app
 RUN pnpm turbo build --filter=@fixspace/database --filter=@fixspace/domain --no-cache
 # Build the API
 RUN pnpm turbo build --filter=@fixspace/api --no-cache
