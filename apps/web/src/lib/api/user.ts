@@ -1,4 +1,4 @@
-import type { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@nucleus/domain";
+import type { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getMe() {
@@ -23,4 +23,25 @@ export function changePassword(payload: ChangePasswordDto) {
     method: "PATCH",
     body: payload,
   });
+}
+
+export async function uploadAvatar(file: File): Promise<UserResponseDto> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/users/me/avatar`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Upload failed");
+  return res.json() as Promise<UserResponseDto>;
+}
+
+export async function deleteAvatar(): Promise<UserResponseDto> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/users/me/avatar`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Delete failed");
+  return res.json() as Promise<UserResponseDto>;
 }

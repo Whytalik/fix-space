@@ -1,5 +1,5 @@
-import type { RecordFilterDto, RecordSortDto } from "@nucleus/domain";
-import { FilterLogic } from "@nucleus/domain";
+import type { RecordFilterDto, RecordSortDto } from "@fixspace/domain";
+import { FilterLogic } from "@fixspace/domain/enums";
 
 const filtersKey = (id: string) => `db-filters:${id}`;
 const sortsKey = (id: string) => `db-sorts:${id}`;

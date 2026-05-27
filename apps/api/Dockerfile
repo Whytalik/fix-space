@@ -21,7 +21,7 @@ FROM installer AS builder
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 
-RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/postgres" pnpm --filter @fixspace/database db:generate
+RUN cd packages/database && npx prisma generate
 RUN pnpm turbo build --filter=@fixspace/database --filter=@fixspace/domain --no-cache
 # Build the API
 RUN pnpm turbo build --filter=@fixspace/api --no-cache

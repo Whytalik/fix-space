@@ -8,7 +8,7 @@ import { useAppContext } from "@/context/app-context";
 import { useEscape } from "@/hooks/useEscape";
 import { useMutation } from "@/hooks/useMutation";
 import { updateSpace } from "@/lib/api/space";
-import type { SectionResponseDto } from "@nucleus/domain";
+import type { SectionResponseDto } from "@fixspace/domain";
 import { Smile, X } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";

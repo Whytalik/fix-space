@@ -8,13 +8,13 @@ import { Toast } from "@/components/ui/primitives/toast";
 import { ColorPicker } from "@/components/ui/color-picker/color-picker";
 import { getAllIcons, IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import type { SectionSettings } from "@nucleus/domain";
+import type { SectionSettings as SectionSettingsDto } from "@fixspace/domain";
 import { useEffect, useRef, useState } from "react";
 
 type ToastState = { message: string; variant: "success" | "error" } | null;
 
 export function SectionSettings() {
-  const [form, setForm] = useState<SectionSettings | null>(null);
+  const [form, setForm] = useState<SectionSettingsDto | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);

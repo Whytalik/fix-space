@@ -8,7 +8,7 @@ import {
   DEFAULT_STATUS_PROPERTY,
   DEFAULT_TEXT_PROPERTY,
   PropertyType,
-} from "@nucleus/domain";
+} from "@fixspace/domain/enums";
 
 export const TYPE_META: Record<PropertyType, { label: string; description: string }> = {
   [PropertyType.TEXT]: { label: "Text", description: "Short or long text, URLs, rich content" },
@@ -19,6 +19,10 @@ export const TYPE_META: Record<PropertyType, { label: string; description: strin
   [PropertyType.STATUS]: { label: "Status", description: "Workflow status with colour coding" },
   [PropertyType.RELATION]: { label: "Relation", description: "Link records to another database" },
   [PropertyType.FORMULA]: { label: "Formula", description: "Computed value from an expression" },
+  [PropertyType.DURATION]: { label: "Duration", description: "Time duration in hours and minutes" },
+  [PropertyType.RATING]: { label: "Rating", description: "Star rating from 1 to 5" },
+  [PropertyType.PROGRESS]: { label: "Progress", description: "Percentage progress bar" },
+  [PropertyType.BUTTON]: { label: "Button", description: "Action button trigger" },
 };
 
 export const TYPE_ORDER: PropertyType[] = [
@@ -30,6 +34,10 @@ export const TYPE_ORDER: PropertyType[] = [
   PropertyType.STATUS,
   PropertyType.RELATION,
   PropertyType.FORMULA,
+  PropertyType.DURATION,
+  PropertyType.RATING,
+  PropertyType.PROGRESS,
+  PropertyType.BUTTON,
 ];
 
 export function getDefaultConfig(type: PropertyType): Record<string, unknown> {

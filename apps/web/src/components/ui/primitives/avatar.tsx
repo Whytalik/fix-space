@@ -1,5 +1,6 @@
 interface AvatarProps {
   initial: string;
+  image?: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -10,7 +11,17 @@ const SIZE_CLASSES = {
   lg: "w-20 h-20 text-3xl",
 };
 
-export function Avatar({ initial, size = "md", className = "" }: AvatarProps) {
+export function Avatar({ initial, image, size = "md", className = "" }: AvatarProps) {
+  if (image) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={image}
+        alt={initial}
+        className={`rounded-full object-cover shrink-0 ${SIZE_CLASSES[size]} ${className}`}
+      />
+    );
+  }
   return (
     <div
       className={`flex items-center justify-center rounded-full bg-accent-muted border border-accent font-bold text-accent shrink-0 ${SIZE_CLASSES[size]} ${className}`}

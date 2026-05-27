@@ -2,7 +2,7 @@
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { useAppContext } from "@/context/app-context";
-import type { DatabaseResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto } from "@fixspace/domain";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";

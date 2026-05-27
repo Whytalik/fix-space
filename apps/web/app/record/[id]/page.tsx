@@ -14,8 +14,8 @@ import { useUIContext } from "@/context/ui-context";
 import { createPropertyValue, updatePropertyValue } from "@/lib/api/property-value";
 import { deleteRecord, updateRecord } from "@/lib/api/record";
 import { clearCached } from "@/lib/cache";
-import type { PropertyResponseDto, RecordResponseDto } from "@nucleus/domain";
-import { PropertyType } from "@nucleus/domain";
+import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
+import { PropertyType } from "@fixspace/domain/enums";
 import { ChevronDown, Eye, Notebook, Pencil, Trash2 } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -42,7 +42,7 @@ export default function RecordPage() {
 
   const record = useMemo(() => records.find((r) => r.id === id), [records, id]);
   const sorted = useMemo(
-    () => [...properties].filter((p) => !p.isPrimary).sort((a, b) => a.position - b.position),
+    () => [...properties].filter((p) => p.position !== 0).sort((a, b) => a.position - b.position),
     [properties],
   );
 
@@ -85,16 +85,16 @@ export default function RecordPage() {
     }
   }, [record, properties]);
 
-  function hasChanges(current: FormValues): boolean {
-    if (!record) return false;
-    const original = initValues(properties, record);
-    if (JSON.stringify(current) !== JSON.stringify(original)) return true;
-    if (nameValue !== (record.name ?? "")) return true;
-    if (iconValue !== (record.icon ?? "")) return true;
-    return false;
-  }
-
   const handleToggleMode = useCallback(async () => {
+    function hasChanges(current: FormValues): boolean {
+      if (!record) return false;
+      const original = initValues(properties, record);
+      if (JSON.stringify(current) !== JSON.stringify(original)) return true;
+      if (nameValue !== (record.name ?? "")) return true;
+      if (iconValue !== (record.icon ?? "")) return true;
+      return false;
+    }
+
     if (!isEditMode) {
       setEditMode(true);
       return;
@@ -138,7 +138,7 @@ export default function RecordPage() {
     } finally {
       setIsSaving(false);
     }
-  }, [isEditMode, record, hasChanges, formValues, nameValue, iconValue, sorted, database?.id, refresh, showError]);
+  }, [isEditMode, record, formValues, nameValue, iconValue, sorted, database?.id, refresh, showError, properties]);
 
   async function handleConfirmDelete() {
     try {
@@ -277,7 +277,7 @@ export default function RecordPage() {
                       className="grid gap-3"
                       style={{ gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}
                     >
-                      {grouped[groupName].map((prop) => {
+                      {(grouped[groupName] ?? []).map((prop) => {
                         const pv = record.values?.find((v) => v.propertyId === prop.id);
                         const relatedDbId =
                           prop.type === PropertyType.RELATION
@@ -298,7 +298,7 @@ export default function RecordPage() {
                             <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-ink-secondary">
                               <PropertyIcon type={prop.type} size={10} />
                               <span className="truncate">{prop.name}</span>
-                              {prop.isPrimary && <span className="ml-auto text-accent text-[8px]">●</span>}
+                              {prop.position === 0 && <span className="ml-auto text-accent text-[8px]">●</span>}
                               {prop.hint && <PropertyHint hint={prop.hint} />}
                             </div>
 
@@ -310,7 +310,9 @@ export default function RecordPage() {
                                 relationRecordsMap={relatedRecordsMap}
                               />
                             ) : (
-                              <div className={prop.isPrimary ? "text-xl font-semibold text-ink" : "text-sm text-ink"}>
+                              <div
+                                className={prop.position === 0 ? "text-xl font-semibold text-ink" : "text-sm text-ink"}
+                              >
                                 <CellValue
                                   value={pv?.value}
                                   type={prop.type}

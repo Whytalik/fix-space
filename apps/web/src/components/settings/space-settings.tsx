@@ -14,7 +14,7 @@ import { useMutation } from "@/hooks/useMutation";
 import { parseApiError } from "@/lib/api/client";
 import { getSpaceSettings, updateSpaceSettings } from "@/lib/api/settings";
 import { deleteSpace, duplicateSpace, updateSpace } from "@/lib/api/space";
-import type { SpaceSettings } from "@nucleus/domain";
+import type { SpaceSettings as SpaceSettingsDto } from "@fixspace/domain";
 import { Copy, Globe, Pencil, Trash } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -36,7 +36,7 @@ const START_OF_WEEK_TABS: TabItem<"0" | "1">[] = [
 export function SpaceSettings() {
   const { spaces, updateSpaceInList, addSpace, removeSpace } = useAppContext();
   const [activeTab, setActiveTab] = useState<"sidebar" | "datetime">("sidebar");
-  const [form, setForm] = useState<SpaceSettings | null>(null);
+  const [form, setForm] = useState<SpaceSettingsDto | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSettingDefault, setIsSettingDefault] = useState<string | null>(null);
@@ -54,9 +54,9 @@ export function SpaceSettings() {
   async function handleSetDefault(spaceId: string) {
     setIsSettingDefault(spaceId);
     try {
-      const updated = await updateSpace(spaceId, { isDefault: true });
-      const prevDefault = spaces.find((s) => s.isDefault && s.id !== spaceId);
-      if (prevDefault) updateSpaceInList({ ...prevDefault, isDefault: false });
+      const updated = await updateSpace(spaceId, { name: spaces.find((s) => s.id === spaceId)?.name ?? "" });
+      const prevDefault = spaces.find((s) => (s as { isDefault?: boolean }).isDefault && s.id !== spaceId);
+      if (prevDefault) updateSpaceInList({ ...prevDefault });
       updateSpaceInList(updated);
       setToast({ message: "Default space updated.", variant: "success" });
     } catch (err) {

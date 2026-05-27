@@ -15,7 +15,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import type { SectionResponseDto } from "@nucleus/domain";
+import type { SectionResponseDto } from "@fixspace/domain";
 import { useMemo, useRef, useState } from "react";
 
 const collisionDetection: CollisionDetection = (args) => {

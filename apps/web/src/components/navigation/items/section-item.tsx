@@ -13,7 +13,7 @@ import { useMutation } from "@/hooks/useMutation";
 import { updateSpace } from "@/lib/api/space";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { SectionResponseDto } from "@nucleus/domain";
+import type { SectionResponseDto } from "@fixspace/domain";
 import { Button } from "@/components/ui/primitives/button";
 import { ChevronRight, LayoutGrid, MoreHorizontal, Pencil, Smile, Trash, X } from "lucide-react";
 import { useCallback, useRef, useState } from "react";

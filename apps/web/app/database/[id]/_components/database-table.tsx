@@ -6,8 +6,8 @@ import { PropertyIcon } from "@/components/property/property-icon";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { useDatabaseContext } from "@/context/database-context";
 import { useColumnWidths } from "@/hooks/useColumnWidths";
-import type { PropertyResponseDto, RecordResponseDto } from "@nucleus/domain";
-import { PropertyType } from "@nucleus/domain";
+import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
+import { PropertyType } from "@fixspace/domain/enums";
 import { Notebook } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -132,8 +132,6 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                                 value={pv.value}
                                 type={prop.type}
                                 relatedRecords={relatedDbId ? relatedRecordsMap[relatedDbId] : undefined}
-                                property={prop}
-                                truncate={false}
                               />
                             ) : record.name ? (
                               <span className="text-ink text-sm">{record.name}</span>
@@ -146,7 +144,6 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                             value={pv?.value}
                             type={prop.type}
                             relatedRecords={relatedDbId ? relatedRecordsMap[relatedDbId] : undefined}
-                            property={prop}
                           />
                         )}
                       </td>

@@ -4,7 +4,7 @@ import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
 import { Button } from "@/components/ui/primitives/button";
 import { Toggle } from "@/components/ui/primitives/toggle";
-import type { RecordResponseDto } from "@nucleus/domain";
+import type { RecordResponseDto } from "@fixspace/domain";
 import { Eye, Notebook, PanelRight, Pencil, Trash2 } from "lucide-react";
 import type React from "react";
 

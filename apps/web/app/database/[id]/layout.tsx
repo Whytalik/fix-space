@@ -7,7 +7,7 @@ export default function DatabaseLayout({ children }: { children: React.ReactNode
   const { isLoading } = useAppContext();
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen"></div>;
+    return <div className="flex items-center justify-center h-screen" />;
   }
 
   return <DatabaseProvider>{children}</DatabaseProvider>;

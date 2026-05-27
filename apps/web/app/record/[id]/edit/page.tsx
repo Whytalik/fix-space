@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/primitives/button";
 import { TabSwitcher } from "@/components/ui/primitives/tab-switcher";
 import type { TabItem } from "@/components/ui/primitives/tab-switcher";
 import { Blocks, Columns3, LayoutTemplate, Plus } from "lucide-react";
-import { useParams } from "next/navigation";
 import { useState } from "react";
 
 type EditorTab = "columns" | "components" | "blocks";
@@ -27,11 +26,7 @@ function ColumnVisual({ count }: { count: ColumnCount }) {
   return (
     <div className="flex gap-1 w-full h-6">
       {Array.from({ length: count }).map((_, i) => (
-        <div
-          key={i}
-          className="flex-1 rounded"
-          style={{ background: "var(--color-stroke)" }}
-        />
+        <div key={i} className="flex-1 rounded" style={{ background: "var(--color-stroke)" }} />
       ))}
     </div>
   );
@@ -99,8 +94,6 @@ function BlocksTabContent() {
 }
 
 export default function RecordEditPage() {
-  const params = useParams<{ id: string }>();
-  const id = params.id;
   const [activeTab, setActiveTab] = useState<EditorTab>("columns");
 
   return (
@@ -114,12 +107,7 @@ export default function RecordEditPage() {
         }}
       >
         <div className="p-3 border-b" style={{ borderColor: "var(--color-stroke)" }}>
-          <TabSwitcher<EditorTab>
-            items={TAB_ITEMS}
-            active={activeTab}
-            onChange={setActiveTab}
-            orientation="vertical"
-          />
+          <TabSwitcher<EditorTab> items={TAB_ITEMS} active={activeTab} onChange={setActiveTab} orientation="vertical" />
         </div>
 
         <div className="flex-1 overflow-auto">
@@ -155,10 +143,7 @@ export default function RecordEditPage() {
           borderLeft: "1px solid var(--color-stroke)",
         }}
       >
-        <div
-          className="px-4 py-3 border-b"
-          style={{ borderColor: "var(--color-stroke)" }}
-        >
+        <div className="px-4 py-3 border-b" style={{ borderColor: "var(--color-stroke)" }}>
           <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--color-ink-muted)" }}>
             Settings
           </p>

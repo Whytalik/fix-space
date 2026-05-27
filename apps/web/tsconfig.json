@@ -7,7 +7,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@fixspace/domain": ["../../packages/domain/dist/entry"],
+      "@fixspace/domain/enums": ["../../packages/domain/dist/enums"]
     },
     "strictPropertyInitialization": false,
     "experimentalDecorators": true

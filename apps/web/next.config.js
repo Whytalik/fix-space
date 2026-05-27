@@ -1,48 +1,52 @@
-import createNextIntlPlugin from 'next-intl/plugin';
-import { fileURLToPath } from 'url';
-import path from 'path';
+import { fileURLToPath } from "url";
+import path from "path";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const monorepoRoot = path.join(__dirname, '../../');
+const monorepoRoot = path.join(__dirname, "../../");
 
-const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const SERVER_ONLY_PACKAGES = [
+  "@nestjs/common",
+  "@nestjs/core",
+  "@nestjs/mapped-types",
+  "@nestjs/microservices",
+  "@nestjs/websockets",
+  "@nestjs/platform-express",
+  "@nestjs/swagger",
+  "nestjs-i18n",
+  "class-transformer",
+  "class-validator",
+  "reflect-metadata",
+  "express",
+];
+
+const stubPath = path.resolve(__dirname, "src/lib/server-only-stub.js");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  output: "standalone",
   outputFileTracingRoot: monorepoRoot,
-  allowedDevOrigins: ['http://localhost:3000'],
+  allowedDevOrigins: ["http://localhost:3000"],
   serverExternalPackages: [
-    '@nestjs/common',
-    '@nestjs/mapped-types',
-    '@nestjs/microservices',
-    '@nestjs/websockets',
-    'class-transformer',
-    'class-validator',
-    'nestjs-i18n',
-    'reflect-metadata',
+    "@nestjs/common",
+    "@nestjs/core",
+    "@nestjs/mapped-types",
+    "@nestjs/microservices",
+    "@nestjs/websockets",
+    "@nestjs/platform-express",
+    "@nestjs/swagger",
+    "nestjs-i18n",
+    "class-transformer",
+    "class-validator",
+    "reflect-metadata",
+    "express",
   ],
-  webpack: (config, { isServer }) => {
+  webpack(config, { isServer }) {
     if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        'fs/promises': false,
-        async_hooks: false,
-        perf_hooks: false,
-        repl: false,
-        graphql: false,
-        hbs: false,
-        net: false,
-        tls: false,
-        dns: false,
-      };
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : []),
-        '@nestjs/microservices',
-        '@nestjs/websockets',
-        'class-transformer/storage',
-      ];
+      const aliases = {};
+      for (const pkg of SERVER_ONLY_PACKAGES) {
+        aliases[pkg] = stubPath;
+      }
+      config.resolve.alias = { ...config.resolve.alias, ...aliases };
     }
     return config;
   },
@@ -52,4 +56,4 @@ const nextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default nextConfig;

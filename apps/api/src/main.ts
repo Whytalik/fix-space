@@ -20,6 +20,7 @@ async function bootstrap() {
 
   const port = config.get<number>("PORT", 3000);
   const corsOrigin = config.get<string>("CORS_ORIGIN", "http://localhost:3001");
+  const corsOrigins = corsOrigin.includes(",") ? corsOrigin.split(",").map((o) => o.trim()) : corsOrigin;
   const appLogger = app.get(AppLogger);
 
   const swaggerConfig = new DocumentBuilder()
@@ -34,7 +35,13 @@ async function bootstrap() {
   SwaggerModule.setup("api/docs", app, document);
 
   app.use(cookieParser());
-  app.enableCors({ origin: corsOrigin, credentials: true });
+  app.use((req: any, res: any, next: any) => {
+    const [pathPart, queryPart] = req.url.split("?");
+    const sanitizedPath = pathPart.replace(/\/{2,}/g, "/");
+    req.url = queryPart ? `${sanitizedPath}?${queryPart}` : sanitizedPath;
+    next();
+  });
+  app.enableCors({ origin: corsOrigins, credentials: true });
   app.useStaticAssets(path.join(process.cwd(), "public"));
   app.useGlobalPipes(
     new I18nValidationPipe({

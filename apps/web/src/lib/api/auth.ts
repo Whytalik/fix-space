@@ -1,4 +1,4 @@
-import type { AuthResponseDto, LoginUserDto, RegisterUserDto } from "@nucleus/domain";
+import type { AuthResponseDto, LoginUserDto, RegisterUserDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function login(dto: LoginUserDto) {

@@ -5,8 +5,8 @@ import { PropertyHint } from "@/components/property/property-hint";
 import { PropertyIcon } from "@/components/property/property-icon";
 import { PropertyInput } from "@/components/property/property-input";
 import { Card } from "@/components/ui/primitives/card";
-import type { PropertyResponseDto, RecordResponseDto } from "@nucleus/domain";
-import { PropertyType } from "@nucleus/domain";
+import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
+import { PropertyType } from "@fixspace/domain/enums";
 
 type RecordPropertiesSectionProps = {
   isEditMode: boolean;
@@ -78,7 +78,6 @@ export function RecordPropertiesSection({
                             value={pv?.value}
                             type={prop.type}
                             relatedRecords={relatedDbId ? relatedRecordsMap[relatedDbId] : undefined}
-                            property={prop}
                           />
                         </div>
                       )}

@@ -2,7 +2,7 @@
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { Badge } from "@/components/ui/primitives/badge";
-import type { TemplateResponseDto } from "@nucleus/domain";
+import type { TemplateResponseDto } from "@fixspace/domain";
 import { FileX, Layers } from "lucide-react";
 
 type TemplatePickerModalProps = {

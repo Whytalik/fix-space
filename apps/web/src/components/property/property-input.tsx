@@ -1,7 +1,7 @@
 "use client";
 
-import { PropertyType } from "@nucleus/domain";
-import type { PropertyResponseDto, RecordResponseDto } from "@nucleus/domain";
+import { PropertyType } from "@fixspace/domain/enums";
+import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
 import { RelationInput } from "./relation-input";
 
 interface PropertyInputProps {

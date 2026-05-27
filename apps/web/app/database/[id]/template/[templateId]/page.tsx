@@ -11,7 +11,7 @@ import {
   updateTemplate,
   updateTemplatePropertyValue,
 } from "@/lib/api/template";
-import type { PropertyResponseDto, RecordResponseDto, TemplateResponseDto } from "@nucleus/domain";
+import type { PropertyResponseDto, RecordResponseDto, TemplateResponseDto } from "@fixspace/domain";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TemplateHeader } from "./_components/template-header";

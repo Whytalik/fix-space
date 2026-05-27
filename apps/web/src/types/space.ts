@@ -1,4 +1,4 @@
-import type { SpaceResponseDto } from "@nucleus/domain";
+import type { SpaceResponseDto } from "@fixspace/domain";
 
 export type SpaceState = {
   spaces: SpaceResponseDto[];

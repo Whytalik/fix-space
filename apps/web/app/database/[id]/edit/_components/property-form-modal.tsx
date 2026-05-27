@@ -8,8 +8,8 @@ import { Combobox } from "@/components/ui/primitives/combobox";
 import { useEscape } from "@/hooks/useEscape";
 import { useMutation } from "@/hooks/useMutation";
 import { createProperty, updateProperty } from "@/lib/api/property";
-import type { DatabaseResponseDto, PropertyResponseDto } from "@nucleus/domain";
-import { PropertyType } from "@nucleus/domain";
+import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain";
+import { PropertyType } from "@fixspace/domain/enums";
 import { Toggle } from "@/components/ui/primitives/toggle";
 import { ArrowLeft, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -49,7 +49,7 @@ export function PropertyFormModal({
   const iconButtonRef = useRef<HTMLButtonElement>(null);
   const [isRequired, setIsRequired] = useState(property?.isRequired ?? false);
   const [config, setConfig] = useState<Record<string, unknown>>(
-    (property?.config as Record<string, unknown>) ?? getDefaultConfig(property?.type ?? PropertyType.TEXT),
+    (property?.config as unknown as Record<string, unknown>) ?? getDefaultConfig(property?.type ?? PropertyType.TEXT),
   );
 
   const savedRef = useRef<PropertyResponseDto | null>(null);

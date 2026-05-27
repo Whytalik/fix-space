@@ -46,6 +46,8 @@ services:
       - api
 
   db-test:
+    profiles:
+      - test
     image: postgres:16
     environment:
       POSTGRES_USER: postgres

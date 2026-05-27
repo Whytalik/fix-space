@@ -11,8 +11,8 @@ import { TextInput } from "@/components/ui/primitives/text-input";
 import { StatusInput } from "@/components/ui/primitives/status-input";
 import type { StatusOption } from "@/components/ui/primitives/status-input";
 import { useDatabaseContext } from "@/context/database-context";
-import type { RecordFilterDto } from "@nucleus/domain";
-import { FilterField, FilterLogic, FilterOperator, PropertyType } from "@nucleus/domain";
+import type { RecordFilterDto } from "@fixspace/domain";
+import { FilterField, FilterLogic, FilterOperator, PropertyType } from "@fixspace/domain/enums";
 import { X } from "lucide-react";
 
 const NO_VALUE_OPERATORS = new Set([

@@ -7,7 +7,7 @@ import { useDatabaseContext } from "@/context/database-context";
 import { useUIContext } from "@/context/ui-context";
 import { updateDatabase } from "@/lib/api/database";
 import { deleteProperty, updateProperty } from "@/lib/api/property";
-import type { PropertyResponseDto } from "@nucleus/domain";
+import type { PropertyResponseDto } from "@fixspace/domain";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { EditGeneralSection } from "./_components/edit-general-section";
@@ -50,7 +50,7 @@ export default function EditDatabasePage() {
     setTitle(database.title ?? "");
     setRecordLimit(database.recordLimit ?? null);
     setUseDefaultTemplate(database.useDefaultTemplate ?? true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [database?.id]);
 
   async function saveDatabase(

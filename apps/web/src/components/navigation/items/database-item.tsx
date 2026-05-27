@@ -8,7 +8,7 @@ import { useMutation } from "@/hooks/useMutation";
 import { deleteDatabase as deleteDatabaseApi, duplicateDatabase } from "@/lib/api/database";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { DatabaseResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto } from "@fixspace/domain";
 import { Button } from "@/components/ui/primitives/button";
 import { Copy, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import Link from "next/link";

@@ -10,17 +10,18 @@ import type {
   SelectOption,
   StatusCategoryConfig,
   StatusOptionColor,
-} from "@nucleus/domain";
+} from "@fixspace/domain";
 import {
   DATA_FORMATS_VALUES,
   DEFAULT_STATUS_PROPERTY,
-  FORMULA_OUTPUT_TYPE_VALUES,
   NUMBER_FORMAT_VALUES,
   PropertyType,
   STATUS_OPTION_COLOR_VALUES,
   TIME_FORMATS_VALUES,
   URL_HANDLING_VALUES,
-} from "@nucleus/domain";
+} from "@fixspace/domain/enums";
+
+const FORMULA_OUTPUT_TYPE_VALUES = ["text", "number", "checkbox", "date", "relation", "array"] as const;
 import { Image as ImageIcon, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 

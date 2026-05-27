@@ -1,12 +1,12 @@
-import type { DatabaseResponseDto, PropertyResponseDto } from "@nucleus/domain";
-import { PropertyType } from "@nucleus/domain";
+import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain";
+import { PropertyType } from "@fixspace/domain/enums";
 
 export type GroupItem = { kind: "group"; id: string; name: string };
 export type PropItem = { kind: "property"; id: string; prop: PropertyResponseDto };
 export type FlatItem = GroupItem | PropItem;
 
 export function getConfigSummary(prop: PropertyResponseDto, databases?: DatabaseResponseDto[]): string | null {
-  const c = prop.config as Record<string, unknown> | null;
+  const c = prop.config as unknown as Record<string, unknown> | null;
   if (!c) return null;
 
   switch (prop.type) {

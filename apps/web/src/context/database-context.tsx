@@ -4,8 +4,14 @@ import { ApiError } from "@/lib/api/client";
 import { getProperties } from "@/lib/api/property";
 import { getRecords } from "@/lib/api/record";
 import { getCached, setCached } from "@/lib/cache";
-import type { DatabaseResponseDto, PropertyResponseDto, RecordResponseDto } from "@nucleus/domain";
-import { PropertyType } from "@nucleus/domain";
+import type {
+  DatabaseResponseDto,
+  PropertyResponseDto,
+  RecordFilterDto,
+  RecordResponseDto,
+  RecordSortDto,
+} from "@fixspace/domain";
+import { FilterLogic, PropertyType } from "@fixspace/domain/enums";
 import { useParams } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useAppContext } from "./app-context";
@@ -23,8 +29,25 @@ interface DatabaseContextValue {
   relatedRecordsMap: Record<string, RecordResponseDto[]>;
   isLoading: boolean;
   error: string | null;
+  page: number;
+  pageSize: number;
+  total: number;
+  wrapCells: boolean;
+  search: string;
+  sorts: RecordSortDto[];
+  filters: RecordFilterDto[];
+  filterLogic: FilterLogic;
+  setPage: (page: number) => void;
+  setPageSize: (size: number) => void;
+  setWrapCells: (wrap: boolean) => void;
+  setSearch: (value: string) => void;
+  setSorts: (sorts: RecordSortDto[]) => void;
+  setFilters: (filters: RecordFilterDto[]) => void;
+  setFilterLogic: (logic: FilterLogic) => void;
   refresh: () => void;
+  invalidateRecords: () => void;
   applyDatabaseUpdate: (updated: DatabaseResponseDto) => void;
+  applyPropertiesUpdate: (properties: PropertyResponseDto[]) => void;
 }
 
 const DatabaseContext = createContext<DatabaseContextValue>({
@@ -34,8 +57,25 @@ const DatabaseContext = createContext<DatabaseContextValue>({
   relatedRecordsMap: {},
   isLoading: false,
   error: null,
+  page: 1,
+  pageSize: 25,
+  total: 0,
+  wrapCells: false,
+  search: "",
+  sorts: [],
+  filters: [],
+  filterLogic: FilterLogic.AND,
+  setPage: () => {},
+  setPageSize: () => {},
+  setWrapCells: () => {},
+  setSearch: () => {},
+  setSorts: () => {},
+  setFilters: () => {},
+  setFilterLogic: () => {},
   refresh: () => {},
+  invalidateRecords: () => {},
   applyDatabaseUpdate: () => {},
+  applyPropertiesUpdate: () => {},
 });
 
 async function fetchRelatedRecords(props: PropertyResponseDto[]): Promise<Record<string, RecordResponseDto[]>> {
@@ -67,6 +107,13 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
   const [relatedRecordsMap, setRelatedRecordsMap] = useState<Record<string, RecordResponseDto[]>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  const [wrapCells, setWrapCells] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sorts, setSorts] = useState<RecordSortDto[]>([]);
+  const [filters, setFilters] = useState<RecordFilterDto[]>([]);
+  const [filterLogic, setFilterLogic] = useState<FilterLogic>(FilterLogic.AND);
 
   useEffect(() => {
     if (id) setCurrentDatabaseId(id);
@@ -124,6 +171,10 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
     refresh();
   }, [id, appLoading, refresh]);
 
+  const invalidateRecords = useCallback(() => {
+    if (id) setCached(recsKey(id), null, 0);
+  }, [id]);
+
   return (
     <DatabaseContext.Provider
       value={{
@@ -133,8 +184,25 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
         relatedRecordsMap,
         isLoading,
         error,
+        page,
+        pageSize,
+        total: records.length,
+        wrapCells,
+        search,
+        sorts,
+        filters,
+        filterLogic,
+        setPage,
+        setPageSize,
+        setWrapCells,
+        setSearch,
+        setSorts,
+        setFilters,
+        setFilterLogic,
         refresh,
+        invalidateRecords,
         applyDatabaseUpdate: setDatabaseOverride,
+        applyPropertiesUpdate: setProperties,
       }}
     >
       {children}

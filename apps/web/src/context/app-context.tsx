@@ -11,7 +11,7 @@ import { clearCached, getCached, setCached } from "@/lib/cache";
 import { storage } from "@/lib/storage";
 import type { SpaceAction, SpaceState } from "@/types/space";
 import { CACHE_KEY_SPACES, CACHE_KEY_USER } from "@/utils/constants";
-import type { DatabaseResponseDto, SectionResponseDto, SpaceResponseDto, UserResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto, SectionResponseDto, SpaceResponseDto, UserResponseDto } from "@fixspace/domain";
 import { createContext, useContext, useEffect, useMemo, useReducer, useState } from "react";
 
 function spaceReducer(state: SpaceState, action: SpaceAction): SpaceState {

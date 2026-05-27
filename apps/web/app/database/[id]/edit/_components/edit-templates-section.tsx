@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/primitives/badge";
 import { Button } from "@/components/ui/primitives/button";
 import { useUIContext } from "@/context/ui-context";
 import { createTemplate, deleteTemplate, getTemplates } from "@/lib/api/template";
-import type { DatabaseResponseDto, TemplateResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto, TemplateResponseDto } from "@fixspace/domain";
 import { Layers, Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

@@ -13,7 +13,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { PropertyResponseDto } from "@nucleus/domain";
+import type { PropertyResponseDto } from "@fixspace/domain";
 import { Eye, EyeOff, GripVertical } from "lucide-react";
 import { useMemo, useState } from "react";
 

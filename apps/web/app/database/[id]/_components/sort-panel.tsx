@@ -17,8 +17,8 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { RecordSortDto } from "@nucleus/domain";
-import { PropertyType, SortDirection, SortField } from "@nucleus/domain";
+import type { RecordSortDto } from "@fixspace/domain";
+import { PropertyType, SortDirection, SortField } from "@fixspace/domain/enums";
 import { ArrowDown, ArrowUp, GripVertical, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 

@@ -1,4 +1,4 @@
-import type { SpaceResponseDto } from "@nucleus/domain";
+import type { SpaceResponseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getSpaces() {

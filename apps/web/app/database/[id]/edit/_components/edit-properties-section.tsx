@@ -16,7 +16,7 @@ import {
   type Modifier,
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import type { DatabaseResponseDto, PropertyResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain";
 import { Check, ChevronRight, GripVertical, Plus, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GroupHeader, PropertyRow } from "./property-list-items";

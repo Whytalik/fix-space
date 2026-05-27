@@ -7,8 +7,8 @@ import { useEscape } from "@/hooks/useEscape";
 import { useMutation } from "@/hooks/useMutation";
 import { createPropertyValue, updatePropertyValue } from "@/lib/api/property-value";
 import { createRecord, updateRecord } from "@/lib/api/record";
-import type { PropertyResponseDto, RecordResponseDto } from "@nucleus/domain";
-import { PropertyType } from "@nucleus/domain";
+import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
+import { PropertyType } from "@fixspace/domain/enums";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -51,7 +51,7 @@ export function RecordModal({ databaseId, properties, record, onClose, onSaved }
     isLoading: isSaving,
     error,
   } = useMutation(async () => {
-    const primaryProp = editableProps.find((p) => p.isPrimary);
+    const primaryProp = editableProps.find((p) => p.position === 0);
     const primaryName = primaryProp && values[primaryProp.id] ? String(values[primaryProp.id]) : undefined;
 
     let recordId = record?.id;

@@ -7,13 +7,13 @@ import { Spinner } from "@/components/ui/primitives/spinner";
 import { Toast } from "@/components/ui/primitives/toast";
 import { getAllIcons, IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import type { DatabaseSettings } from "@nucleus/domain";
+import type { DatabaseSettings as DatabaseSettingsDto } from "@fixspace/domain";
 import { useEffect, useRef, useState } from "react";
 
 type ToastState = { message: string; variant: "success" | "error" } | null;
 
 export function DatabaseSettings() {
-  const [form, setForm] = useState<DatabaseSettings | null>(null);
+  const [form, setForm] = useState<DatabaseSettingsDto | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);

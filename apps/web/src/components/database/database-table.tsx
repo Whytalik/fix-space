@@ -1,7 +1,7 @@
 "use client";
 
-import { PropertyType } from "@nucleus/domain";
-import type { PropertyResponseDto, RecordResponseDto } from "@nucleus/domain";
+import { PropertyType } from "@fixspace/domain/enums";
+import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { CellValue } from "./cell-value";
@@ -18,7 +18,7 @@ interface DatabaseTableProps {
   onRefresh: () => void;
 }
 
-export function DatabaseTable({ databaseId, properties, records, onRefresh }: DatabaseTableProps) {
+export function DatabaseTable({ properties, records }: DatabaseTableProps) {
   const { relatedRecordsMap } = useDatabaseContext();
   const router = useRouter();
 
@@ -55,7 +55,7 @@ export function DatabaseTable({ databaseId, properties, records, onRefresh }: Da
                         <PropertyIcon type={prop.type} />
                       </span>
                       {prop.name}
-                      {prop.isPrimary && <span className="ml-1 text-xs text-accent">●</span>}
+                      {prop.position === 0 && <span className="ml-1 text-xs text-accent">●</span>}
                       {prop.hint && <PropertyHint hint={prop.hint} />}
                     </span>
                   </th>

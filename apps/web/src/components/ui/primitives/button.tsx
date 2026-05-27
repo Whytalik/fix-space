@@ -6,10 +6,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "danger" | "ghost";
   size?: "md" | "sm" | "icon";
   loading?: boolean;
+  active?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "primary", size = "md", loading = false, children, disabled, className = "", ...rest },
+  { variant = "primary", size = "md", loading = false, active = false, children, disabled, className = "", ...rest },
   ref,
 ) {
   const isDisabled = disabled || loading;
@@ -25,7 +26,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       : variant === "danger"
         ? "bg-error text-white border-0 hover:bg-error/85"
         : variant === "ghost"
-          ? "bg-transparent border-0 text-ink-secondary hover:bg-surface hover:text-ink"
+          ? active
+            ? "bg-surface border-0 text-ink"
+            : "bg-transparent border-0 text-ink-secondary hover:bg-surface hover:text-ink"
           : "bg-surface border border-stroke text-ink-secondary hover:text-ink hover:border-ink-muted";
 
   return (

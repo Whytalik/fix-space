@@ -3,7 +3,7 @@
 import { PropertyIcon } from "@/components/property/property-icon";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { DatabaseResponseDto } from "@nucleus/domain";
+import type { DatabaseResponseDto } from "@fixspace/domain";
 import { Check, ChevronDown, ChevronRight, GripVertical, Pencil, Trash2, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { GroupItem, PropItem } from "./property-list.utils";

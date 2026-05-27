@@ -3,7 +3,7 @@
 import { useAppContext } from "@/context/app-context";
 import { useEscape } from "@/hooks/useEscape";
 import { searchRecords } from "@/lib/api/record";
-import type { SpaceSearchResultDto } from "@nucleus/domain";
+import type { SpaceSearchResultDto } from "@fixspace/domain";
 import { Database, FileText, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";

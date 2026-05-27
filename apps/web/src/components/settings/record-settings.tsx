@@ -7,13 +7,13 @@ import { Spinner } from "@/components/ui/primitives/spinner";
 import { Toast } from "@/components/ui/primitives/toast";
 import { getAllIcons, IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import type { RecordSettings } from "@nucleus/domain";
+import type { RecordSettings as RecordSettingsDto } from "@fixspace/domain";
 import { useEffect, useRef, useState } from "react";
 
 type ToastState = { message: string; variant: "success" | "error" } | null;
 
 export function RecordSettings() {
-  const [form, setForm] = useState<RecordSettings | null>(null);
+  const [form, setForm] = useState<RecordSettingsDto | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);

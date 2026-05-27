@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { DatabaseToolbar } from "./database-toolbar";
 import { TemplatePickerModal } from "./template-picker-modal";
-import type { TemplateResponseDto } from "@nucleus/domain";
+import type { TemplateResponseDto } from "@fixspace/domain";
 
 export function DatabaseHeader() {
   const router = useRouter();

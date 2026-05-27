@@ -9,7 +9,7 @@ import { useEscape } from "@/hooks/useEscape";
 import { useMutation } from "@/hooks/useMutation";
 import { updateSpace } from "@/lib/api/space";
 import { getSectionSettings } from "@/lib/api/settings";
-import { DEFAULT_SECTION_SETTINGS } from "@nucleus/domain";
+import { DEFAULT_SECTION_SETTINGS } from "@fixspace/domain/enums";
 import { Smile, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
