@@ -232,13 +232,14 @@ jobs:
           cat deployment/manifest.txt
           echo "Deployment to production: SIMULATED SUCCESSFULLY"
 
-      - name: Trigger Railway Deploy Hook
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
         env:
-          RAILWAY_DEPLOY_HOOK: ${{ secrets.RAILWAY_DEPLOY_HOOK }}
-        if: env.RAILWAY_DEPLOY_HOOK != ''
-        run: |
-          echo "Triggering live Railway deployment..."
-          curl -s -X POST "$RAILWAY_DEPLOY_HOOK"
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        if: env.RAILWAY_TOKEN != ''
+        run: railway up --ci --service fix-space-api
 
       - uses: actions/upload-artifact@v4
         with:
