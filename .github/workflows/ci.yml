@@ -9,6 +9,7 @@ on:
 env:
   NODE_VERSION: '20'
   PNPM_VERSION: '9.15.1'
+  DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/unused'
 
 jobs:
   lint:
