@@ -21,6 +21,9 @@ FROM installer AS builder
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 
+# Placeholder for Prisma 7 config validation
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/unused"
+
 WORKDIR /app/packages/database
 RUN pnpm exec prisma generate
 WORKDIR /app
