@@ -1,5 +1,3 @@
 {
-  "installCommand": "cd ../.. && pnpm install",
-  "buildCommand": "cd ../.. && turbo build --filter=@fixspace/web",
-  "outputDirectory": ".next"
+  "installCommand": "cd ../.. && pnpm install --prod=false"
 }
