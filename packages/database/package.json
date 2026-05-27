@@ -19,7 +19,7 @@
     "db:generate": "dotenv -e ../../.env.development -e ../../.env -- prisma generate",
     "format": "dotenv -e ../../.env.development -e ../../.env -- prisma format",
     "lint": "eslint . --max-warnings 0",
-    "test": "jest --passWithNoTests",
+    "test": "pnpm exec jest --passWithNoTests",
     "studio": "dotenv -e ../../.env.development -e ../../.env -- prisma studio"
   },
   "dependencies": {
