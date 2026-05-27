@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* eslint-disable no-undef, no-unused-vars */
 // Stub for server-only packages (NestJS, class-validator, etc.) in browser builds.
 // These packages use Node.js APIs and cannot run in the browser.
 // All their exports are replaced with no-ops since the web app only imports
