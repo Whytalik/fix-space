@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "pnpm build --watch",
     "build": "pnpm exec tsc -b tsconfig.build.json -v",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\""
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
+    "test": "jest --passWithNoTests"
   },
   "main": "./dist/entry.js",
   "types": "./dist/entry.d.ts",

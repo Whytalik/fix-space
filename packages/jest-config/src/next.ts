@@ -9,7 +9,7 @@ const createJestConfig = nextJest({
 
 const config: Config = {
   coverageProvider: "v8",
-  collectCoverage: false,
+  collectCoverage: true,
   testEnvironment: "jsdom",
   moduleFileExtensions: ["js", "ts", "json", "jsx", "tsx"],
   moduleNameMapper: {
