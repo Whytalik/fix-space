@@ -13,10 +13,6 @@ export function getSectionSettings() {
   return apiFetch<SectionSettings>("/settings/section");
 }
 
-export function getRecordSettings() {
-  return apiFetch<RecordSettings>("/settings/record");
-}
-
 export function updateSpaceSettings(data: Partial<SpaceSettings>) {
   return apiFetch<SpaceSettings>("/settings/space", { method: "PATCH", body: data });
 }
@@ -27,6 +23,10 @@ export function updateDatabaseSettings(data: Partial<DatabaseSettings>) {
 
 export function updateSectionSettings(data: Partial<SectionSettings>) {
   return apiFetch<SectionSettings>("/settings/section", { method: "PATCH", body: data });
+}
+
+export function getRecordSettings() {
+  return apiFetch<RecordSettings>("/settings/record");
 }
 
 export function updateRecordSettings(data: Partial<RecordSettings>) {

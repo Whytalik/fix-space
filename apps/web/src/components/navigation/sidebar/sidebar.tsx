@@ -5,6 +5,7 @@ import { useUIContext } from "@/context/ui-context";
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { DatabaseItem } from "../items/database-item";
 import { SectionItem } from "../items/section-item";
 import { useSidebarDnd } from "./hooks/use-sidebar-dnd";
@@ -14,6 +15,7 @@ import { SidebarDragOverlay } from "./sidebar-drag-overlay";
 import { UnsectionedDropZone } from "./unsectioned-drop-zone";
 
 export function Sidebar() {
+  const t = useTranslations("Sidebar");
   const { space } = useAppContext();
   const { openSettings } = useUIContext();
   const { collapsed, toggle, collapsedSections, toggleSection } = useSidebarState();
@@ -97,18 +99,18 @@ export function Sidebar() {
         <div className="mt-auto pt-3 border-t border-stroke">
           <button
             onClick={openSettings}
-            title={collapsed ? "Settings" : undefined}
+            title={collapsed ? t("settings") : undefined}
             className={`flex w-full items-center gap-2.5 px-2 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${collapsed ? "justify-center" : ""} text-ink-secondary hover:bg-surface hover:text-ink`}
           >
             <Settings size={16} className="shrink-0" />
-            {!collapsed && <span>Settings</span>}
+            {!collapsed && <span>{t("settings")}</span>}
           </button>
         </div>
       </aside>
 
       <button
         onClick={toggle}
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        title={collapsed ? t("expandSidebar") : t("collapseSidebar")}
         className="absolute -right-3 top-6 z-10 w-6 h-6 rounded-full border border-stroke bg-canvas text-ink-muted inline-flex items-center justify-center transition-colors duration-150 hover:bg-surface hover:text-ink cursor-pointer"
       >
         {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}

@@ -5,6 +5,7 @@ import { useEscape } from "@/hooks/useEscape";
 import { searchRecords } from "@/lib/api/record";
 import type { SpaceSearchResultDto } from "@fixspace/domain";
 import { Database, FileText, Search, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -59,6 +60,7 @@ function highlight(text: string, term: string): React.ReactNode {
 }
 
 export function SearchModal({ onClose }: SearchModalProps) {
+  const t = useTranslations("SearchModal");
   const { space } = useAppContext();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -85,14 +87,14 @@ export function SearchModal({ onClose }: SearchModalProps) {
         const data = await searchRecords(space.id, query.trim());
         setResults(data);
       } catch {
-        setError("Search failed. Please try again.");
+        setError(t("searchFailed"));
       } finally {
         setIsLoading(false);
       }
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query, space]);
+  }, [query, space, t]);
 
   function handleResultClick(result: SpaceSearchResultDto) {
     router.push(`/record/${result.id}`);
@@ -120,7 +122,6 @@ export function SearchModal({ onClose }: SearchModalProps) {
         className="w-130 bg-elevated border border-stroke rounded-xl shadow-lg overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Search input row */}
         <div className="flex items-center gap-2.5 px-4 py-3 border-b border-stroke">
           <Search size={15} className="shrink-0 text-ink-muted" />
           <input
@@ -128,7 +129,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
             autoFocus
             value={query}
             onChange={handleQueryChange}
-            placeholder="Search records..."
+            placeholder={t("searchRecords")}
             className="flex-1 bg-transparent text-sm text-ink placeholder:text-ink-muted focus:outline-none"
           />
           {isLoading ? (
@@ -140,14 +141,13 @@ export function SearchModal({ onClose }: SearchModalProps) {
           )}
         </div>
 
-        {/* Results area */}
         <div className="max-h-90 overflow-y-auto scrollbar">
-          {!hasQuery && (
-            <p className="px-4 py-8 text-sm text-ink-muted text-center">Start typing to search across your space</p>
-          )}
+          {!hasQuery && <p className="px-4 py-8 text-sm text-ink-muted text-center">{t("startTyping")}</p>}
 
           {hasQuery && !isLoading && !error && results.length === 0 && (
-            <p className="px-4 py-8 text-sm text-ink-muted text-center">No results for &laquo;{query}&raquo;</p>
+            <p className="px-4 py-8 text-sm text-ink-muted text-center">
+              {t("noResults")} &laquo;{query}&raquo;
+            </p>
           )}
 
           {hasQuery && error && <p className="px-4 py-8 text-sm text-red-400 text-center">{error}</p>}

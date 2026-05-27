@@ -53,3 +53,9 @@ export function devVerifyUser(email: string) {
     body: { email },
   });
 }
+
+export function verifyEmail(token: string) {
+  return apiFetch<{ message: string }>(`/auth/verify-email?token=${token}`, {
+    method: "POST",
+  });
+}

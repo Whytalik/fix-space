@@ -2,6 +2,7 @@
 
 import { PropertyType } from "@fixspace/domain/enums";
 import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
+import { useTranslations } from "next-intl";
 import { RelationInput } from "./relation-input";
 
 interface PropertyInputProps {
@@ -12,6 +13,7 @@ interface PropertyInputProps {
 }
 
 export function PropertyInput({ property, value, onChange, relationRecordsMap }: PropertyInputProps) {
+  const t = useTranslations("PropertyInput");
   switch (property.type) {
     case PropertyType.TEXT:
       return (
@@ -20,7 +22,7 @@ export function PropertyInput({ property, value, onChange, relationRecordsMap }:
           className="field-input"
           value={String(value ?? "")}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="Enter text…"
+          placeholder={t("enterText")}
         />
       );
 
@@ -54,7 +56,7 @@ export function PropertyInput({ property, value, onChange, relationRecordsMap }:
             checked={Boolean(value)}
             onChange={(e) => onChange(e.target.checked)}
           />
-          <span className="text-sm text-ink-secondary">Checked</span>
+          <span className="text-sm text-ink-secondary">{t("checked")}</span>
         </label>
       );
 
@@ -67,7 +69,7 @@ export function PropertyInput({ property, value, onChange, relationRecordsMap }:
           value={String(value ?? "")}
           onChange={(e) => onChange(e.target.value)}
         >
-          <option value="">— None —</option>
+          <option value="">{t("none")}</option>
           {options.map((opt) => (
             <option key={opt} value={opt}>
               {opt}
@@ -93,7 +95,7 @@ export function PropertyInput({ property, value, onChange, relationRecordsMap }:
             onChange(opt ? { label: opt.name, color: opt.color } : "");
           }}
         >
-          <option value="">— None —</option>
+          <option value="">{t("none")}</option>
           {allOptions.map((opt) => (
             <option key={opt.name} value={opt.name}>
               {opt.name}

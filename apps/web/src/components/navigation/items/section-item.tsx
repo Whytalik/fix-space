@@ -16,6 +16,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { SectionResponseDto } from "@fixspace/domain";
 import { Button } from "@/components/ui/primitives/button";
 import { ChevronRight, LayoutGrid, MoreHorizontal, Pencil, Smile, Trash, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AddDatabaseModal } from "@/components/database/add-database-modal";
@@ -28,6 +29,7 @@ interface SectionItemProps {
 }
 
 export function SectionItem({ section, collapsed, isCollapsed, onToggle }: SectionItemProps) {
+  const t = useTranslations("SectionItem");
   const { space, updateSpaceInList } = useAppContext();
   const { setNodeRef, listeners, transform, transition, isDragging } = useSortable({
     id: section.id,
@@ -182,15 +184,15 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
           onClose={() => setShowMenu(false)}
           items={[
             {
-              label: "Add database",
+              label: t("addDatabase"),
               icon: <LayoutGrid size={13} />,
               onClick() {
                 addDatabase.open();
               },
             },
-            { label: "Edit", icon: <Pencil size={13} />, onClick: openEdit },
+            { label: t("edit"), icon: <Pencil size={13} />, onClick: openEdit },
             {
-              label: "Delete",
+              label: t("delete"),
               icon: <Trash size={13} />,
               variant: "danger",
               onClick: () => {
@@ -222,7 +224,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
             >
               <div className="flex items-center justify-between px-4 pt-4 pb-2">
                 <span className="text-[11px] font-semibold text-ink-secondary uppercase tracking-wider">
-                  Edit Section
+                  {t("editSection")}
                 </span>
                 <Button variant="ghost" size="icon" onClick={closeEdit}>
                   <X size={13} />
@@ -238,7 +240,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
                         setShowIconPicker((v) => !v);
                         setShowColorPicker(false);
                       }}
-                      title="Choose icon"
+                      title={t("chooseIcon")}
                       className="w-9.5 h-9.5 bg-surface border border-stroke rounded-lg flex items-center justify-center text-ink-secondary hover:border-accent focus:outline-none focus:border-accent transition-colors"
                     >
                       {editIcon ? <IconDisplay value={editIcon} size={18} /> : <Smile size={15} />}
@@ -263,7 +265,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
                         setShowColorPicker((v) => !v);
                         setShowIconPicker(false);
                       }}
-                      title="Choose color"
+                      title={t("chooseColor")}
                       className="w-9.5 h-9.5 bg-surface border border-stroke rounded-lg flex items-center justify-center hover:border-accent focus:outline-none focus:border-accent transition-colors overflow-hidden"
                     >
                       {editColor ? (
@@ -286,7 +288,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
-                    placeholder="Section name"
+                    placeholder={t("sectionName")}
                     className="flex-1 bg-surface border border-stroke rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-accent"
                   />
                 </div>
@@ -296,7 +298,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
                   disabled={!editName.trim() || isSaving}
                   onClick={handleSaveEdit}
                 >
-                  {isSaving ? "Saving..." : "Save changes"}
+                  {isSaving ? t("saving") : t("saveChanges")}
                 </Button>
               </div>
             </div>
@@ -306,9 +308,9 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
 
       {showDeleteConfirm && (
         <ConfirmDialog
-          title="Delete section"
-          description="The section will be removed. Databases inside will become unsectioned."
-          confirmLabel={isDeleting ? "Deleting..." : "Delete"}
+          title={t("deleteSection")}
+          description={t("deleteSectionDesc")}
+          confirmLabel={isDeleting ? t("deleting") : t("delete")}
           variant="danger"
           onConfirm={handleDelete}
           onCancel={() => setShowDeleteConfirm(false)}

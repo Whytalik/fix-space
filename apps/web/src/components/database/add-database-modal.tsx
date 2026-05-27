@@ -8,6 +8,7 @@ import { useMutation } from "@/hooks/useMutation";
 import { createDatabase } from "@/lib/api/database";
 import { Button } from "@/components/ui/primitives/button";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -20,6 +21,7 @@ interface AddDatabaseModalProps {
 }
 
 export function AddDatabaseModal({ spaceId, sectionId, onClose, onSaved }: AddDatabaseModalProps) {
+  const t = useTranslations("AddDatabaseModal");
   const router = useRouter();
   const { addDatabaseToSpace } = useAppContext();
   const [icon, setIcon] = useState("");
@@ -82,7 +84,7 @@ export function AddDatabaseModal({ spaceId, sectionId, onClose, onSaved }: AddDa
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-stroke px-6 py-4">
-          <h2 className="type-modal-title">Add database</h2>
+          <h2 className="type-modal-title">{t("addDatabase")}</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X size={18} />
           </Button>
@@ -90,7 +92,7 @@ export function AddDatabaseModal({ spaceId, sectionId, onClose, onSaved }: AddDa
 
         <div className="px-6 py-5 flex flex-col gap-4">
           <div>
-            <label className="block mb-1.5 type-field-label">Icon</label>
+            <label className="block mb-1.5 type-field-label">{t("icon")}</label>
             <div>
               <button
                 ref={iconButtonRef}
@@ -106,7 +108,7 @@ export function AddDatabaseModal({ spaceId, sectionId, onClose, onSaved }: AddDa
                     </span>
                   </span>
                 ) : (
-                  <span className="text-ink-muted">Choose an icon…</span>
+                  <span className="text-ink-muted">{t("chooseIcon")}</span>
                 )}
               </button>
               {showIconPicker && (
@@ -121,17 +123,17 @@ export function AddDatabaseModal({ spaceId, sectionId, onClose, onSaved }: AddDa
           </div>
 
           <div>
-            <label className="block mb-1.5 type-field-label">Title</label>
+            <label className="block mb-1.5 type-field-label">{t("title")}</label>
             <input
               type="text"
               className="field-input"
               value={title}
               onChange={handleTitleChange}
-              placeholder="e.g. Trading Journal"
+              placeholder={t("placeholderTitle")}
             />
             <p className="mt-1.5 type-hint">
-              Internal name:{" "}
-              <span className="font-mono text-ink-secondary">[DB] {title || "Trading Journal"}</span>
+              {t("internalName")}{" "}
+              <span className="font-mono text-ink-secondary">[DB] {title || t("placeholderTitle")}</span>
             </p>
           </div>
 
@@ -140,10 +142,10 @@ export function AddDatabaseModal({ spaceId, sectionId, onClose, onSaved }: AddDa
 
         <div className="flex items-center justify-end gap-2 border-t border-stroke px-6 py-4">
           <Button variant="secondary" onClick={onClose}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button onClick={handleSave} loading={isSaving} disabled={isSaving || !title.trim()}>
-            {isSaving ? "Creating…" : "Create database"}
+            {isSaving ? t("creating") : t("createDatabase")}
           </Button>
         </div>
       </div>

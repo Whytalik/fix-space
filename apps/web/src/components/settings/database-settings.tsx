@@ -8,11 +8,13 @@ import { Toast } from "@/components/ui/primitives/toast";
 import { getAllIcons, IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
 import type { DatabaseSettings as DatabaseSettingsDto } from "@fixspace/domain";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 type ToastState = { message: string; variant: "success" | "error" } | null;
 
 export function DatabaseSettings() {
+  const t = useTranslations("DatabaseSettingsComp");
   const [form, setForm] = useState<DatabaseSettingsDto | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -32,7 +34,7 @@ export function DatabaseSettings() {
     try {
       const updated = await updateDatabaseSettings(form);
       setForm(updated);
-      setToast({ message: "Settings saved.", variant: "success" });
+      setToast({ message: t("settingsSaved"), variant: "success" });
     } catch (err) {
       setToast({ message: parseApiError(err), variant: "error" });
     } finally {
@@ -48,7 +50,7 @@ export function DatabaseSettings() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm text-ink-secondary">Default icon</label>
+          <label className="text-sm text-ink-secondary">{t("defaultIcon")}</label>
           <div>
             <button
               ref={iconButtonRef}
@@ -64,7 +66,7 @@ export function DatabaseSettings() {
                   </span>
                 </span>
               ) : (
-                <span className="text-ink-muted">Choose an icon…</span>
+                <span className="text-ink-muted">{t("chooseIcon")}</span>
               )}
             </button>
             {showIconPicker && (
@@ -85,7 +87,7 @@ export function DatabaseSettings() {
       {toast && <Toast message={toast.message} variant={toast.variant} onDismiss={() => setToast(null)} />}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? "Saving…" : "Save changes"}
+          {isSaving ? t("saving") : t("saveChanges")}
         </Button>
       </div>
     </div>

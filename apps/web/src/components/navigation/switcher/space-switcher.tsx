@@ -9,12 +9,14 @@ import { createSpace, deleteSpace, duplicateSpace, updateSpace } from "@/lib/api
 import { Badge } from "@/components/ui/primitives/badge";
 import { Button } from "@/components/ui/primitives/button";
 import { Check, ChevronDown, Copy, Globe, Pencil, Plus, Trash, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { SpaceFormView } from "./space-form-view";
 
 export function SpaceSwitcher() {
+  const t = useTranslations("SpaceSwitcher");
   const { space, spaces, setSpace, addSpace, removeSpace, updateSpaceInList } = useAppContext();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -129,9 +131,9 @@ export function SpaceSwitcher() {
 
       {confirmDeleteId && (
         <ConfirmDialog
-          title="Delete space"
-          description="All databases and records inside will be permanently deleted. This action cannot be undone."
-          confirmLabel="Delete"
+          title={t("deleteSpace")}
+          description={t("deleteSpaceDesc")}
+          confirmLabel={t("delete")}
           variant="danger"
           onConfirm={() => handleDelete(confirmDeleteId)}
           onCancel={() => setConfirmDeleteId(null)}
@@ -152,7 +154,7 @@ export function SpaceSwitcher() {
                 <>
                   <div className="flex items-center justify-between px-4 pt-4 pb-2">
                     <span className="text-[11px] font-semibold text-ink-secondary uppercase tracking-wider">
-                      Spaces
+                      {t("spaces")}
                     </span>
                     <Button variant="ghost" size="icon" onClick={handleClose}>
                       <X size={13} />
@@ -174,7 +176,7 @@ export function SpaceSwitcher() {
                           <span className="text-sm text-ink truncate flex-1">{s.name}</span>
                           {s.isDefault && (
                             <Badge variant="accent" className="shrink-0 px-1.5 text-[10px]">
-                              Default
+                              {t("default")}
                             </Badge>
                           )}
                           {s.id === space.id && <Check size={14} className="text-accent shrink-0" />}
@@ -187,7 +189,7 @@ export function SpaceSwitcher() {
                               e.stopPropagation();
                               handleEdit(s);
                             }}
-                            title="Edit"
+                            title={t("edit")}
                           >
                             <Pencil size={13} />
                           </Button>
@@ -196,7 +198,7 @@ export function SpaceSwitcher() {
                             size="icon"
                             onClick={(e) => handleDuplicate(e, s.id)}
                             disabled={duplicatingId === s.id}
-                            title="Duplicate"
+                            title={t("duplicate")}
                           >
                             <Copy size={13} />
                           </Button>
@@ -208,7 +210,7 @@ export function SpaceSwitcher() {
                               setConfirmDeleteId(s.id);
                             }}
                             disabled={spaces.length === 1 || s.isDefault}
-                            title={s.isDefault ? "Cannot delete the default space" : "Delete"}
+                            title={s.isDefault ? t("cannotDeleteDefault") : t("delete")}
                             className="hover:text-red-400 disabled:hover:text-ink-secondary"
                           >
                             <Trash size={13} />
@@ -220,20 +222,20 @@ export function SpaceSwitcher() {
                   <div className="border-t border-stroke px-2 py-2">
                     <Button variant="ghost" onClick={() => setView("new")} className="w-full justify-center gap-2">
                       <Plus size={13} className="shrink-0" />
-                      New space
+                      {t("newSpace")}
                     </Button>
                   </div>
                 </>
               ) : view === "new" ? (
                 <SpaceFormView
-                  title="New Space"
+                  title={t("newSpaceTitle")}
                   name={newName}
                   icon={newIcon}
                   showIconPicker={showIconPicker}
                   iconButtonRef={iconButtonRef}
                   isLoading={isCreating}
-                  submitLabel="Add space"
-                  loadingLabel="Creating..."
+                  submitLabel={t("addSpace")}
+                  loadingLabel={t("creating")}
                   onNameChange={setNewName}
                   onSubmit={handleCreate}
                   onBack={() => setView("list")}
@@ -243,15 +245,15 @@ export function SpaceSwitcher() {
                 />
               ) : (
                 <SpaceFormView
-                  title="Edit Space"
+                  title={t("editSpace")}
                   name={editName}
                   icon={editIcon}
                   showIconPicker={showIconPicker}
                   iconButtonRef={iconButtonRef}
                   isLoading={isSaving}
                   error={editError}
-                  submitLabel="Save changes"
-                  loadingLabel="Saving..."
+                  submitLabel={t("saveChanges")}
+                  loadingLabel={t("saving")}
                   onNameChange={setEditName}
                   onSubmit={handleSaveEdit}
                   onBack={() => setView("list")}

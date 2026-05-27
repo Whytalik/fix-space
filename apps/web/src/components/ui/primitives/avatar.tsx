@@ -1,8 +1,10 @@
+import Image from "next/image";
+
 interface AvatarProps {
   initial: string;
-  image?: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
+  image?: string | null;
 }
 
 const SIZE_CLASSES = {
@@ -11,13 +13,17 @@ const SIZE_CLASSES = {
   lg: "w-20 h-20 text-3xl",
 };
 
-export function Avatar({ initial, image, size = "md", className = "" }: AvatarProps) {
+const SIZE_PX = { sm: 30, md: 56, lg: 80 };
+
+export function Avatar({ initial, size = "md", className = "", image }: AvatarProps) {
   if (image) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={image}
         alt={initial}
+        width={SIZE_PX[size]}
+        height={SIZE_PX[size]}
+        unoptimized
         className={`rounded-full object-cover shrink-0 ${SIZE_CLASSES[size]} ${className}`}
       />
     );

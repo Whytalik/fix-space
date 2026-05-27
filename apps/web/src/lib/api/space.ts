@@ -10,6 +10,7 @@ export function updateSpace(
   data: {
     name?: string;
     icon?: string;
+    isDefault?: boolean;
     sectionOperations?: Array<
       | { operation: "CREATE"; create: { name: string; icon?: string; color?: string; position?: number } }
       | { operation: "UPDATE"; id: string; update: { name?: string; icon?: string; color?: string; position?: number } }

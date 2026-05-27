@@ -58,17 +58,21 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
 
   const accessToken = storage.getToken();
 
+  const isFormData = body instanceof FormData;
+
   const buildHeaders = (token: string | null): Record<string, string> => ({
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...headers,
   });
+
+  const serializeBody = () => (body === undefined ? undefined : isFormData ? (body as FormData) : JSON.stringify(body));
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method,
     credentials: "include",
     headers: buildHeaders(accessToken),
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: serializeBody(),
   });
 
   if (res.status === 401 && path !== "/auth/refresh" && path !== "/auth/login") {
@@ -79,7 +83,7 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
         method,
         credentials: "include",
         headers: buildHeaders(newToken),
-        body: body !== undefined ? JSON.stringify(body) : undefined,
+        body: serializeBody(),
       });
       const retryData = await retryRes.json().catch(() => ({}));
       if (!retryRes.ok) {

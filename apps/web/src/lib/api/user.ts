@@ -25,23 +25,12 @@ export function changePassword(payload: ChangePasswordDto) {
   });
 }
 
-export async function uploadAvatar(file: File): Promise<UserResponseDto> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/users/me/avatar`, {
-    method: "POST",
-    body: formData,
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Upload failed");
-  return res.json() as Promise<UserResponseDto>;
+export function uploadAvatar(file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  return apiFetch<UserResponseDto>("/users/me/avatar", { method: "POST", body: form });
 }
 
-export async function deleteAvatar(): Promise<UserResponseDto> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ""}/users/me/avatar`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Delete failed");
-  return res.json() as Promise<UserResponseDto>;
+export function deleteAvatar() {
+  return apiFetch<UserResponseDto>("/users/me/avatar", { method: "DELETE" });
 }

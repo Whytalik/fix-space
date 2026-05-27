@@ -7,11 +7,11 @@ import {
   Hash,
   Link2,
   List,
-  MousePointer,
-  Percent,
+  MoreHorizontal,
   Sigma,
   Star,
   Tag,
+  TrendingUp,
 } from "lucide-react";
 
 interface PropertyIconProps {
@@ -25,14 +25,14 @@ const ICONS: Record<PropertyType, React.ElementType> = {
   [PropertyType.NUMBER]: Hash,
   [PropertyType.DATE]: Calendar,
   [PropertyType.CHECKBOX]: CheckSquare,
+  [PropertyType.DURATION]: Clock,
   [PropertyType.SELECT]: Tag,
   [PropertyType.STATUS]: List,
   [PropertyType.RELATION]: Link2,
   [PropertyType.FORMULA]: Sigma,
-  [PropertyType.DURATION]: Clock,
   [PropertyType.RATING]: Star,
-  [PropertyType.PROGRESS]: Percent,
-  [PropertyType.BUTTON]: MousePointer,
+  [PropertyType.PROGRESS]: TrendingUp,
+  [PropertyType.BUTTON]: MoreHorizontal,
 };
 
 export function PropertyIcon({ type, size = 13, className }: PropertyIconProps) {

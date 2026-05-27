@@ -11,6 +11,7 @@ import { updateSpace } from "@/lib/api/space";
 import { getSectionSettings } from "@/lib/api/settings";
 import { DEFAULT_SECTION_SETTINGS } from "@fixspace/domain/enums";
 import { Smile, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -19,6 +20,7 @@ type AddSectionModalProps = {
 };
 
 export function AddSectionModal({ onClose }: AddSectionModalProps) {
+  const t = useTranslations("AddSection");
   const { space, updateSpaceInList } = useAppContext();
 
   const [name, setName] = useState("");
@@ -77,7 +79,7 @@ export function AddSectionModal({ onClose }: AddSectionModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <span className="text-[11px] font-semibold text-ink-secondary uppercase tracking-wider">New Section</span>
+          <span className="text-[11px] font-semibold text-ink-secondary uppercase tracking-wider">{t("title")}</span>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X size={13} />
           </Button>
@@ -92,7 +94,7 @@ export function AddSectionModal({ onClose }: AddSectionModalProps) {
                   setShowIconPicker((v) => !v);
                   setShowColorPicker(false);
                 }}
-                title="Choose icon"
+                title={t("chooseIcon")}
                 className="w-9.5 h-9.5 bg-surface border border-stroke rounded-lg flex items-center justify-center text-ink-secondary hover:border-accent focus:outline-none focus:border-accent transition-colors"
               >
                 {icon ? <IconDisplay value={icon} size={18} /> : <Smile size={15} />}
@@ -117,7 +119,7 @@ export function AddSectionModal({ onClose }: AddSectionModalProps) {
                   setShowColorPicker((v) => !v);
                   setShowIconPicker(false);
                 }}
-                title="Choose color"
+                title={t("chooseColor")}
                 className="w-9.5 h-9.5 bg-surface border border-stroke rounded-lg flex items-center justify-center hover:border-accent focus:outline-none focus:border-accent transition-colors overflow-hidden"
               >
                 {color ? (
@@ -140,12 +142,12 @@ export function AddSectionModal({ onClose }: AddSectionModalProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-              placeholder="Section name"
+              placeholder={t("placeholder")}
               className="flex-1 bg-surface border border-stroke rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-accent"
             />
           </div>
           <Button className="w-full" loading={isCreating} disabled={!name.trim() || isCreating} onClick={handleCreate}>
-            {isCreating ? "Creating..." : "Add section"}
+            {isCreating ? t("creating") : t("add")}
           </Button>
         </div>
       </div>

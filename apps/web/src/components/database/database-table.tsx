@@ -12,10 +12,8 @@ import { ExternalLink } from "lucide-react";
 import { useDatabaseContext } from "@/context/database-context";
 
 interface DatabaseTableProps {
-  databaseId: string;
   properties: PropertyResponseDto[];
   records: RecordResponseDto[];
-  onRefresh: () => void;
 }
 
 export function DatabaseTable({ properties, records }: DatabaseTableProps) {

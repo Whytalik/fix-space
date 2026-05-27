@@ -1,26 +1,33 @@
-import type { PropertyResponseDto } from "@fixspace/domain";
+import type { CreatePropertyDto, PropertyResponseDto, UpdatePropertyDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getProperties(databaseId: string) {
   return apiFetch<PropertyResponseDto[]>(`/properties?databaseId=${databaseId}`);
 }
 
-export function createProperty(databaseId: string, data: Record<string, unknown>) {
-  return apiFetch<PropertyResponseDto>(`/properties`, {
+type CreatePropertyInput = Omit<CreatePropertyDto, "databaseId" | "config"> & { config?: Record<string, unknown> };
+
+export function createProperty(databaseId: string, dto: CreatePropertyInput) {
+  return apiFetch<PropertyResponseDto>(`/properties?databaseId=${databaseId}`, {
     method: "POST",
-    body: { ...data, databaseId },
+    body: dto,
   });
 }
 
-export function updateProperty(propertyId: string, data: Record<string, unknown>) {
+type UpdatePropertyInput = Omit<UpdatePropertyDto, "config" | "group"> & {
+  config?: Record<string, unknown>;
+  group?: string | null;
+};
+
+export function updateProperty(propertyId: string, dto: UpdatePropertyInput) {
   return apiFetch<PropertyResponseDto>(`/properties/${propertyId}`, {
     method: "PATCH",
-    body: data,
+    body: dto,
   });
 }
 
 export function deleteProperty(propertyId: string) {
-  return apiFetch<void>(`/properties/${propertyId}`, {
+  return apiFetch<PropertyResponseDto>(`/properties/${propertyId}`, {
     method: "DELETE",
   });
 }
