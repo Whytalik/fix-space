@@ -66,8 +66,9 @@
       "outputs": []
     },
     "db:generate": {
-      "cache": false,
-      "outputs": []
+      "inputs": ["prisma/schema.prisma"],
+      "outputs": ["generated/**"],
+      "cache": true
     },
     "db:migrate:dev": {
       "cache": false,

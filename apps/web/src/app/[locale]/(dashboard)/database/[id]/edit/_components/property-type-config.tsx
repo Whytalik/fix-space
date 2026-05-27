@@ -20,7 +20,6 @@ import {
   TIME_FORMATS_VALUES,
   URL_HANDLING_VALUES,
 } from "@fixspace/domain/enums";
-const FORMULA_OUTPUT_TYPE_VALUES = ["text", "number", "checkbox", "date", "relation", "array"] as const;
 import { Image as ImageIcon, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 

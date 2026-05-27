@@ -29,8 +29,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
       - name: Generate Prisma Client
-        run: npx prisma generate --schema=packages/database/prisma/schema.prisma
+        run: pnpm turbo db:generate
 
       - name: Lint
         run: pnpm turbo lint
@@ -54,8 +62,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
       - name: Generate Prisma Client
-        run: npx prisma generate --schema=packages/database/prisma/schema.prisma
+        run: pnpm turbo db:generate
 
       - name: Test
         run: pnpm turbo test
@@ -168,8 +184,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
       - name: Generate Prisma Client
-        run: npx prisma generate --schema=packages/database/prisma/schema.prisma
+        run: pnpm turbo db:generate
 
       - name: Build
         run: pnpm turbo build
