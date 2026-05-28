@@ -12,7 +12,7 @@ export class UpdateUserDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @MinLength(3, { message: i18nValidationMessage<I18nTranslations>("validation.MIN_LENGTH") })
   @MaxLength(50, { message: i18nValidationMessage<I18nTranslations>("validation.MAX_LENGTH") })
-  @Matches(/^[a-zA-Z0-9_-]+$/, { message: i18nValidationMessage<I18nTranslations>("validation.INVALID_USERNAME") })
+  @Matches(/^[a-zA-Z0-9\u0400-\u04FF_-]+$/, { message: i18nValidationMessage<I18nTranslations>("validation.INVALID_USERNAME") })
   username?: string;
 
   @IsOptional()
