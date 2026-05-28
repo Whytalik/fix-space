@@ -31,18 +31,22 @@ export class AppLogger {
     const parts: string[] = [message];
 
     const contextParts: string[] = [];
-    if (ctx?.requestId) contextParts.push(`reqId=${ctx.requestId.substring(0, 8)}`);
-    if (ctx?.userId) contextParts.push(`userId=${ctx.userId}`);
+    if (ctx?.requestId) {
+      contextParts.push(`\x1b[90mreqId=\x1b[36m${ctx.requestId.substring(0, 8)}\x1b[0m`);
+    }
+    if (ctx?.userId) {
+      contextParts.push(`\x1b[90muserId=\x1b[35m${ctx.userId}\x1b[0m`);
+    }
 
     if (contextParts.length > 0) {
-      parts.push(`| ${contextParts.join(", ")}`);
+      parts.push(`\x1b[90m|\x1b[0m ${contextParts.join("\x1b[90m, \x1b[0m")}`);
     }
 
     if (details && Object.keys(details).length > 0) {
       const detailStr = Object.entries(details)
-        .map(([k, v]) => `${k}=${typeof v === "object" ? JSON.stringify(v) : v}`)
-        .join(", ");
-      parts.push(`| ${detailStr}`);
+        .map(([k, v]) => `\x1b[90m${k}=\x1b[0m${typeof v === "object" ? JSON.stringify(v) : v}`)
+        .join(" \x1b[90m,\x1b[0m ");
+      parts.push(`\x1b[90m|\x1b[0m ${detailStr}`);
     }
 
     return parts.join(" ");
