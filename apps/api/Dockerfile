@@ -42,7 +42,8 @@ COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/src/i18n ./apps/api/dist/i18n
+COPY --from=builder /app/packages/database/prisma ./packages/database/prisma
 
 WORKDIR /app/apps/api
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "cd /app/packages/database && npx prisma migrate deploy && node /app/apps/api/dist/main.js"]
