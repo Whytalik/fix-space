@@ -45,4 +45,4 @@ COPY --from=builder /app/apps/api/src/i18n ./apps/api/dist/i18n
 
 WORKDIR /app/apps/api
 EXPOSE 3000
-CMD npx prisma migrate deploy --schema ../../packages/database/prisma/schema.prisma && node dist/main.js
+CMD ["sh", "-c", "cd /app/packages/database && npx prisma migrate deploy && cd /app/apps/api && exec node dist/main.js"]
