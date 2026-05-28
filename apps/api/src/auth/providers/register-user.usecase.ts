@@ -65,9 +65,15 @@ export class RegisterUserUseCase {
     await this.initializeUserSpaceUseCase.initialize(user.id, registerUserDto.username);
 
     const verificationToken = await this.tokenService.createVerificationToken(user.id);
-    await this.mailService.sendVerificationEmail(user.email, user.username, verificationToken);
+    this.mailService.sendVerificationEmail(user.email, user.username, verificationToken).catch((err) => {
+      this.logger.error("Failed to send verification email", {
+        userId: user.id,
+        email: user.email,
+        error: err?.message ?? err,
+      });
+    });
 
-    this.logger.log("Verification email sent", {
+    this.logger.log("Verification email queued in background", {
       userId: user.id,
       email: user.email,
     });
