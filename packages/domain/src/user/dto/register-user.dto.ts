@@ -25,7 +25,7 @@ export class RegisterUserDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @MinLength(8, { message: i18nValidationMessage<I18nTranslations>("validation.MIN_LENGTH") })
   @MaxLength(128, { message: i18nValidationMessage<I18nTranslations>("validation.MAX_LENGTH") })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#._-])/, {
     message: i18nValidationMessage<I18nTranslations>("validation.INVALID_PASSWORD"),
   })
   password: string;

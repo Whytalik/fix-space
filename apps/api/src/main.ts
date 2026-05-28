@@ -52,7 +52,7 @@ async function bootstrap() {
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)), new LoggingInterceptor(appLogger));
   app.useGlobalFilters(
-    new I18nValidationExceptionFilter({ detailedErrors: false }),
+    new I18nValidationExceptionFilter({ detailedErrors: true }),
     new GlobalExceptionFilter(appLogger),
   );
   await app.listen(port);
