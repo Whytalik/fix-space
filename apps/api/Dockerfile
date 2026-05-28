@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -32,7 +32,7 @@ RUN pnpm turbo build --filter=@fixspace/database --filter=@fixspace/domain --no-
 RUN pnpm turbo build --filter=@fixspace/api --no-cache
 
 # Stage 4: minimal production image
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 ENV NODE_ENV=production
 WORKDIR /app
 
@@ -45,4 +45,4 @@ COPY --from=builder /app/apps/api/src/i18n ./apps/api/dist/i18n
 
 WORKDIR /app/apps/api
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+CMD npx prisma migrate deploy --schema ../../packages/database/prisma/schema.prisma && node dist/main.js
