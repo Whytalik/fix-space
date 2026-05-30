@@ -12,7 +12,7 @@ import { PrismaClient } from "../generated/client/client.js";
 
 const globalForPrisma = global as typeof global & { prisma?: PrismaClient };
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });

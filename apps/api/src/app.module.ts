@@ -41,7 +41,12 @@ import { UserModule } from "./modules/user/user.module";
         new AcceptLanguageResolver(),
       ],
     }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 200 }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: process.env.NODE_ENV === "test" ? 10000 : 200,
+      },
+    ]),
     LoggerModule,
     UserModule,
     AuthModule,
@@ -61,10 +66,14 @@ import { UserModule } from "./modules/user/user.module";
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    ...(process.env.NODE_ENV === "test"
+      ? []
+      : [
+          {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard,
+          },
+        ]),
   ],
 })
 export class AppModule implements NestModule {
