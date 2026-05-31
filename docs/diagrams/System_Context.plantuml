@@ -27,7 +27,7 @@ rectangle "FIX Space" as System_Box #E3F2FD {
 
 rectangle "Зовнішні системи" as External_Box #FFF9C4 {
   component "Google OAuth 2.0" as Google
-  component "SMTP Server" as SMTP
+  component "Resend API\n(Email Service)" as Resend
   component "Binance API" as Binance
   component "Bybit API" as Bybit
   component "OKX API" as OKX
@@ -41,7 +41,7 @@ User ..> Google : Авторизація через\nGoogle-акаунт
 
 Google ..> System : OAuth callback:\ntoken, email, profile
 
-System ..> SMTP : Email-розсилка:\nверифікація, скидання пароля,\nнотифікації
+System ..> Resend : Email-розсилка:\nверифікація, скидання пароля,\nнотифікації
 
 System ..> Binance : Імпорт даних\nпро торгівлю
 System ..> Bybit : Імпорт даних\nпро торгівлю

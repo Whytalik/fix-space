@@ -256,7 +256,7 @@
 
 ---
 
-## #96 [Workspace] Create new workspace (max 10 per account)
+## #96 [Workspace] Create new workspace (max 5 per account)
 
 **State:** OPEN
 **Milestone:** Feature Complete
@@ -268,12 +268,12 @@
 
 ### Description
 
-Створення додаткового workspace з пресетним набором БД. Ліміт: 10 workspace на акаунт. Новий workspace ініціалізується так само, як при реєстрації.
+Створення додаткового workspace з пресетним набором БД. Ліміт: 5 workspace на акаунт. Новий workspace ініціалізується так само, як при реєстрації.
 
 ### Acceptance Criteria
 
-- [ ] **Given** <10 workspace, **When** натиснуто «Create workspace», **Then** новий workspace створюється з пресетними БД
-- [ ] **Given** 10 workspace, **When** спроба створити, **Then** помилка «Workspace limit reached (10)»
+- [ ] **Given** <5 workspace, **When** натиснуто «Create workspace», **Then** новий workspace створюється з пресетними БД
+- [ ] **Given** 5 workspace, **When** спроба створити, **Then** помилка «Workspace limit reached (5)»
 - [ ] Новий workspace містить всі 9 пресетних БД, секції, шаблони
 
 ### Technical Notes
@@ -281,14 +281,14 @@
 **API:**
 
 - `POST /api/workspaces` — body: `{ name }` → reuse initializeDefault logic
-- Pre-check: count user workspaces ≤ 10
+- Pre-check: count user workspaces ≤ 5
 
 ### Implementation Checklist
 
 **Backend (API):**
 
 - [ ] Endpoint: create workspace з ініціалізацією
-- [ ] Limit check: max 10 per account
+- [ ] Limit check: max 5 per account
 
 **Frontend (Web):**
 
@@ -299,7 +299,7 @@
 
 - [ ] **[§3.2]** Можливість створення додаткових просторів і дублювання існуючого вирішує задачу безпечного експериментування зі структурою даних: трейдер може спробувати нову організацію баз даних або властивостей на копії простору, не ризикуючи накопиченими даними в основному. Якщо нова структура підходить — зміни вносяться в основний простір; якщо ні — копія видаляється (#153).
 - [ ] **[§3.2]** Створення додаткового робочого простору
-- [ ] **[§3.2]** Ліміт: до 10 робочих просторів на акаунт
+- [ ] **[§3.2]** Ліміт: до 5 робочих просторів на акаунт
 
 ### References
 

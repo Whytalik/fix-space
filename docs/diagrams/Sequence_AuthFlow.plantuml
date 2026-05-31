@@ -44,7 +44,7 @@ FE -> API : POST /auth/login
 API -> DB : Find user by email
 DB --> API : User record
 API -> API : Compare password (bcrypt)
-API -> API : Generate accessToken (15 min)\n+ refreshToken (30 days)
+API -> API : Generate accessToken (15 min)\n+ refreshToken (7 days)
 API -> DB : Store hashed refreshToken
 API --> FE : 200 OK\n+ Set HTTP-only cookies\n(access_token, refresh_token)
 FE --> U : Redirect to workspace

@@ -382,7 +382,7 @@ POST /auth/login
   accessToken = JWT.sign({ sub: userId }, secret, { expiresIn: '15m' })
   rawRefresh = crypto.randomBytes(32)
   tokenHash = bcrypt.hash(rawRefresh)
-  CREATE RefreshToken { tokenHash, expiresAt: now + 30d }
+  CREATE RefreshToken { tokenHash, expiresAt: now + 7d }
   SET HTTP-only cookies: access_token, refresh_token
   → 200 + UserResponseDto
 
@@ -391,7 +391,7 @@ POST /auth/refresh
   find RefreshToken WHERE bcrypt.compare(rawRefresh, tokenHash) matches
   IF not found OR revokedAt IS NOT NULL OR expiresAt < now → 401
   OLD token: revokedAt = now
-  NEW accessToken + NEW RefreshToken { expiresAt: now + 30d }  // продовжується
+  NEW accessToken + NEW RefreshToken { expiresAt: now + 7d }  // продовжується
   SET cookies
   → 200
 
