@@ -8,7 +8,7 @@ dotenv.config({ path: path.resolve(rootDir, ".env") });
 
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import { PrismaClient } from "../generated/client/client.js";
+import { PrismaClient } from "../generated/client";
 
 const globalForPrisma = global as typeof global & { prisma?: PrismaClient };
 
@@ -19,4 +19,4 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-export * from "../generated/client/client.js";
+export * from "../generated/client";
