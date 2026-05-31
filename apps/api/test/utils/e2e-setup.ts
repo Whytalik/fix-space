@@ -1,9 +1,9 @@
-import { prisma, pool } from "@fixspace/database";
+import { pool, prisma } from "@fixspace/database";
 import { jest } from "@jest/globals";
 import { ClassSerializerInterceptor, type INestApplication } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { Test } from "@nestjs/testing";
-import { ThrottlerGuard, ThrottlerStorageService } from "@nestjs/throttler";
+import { ThrottlerGuard } from "@nestjs/throttler";
 import cookieParser from "cookie-parser";
 import { I18nValidationExceptionFilter, I18nValidationPipe } from "nestjs-i18n";
 import * as supertest from "supertest";
@@ -23,14 +23,17 @@ export function uniqueUsername(): string {
   return `e2e${Date.now()}${Math.floor(Math.random() * 9999)}`;
 }
 
-export const mockMailService = {
-  sendVerificationEmail: jest.fn<any>(),
-  sendPasswordResetEmail: jest.fn<any>(),
-  sendPasswordChangeNotification: jest.fn<any>(),
+export const mockMailService: Record<keyof MailService, jest.Mock> = {
+  sendVerificationEmail: jest.fn(),
+  sendPasswordResetEmail: jest.fn(),
+  sendPasswordChangeNotification: jest.fn(),
+  onModuleInit: jest.fn(),
 };
 
-export const mockInitializeUserSpaceUseCase = {
-  initialize: jest.fn<() => Promise<void>>(),
+export const mockInitializeUserSpaceUseCase: Record<keyof InitializeUserSpaceUseCase, jest.Mock> = {
+  initialize: jest.fn(),
+  seedContent: jest.fn(),
+  createAndSeed: jest.fn(),
 };
 
 export async function setupE2eApp() {
@@ -42,14 +45,12 @@ export async function setupE2eApp() {
     .compile();
 
   const app = moduleRef.createNestApplication();
-
-  // Disable ThrottlerGuard for E2E tests
   try {
     const throttlerGuard = app.get(ThrottlerGuard);
     if (throttlerGuard) {
       jest.spyOn(throttlerGuard, "canActivate").mockResolvedValue(true);
     }
-  } catch (e) {
+  } catch {
     // ThrottlerGuard might not be available as a direct provider
   }
 
@@ -71,7 +72,7 @@ export async function setupE2eApp() {
 export async function cleanupE2eApp(app: INestApplication, marker = E2E_EMAIL_MARKER) {
   try {
     await prisma.user.deleteMany({ where: { email: { contains: marker } } });
-  } catch (e) {
+  } catch {
     // Ignore errors during cleanup if user doesn't exist
   } finally {
     await app.close();

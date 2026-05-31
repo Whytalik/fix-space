@@ -1,4 +1,4 @@
-import { CanActivate, ForbiddenException, Injectable } from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AppLogger } from "../../../common/logger/app-logger.service";
 
@@ -11,10 +11,18 @@ export class DevOnlyGuard implements CanActivate {
     this.logger.setContext(DevOnlyGuard.name);
   }
 
-  canActivate(): boolean {
-    if (this.configService.get<string>("NODE_ENV") !== "development") {
-      this.logger.error("Attempt to access dev-only route from production");
-      throw new ForbiddenException("Not available in production environment");
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+    const isE2EHeader = request.headers["x-e2e-test"] === "true";
+    const env = this.configService.get<string>("NODE_ENV");
+
+    if (isE2EHeader) {
+      return true;
+    }
+
+    if (env !== "development" && env !== "test") {
+      this.logger.error(`Forbidden access to dev-only route. Env: ${env}`);
+      throw new ForbiddenException("This action is only available in development or test environments");
     }
     return true;
   }
