@@ -1,0 +1,11 @@
+{
+  "extends": "@fixspace/typescript-config/nestjs.json",
+  "include": ["src/**/*", "test/**/*"],
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}

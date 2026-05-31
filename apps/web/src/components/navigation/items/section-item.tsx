@@ -14,12 +14,12 @@ import { updateSpace } from "@/lib/api/space";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { SectionResponseDto } from "@fixspace/domain";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { ChevronRight, LayoutGrid, MoreHorizontal, Pencil, Smile, Trash, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AddDatabaseModal } from "@/components/database/add-database-modal";
+import { AddDatabaseModal } from "@/features/database/components/add-database-modal";
 
 interface SectionItemProps {
   section: SectionResponseDto;

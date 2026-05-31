@@ -8,8 +8,24 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale = routing.defaultLocale;
   }
 
+  const namespaces = ["auth", "landing", "dashboard", "settings", "database", "components"];
+
+  const messages = (
+    await Promise.all(
+      namespaces.map(async (ns) => {
+        try {
+          const nsModule = await import(`../../messages/${locale}/${ns}.json`);
+          return nsModule.default;
+        } catch (e) {
+          console.error(`Failed to load namespace ${ns} for locale ${locale}`, e);
+          return {};
+        }
+      }),
+    )
+  ).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+
   return {
     locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
+    messages,
   };
 });

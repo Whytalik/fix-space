@@ -41,7 +41,6 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/apps/api/src/i18n ./apps/api/dist/i18n
 
 WORKDIR /app/apps/api
 EXPOSE 3000

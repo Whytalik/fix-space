@@ -4,6 +4,6 @@ import { nextJsConfig } from '@fixspace/eslint-config/next-js';
 export default [
   ...nextJsConfig,
   {
-    ignores: ['.next/**'],
+    ignores: ['.next/**', 'coverage/**'],
   },
 ];

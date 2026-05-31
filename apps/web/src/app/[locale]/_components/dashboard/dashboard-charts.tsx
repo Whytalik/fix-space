@@ -1,10 +1,10 @@
 // apps/web/app/_components/dashboard/dashboard-charts.tsx
 "use client";
 
-import { Card } from "@/components/ui/primitives/card";
+import { Card } from "@/components/ui/primitives/display/card";
 import { BarChart3, LineChart, Activity } from "lucide-react";
-import { AreaChartWrapper } from "@/components/charts/area-chart";
-import { BarChartWrapper } from "@/components/charts/bar-chart";
+import { AreaChartWrapper } from "@/features/charts/components/area-chart";
+import { BarChartWrapper } from "@/features/charts/components/bar-chart";
 import { pnlData, winRateData, rrDeviationData } from "./mock-chart-data";
 import { useTheme } from "@/context/theme-context";
 import { useMemo } from "react";

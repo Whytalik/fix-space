@@ -1,16 +1,16 @@
 "use client";
 
-import { PropertyIcon } from "@/components/property/property-icon";
+import { PropertyIcon } from "@/features/property/components/property-icon";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import { Button } from "@/components/ui/primitives/button";
-import { Combobox } from "@/components/ui/primitives/combobox";
+import { Button } from "@/components/ui/primitives/actions/button";
+import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { useEscape } from "@/hooks/useEscape";
 import { useMutation } from "@/hooks/useMutation";
 import { createProperty, updateProperty } from "@/lib/api/property";
 import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain";
 import { PropertyType } from "@fixspace/domain/enums";
-import { Toggle } from "@/components/ui/primitives/toggle";
+import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { ArrowLeft, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";

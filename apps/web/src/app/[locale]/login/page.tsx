@@ -1,27 +1,85 @@
 "use client";
 
+import { AuthPageShell } from "@/features/auth/components/auth-page-shell";
+import { FormErrors } from "@/components/ui/form/form-errors";
+import { FormField } from "@/components/ui/form/form-field";
+import { Button } from "@/components/ui/primitives/actions/button";
+import { login } from "@/lib/api/auth";
+import { parseApiErrors } from "@/lib/api/client";
 import { useState } from "react";
-import { ForgotPasswordForm } from "./_components/forgot-password-form";
-import { LoginForm } from "./_components/login-form";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Header } from "@/components/layout/header/header";
 import { Footer } from "@/components/layout/footer";
 
-type View = "login" | "forgot";
-
 export default function LoginPage() {
-  const [view, setView] = useState<View>("login");
+  const t = useTranslations("Auth");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  let content;
-  if (view === "forgot") {
-    content = <ForgotPasswordForm onBack={() => setView("login")} />;
-  } else {
-    content = <LoginForm onForgotClick={() => setView("forgot")} />;
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErrors([]);
+    setLoading(true);
+    try {
+      await login({ email, password });
+      window.location.href = "/";
+    } catch (err) {
+      setErrors(parseApiErrors(err));
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="flex flex-col h-screen overflow-y-auto scrollbar bg-canvas">
       <Header />
-      <main className="flex-1 flex items-center justify-center p-6">{content}</main>
+      <main className="flex-1 flex items-center justify-center p-6">
+        <AuthPageShell
+          title={t("welcomeBack")}
+          subtitle={t("signInSubtitle")}
+          footerText={t("dontHaveAccount")}
+          footerLinkHref="/register"
+          footerLinkText={t("signUp")}
+        >
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <FormField
+              id="email"
+              label={t("email")}
+              type="email"
+              autoComplete="username"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t("placeholderEmail")}
+            />
+            <div className="flex flex-col gap-1.5">
+              <FormField
+                id="password"
+                label={t("password")}
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t("placeholderPassword")}
+              />
+              <Link
+                href="/forgot-password"
+                className="self-end text-xs text-ink-secondary hover:text-accent transition-colors"
+              >
+                {t("forgotPassword")}
+              </Link>
+            </div>
+            <FormErrors errors={errors} />
+            <Button type="submit" loading={loading} className="mt-1">
+              {loading ? t("signingIn") : t("signIn")}
+            </Button>
+          </form>
+        </AuthPageShell>
+      </main>
       <Footer />
     </div>
   );

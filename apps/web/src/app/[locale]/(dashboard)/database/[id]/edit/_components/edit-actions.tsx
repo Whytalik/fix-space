@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 
 type EditActionsProps = {
   isSaving: boolean;

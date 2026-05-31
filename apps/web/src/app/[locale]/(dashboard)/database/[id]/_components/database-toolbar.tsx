@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { useDatabaseContext } from "@/context/database-context";
 import { ArrowUpDown, Layers, Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

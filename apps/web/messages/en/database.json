@@ -1,0 +1,155 @@
+{
+  "AddDatabase": {
+    "title": "New Database",
+    "chooseIcon": "Choose icon",
+    "placeholder": "Database name",
+    "creating": "Creating…",
+    "add": "Add database"
+  },
+  "DatabaseToolbar": {
+    "search": "Search",
+    "searchPlaceholder": "Search records…",
+    "sort": "Sort",
+    "filter": "Filter",
+    "group": "Group"
+  },
+  "DatabaseTable": {
+    "noProperties": "No properties defined for this database.",
+    "noRecords": "No records yet.",
+    "untitled": "Untitled",
+    "recordsOf": "{from}–{to} of {total} records",
+    "rowsPerPage": "Rows per page:",
+    "refresh": "Refresh database",
+    "previousPage": "Previous page",
+    "nextPage": "Next page"
+  },
+  "DatabaseEdit": {
+    "title": "Edit Database",
+    "general": "General",
+    "properties": "Properties",
+    "templates": "Templates",
+    "limits": "Limits",
+    "view": "View",
+    "recordLimit": "Record limit",
+    "recordLimitDesc": "Maximum number of records in this database or no limit.",
+    "noLimit": "No limit",
+    "useDefaultTemplate": "Use default template",
+    "useDefaultTemplateDesc": "Automatically apply the default template when creating new records.",
+    "wrapCells": "Wrap cell content",
+    "wrapCellsDesc": "Allow text in cells to wrap onto multiple lines instead of clipping.",
+    "internalName": "Internal name",
+    "placeholderTitle": "e.g. Trading Journal",
+    "icon": "Icon",
+    "title": "Title",
+    "chooseIcon": "Choose an icon…"
+  },
+  "PropertyEdit": {
+    "properties": "Properties",
+    "record": "Record",
+    "table": "Table",
+    "addGroup": "Add group",
+    "addProperty": "Add property",
+    "groupName": "Group name…",
+    "noProperties": "No properties yet.",
+    "deleteProperty": "Delete property?",
+    "deletePropertyDesc": "This will permanently delete the property and all its values. This action cannot be undone.",
+    "delete": "Delete"
+  },
+  "TemplateEdit": {
+    "untitledTemplate": "Untitled template",
+    "noTemplates": "No templates yet",
+    "template": "template",
+    "templates": "templates",
+    "templatesDesc": "Templates allow pre-filling field values when creating new records.",
+    "creating": "Creating…",
+    "addTemplate": "Add template",
+    "default": "Default",
+    "editTemplate": "Edit template",
+    "deleteTemplate": "Delete template",
+    "deleteDescription": "\"{name}\" will be permanently deleted.",
+    "deleting": "Deleting…",
+    "delete": "Delete"
+  },
+  "PropertyForm": {
+    "newProperty": "New property",
+    "viewProperty": "View property",
+    "editProperty": "Edit property",
+    "general": "General",
+    "type": "Type",
+    "change": "Change",
+    "icon": "Icon (optional)",
+    "name": "Name",
+    "namePlaceholder": "Property name…",
+    "group": "Group (optional)",
+    "groupPlaceholder": "Assign to group…",
+    "hint": "Hint (optional)",
+    "hintPlaceholder": "Displayed below the field label…",
+    "required": "Required field",
+    "settings": "settings",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "addProperty": "Add property",
+    "chooseType": "choose type",
+    "saveChanges": "Save changes"
+  },
+  "AddDatabaseModal": {
+    "addDatabase": "New Database",
+    "icon": "Icon",
+    "chooseIcon": "Choose an icon…",
+    "title": "Title",
+    "placeholderTitle": "e.g. Trading Journal",
+    "internalName": "Internal name:",
+    "cancel": "Cancel",
+    "creating": "Creating…",
+    "createDatabase": "Create database"
+  },
+  "DatabasePage": {
+    "retry": "Retry"
+  },
+  "DatabaseHeader": {
+    "edit": "Edit",
+    "addItem": "Add Item"
+  },
+  "TemplatePickerModal": {
+    "chooseTemplate": "Choose a template",
+    "chooseTemplateDesc": "Select a template to apply to the new record.",
+    "noTemplate": "No template",
+    "default": "Default"
+  },
+  "TemplateEditModal": {
+    "templateName": "Template name",
+    "default": "Default",
+    "noPropertiesDefined": "No properties defined for this database.",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "TemplatePage": {
+    "noProperties": "No properties defined for this database.",
+    "untitledTemplate": "Untitled template",
+    "deleteDescription": "\"{name}\" will be permanently deleted.",
+    "changeIcon": "Change icon",
+    "defaultTemplate": "Default"
+  },
+  "TemplatePageComp": {
+    "templateNotFound": "Template not found.",
+    "noPropertiesDefined": "No properties defined for this database.",
+    "deleteTemplate": "Delete template",
+    "deleteDescription": "\"{name}\" will be permanently deleted.",
+    "deleting": "Deleting…",
+    "delete": "Delete",
+    "setDefault": "Set as default",
+    "setDefaultTitle": "Change default template?",
+    "setDefaultDesc": "This will replace the current default template. All new records will use this template by default.",
+    "removeDefault": "Remove default",
+    "removeDefaultTitle": "Remove default status?",
+    "removeDefaultDesc": "Another template will automatically become the default. New records will still use a template."
+  },
+  "DatabaseItem": {
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "deleteDatabase": "Delete database",
+    "deleteDatabaseDesc": "This database and all its records will be permanently deleted.",
+    "deleting": "Deleting…"
+  }
+}

@@ -1,6 +1,5 @@
 "use client";
 
-import "reflect-metadata";
 import { useDatabaseMutations } from "@/hooks/useDatabaseMutations";
 import { useSectionMutations } from "@/hooks/useSectionMutations";
 import { useSpaceMutations } from "@/hooks/useSpaceMutations";
@@ -105,7 +104,7 @@ export function AppProvider({
   initialUser?: UserResponseDto | null;
 }) {
   const [user, setUser] = useState<UserResponseDto | null>(initialUser);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [currentDatabaseId, setCurrentDatabaseId] = useState<string | null>(null);
   const [currentRecordName, setCurrentRecordName] = useState<string | null>(null);
   const [currentRecordIcon, setCurrentRecordIcon] = useState<string | null>(null);

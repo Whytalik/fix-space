@@ -1,15 +1,15 @@
 "use client";
 
-import { PropertyIcon } from "@/components/property/property-icon";
-import { Button } from "@/components/ui/primitives/button";
-import type { ComboboxOption } from "@/components/ui/primitives/combobox";
-import { Combobox } from "@/components/ui/primitives/combobox";
+import { PropertyIcon } from "@/features/property/components/property-icon";
+import { Button } from "@/components/ui/primitives/actions/button";
+import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
+import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { useState } from "react";
-import { DateInput } from "@/components/ui/primitives/date-input";
-import { NumberInput } from "@/components/ui/primitives/number-input";
-import { TextInput } from "@/components/ui/primitives/text-input";
-import { StatusInput } from "@/components/ui/primitives/status-input";
-import type { StatusOption } from "@/components/ui/primitives/status-input";
+import { DateInput } from "@/components/ui/primitives/inputs/date-input";
+import { NumberInput } from "@/components/ui/primitives/inputs/number-input";
+import { TextInput } from "@/components/ui/primitives/inputs/text-input";
+import { StatusPropertyInput } from "@/features/property/components/inputs/status-property-input";
+import type { StatusPropertyOption } from "@/features/property/components/inputs/status-property-input";
 import { useDatabaseContext } from "@/context/database-context";
 import type { RecordFilterDto } from "@fixspace/domain";
 import { FilterField, FilterLogic, FilterOperator, PropertyType } from "@fixspace/domain/enums";
@@ -169,7 +169,7 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
           ).map((o) => ({ value: o, label: o }))
         : [];
 
-  const statusOptions: StatusOption[] =
+  const statusOptions: StatusPropertyOption[] =
     propType === PropertyType.STATUS
       ? ((
           property?.config as { categories?: Array<{ options: Array<{ name: string; color: string }> }> } | null
@@ -231,7 +231,7 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
 
       {!noValue && !isMulti && propType === PropertyType.STATUS && (
         <div className="flex-1 min-w-0">
-          <StatusInput
+          <StatusPropertyInput
             options={statusOptions}
             value={
               filter.value != null

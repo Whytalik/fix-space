@@ -26,6 +26,7 @@
 
 - [ ] Нові компоненти мають unit-тести (`*.test.tsx`)
 - [ ] Тести перевіряють рендер, props та інтерактивність
+- [ ] Playwright E2E тести успішно пройдено (`pnpm --filter @fixspace/web test:e2e`)
 - [ ] Smoke-тест у браузері пройдено
 - [ ] Адаптивність перевірена (mobile/tablet/desktop)
 
@@ -50,7 +51,7 @@
 ## Pre-release (перед тегом версії)
 
 - [ ] `turbo test` — всі unit-тести (API + Web) зелені
-- [ ] `turbo test:e2e` — всі e2e-сценарії зелені
+- [ ] `turbo test:e2e` — всі e2e-сценарії (API + UI) зелені
 - [ ] Smoke test: `POST /auth/login` → 200, `GET /spaces` → 200
 - [ ] `docs/06-testing/coverage-report-after-development.md` оновлено
 - [ ] `git tag vX.X` створено після merge

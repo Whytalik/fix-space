@@ -55,7 +55,15 @@ export function devVerifyUser(email: string) {
 }
 
 export function verifyEmail(token: string) {
-  return apiFetch<{ message: string }>(`/auth/verify-email?token=${token}`, {
+  return apiFetch<{ message: string }>("/auth/verify", {
     method: "POST",
+    body: { token },
+  });
+}
+
+export function resendVerification(email: string) {
+  return apiFetch<{ message: string }>("/auth/resend-verification", {
+    method: "POST",
+    body: { email },
   });
 }

@@ -36,11 +36,11 @@
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `PropertyType`       | `TEXT`, `NUMBER`, `DATE`, `CHECKBOX`, `SELECT`, `STATUS`, `RELATION`, `FORMULA`, `RATING`, `PROGRESS`, `DURATION`, `BUTTON` |
 | `AutomationTrigger`  | `ON_RECORD_CREATE`, `ON_FIELD_CHANGE`, `ON_SCHEDULE`                                                                        |
-| `AutomationStatus`   | `PENDING`, `SUCCESS`, `FAILED`, `SKIPPED`                                                                                   |
-| `NotificationType`   | `INTEGRATION`, `AUTOMATION`, `SYSTEM`                                                                                       |
-| `IntegrationService` | `BINANCE`, `BYBIT`, `OKX`, `MT5`, `CTRADER`                                                                                 |
-| `IntegrationStatus`  | `CONNECTED`, `SYNCING`, `ERROR`, `DISCONNECTED`                                                                             |
-| `ImportStatus`       | `PENDING`, `IN_PROGRESS`, `COMPLETED`, `FAILED`                                                                             |
+| `AutomationStatus`   | `SUCCESS`, `FAILURE`, `SKIPPED`                                                                                             |
+| `NotificationType`   | `SYSTEM`, `ALERT`, `INTEGRATION`                                                                                            |
+| `IntegrationService` | `BINANCE`, `BYBIT`, `OKX`, `METATRADER5`, `CTRADER`                                                                         |
+| `IntegrationStatus`  | `ACTIVE`, `INACTIVE`, `ERROR`                                                                                               |
+| `ImportStatus`       | `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`                                                                              |
 
 ### 1.3. ER-діаграма
 
@@ -177,7 +177,7 @@ _Для забезпечення швидкості (відповідь API < 30
 | Сутність                 | Батько              | Призначення                                                                            |
 | ------------------------ | ------------------- | -------------------------------------------------------------------------------------- |
 | `User`                   | —                   | Акаунт; власник усіх даних платформи                                                   |
-| `Space`                  | User                | Ізольований робочий простір; мін. 1, макс. 10 на користувача                           |
+| `Space`                  | User                | Ізольований робочий простір; мін. 1, макс. 5 на користувача                            |
 | `Section`                | Space               | Іменована навігаційна група баз даних у сайдбарі; не зберігає даних                    |
 | `Database`               | Space (+ Section?)  | Структурована колекція записів із набором властивостей; `recordLimit`, `isLocked`      |
 | `Property`               | Database            | Колонка бази даних із фіксованим типом і конфігурацією                                 |
@@ -205,15 +205,15 @@ _Для забезпечення швидкості (відповідь API < 30
 
 ### `User`
 
-| Поле           | Тип      | Nullable | Опис                                                    |
-| -------------- | -------- | -------- | ------------------------------------------------------- |
-| `id`           | UUID     | —        | Первинний ключ                                          |
-| `email`        | String   | —        | Унікальна email-адреса                                  |
-| `username`     | String   | —        | Унікальний нікнейм                                      |
-| `passwordHash` | String   | ✓        | bcrypt-хеш пароля; `null` якщо вхід тільки через Google |
-| `icon`         | String   | ✓        | URL аватару профілю                                     |
-| `isVerified`   | Boolean  | —        | Підтверджений email; за замовчуванням `false`           |
-| `createdAt`    | DateTime | —        | Час реєстрації                                          |
+| Поле           | Тип      | Nullable | Опис                                          |
+| -------------- | -------- | -------- | --------------------------------------------- |
+| `id`           | UUID     | —        | Первинний ключ                                |
+| `email`        | String   | —        | Унікальна email-адреса                        |
+| `username`     | String   | —        | Унікальний нікнейм                            |
+| `passwordHash` | String   | —        | bcrypt-хеш пароля                             |
+| `icon`         | String   | ✓        | URL аватару профілю                           |
+| `isVerified`   | Boolean  | —        | Підтверджений email; за замовчуванням `false` |
+| `createdAt`    | DateTime | —        | Час реєстрації                                |
 
 ### `RefreshToken`
 
@@ -286,29 +286,36 @@ _Для забезпечення швидкості (відповідь API < 30
 
 ### `IntegrationConnection`
 
-| Поле          | Тип                | Nullable | Опис                                                  |
-| ------------- | ------------------ | -------- | ----------------------------------------------------- |
-| `id`          | UUID               | —        | Первинний ключ                                        |
-| `userId`      | UUID (FK)          | —        | → `User`                                              |
-| `service`     | IntegrationService | —        | `BINANCE` / `BYBIT` / `OKX` / `MT5` / `CTRADER`       |
-| `name`        | String             | —        | Довільна мітка підключення (напр. «Binance Main»)     |
-| `credentials` | Json               | —        | Зашифровані облікові дані (API Key, OAuth token тощо) |
-| `status`      | IntegrationStatus  | —        | `CONNECTED` / `SYNCING` / `ERROR` / `DISCONNECTED`    |
-| `lastSyncAt`  | DateTime           | ✓        | Час останньої успішної синхронізації                  |
-| `createdAt`   | DateTime           | —        | Час підключення                                       |
-| `updatedAt`   | DateTime           | —        | Час останньої зміни                                   |
-| `config`      | Json               | ✓        | Додаткова конфігурація (тип ринку, діапазон дат тощо) |
+| Поле                  | Тип                | Nullable | Опис                                                        |
+| --------------------- | ------------------ | -------- | ----------------------------------------------------------- |
+| `id`                  | UUID               | —        | Первинний ключ                                              |
+| `userId`              | UUID (FK)          | —        | → `User`                                                    |
+| `service`             | IntegrationService | —        | `BINANCE` / `BYBIT` / `OKX` / `METATRADER5` / `CTRADER`     |
+| `name`                | String             | —        | Довільна мітка підключення (напр. «Binance Main»)           |
+| `credentials`         | Json               | —        | Зашифровані облікові дані (API Key, OAuth token тощо)       |
+| `status`              | IntegrationStatus  | —        | `ACTIVE` / `INACTIVE` / `ERROR` (за замовчуванням `ACTIVE`) |
+| `syncInterval`        | Int                | —        | Інтервал синхронізації в хвилинах (за замовчуванням 5)      |
+| `marketType`          | String             | ✓        | Тип ринку (напр., spot, futures)                            |
+| `externalAccountId`   | String             | ✓        | Зовнішній ідентифікатор рахунку                             |
+| `lastSyncAt`          | DateTime           | ✓        | Час останньої успішної синхронізації                        |
+| `lastSyncError`       | String             | ✓        | Текст останньої помилки синхронізації                       |
+| `consecutiveFailures` | Int                | —        | Кількість послідовних помилок (за замовчуванням 0)          |
+| `createdAt`           | DateTime           | —        | Час підключення                                             |
+| `updatedAt`           | DateTime           | —        | Час останньої зміни                                         |
+| `config`              | Json               | ✓        | Додаткова конфігурація (діапазон дат тощо)                  |
 
 ### `Space`
 
-| Поле        | Тип       | Nullable | Опис                                       |
-| ----------- | --------- | -------- | ------------------------------------------ |
-| `id`        | UUID      | —        | Первинний ключ                             |
-| `ownerId`   | UUID (FK) | —        | → `User`                                   |
-| `name`      | String    | —        | Назва простору (унікальна для користувача) |
-| `icon`      | String    | ✓        | Emoji або URL іконки                       |
-| `isDefault` | Boolean   | —        | Основний простір (не може бути видалений)  |
-| `createdAt` | DateTime  | —        | Час створення                              |
+| Поле        | Тип       | Nullable | Опис                                               |
+| ----------- | --------- | -------- | -------------------------------------------------- |
+| `id`        | UUID      | —        | Первинний ключ                                     |
+| `ownerId`   | UUID (FK) | —        | → `User`                                           |
+| `name`      | String    | —        | Назва простору (унікальна для користувача)         |
+| `icon`      | String    | ✓        | Emoji або URL іконки                               |
+| `isDefault` | Boolean   | —        | Основний простір (не може бути видалений)          |
+| `isDemo`    | Boolean   | —        | Демонстраційний простір (за замовчуванням `false`) |
+| `createdAt` | DateTime  | —        | Час створення                                      |
+| `config`    | Json      | ✓        | Конфігурація простору                              |
 
 ### `Section`
 
@@ -317,6 +324,7 @@ _Для забезпечення швидкості (відповідь API < 30
 | `id`        | UUID      | —        | Первинний ключ                            |
 | `spaceId`   | UUID (FK) | —        | → `Space`                                 |
 | `name`      | String    | —        | Назва секції (унікальна в межах простору) |
+| `key`       | String    | ✓        | Системний ключ секції                     |
 | `position`  | Int       | —        | Порядок у сайдбарі                        |
 | `icon`      | String    | ✓        | Emoji або URL іконки                      |
 | `color`     | String    | ✓        | Колір заголовка секції                    |
@@ -332,13 +340,17 @@ _Для забезпечення швидкості (відповідь API < 30
 | `sectionId`          | UUID (FK) | ✓        | → `Section`; `null` якщо база поза секцією (SetNull при видаленні секції) |
 | `name`               | String    | —        | Системна назва (унікальна в межах простору)                               |
 | `title`              | String    | —        | Відображувана назва                                                       |
+| `type`               | String    | ✓        | Тип бази даних                                                            |
+| `key`                | String    | ✓        | Унікальний системний ключ бази даних                                      |
 | `icon`               | String    | ✓        | Emoji або URL іконки                                                      |
 | `recordLimit`        | Int       | ✓        | Максимальна кількість активних записів; `null` = без обмеження            |
 | `useDefaultTemplate` | Boolean   | —        | Автоматично застосовувати шаблон за замовчуванням при створенні запису    |
+| `enableStats`        | Boolean   | —        | Прапорець ввімкнення статистики (за замовчуванням `false`)                |
 | `isPreset`           | Boolean   | —        | Попередньо налаштована (системна) база; не можна видалити                 |
 | `isLocked`           | Boolean   | —        | Структура заблокована (заборонено змінювати властивості)                  |
 | `createdAt`          | DateTime  | —        | Час створення                                                             |
 | `updatedAt`          | DateTime  | —        | Час останньої зміни                                                       |
+| `config`             | Json      | ✓        | Налаштування та конфігурація бази даних                                   |
 
 ### `Property`
 
@@ -346,6 +358,7 @@ _Для забезпечення швидкості (відповідь API < 30
 | ------------- | ------------ | -------- | ------------------------------------------------------------------------------------------------------------------- |
 | `id`          | UUID         | —        | Первинний ключ                                                                                                      |
 | `databaseId`  | UUID (FK)    | —        | → `Database`                                                                                                        |
+| `groupId`     | UUID (FK)    | ✓        | → `PropertyGroup` (група властивостей)                                                                              |
 | `name`        | String       | —        | Назва властивості (унікальна в межах бази)                                                                          |
 | `type`        | PropertyType | —        | Тип: TEXT / NUMBER / DATE / CHECKBOX / SELECT / STATUS / RELATION / FORMULA / RATING / PROGRESS / DURATION / BUTTON |
 | `position`    | Int          | —        | Порядок стовпця в таблиці                                                                                           |
@@ -361,16 +374,21 @@ _Для забезпечення швидкості (відповідь API < 30
 
 ### `Record`
 
-| Поле         | Тип       | Nullable | Опис                                                                             |
-| ------------ | --------- | -------- | -------------------------------------------------------------------------------- |
-| `id`         | UUID      | —        | Первинний ключ                                                                   |
-| `databaseId` | UUID (FK) | —        | → `Database`                                                                     |
-| `templateId` | UUID (FK) | ✓        | → `Template`; шаблон, використаний при створенні (SetNull при видаленні шаблону) |
-| `name`       | String    | —        | Заголовок запису; за замовчуванням `"Untitled"`                                  |
-| `icon`       | String    | ✓        | Emoji іконки запису                                                              |
-| `deletedAt`  | DateTime  | ✓        | Час переміщення до Кошика; `null` = активний запис                               |
-| `createdAt`  | DateTime  | —        | Час створення                                                                    |
-| `updatedAt`  | DateTime  | —        | Час останньої зміни                                                              |
+| Поле                  | Тип       | Nullable | Опис                                               |
+| --------------------- | --------- | -------- | -------------------------------------------------- |
+| `id`                  | UUID      | —        | Первинний ключ                                     |
+| `databaseId`          | UUID (FK) | —        | → `Database`                                       |
+| `templateId`          | UUID (FK) | ✓        | → `Template`; шаблон, використаний при створенні   |
+| `sourceIntegrationId` | String    | ✓        | Ідентифікатор джерела інтеграції                   |
+| `sourceLabel`         | String    | ✓        | Мітка джерела інтеграції                           |
+| `sourcePositionId`    | String    | ✓        | Ідентифікатор позиції в зовнішній системі          |
+| `sourceCurrency`      | String    | ✓        | Валюта операції                                    |
+| `name`                | String    | —        | Заголовок запису; за замовчуванням `"Untitled"`    |
+| `icon`                | String    | ✓        | Emoji іконки запису                                |
+| `config`              | Json      | ✓        | Додаткові налаштування запису                      |
+| `deletedAt`           | DateTime  | ✓        | Час переміщення до Кошика; `null` = активний запис |
+| `createdAt`           | DateTime  | —        | Час створення                                      |
+| `updatedAt`           | DateTime  | —        | Час останньої зміни                                |
 
 ### `PropertyValue`
 
@@ -400,11 +418,13 @@ _Для забезпечення швидкості (відповідь API < 30
 | `name`        | String    | —        | Назва шаблону (унікальна в межах бази); за замовчуванням `"Untitled"` |
 | `description` | String    | ✓        | Короткий опис для вибору при створенні запису                         |
 | `icon`        | String    | ✓        | Emoji або URL іконки                                                  |
+| `namePattern` | String    | ✓        | Шаблон для автогенерації назви запису                                 |
+| `content`     | Json      | —        | Попередньо сконфігурована контентна область (за замовчуванням `{}`)   |
 | `isDefault`   | Boolean   | —        | Застосовується автоматично якщо `Database.useDefaultTemplate = true`  |
 | `position`    | Int       | —        | Порядок у списку шаблонів                                             |
 | `createdAt`   | DateTime  | —        | Час створення                                                         |
 | `updatedAt`   | DateTime  | —        | Час останньої зміни                                                   |
-| `config`      | Json      | ✓        | Додаткова конфігурація (наприклад `namePattern` для токенів назви)    |
+| `config`      | Json      | ✓        | Додаткова конфігурація                                                |
 
 ### `TemplatePropertyValue`
 
@@ -424,13 +444,15 @@ _Для забезпечення швидкості (відповідь API < 30
 | `name`          | String    | —        | Назва подання (унікальна в межах бази)                  |
 | `isDefault`     | Boolean   | —        | Відкривається першим при вході до бази                  |
 | `isLocked`      | Boolean   | —        | Конфігурацію подання заблоковано від змін               |
+| `pageSize`      | Int       | —        | Кількість записів на сторінку (за замовчуванням 50)     |
 | `position`      | Int       | —        | Порядок вкладки                                         |
 | `filters`       | Json      | ✓        | Збережена конфігурація фільтрів (`FilterSet`)           |
 | `sort`          | Json      | ✓        | Збережені критерії сортування                           |
 | `groupBy`       | String    | ✓        | ID властивості для групування                           |
-| `columnOrder`   | Json      | ✓        | Масив ID властивостей у порядку стовпців                |
 | `columnWidths`  | Json      | ✓        | Ширина кожного стовпця у пікселях                       |
 | `hiddenColumns` | String[]  | —        | Масив ID прихованих властивостей; за замовчуванням `[]` |
+| `textWrap`      | Boolean   | —        | Прапорець перенесення тексту (за замовчуванням `false`) |
+| `searchQuery`   | String    | ✓        | Збережений пошуковий запит                              |
 | `createdAt`     | DateTime  | —        | Час створення                                           |
 | `updatedAt`     | DateTime  | —        | Час останньої зміни                                     |
 
@@ -445,10 +467,9 @@ _Для забезпечення швидкості (відповідь API < 30
 | `condition`  | Json              | ✓        | Умова тригера (яке поле, яке значення або розклад)                            |
 | `actions`    | Json              | —        | Масив дій до 5 елементів (встановити поле / створити запис / зв'язати записи) |
 | `active`     | Boolean           | —        | Автоматизація увімкнена; за замовчуванням `true`                              |
-| `position`   | Int               | —        | Порядок у списку автоматизацій                                                |
 | `createdAt`  | DateTime          | —        | Час створення                                                                 |
 | `updatedAt`  | DateTime          | —        | Час останньої зміни                                                           |
-| `config`     | Json              | ✓        | Додаткова конфігурація (захист від рекурсії, метадані шаблону)                |
+| `config`     | Json              | ✓        | Додаткова конфігурація                                                        |
 
 ### `AutomationLog`
 
@@ -457,7 +478,7 @@ _Для забезпечення швидкості (відповідь API < 30
 | `id`             | UUID             | —        | Первинний ключ                                           |
 | `automationId`   | UUID (FK)        | —        | → `Automation`                                           |
 | `sourceRecordId` | UUID             | ✓        | ID запису, що спричинив тригер; `null` для `ON_SCHEDULE` |
-| `status`         | AutomationStatus | —        | `PENDING` / `SUCCESS` / `FAILED` / `SKIPPED`             |
+| `status`         | AutomationStatus | —        | `SUCCESS` / `FAILURE` / `SKIPPED`                        |
 | `result`         | String           | ✓        | Опис результату або причини помилки в людській мові      |
 | `createdAt`      | DateTime         | —        | Час виконання                                            |
 

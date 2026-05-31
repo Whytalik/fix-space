@@ -1,7 +1,7 @@
 "use client";
 
-import { Combobox } from "@/components/ui/primitives/combobox";
-import { Toggle } from "@/components/ui/primitives/toggle";
+import { Combobox } from "@/components/ui/primitives/inputs/combobox";
+import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
 import type {

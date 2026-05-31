@@ -31,7 +31,7 @@ component "Guards & Filters" as Infra
 component "Prisma ORM" as Prisma
 
 component "Google OAuth" as Google
-component "SMTP Server" as SMTP
+component "Resend / Mail Service" as Mail
 
 Auth --> Infra
 User --> Infra
@@ -44,7 +44,7 @@ Integrations --> Infra
 Infra --> Prisma
 
 Auth --> Google : OAuth 2.0
-Auth --> SMTP : Email
-Automation --> SMTP : Notifications
+Auth --> Mail : Email
+Automation --> Mail : Notifications
 
 @enduml

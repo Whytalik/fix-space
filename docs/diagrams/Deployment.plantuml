@@ -35,7 +35,7 @@ node "Railway" as Railway_Node #F8F9FA {
 
 node "Зовнішні сервіси" as Ext_Node #FFF9C4 {
   artifact "Google OAuth 2.0" as Google
-  artifact "SMTP Server\n(Nodemailer)" as SMTP
+  artifact "Resend SDK / API" as Resend
 }
 
 Vercel_Node -[hidden]down-> Railway_Node
@@ -46,7 +46,7 @@ SSR ..> NestJS : HTTPS REST API (SSR)
 CDN ..> SSR : Edge-кешування
 
 NestJS ..> PgDB : Prisma ORM (SSL)
-NestJS ..> SMTP : SMTP
+NestJS ..> Resend : API / SMTP
 NestJS ..> Google : OAuth 2.0
 
 SSR ..> Monitor : Web Vitals

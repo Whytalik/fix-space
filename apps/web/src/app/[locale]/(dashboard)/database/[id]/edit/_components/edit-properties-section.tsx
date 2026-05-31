@@ -1,9 +1,9 @@
 "use client";
 
-import { PropertyIcon } from "@/components/property/property-icon";
+import { PropertyIcon } from "@/features/property/components/property-icon";
 import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
-import { Button } from "@/components/ui/primitives/button";
-import { TabSwitcher, type TabItem } from "@/components/ui/primitives/tab-switcher";
+import { Button } from "@/components/ui/primitives/actions/button";
+import { TabSwitcher, type TabItem } from "@/components/ui/primitives/navigation/tab-switcher";
 import {
   closestCenter,
   DndContext,

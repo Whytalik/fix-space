@@ -3,7 +3,7 @@
 import { ColorPicker } from "@/components/ui/color-picker/color-picker";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { useAppContext } from "@/context/app-context";
 import { useEscape } from "@/hooks/useEscape";
 import { useMutation } from "@/hooks/useMutation";

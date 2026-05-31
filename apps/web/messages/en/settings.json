@@ -1,0 +1,97 @@
+{
+  "Settings": {
+    "appearance": {
+      "theme": {
+        "title": "Theme",
+        "description": "Customize the appearance of your workspace.",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "language": {
+        "title": "Language",
+        "description": "Choose your interface language."
+      }
+    }
+  },
+  "SettingsModal": {
+    "title": "Settings",
+    "profile": "Profile",
+    "appearance": "Appearance",
+    "space": "Space",
+    "database": "Database",
+    "section": "Section",
+    "record": "Record",
+    "manageSettings": "Manage your",
+    "settings": "Settings"
+  },
+  "SpaceSettingsComp": {
+    "sidebar": "Sidebar",
+    "datetime": "Date & Time",
+    "timeFormat12h": "12h",
+    "timeFormat24h": "24h",
+    "monday": "Monday",
+    "sunday": "Sunday",
+    "defaultUpdated": "Default space updated.",
+    "spaceDuplicated": "Space duplicated.",
+    "spaceDeleted": "Space deleted.",
+    "settingsSaved": "Settings saved.",
+    "spaces": "Spaces",
+    "saving": "Saving…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "setAsDefault": "Set as default",
+    "default": "Default",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "saveChanges": "Save changes",
+    "timeFormat": "Time format",
+    "startOfWeek": "Start of week",
+    "dateFormat": "Date format",
+    "placeholderDateFormat": "e.g. DD/MM/YYYY",
+    "deleteSpace": "Delete space",
+    "deleteSpaceDesc": "All databases and records inside will be permanently deleted. This action cannot be undone.",
+    "delete": "Delete"
+  },
+  "DatabaseSettingsComp": {
+    "settingsSaved": "Settings saved.",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "saving": "Saving…",
+    "saveChanges": "Save changes"
+  },
+  "SectionSettingsComp": {
+    "settingsSaved": "Settings saved.",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "defaultColor": "Default color",
+    "saving": "Saving…",
+    "saveChanges": "Save changes"
+  },
+  "RecordSettingsComp": {
+    "settingsSaved": "Settings saved.",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "saving": "Saving…",
+    "saveChanges": "Save changes"
+  },
+  "ProfileSettingsComp": {
+    "general": "General",
+    "security": "Security",
+    "username": "Username",
+    "placeholderUsername": "Enter username",
+    "profileUpdated": "Profile updated successfully.",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "currentPassword": "Current password",
+    "placeholderCurrentPassword": "Enter current password",
+    "newPassword": "New password",
+    "placeholderNewPassword": "Enter new password",
+    "confirmPassword": "Confirm new password",
+    "placeholderConfirmPassword": "Confirm new password",
+    "passwordChanged": "Password changed successfully.",
+    "allFieldsRequired": "All fields are required.",
+    "passwordsNotMatch": "New passwords do not match.",
+    "changePassword": "Change password",
+    "changing": "Changing…"
+  }
+}

@@ -14,15 +14,16 @@ export function LandingBackground() {
         className="absolute inset-0"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
+            linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
           `,
-          backgroundSize: "50px 50px",
-          maskImage: "radial-gradient(ellipse 100% 100% at 50% 0%, #000 20%, transparent 90%)",
-          WebkitMaskImage: "radial-gradient(ellipse 100% 100% at 50% 0%, #000 20%, transparent 90%)",
-          transform: "perspective(600px) rotateX(45deg) translateY(-10%) scale(2)",
+          backgroundSize: "60px 60px",
+          maskImage: "radial-gradient(ellipse 80% 80% at 50% 0%, #000 20%, transparent 100%)",
+          WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 0%, #000 20%, transparent 100%)",
+          transform: "perspective(800px) rotateX(45deg) translateY(-5%) scale(1.8)",
           transformOrigin: "top",
-          opacity: 0.8,
+          willChange: "transform",
+          opacity: 0.6,
         }}
       />
     </div>

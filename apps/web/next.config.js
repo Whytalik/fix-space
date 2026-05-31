@@ -28,7 +28,12 @@ const stubPath = path.resolve(__dirname, "src/lib/server-only-stub.js");
 const nextConfig = {
   output: "standalone",
   outputFileTracingRoot: monorepoRoot,
-  allowedDevOrigins: ["http://localhost:3000"],
+  allowedDevOrigins: [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+  ],
   serverExternalPackages: [
     "@nestjs/common",
     "@nestjs/core",
@@ -43,6 +48,9 @@ const nextConfig = {
     "reflect-metadata",
     "express",
   ],
+  experimental: {
+  },
+  reactCompiler: true,
   webpack(config, { isServer }) {
     if (!isServer) {
       const aliases = {};

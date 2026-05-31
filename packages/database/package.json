@@ -1,7 +1,6 @@
 {
   "name": "@fixspace/database",
   "version": "1.0.0",
-  "type": "module",
   "main": "./dist/src/client.js",
   "types": "./dist/src/client.d.ts",
   "exports": {
@@ -11,7 +10,7 @@
     }
   },
   "scripts": {
-    "build": "pnpm exec tsc -p tsconfig.build.json",
+    "build": "pnpm exec tsc -p tsconfig.build.json && node -e \"const fs = require('fs'); const dir = './dist/generated/client'; if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(dir + '/client.js', '\\\"use strict\\\";\\nmodule.exports = require(\\\"../../../generated/client/client.js\\\");\\n'); fs.writeFileSync(dir + '/index.js', '\\\"use strict\\\";\\nmodule.exports = require(\\\"../../../generated/client/index.js\\\");\\n'); fs.writeFileSync(dir + '/index.d.ts', 'export * from \\\"../../../generated/client/index\\\";\\n'); fs.writeFileSync(dir + '/client.d.ts', 'export * from \\\"../../../generated/client/client\\\";\\n');\"",
     "db:migrate:deploy": "dotenv -e ../../.env.production -e ../../.env -- prisma migrate deploy",
     "db:migrate:dev": "dotenv -e ../../.env.development -e ../../.env -- prisma migrate dev",
     "db:push": "dotenv -e ../../.env.development -e ../../.env -- prisma db push",

@@ -2,8 +2,8 @@
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import { Combobox, type ComboboxOption } from "@/components/ui/primitives/combobox";
-import { Toggle } from "@/components/ui/primitives/toggle";
+import { Combobox, type ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
+import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 

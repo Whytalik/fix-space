@@ -1,8 +1,8 @@
 "use client";
 
-import { Card } from "@/components/ui/primitives/card";
+import { Card } from "@/components/ui/primitives/display/card";
 import { Inbox, Plus, FileText } from "lucide-react";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import type { RecordResponseDto } from "@fixspace/domain";
 import Link from "next/link";
 import { IconDisplay } from "@/components/ui/icons/icon-display";

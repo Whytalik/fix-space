@@ -43,7 +43,8 @@
         "api",
         "web",
         "deps",
-        "ci"
+        "ci",
+        "docs"
       ]
     ],
     "scope-empty": [2, "never"],

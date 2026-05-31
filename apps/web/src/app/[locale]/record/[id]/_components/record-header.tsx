@@ -3,7 +3,7 @@
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import type { RecordResponseDto } from "@fixspace/domain";
 import { Eye, Notebook, Pencil, Trash2 } from "lucide-react";
 import type React from "react";

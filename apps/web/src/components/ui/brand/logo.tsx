@@ -7,10 +7,11 @@ interface LogoProps {
   size?: number;
   href?: string;
   className?: string;
+  withText?: boolean;
 }
 
-export function Logo({ size = 28, href, className }: LogoProps) {
-  const content = (
+export function Logo({ size = 28, href, className, withText = true }: LogoProps) {
+  const content = withText ? (
     <>
       <LogoIcon size={size} />
       <span
@@ -20,6 +21,8 @@ export function Logo({ size = 28, href, className }: LogoProps) {
         FIX Space
       </span>
     </>
+  ) : (
+    <LogoIcon size={size} />
   );
 
   if (href) {

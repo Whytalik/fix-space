@@ -4,6 +4,16 @@ import { nestJsConfig } from '@fixspace/eslint-config/nest-js';
 export default [
   ...nestJsConfig,
   {
+    files: ['test/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['./tsconfig.e2e.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
     ignores: ['.prettierrc.mjs', 'eslint.config.mjs'],
   },
 ];

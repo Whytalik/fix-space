@@ -1,6 +1,6 @@
 "use client";
 
-import { Combobox, type ComboboxOption } from "@/components/ui/primitives/combobox";
+import { Combobox, type ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
 import { useDatabaseContext } from "@/context/database-context";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";

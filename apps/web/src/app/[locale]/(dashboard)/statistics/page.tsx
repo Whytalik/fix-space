@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Card } from "@/components/ui/primitives/card";
-import { Select } from "@/components/ui/primitives/select";
-import { DateInput } from "@/components/ui/primitives/date-input";
-import { Button } from "@/components/ui/primitives/button";
-import { TabSwitcher, type TabItem } from "@/components/ui/primitives/tab-switcher";
-import { AreaChartWrapper } from "@/components/charts/area-chart";
-import { BarChartWrapper } from "@/components/charts/bar-chart";
+import { Card } from "@/components/ui/primitives/display/card";
+import { Select } from "@/components/ui/primitives/inputs/select";
+import { DateInput } from "@/components/ui/primitives/inputs/date-input";
+import { Button } from "@/components/ui/primitives/actions/button";
+import { TabSwitcher, type TabItem } from "@/components/ui/primitives/navigation/tab-switcher";
+import { AreaChartWrapper } from "@/features/charts/components/area-chart";
+import { BarChartWrapper } from "@/features/charts/components/bar-chart";
 import { useTheme } from "@/context/theme-context";
 import { useTranslations, useFormatter } from "next-intl";
 import {

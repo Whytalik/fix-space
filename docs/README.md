@@ -1,25 +1,24 @@
-# FIX Space Documentation
+# Технічні специфікації та планування проєкту FIX Space
 
-> Diploma project documentation for defense committee.
+> Пакет проектної та архітектурної документації, розроблений до початку реалізації системи.
 
-## For the Defense Committee
+## Структура специфікацій
 
-| Section                               | What's Inside                                                                    |
-| ------------------------------------- | -------------------------------------------------------------------------------- |
-| [01 Introduction](01-introduction/)   | Project vision, glossary, scope                                                  |
-| [02 Requirements](02-requirements/)   | Functional & non-functional requirements, property types, evaluation methodology |
-| [03 Architecture](03-architecture/)   | System design, database schema, algorithms, security, [diagrams](diagrams/)      |
-| [04 Planning](04-planning/)           | Risks, milestones, known issues, [future work](04-planning/future-work.md)       |
-| [05 Development](05-development/)     | Developer setup, methodology, API contract                                       |
-| [06 Testing](06-testing/)             | Test strategy and feature testing workflows                                      |
-| [07 User Guide](07-user-guide/)       | How to use the application                                                       |
-| [08 Deployment](08-deployment/)       | Vercel + Railway deployment guide                                                |
-| [09 Design System](09-design-system/) | UI component specifications                                                      |
+| Розділ                                | Вміст та призначення                                                               |
+| :------------------------------------ | :--------------------------------------------------------------------------------- |
+| [01 Introduction](01-introduction/)   | Концепція (Vision), межі розробки (Scope) та термінологічний глосарій              |
+| [02 Requirements](02-requirements/)   | Функціональні та нефункціональні вимоги, типи властивостей та методологія оцінки   |
+| [03 Architecture](03-architecture/)   | Системна архітектура, схема бази даних, специфікація алгоритмів та модель безпеки  |
+| [04 Planning](04-planning/)           | Реєстр ризиків, план етапів розробки (Milestones) та дорожня карта розширення      |
+| [05 Development](05-development/)     | Регламенти розробки (DoD), Git-workflow, контракт API та стандарти інтерфейсу      |
+| [06 Testing](06-testing/)             | План та стратегія забезпечення якості, тест-кейси, очікуване покриття коду тестами |
+| [07 Deployment](07-deployment/)       | Специфікація розгортання середовищ та конфігурація конвеєра CI/CD                  |
+| [08 Design System](08-design-system/) | Дизайн-система, специфікація CSS-токенів та компонентів інтерфейсу                 |
 
-## Quick Start
+## Швидкий доступ до ключових розділів
 
-- **What is FIX Space?** → [01-introduction/vision.md](01-introduction/vision.md)
-- **What does it do?** → [02-requirements/functional.md](02-requirements/functional.md)
-- **How is it built?** → [03-architecture/overview.md](03-architecture/overview.md)
-- **What does it do in detail?** → [02-requirements/functional.md](02-requirements/functional.md)
-- **How is it tested?** → [06-testing/strategy.md](06-testing/strategy.md)
+- **Концепція продукту** → [01-introduction/vision.md](01-introduction/vision.md)
+- **Функціональні вимоги** → [02-requirements/functional.md](02-requirements/functional.md)
+- **Архітектурний проект** → [03-architecture/overview.md](03-architecture/overview.md)
+- **План забезпечення якості** → [06-testing/strategy.md](06-testing/strategy.md)
+- **Специфікація CI/CD** → [07-deployment/ci-cd.md](07-deployment/ci-cd.md)

@@ -35,10 +35,10 @@ header.payload.signature
 
 ### Зберігання токенів
 
-| Токен             | Де зберігається                  | Чому                                                 |
-| ----------------- | -------------------------------- | ---------------------------------------------------- |
-| Access (15 хв)    | HTTP-only cookie `access_token`  | JavaScript не може прочитати → захист від XSS        |
-| Refresh (30 днів) | HTTP-only cookie `refresh_token` | Те саме; плюс `revokedAt` в БД для явного анулювання |
+| Токен            | Де зберігається                  | Чому                                                 |
+| ---------------- | -------------------------------- | ---------------------------------------------------- |
+| Access (15 хв)   | HTTP-only cookie `access_token`  | JavaScript не може прочитати → захист від XSS        |
+| Refresh (7 днів) | HTTP-only cookie `refresh_token` | Те саме; плюс `revokedAt` в БД для явного анулювання |
 
 Прапор `SameSite=Lax` на cookies — додатковий захист від CSRF: cookie не надсилається при cross-site запитах.
 
@@ -200,7 +200,8 @@ prisma.record.findMany({ where: { name: userInput } })
 | ---------------------------------- | --------------------------------------------------------- |
 | `JWT_SECRET`, `JWT_REFRESH_SECRET` | `.env.*` файли (не в git)                                 |
 | `DATABASE_URL`                     | `.env.*` файли                                            |
-| SMTP credentials                   | `.env.*` файли                                            |
+| `RESEND_API_KEY`                   | `.env.*` файли                                            |
+| SMTP credentials (fallback)        | `.env.*` файли                                            |
 | API ключі брокерів (Binance, MT5)  | Зашифровані в `IntegrationConnection.credentials` (JSONB) |
 
 **Правило:** `.env.example` — шаблон з назвами змінних без значень, версіонується в git. `.env.development` та `.env.production` — в `.gitignore`.

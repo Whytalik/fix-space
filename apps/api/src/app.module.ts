@@ -5,22 +5,22 @@ import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from "nestjs-i18n";
 import * as path from "path";
 
-import { AuthModule } from "./auth/auth.module";
+import { AuthModule } from "./core/auth/auth.module";
 import { RequestContextMiddleware } from "./common/context/request-context.middleware";
 import { LoggerModule } from "./common/logger/logger.module";
-import { validate } from "./config/env.validation";
-import { DatabaseModule } from "./database/database.module";
-import { HealthModule } from "./health/health.module";
-import { JwtAuthGuard } from "./jwt/jwt-auth.guard";
-import { JwtModule } from "./jwt/jwt.module";
-import { PropertyValueModule } from "./property-value/property-value.module";
-import { PropertyModule } from "./property/property.module";
-import { RecordModule } from "./record/record.module";
-import { SettingsModule } from "./settings/settings.module";
-import { SpaceModule } from "./space/space.module";
-import { TemplatePropertyValueModule } from "./template-property-value/template-property-value.module";
-import { TemplateModule } from "./template/template.module";
-import { UserModule } from "./user/user.module";
+import { validate } from "./core/config/env.validation";
+import { DatabaseModule } from "./modules/database/database.module";
+import { HealthModule } from "./core/health/health.module";
+import { JwtAuthGuard } from "./core/jwt/jwt-auth.guard";
+import { JwtModule } from "./core/jwt/jwt.module";
+import { PropertyValueModule } from "./modules/property-value/property-value.module";
+import { PropertyModule } from "./modules/property/property.module";
+import { RecordModule } from "./modules/record/record.module";
+import { SettingsModule } from "./modules/settings/settings.module";
+import { SpaceModule } from "./modules/space/space.module";
+import { TemplatePropertyValueModule } from "./modules/template-property-value/template-property-value.module";
+import { TemplateModule } from "./modules/template/template.module";
+import { UserModule } from "./modules/user/user.module";
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { UserModule } from "./user/user.module";
     I18nModule.forRoot({
       fallbackLanguage: "en",
       loaderOptions: {
-        path: path.join(__dirname, "i18n/"),
+        path: path.join(__dirname, "core/i18n/"),
         watch: true,
       },
       resolvers: [
@@ -41,7 +41,12 @@ import { UserModule } from "./user/user.module";
         new AcceptLanguageResolver(),
       ],
     }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 200 }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: process.env.NODE_ENV === "test" ? 10000 : 200,
+      },
+    ]),
     LoggerModule,
     UserModule,
     AuthModule,
@@ -61,10 +66,14 @@ import { UserModule } from "./user/user.module";
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
+    ...(process.env.NODE_ENV === "test"
+      ? []
+      : [
+          {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard,
+          },
+        ]),
   ],
 })
 export class AppModule implements NestModule {

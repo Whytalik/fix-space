@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from "@nestjs/common";
 import { Request, Response } from "express";
+import { Prisma } from "@fixspace/database";
 
 import { getRequestContext } from "../context/request-context";
 import { AppLogger } from "../logger/app-logger.service";
@@ -15,6 +16,36 @@ const PRISMA_ERROR_MAP: Record<string, { status: number; i18nKey: string }> = {
   P2025: { status: HttpStatus.NOT_FOUND, i18nKey: "errors.NOT_FOUND" },
   P2026: { status: HttpStatus.BAD_REQUEST, i18nKey: "errors.QUERY_LIMIT_EXCEEDED" },
 };
+
+function colorMethod(method: string): string {
+  const m = method.toUpperCase();
+  switch (m) {
+    case "GET":
+      return `\x1b[32m${m}\x1b[0m`;
+    case "POST":
+      return `\x1b[33m${m}\x1b[0m`;
+    case "PUT":
+    case "PATCH":
+      return `\x1b[34m${m}\x1b[0m`;
+    case "DELETE":
+      return `\x1b[31m${m}\x1b[0m`;
+    default:
+      return `\x1b[36m${m}\x1b[0m`;
+  }
+}
+
+function colorStatus(status: number): string {
+  if (status >= 200 && status < 300) {
+    return `\x1b[32m${status}\x1b[0m`;
+  }
+  if (status >= 300 && status < 400) {
+    return `\x1b[36m${status}\x1b[0m`;
+  }
+  if (status >= 400 && status < 500) {
+    return `\x1b[33m${status}\x1b[0m`;
+  }
+  return `\x1b[31m${status}\x1b[0m`;
+}
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -47,38 +78,69 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorType = "HTTP";
 
       if (status >= 500) {
-        this.logger.error(`${errorType} ${status} | ${method} ${url} | ${message}`, {
-          stack: exception.stack,
-        });
+        this.logger.error(
+          `\x1b[31m✖\x1b[0m  [\x1b[31m${errorType}\x1b[0m] ${colorStatus(status)} | [${colorMethod(method)}] ${url} | ${message}`,
+          {
+            stack: exception.stack,
+          },
+        );
       } else if (status === 401 || status === 403) {
-        this.logger.warn(`${errorType} ${status} | ${method} ${url} | ${message}`);
+        this.logger.warn(
+          `\x1b[33m✖\x1b[0m  [\x1b[33m${errorType}\x1b[0m] ${colorStatus(status)} | [${colorMethod(method)}] ${url} | ${message}`,
+        );
       } else {
-        this.logger.log(`${errorType} ${status} | ${method} ${url} | ${message}`);
+        this.logger.log(
+          `\x1b[33m✖\x1b[0m  [\x1b[33m${errorType}\x1b[0m] ${colorStatus(status)} | [${colorMethod(method)}] ${url} | ${message}`,
+        );
       }
-    } else if (this.isPrismaError(exception)) {
-      const prismaCode = (exception as { code: string }).code;
+    } else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+      const prismaCode = exception.code;
       const mapped = PRISMA_ERROR_MAP[prismaCode];
       errorType = "DATABASE";
 
       if (mapped) {
         status = mapped.status;
         message = t(mapped.i18nKey);
-        this.logger.warn(`${errorType} ${prismaCode} | ${method} ${url} | ${message}`);
+        this.logger.warn(
+          `\x1b[33m✖\x1b[0m  [\x1b[31m${errorType}\x1b[0m] ${prismaCode} | [${colorMethod(method)}] ${url} | ${message}`,
+        );
       } else {
         status = HttpStatus.INTERNAL_SERVER_ERROR;
         message = t("errors.INTERNAL_ERROR");
-        this.logger.error(`${errorType} ${prismaCode} | ${method} ${url} | Unhandled Prisma error`, {
-          stack: (exception as Error).stack,
-        });
+        this.logger.error(
+          `\x1b[31m✖\x1b[0m  [\x1b[31m${errorType}\x1b[0m] ${prismaCode} | [${colorMethod(method)}] ${url} | Unhandled database error`,
+          {
+            stack: exception.stack,
+            meta: exception.meta,
+          },
+        );
       }
+    } else if (
+      exception instanceof Prisma.PrismaClientValidationError ||
+      exception instanceof Prisma.PrismaClientUnknownRequestError ||
+      exception instanceof Prisma.PrismaClientInitializationError
+    ) {
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      message = t("errors.INTERNAL_ERROR");
+      errorType = "DATABASE";
+
+      this.logger.error(
+        `\x1b[31m✖\x1b[0m  [\x1b[31m${errorType}\x1b[0m] | [${colorMethod(method)}] ${url} | Database Validation/Initialization error`,
+        {
+          stack: (exception as Error).stack,
+        },
+      );
     } else {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       message = t("errors.INTERNAL_ERROR");
       errorType = "UNKNOWN";
 
-      this.logger.error(`${errorType} | ${method} ${url} | ${(exception as Error)?.message || "Unknown error"}`, {
-        stack: (exception as Error)?.stack,
-      });
+      this.logger.error(
+        `\x1b[31m✖\x1b[0m  [\x1b[31m${errorType}\x1b[0m] | [${colorMethod(method)}] ${url} | ${exception instanceof Error ? exception.message : "Unknown error"}`,
+        {
+          stack: exception instanceof Error ? exception.stack : undefined,
+        },
+      );
     }
 
     response.status(status).json({
@@ -89,14 +151,5 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: url,
     });
-  }
-
-  private isPrismaError(exception: unknown): boolean {
-    return (
-      exception instanceof Error &&
-      "code" in exception &&
-      typeof (exception as { code: unknown }).code === "string" &&
-      (exception as { code: string }).code.startsWith("P")
-    );
   }
 }
