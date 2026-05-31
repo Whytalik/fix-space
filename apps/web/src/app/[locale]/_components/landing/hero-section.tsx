@@ -1,5 +1,5 @@
 import { LogoIcon } from "@/components/ui/brand/logo";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import {
   Activity,
   BarChart3,
@@ -37,6 +37,8 @@ const FloatingIcon = ({ icon: Icon, className, delay, size = "md", floatDuration
     className={`absolute hidden lg:flex items-center justify-center ${sizeMap[size].box} rounded-xl bg-surface border border-stroke shadow-xl ${className}`}
     style={{
       animation: `fade-up 0.45s ease ${delay} both, float ${floatDuration} ease-in-out ${delay} infinite`,
+      willChange: "transform",
+      transform: "translateZ(0)",
     }}
   >
     <Icon size={sizeMap[size].icon} className="text-ink-secondary" />
@@ -44,10 +46,13 @@ const FloatingIcon = ({ icon: Icon, className, delay, size = "md", floatDuration
 );
 
 export function HeroSection() {
-  const t = useTranslations("HomePage");
+  const t = useTranslations("Landing");
 
   return (
-    <section className="relative min-h-[calc(100vh-60px)] flex flex-col items-center justify-center py-24 px-6 text-center w-full overflow-hidden">
+    <section
+      id="hero"
+      className="relative min-h-[calc(100vh-60px)] flex flex-col items-center justify-center py-24 px-6 text-center w-full overflow-hidden"
+    >
       <div className="absolute inset-0 pointer-events-none">
         <FloatingIcon
           icon={TrendingUp}
@@ -138,36 +143,41 @@ export function HeroSection() {
 
       <div className="relative max-w-270 mx-auto w-full flex flex-col items-center">
         <h1
-          className="mt-20 text-[clamp(44px,6vw,80px)] font-extrabold tracking-[-0.05em] text-ink leading-[1.05] text-balance animate-fade-up"
+          className="mt-12 type-landing-hero animate-fade-up flex flex-col items-center"
           style={{ animationDelay: "0.05s", animationFillMode: "both" }}
         >
-          {t("title")}
+          <span>{t("hero.title")}</span>
+          <span className="type-landing-hero-sub mt-2">{t("hero.subtitle")}</span>
         </h1>
 
         <p
-          className="mt-5 text-base leading-relaxed text-ink-secondary max-w-130 animate-fade-up"
+          className="mt-4 type-landing-body-lg max-w-120 animate-fade-up"
           style={{ animationDelay: "0.12s", animationFillMode: "both" }}
         >
-          {t("description")}
+          {t("hero.description")}
         </p>
 
         <div
-          className="mt-8 flex items-center gap-3 animate-fade-up"
+          className="mt-6 flex items-center gap-3 animate-fade-up"
           style={{ animationDelay: "0.24s", animationFillMode: "both" }}
         >
           <Link href="/register">
-            <Button variant="primary">{t("startForFree")}</Button>
+            <Button variant="primary" size="md">
+              {t("hero.startForFree")}
+            </Button>
           </Link>
           <Link href="/login">
-            <Button variant="secondary">{t("signIn")}</Button>
+            <Button variant="secondary" size="md">
+              {t("hero.logIn")}
+            </Button>
           </Link>
         </div>
 
         <div
-          className="mt-16 opacity-20 animate-fade-up"
+          className="mt-12 opacity-20 animate-fade-up"
           style={{ animationDelay: "0.35s", animationFillMode: "both" }}
         >
-          <LogoIcon size={32} />
+          <LogoIcon size={28} />
         </div>
       </div>
     </section>

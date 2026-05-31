@@ -2,8 +2,8 @@
 
 import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
-import { Badge } from "@/components/ui/primitives/badge";
-import { Button } from "@/components/ui/primitives/button";
+import { Badge } from "@/components/ui/primitives/display/badge";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { useUIContext } from "@/context/ui-context";
 import { createTemplate, deleteTemplate, getTemplates } from "@/lib/api/template";
 import type { DatabaseResponseDto, TemplateResponseDto } from "@fixspace/domain";

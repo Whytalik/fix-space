@@ -1,7 +1,7 @@
 "use client";
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs";
 import { useDatabaseContext } from "@/context/database-context";
 import { useUIContext } from "@/context/ui-context";

@@ -1,9 +1,9 @@
 "use client";
 
-import { PropertyIcon } from "@/components/property/property-icon";
-import { Button } from "@/components/ui/primitives/button";
-import type { ComboboxOption } from "@/components/ui/primitives/combobox";
-import { Combobox } from "@/components/ui/primitives/combobox";
+import { PropertyIcon } from "@/features/property/components/property-icon";
+import { Button } from "@/components/ui/primitives/actions/button";
+import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
+import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { useDatabaseContext } from "@/context/database-context";
 import {
   closestCenter,

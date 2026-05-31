@@ -7,7 +7,7 @@ import { useAppContext } from "@/context/app-context";
 import { useEscape } from "@/hooks/useEscape";
 import { useMutation } from "@/hooks/useMutation";
 import { updateSpace } from "@/lib/api/space";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { Smile, X } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";

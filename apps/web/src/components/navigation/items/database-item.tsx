@@ -9,7 +9,7 @@ import { deleteDatabase as deleteDatabaseApi, duplicateDatabase } from "@/lib/ap
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { DatabaseResponseDto } from "@fixspace/domain";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { Copy, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";

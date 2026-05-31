@@ -1,19 +1,16 @@
 "use client";
 
-import { AuthPageShell } from "@/components/auth/auth-page-shell";
+import { AuthPageShell } from "@/features/auth/components/auth-page-shell";
 import { FormErrors } from "@/components/ui/form/form-errors";
 import { FormField } from "@/components/ui/form/form-field";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { login } from "@/lib/api/auth";
 import { parseApiErrors } from "@/lib/api/client";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
-type LoginFormProps = {
-  onForgotClick: () => void;
-};
-
-export function LoginForm({ onForgotClick }: LoginFormProps) {
+export function LoginForm() {
   const t = useTranslations("Auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,13 +61,12 @@ export function LoginForm({ onForgotClick }: LoginFormProps) {
             onChange={(e) => setPassword(e.target.value)}
             placeholder={t("placeholderPassword")}
           />
-          <button
-            type="button"
-            onClick={onForgotClick}
+          <Link
+            href="/forgot-password"
             className="self-end text-xs text-ink-secondary hover:text-accent transition-colors"
           >
             {t("forgotPassword")}
-          </button>
+          </Link>
         </div>
         <FormErrors errors={errors} />
         <Button type="submit" loading={loading} className="mt-1">

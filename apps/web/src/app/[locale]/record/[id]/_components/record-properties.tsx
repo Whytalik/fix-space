@@ -1,10 +1,10 @@
 "use client";
 
-import { CellValue } from "@/components/database/cell-value";
-import { PropertyHint } from "@/components/property/property-hint";
-import { PropertyIcon } from "@/components/property/property-icon";
-import { PropertyInput } from "@/components/property/property-input";
-import { Card } from "@/components/ui/primitives/card";
+import { CellValue } from "@/features/database/components/cell-value";
+import { PropertyHint } from "@/features/property/components/property-hint";
+import { PropertyIcon } from "@/features/property/components/property-icon";
+import { PropertyInput } from "@/features/property/components/property-input";
+import { Card } from "@/components/ui/primitives/display/card";
 import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
 import { PropertyType } from "@fixspace/domain/enums";
 
@@ -56,7 +56,7 @@ export function RecordPropertiesSection({
                   return (
                     <Card
                       key={prop.id}
-                      variant="convex"
+                      variant="elevated"
                       className={`flex flex-col gap-2 p-3! transition-colors duration-150 ${isEditMode ? "" : "hover:bg-hover"}`}
                       style={statusColor ? { borderLeft: `2px solid ${statusColor}` } : undefined}
                     >

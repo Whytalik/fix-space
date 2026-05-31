@@ -1,7 +1,7 @@
 "use client";
 
-import { Avatar } from "@/components/ui/primitives/avatar";
-import { Skeleton } from "@/components/ui/primitives/skeleton";
+import { Avatar } from "@/components/ui/primitives/display/avatar";
+import { Skeleton } from "@/components/ui/primitives/display/skeleton";
 import { useAppContext } from "@/context/app-context";
 import { useUIContext } from "@/context/ui-context";
 import { useEscape } from "@/hooks/useEscape";

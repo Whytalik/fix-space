@@ -15,16 +15,16 @@ export function LogoIcon({ size = 32, className }: LogoIconProps) {
     >
       <defs>
         <linearGradient id="iso-top" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#5865f2" />
-          <stop offset="100%" stopColor="#7b5cf0" />
+          <stop offset="0%" stopColor="#60a5fa" />
+          <stop offset="100%" stopColor="#2563eb" />
         </linearGradient>
         <linearGradient id="iso-left" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#4752c4" />
-          <stop offset="100%" stopColor="#2d1a8a" />
+          <stop offset="0%" stopColor="#2563eb" />
+          <stop offset="100%" stopColor="#1d4ed8" />
         </linearGradient>
         <linearGradient id="iso-right" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#7b5cf0" />
-          <stop offset="100%" stopColor="#a855f7" />
+          <stop offset="0%" stopColor="#1d4ed8" />
+          <stop offset="100%" stopColor="#1e40af" />
         </linearGradient>
       </defs>
       <g opacity={0.35} transform="translate(0,10)">

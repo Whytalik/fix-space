@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyIcon } from "@/components/property/property-icon";
+import { PropertyIcon } from "@/features/property/components/property-icon";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { DatabaseResponseDto } from "@fixspace/domain";

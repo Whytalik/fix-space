@@ -1,7 +1,7 @@
 "use client";
 
-import type { ComboboxOption } from "@/components/ui/primitives/combobox";
-import { Combobox } from "@/components/ui/primitives/combobox";
+import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
+import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { useDatabaseContext } from "@/context/database-context";
 import { ColorPicker, COLOR_SWATCHES } from "@/components/ui/color-picker/color-picker";
 import type { RecordGroupDto } from "@fixspace/domain";

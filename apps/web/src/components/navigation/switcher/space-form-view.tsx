@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
 import { ArrowLeft, Smile } from "lucide-react";

@@ -1,28 +1,50 @@
-import "reflect-metadata";
-import ReflectPolyfill from "../_reflect-polyfill";
-import { SettingsShell } from "@/components/settings/settings-shell";
-import { ErrorModalShell } from "@/components/ui/primitives/error-modal-shell";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { SettingsShell } from "@/features/settings/components/settings-shell";
+import { ErrorModalShell } from "@/components/ui/primitives/feedback/error-modal-shell";
 import { AppProvider } from "@/context/app-context";
 import { ThemeProvider } from "@/context/theme-context";
 import { UIProvider } from "@/context/ui-context";
-import { QueryProvider } from "@/components/providers/query-provider";
+import { routing } from "@/i18n/routing";
+import { getMeServer } from "@/lib/auth-server";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import { getMeServer } from "@/lib/auth-server";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
-import { routing } from "@/i18n/routing";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import "reflect-metadata";
 import "../globals.css";
 
-export const metadata: Metadata = {
-  title: "FIX Space",
-  description: "A modern trading workspace for your better performance.",
-  icons: {
-    icon: "/favicon.svg",
-  },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://fix-space-web.vercel.app";
+  const title = t("title");
+  const description = t("description");
+
+  return {
+    metadataBase: new URL(baseUrl),
+    title: { default: title, template: `%s | FIX Space` },
+    description,
+    icons: { icon: "/favicon.svg" },
+    openGraph: {
+      type: "website",
+      url: `${baseUrl}/${locale}`,
+      title,
+      description,
+      images: [{ url: `${baseUrl}/opengraph-image.png`, width: 1200, height: 630, alt: "FIX Space" }],
+      locale: locale === "uk" ? "uk_UA" : "en_US",
+      siteName: "FIX Space",
+    },
+    alternates: {
+      canonical: `${baseUrl}/${locale}`,
+      languages: { en: `${baseUrl}/en`, uk: `${baseUrl}/uk` },
+    },
+    robots: { index: true, follow: true },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -41,7 +63,6 @@ export default async function RootLayout({
     notFound();
   }
 
-  // Enable static rendering
   setRequestLocale(locale);
 
   const messages = await getMessages();
@@ -49,9 +70,8 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={`${GeistSans.variable} ${GeistMono.variable}`}>
-      <body className={`${GeistSans.className} h-screen flex flex-col`}>
+      <body className="font-sans antialiased bg-canvas text-ink h-screen flex flex-col">
         <NextIntlClientProvider messages={messages}>
-          <ReflectPolyfill />
           <QueryProvider>
             <AppProvider initialUser={user}>
               <ThemeProvider>
@@ -64,6 +84,8 @@ export default async function RootLayout({
             </AppProvider>
           </QueryProvider>
         </NextIntlClientProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

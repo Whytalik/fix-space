@@ -1,7 +1,7 @@
 "use client";
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
-import { Badge } from "@/components/ui/primitives/badge";
+import { Badge } from "@/components/ui/primitives/display/badge";
 import type { TemplateResponseDto } from "@fixspace/domain";
 import { FileX, Layers } from "lucide-react";
 

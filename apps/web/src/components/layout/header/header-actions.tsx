@@ -1,17 +1,19 @@
 "use client";
 
-import { Avatar } from "@/components/ui/primitives/avatar";
+import { Avatar } from "@/components/ui/primitives/display/avatar";
 import { useAppContext } from "@/context/app-context";
 import { useEscape } from "@/hooks/useEscape";
 import { useLogout } from "@/hooks/useLogout";
 import { LogOut, User } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 
 const AUTH_PAGES = ["/login", "/register"];
 
 export function HeaderActions() {
+  const t = useTranslations("Header");
   const pathname = usePathname();
   const { user, isLoading, clearSession } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +31,7 @@ export function HeaderActions() {
     await logout();
   }
 
-  if (AUTH_PAGES.includes(pathname)) return null;
+  if (AUTH_PAGES.some((p) => pathname.endsWith(p))) return null;
   if (isLoading) return null;
 
   return (
@@ -48,7 +50,7 @@ export function HeaderActions() {
                 className="whitespace-nowrap flex items-center gap-1.5 px-3 text-[13px] font-medium text-ink-secondary hover:text-ink transition-colors cursor-pointer"
               >
                 <User size={13} />
-                Profile
+                {t("profile")}
               </Link>
               <span className="text-stroke">|</span>
               <button
@@ -56,7 +58,7 @@ export function HeaderActions() {
                 className="whitespace-nowrap flex items-center gap-1.5 px-3 text-[13px] font-medium text-ink-secondary hover:text-ink transition-colors cursor-pointer"
               >
                 <LogOut size={13} />
-                Log out
+                {t("logOut")}
               </button>
               <span className="mx-2 text-stroke">|</span>
             </div>
@@ -76,13 +78,13 @@ export function HeaderActions() {
             href="/login"
             className="px-3.5 py-1.75 rounded-lg text-[13.5px] font-semibold text-ink-secondary border border-stroke transition-all duration-150 hover:text-ink hover:border-ink-muted"
           >
-            Log in
+            {t("logIn")}
           </Link>
           <Link
             href="/register"
             className="px-4 py-1.75 rounded-lg text-[13.5px] font-semibold text-white bg-accent shadow-accent transition-colors duration-150 hover:bg-accent-hover"
           >
-            Get started
+            {t("getStarted")}
           </Link>
         </>
       )}

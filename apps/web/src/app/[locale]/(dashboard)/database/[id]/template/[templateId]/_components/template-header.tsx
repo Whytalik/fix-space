@@ -2,8 +2,8 @@
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import { Button } from "@/components/ui/primitives/button";
-import { Toggle } from "@/components/ui/primitives/toggle";
+import { Button } from "@/components/ui/primitives/actions/button";
+import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { Copy, Layers, Trash2 } from "lucide-react";
 import type React from "react";
 import { useTranslations } from "next-intl";

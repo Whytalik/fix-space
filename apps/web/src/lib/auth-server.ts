@@ -4,6 +4,9 @@ import { cookies } from "next/headers";
 
 export async function getMeServer(): Promise<UserResponseDto | null> {
   const cookieStore = await cookies();
+
+  if (!cookieStore.has("access_token")) return null;
+
   const cookieString = cookieStore
     .getAll()
     .map((c) => `${c.name}=${c.value}`)

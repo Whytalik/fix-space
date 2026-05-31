@@ -1,6 +1,7 @@
 import { LogoIcon } from "@/components/ui/brand/logo";
-import Link from "next/link";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
 export default async function NotFound() {
   const t = await getTranslations("NotFound");
@@ -25,11 +26,8 @@ export default async function NotFound() {
       </div>
 
       <div className="animate-fade-up" style={{ animationDelay: "0.42s" }}>
-        <Link
-          href="/"
-          className="px-5 py-2.5 rounded-lg bg-accent text-white text-sm font-semibold transition-colors duration-150 hover:bg-accent-hover"
-        >
-          {t("goToWorkspace")}
+        <Link href="/">
+          <Button variant="primary">{t("goToWorkspace")}</Button>
         </Link>
       </div>
     </div>

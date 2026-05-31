@@ -1,6 +1,6 @@
 "use client";
 
-import { AddDatabaseModal } from "@/components/database/add-database-modal";
+import { AddDatabaseModal } from "@/features/database/components/add-database-modal";
 import { ColorPicker } from "@/components/ui/color-picker/color-picker";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
@@ -9,7 +9,7 @@ import { useEscape } from "@/hooks/useEscape";
 import { useModal } from "@/hooks/useModal";
 import { useMutation } from "@/hooks/useMutation";
 import { updateSpace } from "@/lib/api/space";
-import { Button } from "@/components/ui/primitives/button";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { FolderPlus, LayoutGrid, Smile, X } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";

@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Spinner } from "@/components/ui/primitives/spinner";
+import { Spinner } from "@/components/ui/primitives/feedback/spinner";
 
 type SearchModalProps = {
   onClose: () => void;

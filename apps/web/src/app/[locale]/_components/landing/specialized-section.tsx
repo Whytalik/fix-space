@@ -1,112 +1,105 @@
-import { LogoIcon } from "@/components/ui/brand/logo";
-import { CheckCircle } from "lucide-react";
+import { BarChart2, CheckCircle, Layout, Table, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { SectionHeader } from "./section-header";
 
 export function SpecializedSection() {
   const t = useTranslations("Landing");
+  const tNav = useTranslations("LandingNav");
 
   return (
-    <section id="focus" className="scroll-mt-15 py-20 px-6">
-      <div className="max-w-270 mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-xs font-semibold uppercase tracking-widest text-ink-secondary mb-2">{t("focus")}</p>
-          <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-[-0.04em] text-ink">
-            {t("builtForTraders.title")}
-          </h2>
-          <p className="mt-4 text-sm text-ink-secondary max-w-140 mx-auto leading-relaxed">
-            {t("builtForTraders.description")}
-          </p>
+    <>
+      <SectionHeader
+        eyebrow={tNav("market")}
+        title={t("approaches.title")}
+        description={t("approaches.description")}
+        descriptionClassName="mt-4 max-w-140"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto mt-10">
+        <div className="bg-canvas border border-stroke rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Table size={18} className="text-ink-secondary" />
+            <div>
+              <p className="type-landing-body-muted font-bold">{t("approaches.googleSheets")}</p>
+              <p className="type-landing-caption mt-0.5">{t("approaches.googleSheetsDesc")}</p>
+            </div>
+          </div>
+          <ul className="flex flex-col gap-2.5 type-landing-body-muted">
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <CheckCircle size={12} className="text-success shrink-0 mt-0.5" />
+              <span>{t("approaches.googleSheetsFeatures.freedom")}</span>
+            </li>
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <X size={12} className="text-error shrink-0 mt-0.5" />
+              <span>{t("approaches.googleSheetsFeatures.manual")}</span>
+            </li>
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <X size={12} className="text-error shrink-0 mt-0.5" />
+              <span>{t("approaches.googleSheetsFeatures.fragmentation")}</span>
+            </li>
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <X size={12} className="text-error shrink-0 mt-0.5" />
+              <span>{t("approaches.googleSheetsFeatures.noImport")}</span>
+            </li>
+          </ul>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-          {/* Generic tools */}
-          <div className="bg-surface border border-stroke rounded-xl p-7">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="text-xl">📄</span>
-              <div>
-                <p className="text-sm font-bold text-ink">{t("notionGoogleSheets")}</p>
-                <p className="text-xs text-ink-muted mt-0.5">{t("genericTools")}</p>
-              </div>
+        <div className="bg-canvas border border-stroke rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Layout size={18} className="text-ink-secondary" />
+            <div>
+              <p className="type-landing-body-muted font-bold">{t("approaches.notion")}</p>
+              <p className="type-landing-caption mt-0.5">{t("approaches.notionDesc")}</p>
             </div>
-            <ul className="flex flex-col gap-3 text-xs">
-              <li className="flex items-start gap-2 text-ink-secondary">
-                <span className="shrink-0 mt-0.5">❌</span>
-                <span>{t("noTradingModel")}</span>
-              </li>
-              <li className="flex items-start gap-2 text-ink-secondary">
-                <span className="shrink-0 mt-0.5">❌</span>
-                <span>{t("noNativeConcepts")}</span>
-              </li>
-              <li className="flex items-start gap-2 text-ink-secondary">
-                <span className="shrink-0 mt-0.5">❌</span>
-                <span>{t("noBrokerImport")}</span>
-              </li>
-              <li className="flex items-start gap-2 text-ink-secondary">
-                <span className="shrink-0 mt-0.5">✅</span>
-                <span>{t("fullyFlexible")}</span>
-              </li>
-            </ul>
           </div>
+          <ul className="flex flex-col gap-2.5 type-landing-body-muted">
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <CheckCircle size={12} className="text-success shrink-0 mt-0.5" />
+              <span>{t("approaches.notionFeatures.relations")}</span>
+            </li>
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <CheckCircle size={12} className="text-success shrink-0 mt-0.5" />
+              <span>{t("approaches.notionFeatures.centralization")}</span>
+            </li>
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <X size={12} className="text-error shrink-0 mt-0.5" />
+              <span>{t("approaches.notionFeatures.setup")}</span>
+            </li>
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <X size={12} className="text-error shrink-0 mt-0.5" />
+              <span>{t("approaches.notionFeatures.noAnalytics")}</span>
+            </li>
+          </ul>
+        </div>
 
-          {/* Specialized journals */}
-          <div className="bg-surface border border-stroke rounded-xl p-7">
-            <div className="flex items-center gap-3 mb-5">
-              <span className="text-xl">📊</span>
-              <div>
-                <p className="text-sm font-bold text-ink">{t("specializedJournals")}</p>
-                <p className="text-xs text-ink-muted mt-0.5">{t("exampleGeneric")}</p>
-              </div>
+        <div className="bg-canvas border border-stroke rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <BarChart2 size={18} className="text-ink-secondary" />
+            <div>
+              <p className="type-landing-body-muted font-bold">{t("approaches.specializedJournals")}</p>
+              <p className="type-landing-caption mt-0.5">{t("approaches.exampleGeneric")}</p>
             </div>
-            <ul className="flex flex-col gap-3 text-xs">
-              <li className="flex items-start gap-2 text-ink-secondary">
-                <span className="shrink-0 mt-0.5">✅</span>
-                <span>{t("readyDataModel")}</span>
-              </li>
-              <li className="flex items-start gap-2 text-ink-secondary">
-                <span className="shrink-0 mt-0.5">✅</span>
-                <span>{t("autoImport")}</span>
-              </li>
-              <li className="flex items-start gap-2 text-ink-secondary">
-                <span className="shrink-0 mt-0.5">❌</span>
-                <span>{t("fixedStructure")}</span>
-              </li>
-              <li className="flex items-start gap-2 text-ink-secondary">
-                <span className="shrink-0 mt-0.5">❌</span>
-                <span>{t("paidOnly")}</span>
-              </li>
-            </ul>
           </div>
-
-          {/* FIX Space */}
-          <div className="bg-surface border border-accent rounded-xl p-7 ring-4 ring-accent-muted">
-            <div className="flex items-center gap-3 mb-5">
-              <LogoIcon size={22} />
-              <div>
-                <p className="text-sm font-bold text-ink">FIX Space</p>
-                <p className="text-xs text-ink-muted mt-0.5">{t("purposeBuilt")}</p>
-              </div>
-            </div>
-            <ul className="flex flex-col gap-3 text-xs">
-              <li className="flex items-start gap-2 text-ink">
-                <CheckCircle size={13} className="text-success shrink-0 mt-0.5" />
-                <span>{t("FIX SpaceDescription")}</span>
-              </li>
-              <li className="flex items-start gap-2 text-ink">
-                <CheckCircle size={13} className="text-success shrink-0 mt-0.5" />
-                <span>{t("advancedRelations")}</span>
-              </li>
-              <li className="flex items-start gap-2 text-ink">
-                <CheckCircle size={13} className="text-success shrink-0 mt-0.5" />
-                <span>{t("richMedia")}</span>
-              </li>
-              <li className="flex items-start gap-2 text-ink">
-                <CheckCircle size={13} className="text-success shrink-0 mt-0.5" />
-                <span>{t("fullyCustomizable")}</span>
-              </li>
-            </ul>
-          </div>
+          <ul className="flex flex-col gap-2.5 type-landing-body-muted">
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <CheckCircle size={12} className="text-success shrink-0 mt-0.5" />
+              <span>{t("approaches.readyDataModel")}</span>
+            </li>
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <CheckCircle size={12} className="text-success shrink-0 mt-0.5" />
+              <span>{t("approaches.autoImport")}</span>
+            </li>
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <X size={12} className="text-error shrink-0 mt-0.5" />
+              <span>{t("approaches.fixedStructure")}</span>
+            </li>
+            <li className="flex items-start gap-2 text-ink-secondary">
+              <X size={12} className="text-error shrink-0 mt-0.5" />
+              <span>{t("approaches.paidOnly")}</span>
+            </li>
+          </ul>
         </div>
       </div>
-    </section>
+    </>
   );
 }

@@ -1,5 +1,5 @@
-import { Exclude, Expose } from 'class-transformer';
-import { ContainerBlock } from './content-node.dto';
+import { Exclude, Expose } from "class-transformer";
+import { ContainerBlock } from "./content-node.dto";
 
 @Exclude()
 export class RecordContentResponseDto {

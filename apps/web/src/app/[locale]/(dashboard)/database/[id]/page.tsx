@@ -1,8 +1,8 @@
 "use client";
 
 import { DatabaseHeader } from "./_components/database-header";
-import { DatabaseTable } from "@/components/database/database-table";
-import { Button } from "@/components/ui/primitives/button";
+import { DatabaseTable } from "./_components/database-table";
+import { Button } from "@/components/ui/primitives/actions/button";
 import { useDatabaseContext } from "@/context/database-context";
 import { useTranslations } from "next-intl";
 

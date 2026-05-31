@@ -1,6 +1,6 @@
 "use client";
 
-import { TabSwitcher, type TabItem } from "@/components/ui/primitives/tab-switcher";
+import { TabSwitcher, type TabItem } from "@/components/ui/primitives/navigation/tab-switcher";
 import { useAppContext } from "@/context/app-context";
 import { useDatabaseContext } from "@/context/database-context";
 import { useUIContext } from "@/context/ui-context";

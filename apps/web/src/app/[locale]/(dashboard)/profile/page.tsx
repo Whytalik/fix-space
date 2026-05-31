@@ -1,8 +1,8 @@
 "use client";
 
 import { useAppContext } from "@/context/app-context";
-import { Avatar } from "@/components/ui/primitives/avatar";
-import { Card } from "@/components/ui/primitives/card";
+import { Avatar } from "@/components/ui/primitives/display/avatar";
+import { Card } from "@/components/ui/primitives/display/card";
 import { API_BASE_URL } from "@/utils/constants";
 import { useTranslations } from "next-intl";
 
