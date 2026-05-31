@@ -1,0 +1,28 @@
+# FIX Space
+
+FIX Space is a specialized web platform designed to organize the activities of retail CFD, Forex, and Crypto traders. It solves the problem of "information fragmentation" by providing a centralized workspace for logging trades, analyzing routines, tracking behavioral mistakes, and monitoring statistical performance.
+
+## Core Features
+*   **Centralized Workspaces:** Isolated environments containing modular databases.
+*   **Specialized Databases:** Pre-configured databases for Trading Journal, Daily Routine, Notes, Mistakes, Accounts, Operations, Trading System, and Performance Review.
+*   **Customizable Properties:** 12 property types including Formula (auto-calculated fields like Risk/Reward, Win Rate) and Relation (cross-database links).
+*   **Record Content Area:** A flexible, block-based rich text editor for detailed analysis, screenshots, and checklists.
+*   **Automations:** No-code "WHEN -> THEN" rules to automate routine tasks (e.g., auto-logging mistakes).
+*   **Trading Statistics:** Automated dashboards calculating Win Rate, Profit Factor, Expectancy, and Max Drawdown.
+*   **External Integrations:** Auto-sync trades from Binance, MetaTrader 5, and cTrader.
+
+## Target Audience
+Retail traders who currently use fragmented tools (like spreadsheets + Notion + separate journaling software) and need a unified system to track both objective metrics (P&L) and subjective factors (emotions, rule adherence).
+
+## Architecture
+*   **Frontend:** Next.js (App Router), React, Tailwind CSS.
+*   **Backend:** NestJS, Prisma ORM, PostgreSQL.
+*   **Auth:** JWT with HTTP-only cookies, Google OAuth 2.0.
+
+## Glossary
+*   **CFD (Contract for Difference):** A financial derivative allowing traders to profit from price movements without owning the underlying asset.
+*   **P&L (Profit & Loss):** The financial outcome of a trade.
+*   **R-Multiple:** A measure of performance expressing profit or loss in units of initial risk (R).
+*   **Space:** The top-level isolated container for a user's databases.
+*   **Database:** A structured collection of records with defined properties.
+*   **Record:** A single entry (e.g., one trade) containing structured properties and a free-form content area.

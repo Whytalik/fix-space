@@ -1,0 +1,195 @@
+{
+  "Search": {
+    "placeholder": "Пошук записів...",
+    "hint": "Почніть вводити текст для пошуку по всьому простору",
+    "noResults": "Немає результатів для",
+    "error": "Пошук не вдався. Спробуйте ще раз."
+  },
+  "AddSection": {
+    "title": "Нова секція",
+    "chooseIcon": "Вибрати іконку",
+    "chooseColor": "Вибрати колір",
+    "placeholder": "Назва секції",
+    "creating": "Створення...",
+    "add": "Додати секцію"
+  },
+  "SectionEdit": {
+    "title": "Редагувати секцію",
+    "chooseIcon": "Вибрати іконку",
+    "chooseColor": "Вибрати колір",
+    "placeholder": "Назва секції",
+    "saving": "Збереження...",
+    "save": "Зберегти зміни"
+  },
+  "RecordModal": {
+    "editTitle": "Редагувати запис",
+    "newTitle": "Новий запис",
+    "noEditableProperties": "Немає властивостей для редагування.",
+    "cancel": "Скасувати",
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни",
+    "create": "Створити"
+  },
+  "Breadcrumbs": {
+    "database": "База даних"
+  },
+  "SortPanel": {
+    "title": "Сортування",
+    "clearAll": "Очистити все",
+    "noRules": "Немає правил сортування. Додайте одне нижче.",
+    "selectField": "Вибрати поле…",
+    "addSort": "+ Додати сортування",
+    "createdAt": "Дата створення",
+    "updatedAt": "Дата оновлення",
+    "ascending": "За зростанням",
+    "descending": "За спаданням",
+    "asc": "ЗРОС",
+    "desc": "СПАД"
+  },
+  "FilterPanel": {
+    "title": "Фільтр",
+    "clearAll": "Очистити все",
+    "noRules": "Немає правил фільтрації. Додайте одне нижче.",
+    "selectProperty": "Вибрати властивість…",
+    "addFilter": "+ Додати фільтр",
+    "createdAt": "Дата створення",
+    "updatedAt": "Дата оновлення",
+    "pickValues": "Вибрати значення…",
+    "pickStatus": "Вибрати статус…",
+    "pickOption": "Вибрати варіант…",
+    "value": "Значення…",
+    "operators": {
+      "equals": "дорівнює",
+      "notEquals": "не дорівнює",
+      "contains": "містить",
+      "notContains": "не містить",
+      "startsWith": "починається з",
+      "endsWith": "закінчується на",
+      "isEmpty": "порожнє",
+      "isNotEmpty": "не порожнє",
+      "greaterThan": ">",
+      "lessThan": "<",
+      "greaterThanOrEqual": ">=",
+      "lessThanOrEqual": "<=",
+      "on": "в дату",
+      "before": "до",
+      "after": "після",
+      "onOrBefore": "в дату або раніше",
+      "onOrAfter": "в дату або пізніше",
+      "isChecked": "відмічено",
+      "isUnchecked": "не відмічено",
+      "isExactly": "точно",
+      "isNotExactly": "не точно",
+      "isOneOf": "один з",
+      "isNotOneOf": "не один з"
+    }
+  },
+  "GroupPanel": {
+    "groupBy": "Групувати за",
+    "noGrouping": "Без групування",
+    "selectField": "Вибрати поле…",
+    "selectProperty": "Вибрати властивість…",
+    "selectGranularity": "Вибрати гранулярність…",
+    "groups": "Групи",
+    "createdAt": "Дата створення",
+    "updatedAt": "Дата оновлення",
+    "property": "Властивість",
+    "day": "День",
+    "week": "Тиждень",
+    "month": "Місяць",
+    "year": "Рік",
+    "changeColor": "Змінити колір",
+    "showGroup": "Показати групу",
+    "hideGroup": "Сховати групу"
+  },
+  "RelationInput": {
+    "searchRecords": "Пошук записів…"
+  },
+  "IconPicker": {
+    "searchIcons": "Пошук іконок…",
+    "noIconsFound": "Іконок не знайдено"
+  },
+  "ColorPicker": {
+    "hexPlaceholder": "rrggbb",
+    "invalidHex": "Недійсний hex колір",
+    "save": "Зберегти"
+  },
+  "PropertyInput": {
+    "enterText": "Введіть текст…",
+    "checked": "Відмічено",
+    "none": "— Немає —"
+  },
+  "Combobox": {
+    "search": "Пошук…",
+    "addMore": "Додати ще…"
+  },
+  "RecordPage": {
+    "noProperties": "Для цієї бази даних не визначено властивостей.",
+    "untitled": "Без назви",
+    "changeIcon": "Змінити іконку"
+  },
+  "EditPage": {
+    "noProperties": "Для цієї бази даних не визначено властивостей."
+  },
+  "SearchModal": {
+    "searchFailed": "Пошук не вдався. Спробуйте ще раз.",
+    "searchRecords": "Пошук записів...",
+    "startTyping": "Почніть вводити текст для пошуку по всьому простору",
+    "noResults": "Немає результатів для"
+  },
+  "SectionItem": {
+    "addDatabase": "Додати базу",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "editSection": "Редагувати секцію",
+    "chooseIcon": "Вибрати іконку",
+    "chooseColor": "Вибрати колір",
+    "sectionName": "Назва секції",
+    "saving": "Збереження...",
+    "saveChanges": "Зберегти зміни",
+    "deleteSection": "Видалити секцію",
+    "deleteSectionDesc": "Секцію буде видалено. Бази даних всередині стануть без секції.",
+    "deleting": "Видалення..."
+  },
+  "EditActions": {
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни",
+    "cancel": "Скасувати"
+  },
+  "EditTableView": {
+    "primary": "Основний",
+    "showColumn": "Показати стовпець",
+    "hideColumn": "Сховати стовпець",
+    "noPropertiesYet": "Властивостей ще немає."
+  },
+  "RecordPageComp": {
+    "recordNotFound": "Запис не знайдено.",
+    "deleteRecord": "Видалити запис",
+    "deleteRecordDesc": "Цей запис буде видалено назавжди.",
+    "deleting": "Видалення…",
+    "delete": "Видалити"
+  },
+  "RecordHeaderComp": {
+    "hideProperties": "Сховати властивості",
+    "showProperties": "Показати властивості",
+    "saving": "Збереження…",
+    "viewMode": "Режим перегляду",
+    "editMode": "Режим редагування",
+    "deleteRecord": "Видалити запис"
+  },
+  "SectionEditModal": {
+    "editSection": "Редагувати секцію",
+    "chooseIcon": "Вибрати іконку",
+    "chooseColor": "Вибрати колір",
+    "sectionName": "Назва секції",
+    "saving": "Збереження...",
+    "saveChanges": "Зберегти зміни"
+  },
+  "GlobalError": {
+    "title": "Щось пішло не так",
+    "description": "Сталася неочікувана помилка. Ви можете спробувати ще раз або повернутися до робочого простору.",
+    "error": "Помилка",
+    "tryAgain": "Спробувати ще раз",
+    "goWorkspace": "Перейти до робочого простору"
+  }
+}

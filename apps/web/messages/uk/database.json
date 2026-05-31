@@ -1,0 +1,155 @@
+{
+  "AddDatabase": {
+    "title": "Нова база даних",
+    "chooseIcon": "Вибрати іконку",
+    "placeholder": "Назва бази даних",
+    "creating": "Створення…",
+    "add": "Додати базу"
+  },
+  "DatabaseToolbar": {
+    "search": "Пошук",
+    "searchPlaceholder": "Пошук записів…",
+    "sort": "Сортування",
+    "filter": "Фільтр",
+    "group": "Група"
+  },
+  "DatabaseTable": {
+    "noProperties": "Для цієї бази даних не визначено властивостей.",
+    "noRecords": "Записів ще немає.",
+    "untitled": "Без назви",
+    "recordsOf": "{from}–{to} з {total} записів",
+    "rowsPerPage": "Рядків на сторінці:",
+    "refresh": "Оновити базу даних",
+    "previousPage": "Попередня сторінка",
+    "nextPage": "Наступна сторінка"
+  },
+  "DatabaseEdit": {
+    "title": "Редагувати базу даних",
+    "general": "Загальні",
+    "properties": "Властивості",
+    "templates": "Шаблони",
+    "limits": "Обмеження",
+    "view": "Вигляд",
+    "recordLimit": "Ліміт записів",
+    "recordLimitDesc": "Максимальна кількість записів у цій базі даних або без ліміту.",
+    "noLimit": "Без ліміту",
+    "useDefaultTemplate": "Використовувати шаблон за замовчуванням",
+    "useDefaultTemplateDesc": "Автоматично застосовувати шаблон за замовчуванням при створенні нових записів.",
+    "wrapCells": "Переносити вміст комірок",
+    "wrapCellsDesc": "Дозволити тексту в комірках переноситися на кілька рядків замість обрізання.",
+    "internalName": "Внутрішня назва",
+    "placeholderTitle": "напр. Журнал угод",
+    "icon": "Іконка",
+    "title": "Назва",
+    "chooseIcon": "Вибрати іконку…"
+  },
+  "PropertyEdit": {
+    "properties": "Властивості",
+    "record": "Запис",
+    "table": "Таблиця",
+    "addGroup": "Додати групу",
+    "addProperty": "Додати властивість",
+    "groupName": "Назва групи…",
+    "noProperties": "Властивостей ще немає.",
+    "deleteProperty": "Видалити властивість?",
+    "deletePropertyDesc": "Це назавжди видалить властивість та всі її значення. Цю дію не можна скасувати.",
+    "delete": "Видалити"
+  },
+  "TemplateEdit": {
+    "untitledTemplate": "Шаблон без назви",
+    "noTemplates": "Шаблонів ще немає",
+    "template": "шаблон",
+    "templates": "шаблонів",
+    "templatesDesc": "Шаблони дозволяють попередньо заповнювати значення полів при створенні нових записів.",
+    "creating": "Створення…",
+    "addTemplate": "Додати шаблон",
+    "default": "За замовчуванням",
+    "editTemplate": "Редагувати шаблон",
+    "deleteTemplate": "Видалити шаблон",
+    "deleteDescription": "\"{name}\" буде видалено назавжди.",
+    "deleting": "Видалення…",
+    "delete": "Видалити"
+  },
+  "PropertyForm": {
+    "newProperty": "Нова властивість",
+    "viewProperty": "Перегляд властивості",
+    "editProperty": "Редагувати властивість",
+    "general": "Загальні",
+    "type": "Тип",
+    "change": "Змінити",
+    "icon": "Іконка (необов'язково)",
+    "name": "Назва",
+    "namePlaceholder": "Назва властивості…",
+    "group": "Група (необов'язково)",
+    "groupPlaceholder": "Призначити до групи…",
+    "hint": "Підказка (необов'язково)",
+    "hintPlaceholder": "Відображається під міткою поля…",
+    "required": "Обов'язкове поле",
+    "settings": "налаштування",
+    "edit": "Редагувати",
+    "cancel": "Скасувати",
+    "addProperty": "Додати властивість",
+    "chooseType": "виберіть тип",
+    "saveChanges": "Зберегти зміни"
+  },
+  "DatabaseItem": {
+    "edit": "Редагувати",
+    "duplicate": "Дублювати",
+    "delete": "Видалити",
+    "deleteDatabase": "Видалити базу даних",
+    "deleteDatabaseDesc": "Цю базу даних та всі її записи буде видалено назавжди.",
+    "deleting": "Видалення…"
+  },
+  "AddDatabaseModal": {
+    "addDatabase": "Нова база даних",
+    "icon": "Іконка",
+    "chooseIcon": "Вибрати іконку…",
+    "title": "Назва",
+    "placeholderTitle": "напр. Журнал угод",
+    "internalName": "Внутрішня назва:",
+    "cancel": "Скасувати",
+    "creating": "Створення…",
+    "createDatabase": "Створити базу"
+  },
+  "DatabasePage": {
+    "retry": "Повторити"
+  },
+  "DatabaseHeader": {
+    "edit": "Редагувати",
+    "addItem": "Додати запис"
+  },
+  "TemplatePickerModal": {
+    "chooseTemplate": "Вибрати шаблон",
+    "chooseTemplateDesc": "Виберіть шаблон для застосування до нового запису.",
+    "noTemplate": "Без шаблону",
+    "default": "За замовчуванням"
+  },
+  "TemplateEditModal": {
+    "templateName": "Назва шаблону",
+    "default": "За замовчуванням",
+    "noPropertiesDefined": "Для цієї бази даних не визначено властивостей.",
+    "cancel": "Скасувати",
+    "save": "Зберегти"
+  },
+  "TemplatePage": {
+    "noProperties": "Для цієї бази даних не визначено властивостей.",
+    "untitledTemplate": "Шаблон без назви",
+    "deleteDescription": "\"{name}\" буде видалено назавжди.",
+    "changeIcon": "Змінити іконку",
+    "defaultTemplate": "За замовчуванням"
+  },
+  "TemplatePageComp": {
+    "templateNotFound": "Шаблон не знайдено.",
+    "noPropertiesDefined": "Для цієї бази даних не визначено властивостей.",
+    "deleteTemplate": "Видалити шаблон",
+    "deleteDescription": "\"{name}\" буде видалено назавжди.",
+    "deleting": "Видалення…",
+    "delete": "Видалити",
+    "setDefault": "Встановити за замовчуванням",
+    "setDefaultTitle": "Встановити шаблон за замовчуванням?",
+    "setDefaultDesc": "Це замінить поточний шаблон за замовчуванням. Усі нові записи використовуватимуть цей шаблон.",
+    "removeDefault": "Видалити за замовчуванням",
+    "removeDefaultTitle": "Видалити статус за замовчуванням?",
+    "removeDefaultDesc": "Інший шаблон автоматично стане за замовчуванням. Нові записи все одно використовуватимуть шаблон."
+  }
+}

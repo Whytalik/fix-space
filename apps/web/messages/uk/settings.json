@@ -1,0 +1,97 @@
+{
+  "Settings": {
+    "appearance": {
+      "theme": {
+        "title": "Тема",
+        "description": "Налаштуйте зовнішній вигляд вашого робочого простору.",
+        "light": "Світла",
+        "dark": "Темна"
+      },
+      "language": {
+        "title": "Мова",
+        "description": "Виберіть мову інтерфейсу."
+      }
+    }
+  },
+  "SettingsModal": {
+    "title": "Налаштування",
+    "profile": "Профіль",
+    "appearance": "Зовнішній вигляд",
+    "space": "Простір",
+    "database": "База даних",
+    "section": "Секція",
+    "record": "Запис",
+    "manageSettings": "Керування налаштуваннями",
+    "settings": "Налаштування"
+  },
+  "ProfileSettingsComp": {
+    "general": "Загальні",
+    "security": "Безпека",
+    "username": "Ім'я користувача",
+    "placeholderUsername": "Введіть ім'я користувача",
+    "profileUpdated": "Профіль успішно оновлено.",
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни",
+    "currentPassword": "Поточний пароль",
+    "placeholderCurrentPassword": "Введіть поточний пароль",
+    "newPassword": "Новий пароль",
+    "placeholderNewPassword": "Введіть новий пароль",
+    "confirmPassword": "Підтвердіть новий пароль",
+    "placeholderConfirmPassword": "Підтвердіть новий пароль",
+    "passwordChanged": "Пароль успішно змінено.",
+    "allFieldsRequired": "Всі поля обов'язкові.",
+    "passwordsNotMatch": "Нові паролі не збігаються.",
+    "changePassword": "Змінити пароль",
+    "changing": "Зміна…"
+  },
+  "SpaceSettingsComp": {
+    "sidebar": "Сайдбар",
+    "datetime": "Дата та час",
+    "timeFormat12h": "12h",
+    "timeFormat24h": "24h",
+    "monday": "Понеділок",
+    "sunday": "Неділя",
+    "defaultUpdated": "Простір за замовчуванням оновлено.",
+    "spaceDuplicated": "Простір дубльовано.",
+    "spaceDeleted": "Простір видалено.",
+    "settingsSaved": "Налаштування збережено.",
+    "spaces": "Простори",
+    "saving": "Збереження…",
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "setAsDefault": "Встановити за замовчуванням",
+    "default": "За замовчуванням",
+    "defaultIcon": "Іконка за замовчуванням",
+    "chooseIcon": "Вибрати іконку…",
+    "saveChanges": "Зберегти зміни",
+    "timeFormat": "Формат часу",
+    "startOfWeek": "Початок тижня",
+    "dateFormat": "Формат дати",
+    "placeholderDateFormat": "напр. DD/MM/YYYY",
+    "deleteSpace": "Видалити простір",
+    "deleteSpaceDesc": "Всі бази даних та записи всередині будуть видалені назавжди. Цю дію не можна скасувати.",
+    "delete": "Видалити"
+  },
+  "SectionSettingsComp": {
+    "settingsSaved": "Налаштування збережено.",
+    "defaultIcon": "Іконка за замовчуванням",
+    "chooseIcon": "Вибрати іконку…",
+    "defaultColor": "Колір за замовчуванням",
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни"
+  },
+  "DatabaseSettingsComp": {
+    "settingsSaved": "Налаштування збережено.",
+    "defaultIcon": "Іконка за замовчуванням",
+    "chooseIcon": "Вибрати іконку…",
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни"
+  },
+  "RecordSettingsComp": {
+    "settingsSaved": "Налаштування збережено.",
+    "defaultIcon": "Іконка за замовчуванням",
+    "chooseIcon": "Вибрати іконку…",
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни"
+  }
+}
