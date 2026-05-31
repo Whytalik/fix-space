@@ -1,7 +1,6 @@
 {
   "name": "@fixspace/database",
   "version": "1.0.0",
-  "type": "module",
   "main": "./dist/src/client.js",
   "types": "./dist/src/client.d.ts",
   "exports": {
@@ -11,7 +10,7 @@
     }
   },
   "scripts": {
-    "build": "pnpm exec tsc -p tsconfig.build.json",
+    "build": "pnpm exec tsc -p tsconfig.build.json && node -e \"require('fs').writeFileSync('./dist/generated/client/client.js', '\\\"use strict\\\";\\nmodule.exports = require(\\\"../../../generated/client/client.js\\\");\\n')\"",
     "db:migrate:deploy": "dotenv -e ../../.env.production -e ../../.env -- prisma migrate deploy",
     "db:migrate:dev": "dotenv -e ../../.env.development -e ../../.env -- prisma migrate dev",
     "db:push": "dotenv -e ../../.env.development -e ../../.env -- prisma db push",
