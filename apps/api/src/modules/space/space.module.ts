@@ -6,12 +6,12 @@ import { PropertyValueModule } from "../property-value/property-value.module";
 import { RecordModule } from "../record/record.module";
 import { SettingsModule } from "../settings/settings.module";
 import { TemplateModule } from "../template/template.module";
-import { SectionRepository } from "./providers/section.repository";
+import { SectionRepository } from "./repositories/section.repository";
 import { DuplicateSpaceUseCase } from "./providers/duplicate-space.usecase";
 import { InitializeUserSpaceUseCase } from "./providers/initialize-user-space.usecase";
 import { SectionService } from "./providers/section.service";
 import { SpaceController } from "./space.controller";
-import { SpaceRepository } from "./space.repository";
+import { SpaceRepository } from "./repositories/space.repository";
 import { SpaceService } from "./space.service";
 
 @Module({

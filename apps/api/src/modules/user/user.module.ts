@@ -3,7 +3,7 @@ import { JwtModule } from "../../core/jwt/jwt.module";
 import { MailModule } from "../../core/mail/mail.module";
 import { StorageService } from "./storage.service";
 import { UserController } from "./user.controller";
-import { UserRepository } from "./user.repository";
+import { UserRepository } from "./repositories/user.repository";
 import { UserService } from "./user.service";
 
 @Module({

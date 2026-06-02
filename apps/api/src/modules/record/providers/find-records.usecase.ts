@@ -11,7 +11,7 @@ import {
   SortField,
 } from "@fixspace/domain";
 import { AppLogger } from "../../../common/logger/app-logger.service";
-import { RecordRepository } from "../record.repository";
+import { RecordRepository } from "../repositories/record.repository";
 import { matchesFilter, RecordWithValues } from "../utils/record-filter.util";
 import { matchesSearch } from "../utils/record-search.util";
 import { compareRecords } from "../utils/record-sort.util";

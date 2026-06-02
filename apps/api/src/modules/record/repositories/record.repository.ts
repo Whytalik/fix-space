@@ -2,12 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
 import type { RecordContent } from "@fixspace/database";
 import { ContainerBlock } from "@fixspace/domain";
+import { BaseRepository } from "../../../common/utils/base.repository";
 
 type DbRecordContent = RecordContent;
 export type RecordContentData = Omit<DbRecordContent, "content"> & { content: ContainerBlock };
 
 @Injectable()
-export class RecordRepository {
+export class RecordRepository extends BaseRepository {
   async findDatabaseByOwner(databaseId: string, userId: string) {
     return prisma.database.findFirst({
       where: { id: databaseId, space: { ownerId: userId } },
@@ -132,10 +133,6 @@ export class RecordRepository {
 
   async delete(id: string) {
     return prisma.record.delete({ where: { id } });
-  }
-
-  async transaction<T>(callback: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
-    return prisma.$transaction(callback);
   }
 
   async findContent(recordId: string): Promise<RecordContentData | null> {

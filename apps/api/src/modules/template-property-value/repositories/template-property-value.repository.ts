@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
+import { BaseRepository } from "../../../common/utils/base.repository";
 
 @Injectable()
-export class TemplatePropertyValueRepository {
+export class TemplatePropertyValueRepository extends BaseRepository {
   async findTemplateByOwner(templateId: string, userId: string) {
     return prisma.template.findFirst({
       where: { id: templateId, database: { space: { ownerId: userId } } },

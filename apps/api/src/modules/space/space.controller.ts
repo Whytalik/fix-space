@@ -81,11 +81,7 @@ export class SpaceController {
     @Param("id") id: string,
     @CurrentUser("userId")
     userId: string,
-    @Body()
-    body?: { name?: string },
   ) {
-    return this.duplicateSpaceUseCase.execute(id, userId, {
-      newName: body?.name,
-    });
+    return this.duplicateSpaceUseCase.execute(id, userId);
   }
 }

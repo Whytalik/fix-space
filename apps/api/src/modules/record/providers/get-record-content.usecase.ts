@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { BlockType, RecordContentResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../../common/logger/app-logger.service";
-import { RecordRepository } from "../record.repository";
+import { RecordRepository } from "../repositories/record.repository";
 
 @Injectable()
 export class GetRecordContentUseCase {

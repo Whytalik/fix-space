@@ -2,10 +2,9 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { CreateSpaceDto, SectionOperationDto, SpaceResponseDto, UpdateSpaceDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { t } from "../../common/utils/i18n.helper";
-import { SettingsService } from "../settings/settings.service";
 import { SectionService } from "./providers/section.service";
-import { SpaceRepository } from "./space.repository";
-import { sectionsInclude } from "./space.constants";
+import { SpaceRepository } from "./repositories/space.repository";
+import { sectionsInclude } from "./constants/space.constants";
 import { toSpaceResponseDto } from "./utils/to-space-response.dto";
 
 @Injectable()
@@ -13,7 +12,6 @@ export class SpaceService {
   constructor(
     private readonly logger: AppLogger,
     private readonly sectionService: SectionService,
-    private readonly settingsService: SettingsService,
     private readonly spaceRepo: SpaceRepository,
   ) {
     this.logger.setContext(SpaceService.name);

@@ -3,7 +3,7 @@ import { Prisma } from "@fixspace/database";
 import { CreatePropertyDto, PropertyResponseDto, PropertyType, UpdatePropertyDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { t } from "../../common/utils/i18n.helper";
-import { PropertyRepository } from "./property.repository";
+import { PropertyRepository } from "./repositories/property.repository";
 import { PropertyTypeRegistry } from "./types";
 import { toPropertyResponseDto } from "./utils/to-property-response.dto";
 

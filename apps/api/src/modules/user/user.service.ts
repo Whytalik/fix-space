@@ -4,7 +4,7 @@ import { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/dom
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { verifyPassword, hashPassword } from "../../common/utils/password";
 import { StorageService } from "./storage.service";
-import { UserRepository } from "./user.repository";
+import { UserRepository } from "./repositories/user.repository";
 import { TokenService } from "../../core/auth/token.service";
 import { MailService } from "../../core/mail/mail.service";
 

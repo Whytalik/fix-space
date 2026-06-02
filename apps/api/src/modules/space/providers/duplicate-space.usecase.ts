@@ -2,8 +2,8 @@ import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundE
 import { Prisma } from "@fixspace/database";
 import { SpaceResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../../common/logger/app-logger.service";
-import { sectionsInclude } from "../space.constants";
-import { SpaceRepository } from "../space.repository";
+import { sectionsInclude } from "../constants/space.constants";
+import { SpaceRepository } from "../repositories/space.repository";
 
 export interface DuplicateSpaceOptions {
   newName?: string;

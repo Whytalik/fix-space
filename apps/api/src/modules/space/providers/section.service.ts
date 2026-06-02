@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { Prisma } from "@fixspace/database";
 import { CreateSectionDto, SectionOperationDto, SectionOperationType, SectionResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../../common/logger/app-logger.service";
-import { SectionRepository } from "./section.repository";
+import { SectionRepository } from "../repositories/section.repository";
 
 @Injectable()
 export class SectionService {

@@ -8,7 +8,7 @@ import {
 } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { PropertyTypeRegistry } from "../property/types";
-import { PropertyValueRepository } from "./property-value.repository";
+import { PropertyValueRepository } from "./repositories/property-value.repository";
 
 @Injectable()
 export class PropertyValueService {

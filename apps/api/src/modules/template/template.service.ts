@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
 import { CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
-import { TemplateRepository } from "./template.repository";
+import { TemplateRepository } from "./repositories/template.repository";
 
 @Injectable()
 export class TemplateService {

@@ -11,7 +11,7 @@ import { AppLogger } from "../../common/logger/app-logger.service";
 import { t } from "../../common/utils/i18n.helper";
 import { defaultInitializationConfig } from "../../core/config/initialization.config";
 import { PropertyTypeRegistry } from "../property/types";
-import { DatabaseRepository } from "./database.repository";
+import { DatabaseRepository } from "./repositories/database.repository";
 
 @Injectable()
 export class DatabaseService {

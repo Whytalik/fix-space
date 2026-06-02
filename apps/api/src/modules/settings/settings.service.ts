@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../../common/logger/app-logger.service";
-import { SettingsCategory } from "./settings.constants";
-import { SettingsRepository } from "./settings.repository";
+import { SettingsCategory } from "./constants/settings.constants";
+import { SettingsRepository } from "./repositories/settings.repository";
 
 @Injectable()
 export class SettingsService {

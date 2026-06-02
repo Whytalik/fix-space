@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma, type User } from "@fixspace/database";
+import { BaseRepository } from "../../../common/utils/base.repository";
 
 @Injectable()
-export class UserRepository {
+export class UserRepository extends BaseRepository {
   async findByEmail(email: string): Promise<Omit<User, "passwordHash"> | null> {
     return prisma.user.findUnique({
       where: { email },

@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
+import { BaseRepository } from "../../../common/utils/base.repository";
 
 @Injectable()
-export class PropertyValueRepository {
+export class PropertyValueRepository extends BaseRepository {
   async findRecordByOwner(recordId: string, userId: string) {
     return prisma.record.findFirst({
       where: { id: recordId, database: { space: { ownerId: userId } } },

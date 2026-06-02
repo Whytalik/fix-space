@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
+import { BaseRepository } from "../../../common/utils/base.repository";
 
 @Injectable()
-export class DatabaseRepository {
+export class DatabaseRepository extends BaseRepository {
   async findSpaceByOwner(spaceId: string, userId: string) {
     return prisma.space.findFirst({ where: { id: spaceId, ownerId: userId } });
   }
@@ -43,9 +44,5 @@ export class DatabaseRepository {
 
   async delete(id: string) {
     return prisma.database.delete({ where: { id } });
-  }
-
-  async transaction<T>(callback: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
-    return prisma.$transaction(callback);
   }
 }

@@ -10,7 +10,7 @@ import {
   SpaceSettings,
 } from "@fixspace/domain";
 import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
-import { SettingsCategory } from "./settings.constants";
+import { SettingsCategory } from "./constants/settings.constants";
 import { SettingsService } from "./settings.service";
 
 @Controller("settings")

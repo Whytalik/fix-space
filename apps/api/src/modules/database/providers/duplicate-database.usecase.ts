@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
 import { DatabaseConfigDto, DatabaseResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../../common/logger/app-logger.service";
-import { DatabaseRepository } from "../database.repository";
+import { DatabaseRepository } from "../repositories/database.repository";
 
 @Injectable()
 export class DuplicateDatabaseUseCase {

@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
+import { BaseRepository } from "../../../common/utils/base.repository";
 
 @Injectable()
-export class SectionRepository {
+export class SectionRepository extends BaseRepository {
   async create(data: Prisma.SectionUncheckedCreateInput, tx?: Prisma.TransactionClient) {
     return (tx ?? prisma).section.create({ data });
   }

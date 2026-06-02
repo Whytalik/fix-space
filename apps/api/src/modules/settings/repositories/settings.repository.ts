@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
-import { SettingsCategory } from "./settings.constants";
+import { BaseRepository } from "../../../common/utils/base.repository";
+import { SettingsCategory } from "../constants/settings.constants";
 
 @Injectable()
-export class SettingsRepository {
+export class SettingsRepository extends BaseRepository {
   findMany(userId: string, category: SettingsCategory) {
     return prisma.settings.findMany({ where: { userId, category } });
   }

@@ -4,12 +4,12 @@ import { CreatePropertyDto, CreateSpaceDto, PropertyType, SpaceResponseDto } fro
 import { AppLogger } from "../../../common/logger/app-logger.service";
 import { InitializationConfigService } from "../../../core/config/initialization-config.service";
 import { DatabaseService } from "../../database/database.service";
-import { PropertyRepository } from "../../property/property.repository";
+import { PropertyRepository } from "../../property/repositories/property.repository";
 import { PropertyService } from "../../property/property.service";
-import { PropertyValueRepository } from "../../property-value/property-value.repository";
-import { RecordRepository } from "../../record/record.repository";
+import { PropertyValueRepository } from "../../property-value/repositories/property-value.repository";
+import { RecordRepository } from "../../record/repositories/record.repository";
 import { TemplateService } from "../../template/template.service";
-import { SpaceRepository } from "../space.repository";
+import { SpaceRepository } from "../repositories/space.repository";
 import { SpaceService } from "../space.service";
 import { SectionService } from "./section.service";
 

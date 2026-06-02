@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { Prisma } from "@fixspace/database";
 import { CreateRecordDto, RecordResponseDto, UpdateRecordDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
-import { RecordRepository } from "./record.repository";
+import { RecordRepository } from "./repositories/record.repository";
 
 @Injectable()
 export class RecordService {
