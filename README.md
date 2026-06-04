@@ -100,7 +100,7 @@ Runs automatically on every PR and push to `develop`.
 |  4   | `docker`   | Build API Docker image                     |
 |  5   | `deploy`   | Deploy to staging (push to `develop` only) |
 
-Full description: [`docs/08-deployment/ci-cd.md`](docs/08-deployment/ci-cd.md)
+Full description: [`docs/07-deployment/ci-cd.md`](docs/07-deployment/ci-cd.md)
 
 ---
 
@@ -113,7 +113,6 @@ Full description: [`docs/08-deployment/ci-cd.md`](docs/08-deployment/ci-cd.md)
 | [Security Model](docs/03-architecture/security.md)                | Auth, JWT, resource protection |
 | [Frontend Architecture](docs/03-architecture/frontend-state.md)   | State management, components   |
 | [Test Plan](docs/06-testing/strategy.md)                          | Strategy, types, coverage      |
-| [User Guide](docs/07-user-guide/index.md)                         | End-user instructions          |
 
 ---
 

@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+node scripts/reconcile-issues.js
+
+if ! git diff --quiet docs/; then
+  echo ""
+  echo "⚠  Docs updated by reconcile (test-cases/ or functional/). Commit them before pushing:"
+  echo "   git add docs/ && git commit -m 'docs: sync progress from gh issues'"
+  exit 1
+fi
