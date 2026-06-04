@@ -32,6 +32,7 @@ component "Prisma ORM" as Prisma
 
 component "Google OAuth" as Google
 component "Resend / Mail Service" as Mail
+component "Cloudinary Storage" as Cloudinary
 
 Auth --> Infra
 User --> Infra
@@ -46,5 +47,6 @@ Infra --> Prisma
 Auth --> Google : OAuth 2.0
 Auth --> Mail : Email
 Automation --> Mail : Notifications
+User --> Cloudinary : Avatars / Media
 
 @enduml

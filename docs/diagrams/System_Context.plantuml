@@ -28,6 +28,7 @@ rectangle "FIX Space" as System_Box #E3F2FD {
 rectangle "Зовнішні системи" as External_Box #FFF9C4 {
   component "Google OAuth 2.0" as Google
   component "Resend API\n(Email Service)" as Resend
+  component "Cloudinary API\n(Storage Service)" as Cloudinary
   component "Binance API" as Binance
   component "Bybit API" as Bybit
   component "OKX API" as OKX
@@ -42,6 +43,8 @@ User ..> Google : Авторизація через\nGoogle-акаунт
 Google ..> System : OAuth callback:\ntoken, email, profile
 
 System ..> Resend : Email-розсилка:\nверифікація, скидання пароля,\nнотифікації
+
+System ..> Cloudinary : Збереження медіафайлів\nта аватарів користувача
 
 System ..> Binance : Імпорт даних\nпро торгівлю
 System ..> Bybit : Імпорт даних\nпро торгівлю
