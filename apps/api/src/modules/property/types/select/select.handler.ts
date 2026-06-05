@@ -65,21 +65,21 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
   validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
     if (value === null) return null;
 
-    const { categories, isMultiSelect: isMulti } = this.parseConfig(config);
+    const { categories, isMultiSelect } = this.parseConfig(config);
 
     const allOptions = categories
       ? categories.flatMap((category) => category.options.map((option) => (typeof option === "string" ? option : option.value)))
       : [];
 
-    function extractLabel(v: unknown): string | null {
-      if (typeof v === "string") return v;
-      if (typeof v === "object" && v !== null && typeof (v as Record<string, unknown>).label === "string") {
-        return (v as Record<string, unknown>).label as string;
+    function extractLabel(value: unknown): string | null {
+      if (typeof value === "string") return value;
+      if (typeof value === "object" && value !== null && typeof (value as Record<string, unknown>).label === "string") {
+        return (value as Record<string, unknown>).label as string;
       }
       return null;
     }
 
-    if (isMulti) {
+    if (isMultiSelect) {
       if (!Array.isArray(value)) {
         return ["Multi-select value must be an array or null"];
       }
@@ -135,14 +135,16 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
     targetConfig: Record<string, unknown>,
   ): unknown {
     const { isMultiSelect, categories } = this.parseConfig(targetConfig);
-    const allOptions = categories ? categories.flatMap((c) => c.options.map((o) => (typeof o === "string" ? o : o.value))) : [];
-    const raw = Array.isArray(value) ? (value as unknown[])[0] : value;
+    const allOptions = categories
+      ? categories.flatMap((category) => category.options.map((option) => (typeof option === "string" ? option : option.value)))
+      : [];
+    const rawValue = Array.isArray(value) ? (value as unknown[])[0] : value;
     let label: string | null = null;
-    if (typeof raw === "string") label = raw;
-    else if (typeof raw === "object" && raw !== null && typeof (raw as Record<string, unknown>).label === "string") {
-      label = (raw as Record<string, unknown>).label as string;
-    } else if (raw !== null && raw !== undefined) {
-      label = String(raw);
+    if (typeof rawValue === "string") label = rawValue;
+    else if (typeof rawValue === "object" && rawValue !== null && typeof (rawValue as Record<string, unknown>).label === "string") {
+      label = (rawValue as Record<string, unknown>).label as string;
+    } else if (rawValue !== null && rawValue !== undefined) {
+      label = String(rawValue);
     }
     if (label === null || (allOptions.length > 0 && !allOptions.includes(label))) {
       return this.getDefaultValue(targetConfig);

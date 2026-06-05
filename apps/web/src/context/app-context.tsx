@@ -60,7 +60,7 @@ const AppContext = createContext<AppContextValue>({
 
 function resolveInitialSpaceId(list: SpaceResponseDto[]): string | null {
   const lastId = storage.getLastSpaceId();
-  return (lastId && list.some((s) => s.id === lastId) ? lastId : null) ?? list[0]?.id ?? null;
+  return (lastId && list.some((space) => space.id === lastId) ? lastId : null) ?? list[0]?.id ?? null;
 }
 
 export function AppProvider({ children, initialUser = null }: { children: React.ReactNode; initialUser?: UserResponseDto | null }) {
@@ -79,14 +79,17 @@ export function AppProvider({ children, initialUser = null }: { children: React.
   const [currentSpaceId, setCurrentSpaceId] = useState<string | null>(null);
   const [currentDatabaseId, setCurrentDatabaseId] = useState<string | null>(null);
 
-  const space = useMemo(() => spaces.find((s) => s.id === currentSpaceId) ?? null, [spaces, currentSpaceId]);
-  const databases = useMemo(() => [...(space?.databases ?? []), ...(space?.sections ?? []).flatMap((s) => s.databases ?? [])], [space]);
+  const space = useMemo(() => spaces.find((space) => space.id === currentSpaceId) ?? null, [spaces, currentSpaceId]);
+  const databases = useMemo(
+    () => [...(space?.databases ?? []), ...(space?.sections ?? []).flatMap((section) => section.databases ?? [])],
+    [space],
+  );
 
   const isLoading = !!token || !!initialUser ? isUserLoading || isSpacesLoading : false;
 
   useEffect(() => {
     if (spaces.length > 0) {
-      if (!currentSpaceId || !spaces.some((s) => s.id === currentSpaceId)) {
+      if (!currentSpaceId || !spaces.some((space) => space.id === currentSpaceId)) {
         setCurrentSpaceId(resolveInitialSpaceId(spaces));
       }
     } else {
@@ -94,10 +97,10 @@ export function AppProvider({ children, initialUser = null }: { children: React.
     }
   }, [spaces, currentSpaceId]);
 
-  function applyPatch(fn: (s: SpaceResponseDto) => SpaceResponseDto) {
-    queryClient.setQueryData<SpaceResponseDto[]>(queryKeys.spaces.all(), (old) => {
-      if (!old) return [];
-      return old.map((s) => (s.id === currentSpaceId ? fn(s) : s));
+  function applyPatch(patchFn: (space: SpaceResponseDto) => SpaceResponseDto) {
+    queryClient.setQueryData<SpaceResponseDto[]>(queryKeys.spaces.all(), (previous) => {
+      if (!previous) return [];
+      return previous.map((space) => (space.id === currentSpaceId ? patchFn(space) : space));
     });
   }
 
@@ -107,51 +110,51 @@ export function AppProvider({ children, initialUser = null }: { children: React.
   );
   const { reorderSections, removeSectionFromSpace, renameSectionInSpace } = useSectionMutations(applyPatch);
 
-  function setSpace(s: SpaceResponseDto) {
-    storage.setLastSpaceId(s.id);
-    setCurrentSpaceId(s.id);
+  function setSpace(space: SpaceResponseDto) {
+    storage.setLastSpaceId(space.id);
+    setCurrentSpaceId(space.id);
   }
 
   function addSpace(newSpace: SpaceResponseDto) {
     storage.setLastSpaceId(newSpace.id);
     setCurrentSpaceId(newSpace.id);
-    queryClient.setQueryData<SpaceResponseDto[]>(queryKeys.spaces.all(), (old) => {
-      if (!old) return [newSpace];
-      return [...old, newSpace];
+    queryClient.setQueryData<SpaceResponseDto[]>(queryKeys.spaces.all(), (previous) => {
+      if (!previous) return [newSpace];
+      return [...previous, newSpace];
     });
   }
 
   function removeSpace(spaceId: string) {
-    const fallback = currentSpaceId === spaceId ? (spaces.find((s) => s.id !== spaceId) ?? null) : null;
+    const fallback = currentSpaceId === spaceId ? (spaces.find((space) => space.id !== spaceId) ?? null) : null;
     if (currentSpaceId === spaceId) {
       if (fallback) storage.setLastSpaceId(fallback.id);
       else storage.clearLastSpaceId();
       setCurrentSpaceId(fallback?.id ?? null);
     }
-    queryClient.setQueryData<SpaceResponseDto[]>(queryKeys.spaces.all(), (old) => {
-      if (!old) return [];
-      return old.filter((s) => s.id !== spaceId);
+    queryClient.setQueryData<SpaceResponseDto[]>(queryKeys.spaces.all(), (previous) => {
+      if (!previous) return [];
+      return previous.filter((space) => space.id !== spaceId);
     });
   }
 
   function updateSpaceInList(updated: SpaceResponseDto) {
-    queryClient.setQueryData<SpaceResponseDto[]>(queryKeys.spaces.all(), (old) => {
-      if (!old) return [];
-      return old.map((s) => (s.id === updated.id ? updated : s));
+    queryClient.setQueryData<SpaceResponseDto[]>(queryKeys.spaces.all(), (previous) => {
+      if (!previous) return [];
+      return previous.map((space) => (space.id === updated.id ? updated : space));
     });
   }
 
   function addDatabaseToSpace(db: DatabaseResponseDto) {
-    applyPatch((s) => {
+    applyPatch((space) => {
       if (db.sectionId) {
         return {
-          ...s,
-          sections: (s.sections ?? []).map((sec) =>
-            sec.id === db.sectionId ? { ...sec, databases: [...(sec.databases ?? []), db] } : sec,
+          ...space,
+          sections: (space.sections ?? []).map((section) =>
+            section.id === db.sectionId ? { ...section, databases: [...(section.databases ?? []), db] } : section,
           ),
         };
       }
-      return { ...s, databases: [...(s.databases ?? []), db] };
+      return { ...space, databases: [...(space.databases ?? []), db] };
     });
   }
 

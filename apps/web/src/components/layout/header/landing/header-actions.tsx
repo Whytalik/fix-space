@@ -7,7 +7,7 @@ import { useLogout } from "@/hooks/useLogout";
 import { LogOut, User } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { usePathname } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 const AUTH_PAGES = ["/login", "/register"];
@@ -17,7 +17,12 @@ export function HeaderActions() {
   const pathname = usePathname();
   const { user, isLoading, clearSession } = useAppContext();
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const logout = useLogout();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEscape(
     useCallback(() => {
@@ -31,6 +36,7 @@ export function HeaderActions() {
     await logout();
   }
 
+  if (!isMounted) return null;
   if (AUTH_PAGES.some((page) => pathname.endsWith(page))) return null;
   if (isLoading) return null;
 

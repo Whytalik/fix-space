@@ -2,7 +2,7 @@ const config = {
   singleQuote: false,
   semi: true,
   trailingComma: "all",
-  printWidth: 120,
+  printWidth: 140,
   tabWidth: 2,
   useTabs: false,
   bracketSpacing: true,

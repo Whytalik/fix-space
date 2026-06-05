@@ -24,39 +24,39 @@ interface ColorPickerProps {
   anchorEl?: HTMLElement | null;
 }
 
-export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerProps) {
+export function ColorPicker({ value: initialValue, onChange, onClose, anchorEl }: ColorPickerProps) {
   const t = useTranslations("ColorPicker");
 
-  const [[hue, sat, val], setHsv] = useState<[number, number, number]>(() => hexToHsv(value));
-  const [hex, setHex] = useState(value ?? "");
+  const [[hue, saturation, brightness], setHsv] = useState<[number, number, number]>(() => hexToHsv(initialValue));
+  const [hex, setHex] = useState(initialValue ?? "");
   const [hexError, setHexError] = useState(false);
 
-  const currentHex = hexFromHsv(hue, sat, val);
+  const currentHex = hexFromHsv(hue, saturation, brightness);
   const containerRef = useRef<HTMLDivElement>(null);
   const svRectRef = useRef<DOMRect | null>(null);
   const hueRectRef = useRef<DOMRect | null>(null);
   const svRef = useRef<HTMLDivElement>(null);
   const hueSliderRef = useRef<HTMLDivElement>(null);
 
-  const prevValueRef = useRef(value);
+  const prevValueRef = useRef(initialValue);
   useEffect(() => {
-    if (value === prevValueRef.current) return;
-    prevValueRef.current = value;
-    const rgbValues = value ? hexToRgb(value) : null;
+    if (initialValue === prevValueRef.current) return;
+    prevValueRef.current = initialValue;
+    const rgbValues = initialValue ? hexToRgb(initialValue) : null;
     if (rgbValues) {
       setHsv(rgbToHsv(...rgbValues));
-      setHex(value);
+      setHex(initialValue);
       setHexError(false);
     }
-  }, [value]);
+  }, [initialValue]);
 
   useFloatingPanel(containerRef, onClose, anchorEl);
 
   function calcSV(clientX: number, clientY: number, rect: DOMRect) {
     const nextSaturation = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    const nextValue = Math.max(0, Math.min(1, 1 - (clientY - rect.top) / rect.height));
-    setHsv([hue, nextSaturation, nextValue]);
-    setHex(hexFromHsv(hue, nextSaturation, nextValue));
+    const nextBrightness = Math.max(0, Math.min(1, 1 - (clientY - rect.top) / rect.height));
+    setHsv([hue, nextSaturation, nextBrightness]);
+    setHex(hexFromHsv(hue, nextSaturation, nextBrightness));
     setHexError(false);
   }
 
@@ -77,8 +77,8 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
 
   function calcHue(clientX: number, rect: DOMRect) {
     const nextHue = Math.max(0, Math.min(360, ((clientX - rect.left) / rect.width) * 360));
-    setHsv([nextHue, sat, val]);
-    setHex(hexFromHsv(nextHue, sat, val));
+    setHsv([nextHue, saturation, brightness]);
+    setHex(hexFromHsv(nextHue, saturation, brightness));
     setHexError(false);
   }
 
@@ -120,8 +120,8 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
   }
 
   const hueColor = `hsl(${hue}, 100%, 50%)`;
-  const cursorLeft = `${sat * 100}%`;
-  const cursorTop = `${(1 - val) * 100}%`;
+  const cursorLeft = `${saturation * 100}%`;
+  const cursorTop = `${(1 - brightness) * 100}%`;
   const hueThumbLeft = `${(hue / 360) * 100}%`;
   const fullHex = normalizeHex(hex);
   const previewHex = isValidHex(fullHex) ? fullHex : null;
@@ -195,7 +195,7 @@ export function ColorPicker({ value, onChange, onClose, anchorEl }: ColorPickerP
               onClose();
             }}
             className="w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform"
-            style={{ backgroundColor: swatch, borderColor: value === swatch ? "white" : "transparent" }}
+            style={{ backgroundColor: swatch, borderColor: initialValue === swatch ? "white" : "transparent" }}
           />
         ))}
       </div>

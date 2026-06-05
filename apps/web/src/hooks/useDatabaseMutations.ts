@@ -1,15 +1,15 @@
 import type { DatabaseResponseDto, SpaceResponseDto } from "@fixspace/domain";
 
-type ApplyPatch = (fn: (s: SpaceResponseDto) => SpaceResponseDto) => void;
+type ApplyPatch = (patchFunction: (space: SpaceResponseDto) => SpaceResponseDto) => void;
 
 export function useDatabaseMutations(applyPatch: ApplyPatch, space: SpaceResponseDto | null) {
   function updateDatabaseInSpace(updated: DatabaseResponseDto) {
     applyPatch((prev) => {
-      const replaceDb = (db: DatabaseResponseDto) => (db.id === updated.id ? updated : db);
+      const replaceDb = (database: DatabaseResponseDto) => (database.id === updated.id ? updated : database);
       return {
         ...prev,
         databases: prev.databases?.map(replaceDb) ?? [],
-        sections: prev.sections?.map((s) => ({ ...s, databases: s.databases?.map(replaceDb) ?? [] })) ?? [],
+        sections: prev.sections?.map((section) => ({ ...section, databases: section.databases?.map(replaceDb) ?? [] })) ?? [],
       };
     });
   }
@@ -19,7 +19,7 @@ export function useDatabaseMutations(applyPatch: ApplyPatch, space: SpaceRespons
       if (sectionId === null) return { ...prev, databases: reordered };
       return {
         ...prev,
-        sections: (prev.sections ?? []).map((s) => (s.id === sectionId ? { ...s, databases: reordered } : s)),
+        sections: (prev.sections ?? []).map((section) => (section.id === sectionId ? { ...section, databases: reordered } : section)),
       };
     });
   }
@@ -28,20 +28,20 @@ export function useDatabaseMutations(applyPatch: ApplyPatch, space: SpaceRespons
     applyPatch((prev) => {
       let movedDb: DatabaseResponseDto | undefined;
 
-      const newSections = (prev.sections ?? []).map((s) => ({
-        ...s,
-        databases: (s.databases ?? []).filter((d) => {
-          if (d.id === dbId) {
-            movedDb = d;
+      const newSections = (prev.sections ?? []).map((section) => ({
+        ...section,
+        databases: (section.databases ?? []).filter((database) => {
+          if (database.id === dbId) {
+            movedDb = database;
             return false;
           }
           return true;
         }),
       }));
 
-      const newDatabases = (prev.databases ?? []).filter((d) => {
-        if (d.id === dbId) {
-          movedDb = d;
+      const newDatabases = (prev.databases ?? []).filter((database) => {
+        if (database.id === dbId) {
+          movedDb = database;
           return false;
         }
         return true;
@@ -53,7 +53,9 @@ export function useDatabaseMutations(applyPatch: ApplyPatch, space: SpaceRespons
       if (targetSectionId) {
         return {
           ...prev,
-          sections: newSections.map((s) => (s.id === targetSectionId ? { ...s, databases: [...(s.databases ?? []), updatedDb] } : s)),
+          sections: newSections.map((section) =>
+            section.id === targetSectionId ? { ...section, databases: [...(section.databases ?? []), updatedDb] } : section,
+          ),
           databases: newDatabases,
         };
       }
@@ -63,13 +65,14 @@ export function useDatabaseMutations(applyPatch: ApplyPatch, space: SpaceRespons
   }
 
   function removeDatabaseFromSpace(databaseId: string): string | null {
-    const sectionId = (space?.sections ?? []).find((s) => s.databases?.some((d) => d.id === databaseId))?.id ?? null;
+    const sectionId =
+      (space?.sections ?? []).find((section) => section.databases?.some((database) => database.id === databaseId))?.id ?? null;
     applyPatch((prev) => ({
       ...prev,
-      databases: (prev.databases ?? []).filter((d) => d.id !== databaseId),
-      sections: (prev.sections ?? []).map((s) => ({
-        ...s,
-        databases: (s.databases ?? []).filter((d) => d.id !== databaseId),
+      databases: (prev.databases ?? []).filter((database) => database.id !== databaseId),
+      sections: (prev.sections ?? []).map((section) => ({
+        ...section,
+        databases: (section.databases ?? []).filter((database) => database.id !== databaseId),
       })),
     }));
     return sectionId;

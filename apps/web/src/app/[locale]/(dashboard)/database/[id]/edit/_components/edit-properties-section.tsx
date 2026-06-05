@@ -142,14 +142,14 @@ export function EditPropertiesSection({
     const updated = flatItemsToProperties(newItems);
     onPropertiesChange(updated);
 
-    const origMap = new Map(properties.map((p) => [p.id, p]));
-    for (const p of updated) {
-      const orig = origMap.get(p.id);
+    const origMap = new Map(properties.map((property) => [property.id, property]));
+    for (const property of updated) {
+      const orig = origMap.get(property.id);
       if (!orig) continue;
-      if (orig.position !== p.position || orig.group !== p.group) {
-        onPropertyUpdate(p.id, {
-          ...(orig.position !== p.position ? { position: p.position } : {}),
-          ...(orig.group !== p.group ? { group: p.group ?? null } : {}),
+      if (orig.position !== property.position || orig.group !== property.group) {
+        onPropertyUpdate(property.id, {
+          ...(orig.position !== property.position ? { position: property.position } : {}),
+          ...(orig.group !== property.group ? { group: property.group ?? null } : {}),
         });
       }
     }
@@ -190,9 +190,9 @@ export function EditPropertiesSection({
     const updated = flatItemsToProperties(newItems);
     onPropertiesChange(updated);
 
-    for (const p of updated) {
-      if (p.group === trimmed && properties.find((o) => o.id === p.id)?.group === oldName) {
-        onPropertyUpdate(p.id, { group: trimmed });
+    for (const property of updated) {
+      if (property.group === trimmed && properties.find((existingProperty) => existingProperty.id === property.id)?.group === oldName) {
+        onPropertyUpdate(property.id, { group: trimmed });
       }
     }
   }
@@ -212,9 +212,9 @@ export function EditPropertiesSection({
     const updated = flatItemsToProperties(newItems);
     onPropertiesChange(updated);
 
-    for (const p of updated) {
-      if (!p.group && properties.find((o) => o.id === p.id)?.group === name) {
-        onPropertyUpdate(p.id, { group: null });
+    for (const property of updated) {
+      if (!property.group && properties.find((existingProperty) => existingProperty.id === property.id)?.group === name) {
+        onPropertyUpdate(property.id, { group: null });
       }
     }
   }

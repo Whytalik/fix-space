@@ -64,7 +64,8 @@ export class PropertyResponseDto {
   updatedAt: Date;
 
   @Expose()
-  @Transform(({ value, type, obj }) => {
+  @Transform((params: any) => {
+    const { value, type, object, obj } = params;
     if (type === TransformationType.CLASS_TO_PLAIN) return value;
     if (!value) return value;
     const subTypeMap: Record<string, new (...args: unknown[]) => unknown> = {
@@ -81,7 +82,8 @@ export class PropertyResponseDto {
       [PropertyType.PROGRESS]: ProgressProperty,
       [PropertyType.BUTTON]: ButtonProperty,
     };
-    const Ctor = subTypeMap[obj?.type as string];
+    const targetObj = obj || object;
+    const Ctor = subTypeMap[targetObj?.type as string];
     return Ctor ? Object.assign(new Ctor() as object, value) : value;
   })
   config?:

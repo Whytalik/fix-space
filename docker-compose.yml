@@ -25,6 +25,7 @@ services:
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-super-refresh-secret-key-for-diploma-project}
       - PORT=3000
       - NODE_ENV=production
+      - COOKIE_SECURE=false
     ports:
       - '3000:3000'
     depends_on:
@@ -40,6 +41,7 @@ services:
     environment:
       - PORT=3001
       - NODE_ENV=production
+      - INTERNAL_API_URL=http://api:3000
     ports:
       - '3001:3001'
     depends_on:

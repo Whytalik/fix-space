@@ -1,13 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import {
-  DEFAULT_TEXT_PROPERTY,
-  FilterOperator,
-  OPERATORS_BY_PROPERTY_TYPE,
-  PropertyType,
-  TextProperty,
-  URL_HANDLING_VALUES,
-  UrlHandling,
-} from "@fixspace/domain";
+import { DEFAULT_TEXT_PROPERTY, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, PropertyType, TextProperty } from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
@@ -29,14 +21,6 @@ export class TextHandler implements PropertyConfigHandler, PropertyValueHandler,
 
     if (config.defaultValue !== undefined && typeof config.defaultValue !== "string") {
       errors.push("defaultValue must be a string");
-    }
-
-    if (config.isRichText !== undefined && typeof config.isRichText !== "boolean") {
-      errors.push("isRichText must be a boolean");
-    }
-
-    if (config.urlHandling !== undefined && !URL_HANDLING_VALUES.includes(config.urlHandling as UrlHandling)) {
-      errors.push(`urlHandling must be one of: ${URL_HANDLING_VALUES.join(", ")}`);
     }
 
     return errors.length > 0 ? errors : null;

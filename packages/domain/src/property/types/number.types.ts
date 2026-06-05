@@ -21,6 +21,14 @@ export class NumberProperty {
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   currencySymbol?: string;
+
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  prefix?: string;
+
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  suffix?: string;
 }
 
 export { DEFAULT_NUMBER_PROPERTY } from "./number.constants";

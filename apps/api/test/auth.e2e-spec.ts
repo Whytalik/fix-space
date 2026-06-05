@@ -1,7 +1,7 @@
 import { prisma } from "@fixspace/database";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { INestApplication } from "@nestjs/common";
-import type * as supertest from "supertest";
+import supertest from "supertest";
 import { cleanupE2eApp, mockMailService, setupE2eApp, uniqueEmail, uniqueUsername } from "./utils/e2e-setup";
 
 const E2E_AUTH_MARKER = "e2e-auth-test";
@@ -177,7 +177,7 @@ describe("AuthController (e2e)", () => {
     });
 
     it("should return 401 if no refresh_token cookie is provided", async () => {
-      const res = await agent.post("/auth/refresh");
+      const res = await supertest(app.getHttpServer()).post("/auth/refresh");
 
       expect(res.status).toBe(401);
     });

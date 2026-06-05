@@ -35,8 +35,8 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
   const t = useTranslations("GroupPanel");
 
   const propertyOptions: ComboboxOption[] = properties
-    .filter((p) => p.type !== PropertyType.RELATION)
-    .map((p) => ({ value: p.id, label: p.name }));
+    .filter((property) => property.type !== PropertyType.RELATION)
+    .map((property) => ({ value: property.id, label: property.name }));
 
   function handleFieldChange(value: string) {
     if (!value) {
@@ -73,7 +73,7 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
       <Combobox
         options={[
           { value: "", label: t("noGrouping") },
-          ...FIELD_OPTIONS.map((opt) => ({ ...opt, label: t(opt.label as unknown as string) })),
+          ...FIELD_OPTIONS.map((option) => ({ ...option, label: t(option.label as unknown as string) })),
         ]}
         value={grouping?.field ?? ""}
         onChange={handleFieldChange}
@@ -103,13 +103,13 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
           <div className="h-px bg-stroke my-1" />
           <span className="text-xs font-semibold text-ink-muted uppercase tracking-wide">{t("groups")}</span>
           <div className="flex flex-col gap-1 max-h-52 overflow-y-auto scrollbar">
-            {visibleGroups.map((g, idx) => {
-              const color = groupColors[g.key] ?? PALETTE_COLOR_VALUES[idx % PALETTE_COLOR_VALUES.length];
-              const hidden = hiddenGroups.has(g.key);
-              const pickerOpen = colorPickerKey === g.key;
+            {visibleGroups.map((group, index) => {
+              const color = groupColors[group.key] ?? PALETTE_COLOR_VALUES[index % PALETTE_COLOR_VALUES.length];
+              const hidden = hiddenGroups.has(group.key);
+              const pickerOpen = colorPickerKey === group.key;
 
               return (
-                <div key={g.key} className="flex items-center gap-2 px-1 py-0.5 rounded-md hover:bg-elevated">
+                <div key={group.key} className="flex items-center gap-2 px-1 py-0.5 rounded-md hover:bg-elevated">
                   <span className="shrink-0">
                     <button
                       type="button"
@@ -118,7 +118,7 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
                           setColorPickerKey(null);
                           setColorPickerAnchor(null);
                         } else {
-                          setColorPickerKey(g.key);
+                          setColorPickerKey(group.key);
                           setColorPickerAnchor(e.currentTarget);
                         }
                       }}
@@ -129,10 +129,10 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
                   </span>
                   {pickerOpen && (
                     <ColorPicker
-                      value={groupColors[g.key] ?? ""}
+                      value={groupColors[group.key] ?? ""}
                       anchorEl={colorPickerAnchor}
-                      onChange={(c) => {
-                        setGroupColor(g.key, c);
+                      onChange={(color) => {
+                        setGroupColor(group.key, color);
                         setColorPickerKey(null);
                         setColorPickerAnchor(null);
                       }}
@@ -144,13 +144,13 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
                   )}
 
                   <span className={`flex-1 text-xs truncate ${hidden ? "text-ink-muted line-through" : "text-ink-secondary"}`}>
-                    {g.label}
+                    {group.label}
                   </span>
-                  <span className="text-tiny text-ink-muted shrink-0">{g.records.length}</span>
+                  <span className="text-tiny text-ink-muted shrink-0">{group.records.length}</span>
 
                   <button
                     type="button"
-                    onClick={() => toggleHiddenGroup(g.key)}
+                    onClick={() => toggleHiddenGroup(group.key)}
                     className="shrink-0 text-ink-muted hover:text-ink transition-colors"
                     title={hidden ? t("showGroup") : t("hideGroup")}
                   >

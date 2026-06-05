@@ -21,19 +21,19 @@ export class ProgressHandler implements PropertyConfigHandler, PropertyValueHand
       errors.push("defaultValue must be a number or null");
     }
 
-    if (config.min !== undefined && typeof config.min !== "number") {
-      errors.push("min must be a number");
+    if (config.minValue !== undefined && typeof config.minValue !== "number") {
+      errors.push("minValue must be a number");
     }
 
-    if (config.max !== undefined && typeof config.max !== "number") {
-      errors.push("max must be a number");
+    if (config.maxValue !== undefined && typeof config.maxValue !== "number") {
+      errors.push("maxValue must be a number");
     }
 
-    const min = (config.min as number | undefined) ?? DEFAULT_PROGRESS_PROPERTY.min;
-    const max = (config.max as number | undefined) ?? DEFAULT_PROGRESS_PROPERTY.max;
+    const minValue = (config.minValue as number | undefined) ?? DEFAULT_PROGRESS_PROPERTY.minValue;
+    const maxValue = (config.maxValue as number | undefined) ?? DEFAULT_PROGRESS_PROPERTY.maxValue;
 
-    if (typeof config.min === "number" && typeof config.max === "number" && min >= max) {
-      errors.push("max must be greater than min");
+    if (typeof config.minValue === "number" && typeof config.maxValue === "number" && minValue >= maxValue) {
+      errors.push("maxValue must be greater than minValue");
     }
 
     if (config.step !== undefined) {
@@ -60,10 +60,10 @@ export class ProgressHandler implements PropertyConfigHandler, PropertyValueHand
       return ["Progress value must be a number or null"];
     }
 
-    const { min, max } = this.parseConfig(config);
+    const { minValue, maxValue } = this.parseConfig(config);
 
-    if (value < min || value > max) {
-      return [`Progress value must be between ${min} and ${max}`];
+    if (value < minValue || value > maxValue) {
+      return [`Progress value must be between ${minValue} and ${maxValue}`];
     }
 
     return null;
@@ -73,8 +73,8 @@ export class ProgressHandler implements PropertyConfigHandler, PropertyValueHand
     if (value === null || value === undefined) return null;
     const numericValue = Number(value);
     if (Number.isNaN(numericValue)) return null;
-    const { min, max } = this.parseConfig(config);
-    return Math.min(Math.max(min, numericValue), max);
+    const { minValue, maxValue } = this.parseConfig(config);
+    return Math.min(Math.max(minValue, numericValue), maxValue);
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
@@ -92,13 +92,13 @@ export class ProgressHandler implements PropertyConfigHandler, PropertyValueHand
     targetConfig: Record<string, unknown>,
   ): unknown {
     if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
-    const { min, max } = this.parseConfig(targetConfig);
+    const { minValue, maxValue } = this.parseConfig(targetConfig);
     let numericValue: number;
     if (typeof value === "number") numericValue = value;
     else if (typeof value === "string") numericValue = parseFloat(value);
     else return this.getDefaultValue(targetConfig);
     if (Number.isNaN(numericValue)) return this.getDefaultValue(targetConfig);
-    return Math.min(Math.max(min, numericValue), max);
+    return Math.min(Math.max(minValue, numericValue), maxValue);
   }
 
   getFilterOperators(): FilterOperator[] {

@@ -16,11 +16,11 @@ export class SectionOperationDto {
   @IsEnum(SectionOperationType, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   operation: SectionOperationType;
 
-  @ValidateIf((o) => o.operation === SectionOperationType.UPDATE || o.operation === SectionOperationType.DELETE)
+  @ValidateIf((item) => item.operation === SectionOperationType.UPDATE || item.operation === SectionOperationType.DELETE)
   @IsUUID("4", { message: i18nValidationMessage<I18nTranslations>("validation.IS_UUID") })
   id?: string;
 
-  @ValidateIf((o) => o.operation === SectionOperationType.CREATE)
+  @ValidateIf((item) => item.operation === SectionOperationType.CREATE)
   @ValidateNested()
   @Type(() => CreateSectionDto)
   create?: CreateSectionDto;

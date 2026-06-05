@@ -20,10 +20,13 @@ export class AuthCookiesInterceptor implements NestInterceptor {
       map((data: unknown) => {
         const cookieData = (data ?? {}) as AuthCookieData;
         const response = context.switchToHttp().getResponse<Response>();
-        const cookieOptions = {
-          domain: this.configService.get("COOKIE_DOMAIN", "localhost"),
+        const cookieDomain = this.configService.get<string>("COOKIE_DOMAIN", "");
+        const cookieOptions: any = {
           secure: this.configService.get("NODE_ENV") === "production" && this.configService.get("COOKIE_SECURE") !== "false",
         };
+        if (cookieDomain && cookieDomain !== "localhost") {
+          cookieOptions.domain = cookieDomain;
+        }
 
         if (cookieData.clearCookies) {
           clearAuthCookies(response, cookieOptions);

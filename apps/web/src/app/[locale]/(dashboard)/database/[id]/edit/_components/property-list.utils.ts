@@ -32,7 +32,7 @@ export function getConfigSummary(prop: PropertyResponseDto, databases?: Database
       return config.defaultValue ? "Default: on" : null;
     case PropertyType.SELECT: {
       const cats = config.categories as Array<{ options: string[] }> | undefined;
-      const count = cats?.flatMap((cat) => cat.options).length ?? 0;
+      const count = cats?.flatMap((category) => category.options).length ?? 0;
       const parts: string[] = [];
       if (config.isMultiSelect) parts.push("Multi");
       parts.push(count > 0 ? `${count} option${count !== 1 ? "s" : ""}` : "No options");
@@ -40,11 +40,11 @@ export function getConfigSummary(prop: PropertyResponseDto, databases?: Database
     }
     case PropertyType.STATUS: {
       const cats = config.categories as Array<{ options: unknown[] }> | undefined;
-      const count = cats?.flatMap((cat) => cat.options).length ?? 0;
+      const count = cats?.flatMap((category) => category.options).length ?? 0;
       return count > 0 ? `${count} option${count !== 1 ? "s" : ""}` : "No options";
     }
     case PropertyType.RELATION: {
-      const db = databases?.find((d) => d.id === config.relatedEntityId);
+      const db = databases?.find((database) => database.id === config.relatedEntityId);
       const dbName = db ? (db.title ?? db.name) : config.relatedEntityId ? "Unknown DB" : "No database";
       const mult = config.multiple !== false ? "multiple" : "single";
       return `→ ${dbName} · ${mult}`;
@@ -59,8 +59,8 @@ export function buildFlatItems(properties: PropertyResponseDto[]): FlatItem[] {
 
   const seen = new Set<string>();
   const groupOrder: string[] = [];
-  for (const p of sorted) {
-    const group = p.group ?? "";
+  for (const property of sorted) {
+    const group = property.group ?? "";
     if (!seen.has(group)) {
       seen.add(group);
       groupOrder.push(group);
@@ -69,13 +69,13 @@ export function buildFlatItems(properties: PropertyResponseDto[]): FlatItem[] {
 
   const groups = new Map<string, PropertyResponseDto[]>();
   for (const group of groupOrder) groups.set(group, []);
-  for (const p of sorted) groups.get(p.group ?? "")!.push(p);
+  for (const property of sorted) groups.get(property.group ?? "")!.push(property);
 
   const items: FlatItem[] = [];
   for (const gName of groupOrder) {
     if (gName) items.push({ kind: "group", id: `group:${gName}`, name: gName });
-    for (const p of groups.get(gName)!) {
-      items.push({ kind: "property", id: `prop:${p.id}`, prop: p });
+    for (const property of groups.get(gName)!) {
+      items.push({ kind: "property", id: `prop:${property.id}`, prop: property });
     }
   }
   return items;

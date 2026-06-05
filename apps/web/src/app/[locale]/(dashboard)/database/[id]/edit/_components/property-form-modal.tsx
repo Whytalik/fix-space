@@ -201,7 +201,7 @@ export function PropertyFormModal({
                 <button
                   ref={iconButtonRef}
                   type="button"
-                  onClick={() => setShowIconPicker((v) => !v)}
+                  onClick={() => setShowIconPicker((value) => !value)}
                   className="flex items-center gap-2 rounded-lg border border-stroke bg-canvas px-3 py-2 text-sm text-ink hover:border-accent transition-colors"
                 >
                   {icon ? (
@@ -216,8 +216,8 @@ export function PropertyFormModal({
                 {showIconPicker && (
                   <IconPicker
                     value={icon}
-                    onChange={(v) => {
-                      setIcon(v);
+                    onChange={(value) => {
+                      setIcon(value);
                       setShowIconPicker(false);
                     }}
                     onClose={() => setShowIconPicker(false)}
@@ -248,7 +248,7 @@ export function PropertyFormModal({
               <label className="type-field-label">{t("group")}</label>
               <div className="mt-1">
                 <Combobox
-                  options={existingGroups.map((g) => ({ value: g, label: g }))}
+                  options={existingGroups.map((group) => ({ value: group, label: group }))}
                   value={group}
                   onChange={setGroup}
                   placeholder={t("groupPlaceholder")}

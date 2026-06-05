@@ -113,10 +113,3 @@ Full description: [`docs/07-deployment/ci-cd.md`](docs/07-deployment/ci-cd.md)
 | [Security Model](docs/03-architecture/security.md)                | Auth, JWT, resource protection |
 | [Frontend Architecture](docs/03-architecture/frontend-state.md)   | State management, components   |
 | [Test Plan](docs/06-testing/strategy.md)                          | Strategy, types, coverage      |
-
----
-
-> [!NOTE]
-> Project is successfully deployed! Live Web App is hosted on [Vercel](https://fix-space-web.vercel.app/uk) and REST API is hosted on [Railway](https://fix-space-production.up.railway.app/).
-
-_Thesis project · Specialty 121 · Zhytomyr Polytechnic · 2026_

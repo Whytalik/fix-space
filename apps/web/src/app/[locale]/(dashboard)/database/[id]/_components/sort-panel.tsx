@@ -25,9 +25,7 @@ import { useTranslations } from "next-intl";
 
 const SORTABLE_TYPES = new Set([PropertyType.TEXT, PropertyType.NUMBER, PropertyType.DATE, PropertyType.STATUS, PropertyType.SELECT]);
 
-interface SortPanelProps {
-  onClose: () => void;
-}
+interface SortPanelProps {}
 
 type SortItem = RecordSortDto & { id: string };
 
@@ -95,29 +93,29 @@ function SortRow({ item, rowOptions, prop, onApplyOption, onToggleDirection, onR
   );
 }
 
-export function SortPanel({ onClose }: SortPanelProps) {
+export function SortPanel({}: SortPanelProps) {
   const { properties, sorts, setSorts } = useDatabaseContext();
   const [hasPendingRow, setHasPendingRow] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("SortPanel");
 
-  const sortableProps = properties.filter((p) => SORTABLE_TYPES.has(p.type as PropertyType));
+  const sortableProps = properties.filter((property) => SORTABLE_TYPES.has(property.type as PropertyType));
 
   const metaOptions: ComboboxOption[] = [
     { value: `meta:${SortField.CREATED_AT}`, label: t("createdAt") },
     { value: `meta:${SortField.UPDATED_AT}`, label: t("updatedAt") },
   ];
 
-  const propertyOptions: ComboboxOption[] = sortableProps.map((p) => ({
-    value: `prop:${p.id}`,
-    label: p.name,
+  const propertyOptions: ComboboxOption[] = sortableProps.map((property) => ({
+    value: `prop:${property.id}`,
+    label: property.name,
   }));
 
   const allOptions = [...metaOptions, ...propertyOptions];
 
   const usedValues = useMemo(() => new Set(sorts.map(optionValue)), [sorts]);
 
-  const sortItems = useMemo<SortItem[]>(() => sorts.map((s) => ({ ...s, id: optionValue(s) })), [sorts]);
+  const sortItems = useMemo<SortItem[]>(() => sorts.map((sort) => ({ ...sort, id: optionValue(sort) })), [sorts]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -155,8 +153,8 @@ export function SortPanel({ onClose }: SortPanelProps) {
     clampBoundsRef.current = null;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = sortItems.findIndex((s) => s.id === active.id);
-    const newIndex = sortItems.findIndex((s) => s.id === over.id);
+    const oldIndex = sortItems.findIndex((sortItem) => sortItem.id === active.id);
+    const newIndex = sortItems.findIndex((sortItem) => sortItem.id === over.id);
     setSorts(arrayMove(sorts, oldIndex, newIndex));
   }
 
@@ -188,7 +186,7 @@ export function SortPanel({ onClose }: SortPanelProps) {
   }
 
   function updateSort(index: number, patch: Partial<RecordSortDto>) {
-    setSorts(sorts.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+    setSorts(sorts.map((sort, i) => (i === index ? { ...sort, ...patch } : sort)));
   }
 
   function removeSort(index: number) {
@@ -204,7 +202,7 @@ export function SortPanel({ onClose }: SortPanelProps) {
   }
 
   function getPropertyForSort(sort: RecordSortDto) {
-    return sort.field === SortField.PROPERTY ? properties.find((p) => p.id === sort.propertyId) : null;
+    return sort.field === SortField.PROPERTY ? properties.find((property) => property.id === sort.propertyId) : null;
   }
 
   const canAddSort = !hasPendingRow && usedValues.size < allOptions.length;
@@ -241,18 +239,18 @@ export function SortPanel({ onClose }: SortPanelProps) {
           onDragEnd={handleDragEnd}
         >
           <div className="flex flex-col gap-1">
-            <SortableContext items={sortItems.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+            <SortableContext items={sortItems.map((sortItem) => sortItem.id)} strategy={verticalListSortingStrategy}>
               {sortItems.map((item) => {
-                const sortIndex = sorts.findIndex((s) => optionValue(s) === item.id);
+                const sortIndex = sorts.findIndex((sort) => optionValue(sort) === item.id);
                 const prop = getPropertyForSort(item);
-                const rowOptions = allOptions.filter((o) => !usedValues.has(o.value) || o.value === optionValue(item));
+                const rowOptions = allOptions.filter((option) => !usedValues.has(option.value) || option.value === optionValue(item));
                 return (
                   <SortRow
                     key={item.id}
                     item={item}
                     rowOptions={rowOptions}
                     prop={prop}
-                    onApplyOption={(v) => applyOption(sortIndex, v)}
+                    onApplyOption={(value) => applyOption(sortIndex, value)}
                     onToggleDirection={() => toggleDirection(sortIndex)}
                     onRemove={() => removeSort(sortIndex)}
                   />
@@ -267,7 +265,7 @@ export function SortPanel({ onClose }: SortPanelProps) {
         <div className="flex items-center gap-1.5">
           <div className="flex-1 min-w-32">
             <Combobox
-              options={allOptions.filter((o) => !usedValues.has(o.value))}
+              options={allOptions.filter((option) => !usedValues.has(option.value))}
               value=""
               size="sm"
               placeholder={t("selectField")}

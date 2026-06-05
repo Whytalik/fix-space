@@ -29,8 +29,8 @@ export function matchesSearch(record: SearchableRecord, term: string): boolean {
       if (fieldValue.some((item) => typeof item === "string" && item.toLowerCase().includes(lower))) return true;
     }
 
-    if (typeof val === "object" && !Array.isArray(val)) {
-      const label = (val as Record<string, unknown>).label;
+    if (typeof fieldValue === "object" && !Array.isArray(fieldValue)) {
+      const label = (fieldValue as Record<string, unknown>).label;
       if (typeof label === "string" && label.toLowerCase().includes(lower)) return true;
     }
   }

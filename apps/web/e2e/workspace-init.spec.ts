@@ -89,7 +89,7 @@ test.describe("TC-WS-001 / TC-DB-001: Workspace browser flow", () => {
   });
 
   test("registration → verification → login → 9 preset databases in sidebar", async ({ page, request }) => {
-    await page.goto(`${WEB}/en/register`);
+    await page.goto(`${WEB}/en/register`, { waitUntil: "networkidle" });
     await page.getByLabel(/email/i).fill(testUser.email);
     await page.getByLabel(/username/i).fill(testUser.username);
     await page.getByLabel(/password/i).fill(testUser.password);
@@ -104,7 +104,7 @@ test.describe("TC-WS-001 / TC-DB-001: Workspace browser flow", () => {
       throw new Error(`Verification API failed (${verifyRes.status()}): ${await verifyRes.text()}`);
     }
 
-    await page.goto(`${WEB}/en/login`);
+    await page.goto(`${WEB}/en/login`, { waitUntil: "networkidle" });
     await page.getByLabel(/email/i).fill(testUser.email);
     await page.getByLabel(/password/i).fill(testUser.password);
     await page.getByRole("button", { name: /sign in|увійти/i }).click();

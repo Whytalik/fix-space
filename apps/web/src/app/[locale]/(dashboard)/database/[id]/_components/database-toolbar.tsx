@@ -70,19 +70,19 @@ export function DatabaseToolbar() {
   }
 
   function toggleSort() {
-    setSortOpen((v) => !v);
+    setSortOpen((prev) => !prev);
     setFilterOpen(false);
     setGroupOpen(false);
   }
 
   function toggleFilter() {
-    setFilterOpen((v) => !v);
+    setFilterOpen((prev) => !prev);
     setSortOpen(false);
     setGroupOpen(false);
   }
 
   function toggleGroup() {
-    setGroupOpen((v) => !v);
+    setGroupOpen((prev) => !prev);
     setSortOpen(false);
     setFilterOpen(false);
   }
@@ -123,7 +123,7 @@ export function DatabaseToolbar() {
             </span>
           )}
         </Button>
-        {sortOpen && <SortPanel onClose={() => setSortOpen(false)} />}
+        {sortOpen && <SortPanel />}
       </div>
 
       <div className="relative" ref={filterRef}>
@@ -153,8 +153,8 @@ export function DatabaseToolbar() {
           <div className="absolute top-full right-0 mt-1 z-modal shadow-lg">
             <GroupPanel
               grouping={group ?? null}
-              onChange={(v) => {
-                setGroup(v);
+              onChange={(grouping) => {
+                setGroup(grouping);
                 setGroupOpen(false);
               }}
             />

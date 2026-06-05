@@ -25,6 +25,10 @@ export class StatusCategoryConfig {
   @IsEnum(STATUS_CATEGORY_VALUES, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   category: StatusCategory;
 
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  label?: string;
+
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   defaultOption: string;
