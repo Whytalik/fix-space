@@ -297,6 +297,8 @@ jobs:
     environment:
       name: staging
     steps:
+      - uses: actions/checkout@v4
+
       - name: Create deployment manifest
         run: |
           mkdir -p deployment
@@ -307,7 +309,16 @@ jobs:
           echo "Run ID: ${{ github.run_id }}"                >> deployment/manifest.txt
           echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"  >> deployment/manifest.txt
           cat deployment/manifest.txt
-          echo "Deployment to staging: SIMULATED SUCCESSFULLY"
+          echo "Deployment to staging: IN PROGRESS"
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING || secrets.RAILWAY_TOKEN }}
+        if: env.RAILWAY_TOKEN != ''
+        run: railway up --ci --service ${{ secrets.RAILWAY_SERVICE_STAGING || 'fix-space-api-staging' }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -323,6 +334,8 @@ jobs:
     environment:
       name: production
     steps:
+      - uses: actions/checkout@v4
+
       - name: Create deployment manifest
         run: |
           mkdir -p deployment
@@ -333,7 +346,7 @@ jobs:
           echo "Run ID: ${{ github.run_id }}"                >> deployment/manifest.txt
           echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"  >> deployment/manifest.txt
           cat deployment/manifest.txt
-          echo "Deployment to production: SIMULATED SUCCESSFULLY"
+          echo "Deployment to production: IN PROGRESS"
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
@@ -342,7 +355,7 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         if: env.RAILWAY_TOKEN != ''
-        run: railway up --ci --service fix-space-api
+        run: railway up --ci --service ${{ secrets.RAILWAY_SERVICE_PRODUCTION || 'fix-space-api' }}
 
       - uses: actions/upload-artifact@v4
         with:

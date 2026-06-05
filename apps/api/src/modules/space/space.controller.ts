@@ -9,6 +9,7 @@ import { InitializeUserSpaceUseCase } from "./providers/initialize-user-space.us
 import { SpaceService } from "./space.service";
 
 @ApiTags("Spaces")
+@ApiBearerAuth("access-token")
 @Controller("spaces")
 export class SpaceController {
   constructor(
@@ -28,7 +29,6 @@ export class SpaceController {
   }
 
   @Get()
-  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Get all workspaces for current user" })
   @ApiResponse({ status: 200, description: "List of workspaces.", type: [SpaceResponseDto] })
   findAll(@CurrentUser("userId") userId: string) {
@@ -41,7 +41,6 @@ export class SpaceController {
     model: "space",
     ownerPath: ["ownerId"],
   })
-  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Get workspace by ID" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Workspace found.", type: SpaceResponseDto })
@@ -57,7 +56,6 @@ export class SpaceController {
     model: "space",
     ownerPath: ["ownerId"],
   })
-  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Update workspace" })
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: UpdateSpaceDto })
@@ -74,7 +72,6 @@ export class SpaceController {
     model: "space",
     ownerPath: ["ownerId"],
   })
-  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Duplicate workspace with all structure (databases, properties, templates, records)" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 201, description: "Workspace duplicated.", type: SpaceResponseDto })
@@ -90,7 +87,6 @@ export class SpaceController {
     model: "space",
     ownerPath: ["ownerId"],
   })
-  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Delete workspace" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Workspace deleted.", type: SpaceResponseDto })

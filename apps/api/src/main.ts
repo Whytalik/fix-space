@@ -8,7 +8,6 @@ import * as path from "path";
 import "reflect-metadata";
 
 import { AppModule } from "./app.module";
-import { AuthModule } from "./core/auth/auth.module";
 import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
 import { I18nValidationExceptionFilter, I18nValidationPipe } from "nestjs-i18n";
 import { LoggingInterceptor } from "./common/logger/logging.interceptor";
@@ -37,7 +36,7 @@ async function bootstrap() {
     .addCookieAuth("access_token")
     .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig, { include: [AuthModule] });
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup("api/docs", app, document);
 
   app.use(cookieParser());

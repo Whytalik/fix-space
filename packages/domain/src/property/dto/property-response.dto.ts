@@ -1,3 +1,4 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Expose, Transform, TransformationType } from "class-transformer";
 import {
   ButtonProperty,
@@ -18,51 +19,67 @@ import { VisibilityConditionDto } from "./visibility-condition.dto";
 
 @Exclude()
 export class PropertyResponseDto {
+  @ApiProperty({ description: "Property ID" })
   @Expose()
   id: string;
 
+  @ApiProperty({ description: "Database ID" })
   @Expose()
   databaseId: string;
 
+  @ApiProperty({ description: "Property name", example: "Status" })
   @Expose()
   name: string;
 
+  @ApiProperty({ enum: PropertyType, description: "Property type", example: "text" })
   @Expose()
   type: PropertyType;
 
+  @ApiProperty({ description: "Property position (ordering)", example: 0 })
   @Expose()
   position: number;
 
+  @ApiProperty({ description: "Property icon", example: "tag" })
   @Expose()
   icon: string | null;
 
+  @ApiProperty({ description: "Hint text for the property", example: "Select a status" })
   @Expose()
   hint: string | null;
 
+  @ApiProperty({ description: "Property group name", example: "General" })
   @Expose()
   group: string | null;
 
+  @ApiProperty({ description: "Property group ID", example: "group_1" })
   @Expose()
   groupId: string | null;
 
+  @ApiProperty({ description: "Whether the property is required", example: false })
   @Expose()
   isRequired: boolean;
 
+  @ApiProperty({ description: "Whether the property is visible", example: true })
   @Expose()
   isVisible: boolean;
 
+  @ApiProperty({ description: "Whether the property is protected", example: false })
   @Expose()
   isProtected: boolean;
 
+  @ApiProperty({ description: "Visibility condition", required: false, type: () => VisibilityConditionDto })
   @Expose()
   visibilityCondition?: VisibilityConditionDto | null;
 
+  @ApiProperty({ description: "Creation timestamp", example: "2024-01-01T00:00:00.000Z" })
   @Expose()
   createdAt: Date;
 
+  @ApiProperty({ description: "Last update timestamp", example: "2024-01-10T00:00:00.000Z" })
   @Expose()
   updatedAt: Date;
 
+  @ApiProperty({ description: "Property type-specific configuration", required: false })
   @Expose()
   @Transform((params: any) => {
     const { value, type, object, obj } = params;

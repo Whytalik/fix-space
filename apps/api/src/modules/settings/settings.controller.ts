@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import {
   DatabaseSettings,
   DEFAULT_DATABASE_SETTINGS,
@@ -22,17 +23,26 @@ const DEFAULT_SETTINGS_MAP = {
 
 type UpdateSettingsDto = Partial<SpaceSettings | DatabaseSettings | SectionSettings | RecordSettings>;
 
+@ApiTags("Settings")
+@ApiBearerAuth("access-token")
 @Controller("settings")
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 
   @Get(":category")
+  @ApiOperation({ summary: "Get user settings by category" })
+  @ApiParam({ name: "category", enum: SettingsCategory, description: "Settings category" })
+  @ApiResponse({ status: 200, description: "Settings retrieved." })
   getSettings(@Param("category") category: SettingsCategory, @CurrentUser("userId") userId: string) {
     const defaults = DEFAULT_SETTINGS_MAP[category];
     return this.settingsService.getSettings(userId, category, defaults);
   }
 
   @Patch(":category")
+  @ApiOperation({ summary: "Update user settings by category" })
+  @ApiParam({ name: "category", enum: SettingsCategory, description: "Settings category" })
+  @ApiResponse({ status: 200, description: "Settings updated." })
+  @ApiResponse({ status: 400, description: "Validation error." })
   updateSettings(
     @Param("category") category: SettingsCategory,
     @CurrentUser("userId") userId: string,
