@@ -20,7 +20,13 @@ async function bootstrap() {
 
   const port = config.get<number>("PORT", 3000);
   const corsOrigin = config.get<string>("CORS_ORIGIN", "http://localhost:3001");
-  const corsOrigins = corsOrigin.includes(",") ? corsOrigin.split(",").map((o) => o.trim()) : corsOrigin;
+  const corsOrigins = corsOrigin.includes(",") ? corsOrigin.split(",").map((o) => o.trim()) : [corsOrigin];
+
+  if (process.env.NODE_ENV !== "production") {
+    if (!corsOrigins.includes("http://127.0.0.1:3001")) corsOrigins.push("http://127.0.0.1:3001");
+    if (!corsOrigins.includes("http://localhost:3001")) corsOrigins.push("http://localhost:3001");
+  }
+
   const appLogger = app.get(AppLogger);
 
   const swaggerConfig = new DocumentBuilder()
@@ -51,10 +57,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)), new LoggingInterceptor(appLogger));
-  app.useGlobalFilters(
-    new I18nValidationExceptionFilter({ detailedErrors: true }),
-    new GlobalExceptionFilter(appLogger),
-  );
+  app.useGlobalFilters(new I18nValidationExceptionFilter({ detailedErrors: true }), new GlobalExceptionFilter(appLogger));
   await app.listen(port);
   Logger.log(`API running at http://localhost:${port}`, "Bootstrap");
   Logger.log(`Swagger docs at http://localhost:${port}/api/docs`, "Bootstrap");

@@ -19,10 +19,7 @@ export function updateDatabase(
   });
 }
 
-export function createDatabase(
-  spaceId: string,
-  data: { name: string; title: string; type?: string; sectionId?: string; icon?: string },
-) {
+export function createDatabase(spaceId: string, data: { name: string; title: string; type?: string; sectionId?: string; icon?: string }) {
   return apiFetch<DatabaseResponseDto>(`/databases`, {
     method: "POST",
     body: { ...data, spaceId },

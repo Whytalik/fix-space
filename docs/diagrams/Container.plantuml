@@ -23,6 +23,7 @@ title Діаграма контейнерів
 package "Зовнішні сервіси" as Ext_Box #FFF9C4 {
   component "Google OAuth 2.0" as Google
   component "Resend API\n(Email Service)" as Resend
+  component "Cloudinary API\n(Storage Service)" as Cloudinary
 }
 
 package "Клієнт (Next.js 16, порт 3001)" as Client_Box #FFFFFF {
@@ -49,6 +50,7 @@ package "Сервер (NestJS 11, порт 3000)" as Server_Box {
 
   package "Інфраструктура" as Infra_Box #E8F5E9 {
     component "Mail\n(Resend SDK)" as Mail
+    component "Storage\n(Cloudinary SDK)" as Storage
     component "JWT Guard" as JWTGuard
     component "Throttler" as Throttler
     component "Exception Filter" as Filter
@@ -75,5 +77,8 @@ Prisma ..> DB : SQL
 Google <.. Auth : OAuth 2.0
 
 Resend <.. Mail : Email delivery
+
+Cloudinary <.. Storage : Image upload
+User ..> Storage : Save/remove avatar
 
 @enduml

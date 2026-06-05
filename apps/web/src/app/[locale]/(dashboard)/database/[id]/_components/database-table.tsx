@@ -3,12 +3,9 @@
 import { PropertyType } from "@fixspace/domain/enums";
 import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
 import { useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { CellValue } from "@/features/database/components/cell-value";
-import { PropertyHint } from "@/features/property/components/property-hint";
-import { PropertyIcon } from "@/features/property/components/property-icon";
-import { Button } from "@/components/ui/primitives/actions/button";
-import { ExternalLink } from "lucide-react";
+import { CellValue } from "@/features/database/cell-value";
+import { PropertyHint } from "@/features/property/property-hint";
+import { PropertyIcon } from "@/features/property/property-icon";
 import { useDatabaseContext } from "@/context/database-context";
 
 interface DatabaseTableProps {
@@ -18,21 +15,11 @@ interface DatabaseTableProps {
 
 export function DatabaseTable({ properties, records }: DatabaseTableProps) {
   const { relatedRecordsMap } = useDatabaseContext();
-  const router = useRouter();
 
   const sorted = useMemo(() => [...properties].sort((a, b) => a.position - b.position), [properties]);
 
-  function handleOpen(e: React.MouseEvent, recordId: string) {
-    e.stopPropagation();
-    router.push(`/record/${recordId}`);
-  }
-
   if (sorted.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-40 text-ink-secondary text-sm">
-        No properties defined for this database.
-      </div>
-    );
+    return <div className="flex items-center justify-center h-40 text-ink-secondary text-sm">No properties defined for this database.</div>;
   }
 
   return (
@@ -58,13 +45,12 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                     </span>
                   </th>
                 ))}
-                <th className="sticky right-0 bg-surface w-0 p-0 border-l-0" />
               </tr>
             </thead>
             <tbody>
               {records.length === 0 ? (
                 <tr>
-                  <td colSpan={sorted.length + 1} className="px-3 py-8 text-center text-ink-secondary">
+                  <td colSpan={sorted.length} className="px-3 py-8 text-center text-ink-secondary">
                     No records yet.
                   </td>
                 </tr>
@@ -77,7 +63,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                     }`}
                   >
                     {sorted.map((prop) => {
-                      const pv = record.values?.find((v) => v.propertyId === prop.id);
+                      const propertyValue = record.values?.find((v) => v.propertyId === prop.id);
                       const relatedDbId =
                         prop.type === PropertyType.RELATION
                           ? (prop.config as { relatedEntityId?: string } | null)?.relatedEntityId
@@ -85,27 +71,13 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                       return (
                         <td key={prop.id} className="px-3 py-2.5 border-r border-stroke last:border-r-0 align-middle">
                           <CellValue
-                            value={pv?.value}
+                            value={propertyValue?.value}
                             type={prop.type}
                             relatedRecords={relatedDbId ? relatedRecordsMap[relatedDbId] : undefined}
                           />
                         </td>
                       );
                     })}
-                    <td className="sticky right-0 w-0 p-0 align-middle">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-2">
-                        <div className="w-8 h-8 bg-gradient-to-l from-hover to-transparent -ml-8 pointer-events-none" />
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={(e) => handleOpen(e, record.id)}
-                          className="flex items-center gap-1.5 shadow-sm"
-                        >
-                          <ExternalLink size={13} />
-                          Open
-                        </Button>
-                      </div>
-                    </td>
                   </tr>
                 ))
               )}

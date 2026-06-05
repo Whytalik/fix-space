@@ -1,6 +1,7 @@
 import { QueryProvider } from "@/components/providers/query-provider";
-import { SettingsShell } from "@/features/settings/components/settings-shell";
+import { SettingsShell } from "@/features/settings/settings-shell";
 import { ErrorModalShell } from "@/components/ui/primitives/feedback/error-modal-shell";
+import { CookieBanner } from "@/components/layout/cookie-banner";
 import { AppProvider } from "@/context/app-context";
 import { ThemeProvider } from "@/context/theme-context";
 import { UIProvider } from "@/context/ui-context";
@@ -50,13 +51,7 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export default async function RootLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-}) {
+export default async function RootLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
 
   if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
@@ -83,6 +78,7 @@ export default async function RootLayout({
               </ThemeProvider>
             </AppProvider>
           </QueryProvider>
+          <CookieBanner />
         </NextIntlClientProvider>
         <Analytics />
         <SpeedInsights />

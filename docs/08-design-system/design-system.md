@@ -268,13 +268,21 @@ placeholder:text-ink-muted
 
 ### Дозволені анімації
 
-**`animate-fade-up`** — єдина анімація загального призначення для появи елементів.
+**`animate-fade-up`** — анімація загального призначення для появи елементів.
 
 ```css
 opacity: 0 → 1  +  translateY(10px → 0)  |  duration: 0.45s  |  ease: ease
 ```
 
 Застосовується для: контентних блоків сторінки, вмісту модальних вікон, нових елементів у списках.
+
+**`animate-dropdown`** — анімація появи випадних списків (dropdowns), поповерів (popovers) та контекстних меню.
+
+```css
+opacity: 0 → 1  +  translateY(-8px → 0)  +  scale(0.98 → 1)  |  duration: 0.2s  |  ease: cubic-bezier(0.16, 1, 0.3, 1)
+```
+
+Застосовується для: випадних меню, тултипів, списків вибору (select options).
 
 **`animate-spin`** — виключно для індикаторів завантаження.
 Приклад: `w-5 h-5 rounded-full border-2 border-stroke border-t-accent animate-spin`
@@ -388,7 +396,8 @@ focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-up {
+  .animate-fade-up,
+  .animate-dropdown {
     animation: none;
   }
 }

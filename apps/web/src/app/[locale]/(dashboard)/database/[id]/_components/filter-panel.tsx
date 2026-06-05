@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/components/property-icon";
+import { PropertyIcon } from "@/features/property/property-icon";
 import { Button } from "@/components/ui/primitives/actions/button";
 import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
@@ -8,11 +8,11 @@ import { useState } from "react";
 import { DateInput } from "@/components/ui/primitives/inputs/date-input";
 import { NumberInput } from "@/components/ui/primitives/inputs/number-input";
 import { TextInput } from "@/components/ui/primitives/inputs/text-input";
-import { StatusPropertyInput } from "@/features/property/components/inputs/status-property-input";
-import type { StatusPropertyOption } from "@/features/property/components/inputs/status-property-input";
+import { StatusPropertyInput } from "@/features/property/inputs/status-property-input";
+import type { StatusPropertyOption } from "@/features/property/inputs/status-property-input";
 import { useDatabaseContext } from "@/context/database-context";
 import type { RecordFilterDto } from "@fixspace/domain";
-import { FilterField, FilterLogic, FilterOperator, PropertyType } from "@fixspace/domain/enums";
+import { FilterField, FilterLogic, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, PropertyType } from "@fixspace/domain/enums";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -27,67 +27,26 @@ const MULTI_VALUE_OPERATORS = new Set([FilterOperator.IN, FilterOperator.NOT_IN]
 
 type OperatorDef = { value: FilterOperator; label: string };
 
-const OPERATORS_BY_TYPE: Record<string, { value: FilterOperator; label: string }[]> = {
-  [PropertyType.TEXT]: [
-    { value: FilterOperator.EQUALS, label: "operators.equals" },
-    { value: FilterOperator.NOT_EQUALS, label: "operators.notEquals" },
-    { value: FilterOperator.CONTAINS, label: "operators.contains" },
-    { value: FilterOperator.NOT_CONTAINS, label: "operators.notContains" },
-    { value: FilterOperator.STARTS_WITH, label: "operators.startsWith" },
-    { value: FilterOperator.ENDS_WITH, label: "operators.endsWith" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.NUMBER]: [
-    { value: FilterOperator.EQUALS, label: "operators.equals" },
-    { value: FilterOperator.NOT_EQUALS, label: "operators.notEquals" },
-    { value: FilterOperator.GREATER_THAN, label: "operators.greaterThan" },
-    { value: FilterOperator.LESS_THAN, label: "operators.lessThan" },
-    { value: FilterOperator.GREATER_THAN_OR_EQUAL, label: "operators.greaterThanOrEqual" },
-    { value: FilterOperator.LESS_THAN_OR_EQUAL, label: "operators.lessThanOrEqual" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.DATE]: [
-    { value: FilterOperator.EQUALS, label: "operators.on" },
-    { value: FilterOperator.BEFORE, label: "operators.before" },
-    { value: FilterOperator.AFTER, label: "operators.after" },
-    { value: FilterOperator.ON_OR_BEFORE, label: "operators.onOrBefore" },
-    { value: FilterOperator.ON_OR_AFTER, label: "operators.onOrAfter" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.CHECKBOX]: [
-    { value: FilterOperator.IS_CHECKED, label: "operators.isChecked" },
-    { value: FilterOperator.IS_UNCHECKED, label: "operators.isUnchecked" },
-  ],
-  [PropertyType.SELECT]: [
-    { value: FilterOperator.EQUALS, label: "operators.isExactly" },
-    { value: FilterOperator.NOT_EQUALS, label: "operators.isNotExactly" },
-    { value: FilterOperator.IN, label: "operators.isOneOf" },
-    { value: FilterOperator.NOT_IN, label: "operators.isNotOneOf" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.STATUS]: [
-    { value: FilterOperator.EQUALS, label: "operators.isExactly" },
-    { value: FilterOperator.NOT_EQUALS, label: "operators.isNotExactly" },
-    { value: FilterOperator.IN, label: "operators.isOneOf" },
-    { value: FilterOperator.NOT_IN, label: "operators.isNotOneOf" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.RELATION]: [
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-};
-
-function getOperators(type: string): OperatorDef[] {
-  return OPERATORS_BY_TYPE[type] ?? OPERATORS_BY_TYPE[PropertyType.TEXT] ?? [];
+function getOperatorLabel(operator: FilterOperator, type: PropertyType): string {
+  if (type === PropertyType.DATE && operator === FilterOperator.EQUALS) return "operators.on";
+  if (type === PropertyType.SELECT || type === PropertyType.STATUS) {
+    if (operator === FilterOperator.EQUALS) return "operators.isExactly";
+    if (operator === FilterOperator.NOT_EQUALS) return "operators.isNotExactly";
+    if (operator === FilterOperator.IN) return "operators.isOneOf";
+    if (operator === FilterOperator.NOT_IN) return "operators.isNotOneOf";
+  }
+  return `operators.${operator}`;
 }
 
-function defaultOperator(type: string): FilterOperator {
+function getOperators(type: PropertyType): OperatorDef[] {
+  const operators = OPERATORS_BY_PROPERTY_TYPE[type] || OPERATORS_BY_PROPERTY_TYPE[PropertyType.TEXT] || [];
+  return operators.map((operator) => ({
+    value: operator,
+    label: getOperatorLabel(operator, type),
+  }));
+}
+
+function defaultOperator(type: PropertyType): FilterOperator {
   return getOperators(type)[0]?.value ?? FilterOperator.EQUALS;
 }
 
@@ -110,15 +69,15 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
   const t = useTranslations("FilterPanel");
 
   const isMeta = filter.field === FilterField.CREATED_AT || filter.field === FilterField.UPDATED_AT;
-  const property = isMeta ? undefined : properties.find((p) => p.id === filter.propertyId);
-  const propType = isMeta ? PropertyType.DATE : ((property?.type as string) ?? PropertyType.TEXT);
-  const operators = getOperators(propType).map((op) => ({ ...op, label: t(op.label as unknown as string) }));
+  const property = isMeta ? undefined : properties.find((property) => property.id === filter.propertyId);
+  const propType = isMeta ? PropertyType.DATE : ((property?.type as PropertyType) ?? PropertyType.TEXT);
+  const operators = getOperators(propType).map((operator) => ({ ...operator, label: t(operator.label as unknown as string) }));
   const noValue = NO_VALUE_OPERATORS.has(filter.operator);
   const isMulti = MULTI_VALUE_OPERATORS.has(filter.operator);
 
-  const propertyOptions: ComboboxOption[] = properties.map((p) => ({ value: `prop:${p.id}`, label: p.name }));
+  const propertyOptions: ComboboxOption[] = properties.map((property) => ({ value: `prop:${property.id}`, label: property.name }));
   const allOptions: ComboboxOption[] = [
-    ...META_OPTIONS.map((opt) => ({ ...opt, label: t(opt.label as unknown as string) })),
+    ...META_OPTIONS.map((option) => ({ ...option, label: t(option.label as unknown as string) })),
     ...propertyOptions,
   ];
 
@@ -128,9 +87,9 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
     return filter.propertyId ? `prop:${filter.propertyId}` : "";
   }
 
-  function handleOptionChange(val: string) {
-    if (val.startsWith("meta:")) {
-      const field = val.slice(5) as FilterField;
+  function handleOptionChange(value: string) {
+    if (value.startsWith("meta:")) {
+      const field = value.slice(5) as FilterField;
       onUpdate(index, {
         field,
         propertyId: undefined,
@@ -139,9 +98,9 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
         values: undefined,
       });
     } else {
-      const propId = val.slice(5);
-      const newProp = properties.find((p) => p.id === propId);
-      const newType = (newProp?.type as string) ?? PropertyType.TEXT;
+      const propId = value.slice(5);
+      const newProp = properties.find((property) => property.id === propId);
+      const newType = (newProp?.type as PropertyType) ?? PropertyType.TEXT;
       onUpdate(index, {
         field: undefined,
         propertyId: propId,
@@ -155,25 +114,25 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
   const selectOptions: ComboboxOption[] =
     propType === PropertyType.SELECT
       ? (
-          (
-            property?.config as { categories?: Array<{ options: Array<{ value: string }> }> } | null
-          )?.categories?.flatMap((c) => c.options) ?? []
-        ).map((o) => ({ value: o.value, label: o.value }))
+          (property?.config as { categories?: Array<{ options: Array<{ value: string }> }> } | null)?.categories?.flatMap(
+            (category) => category.options,
+          ) ?? []
+        ).map((option) => ({ value: option.value, label: option.value }))
       : propType === PropertyType.STATUS
         ? (
             (
               property?.config as {
                 categories?: Array<{ options: Array<{ name: string }> }>;
               } | null
-            )?.categories?.flatMap((c) => c.options.map((o) => o.name)) ?? []
-          ).map((o) => ({ value: o, label: o }))
+            )?.categories?.flatMap((category) => category.options.map((option) => option.name)) ?? []
+          ).map((option) => ({ value: option, label: option }))
         : [];
 
   const statusOptions: StatusPropertyOption[] =
     propType === PropertyType.STATUS
-      ? ((
-          property?.config as { categories?: Array<{ options: Array<{ name: string; color: string }> }> } | null
-        )?.categories?.flatMap((c) => c.options) ?? [])
+      ? ((property?.config as { categories?: Array<{ options: Array<{ name: string; color: string }> }> } | null)?.categories?.flatMap(
+          (category) => category.options,
+        ) ?? [])
       : [];
 
   return (
@@ -206,11 +165,11 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
           options={operators}
           value={filter.operator}
           size="sm"
-          onChange={(op) => {
+          onChange={(operator) => {
             onUpdate(index, {
-              operator: op as FilterOperator,
-              value: NO_VALUE_OPERATORS.has(op as FilterOperator) ? undefined : filter.value,
-              values: MULTI_VALUE_OPERATORS.has(op as FilterOperator) ? (filter.values ?? []) : undefined,
+              operator: operator as FilterOperator,
+              value: NO_VALUE_OPERATORS.has(operator as FilterOperator) ? undefined : filter.value,
+              values: MULTI_VALUE_OPERATORS.has(operator as FilterOperator) ? (filter.values ?? []) : undefined,
             });
           }}
         />
@@ -221,7 +180,7 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
           <Combobox
             options={selectOptions}
             value={filter.values ?? []}
-            onChange={(v) => onUpdate(index, { values: v })}
+            onChange={(value) => onUpdate(index, { values: value })}
             multiple
             size="sm"
             placeholder={t("pickValues")}
@@ -235,15 +194,15 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
             options={statusOptions}
             value={
               filter.value != null
-                ? statusOptions.find((o) => o.name === String(filter.value))
+                ? statusOptions.find((option) => option.name === String(filter.value))
                   ? {
                       label: String(filter.value),
-                      color: statusOptions.find((o) => o.name === String(filter.value))!.color,
+                      color: statusOptions.find((option) => option.name === String(filter.value))!.color,
                     }
                   : null
                 : null
             }
-            onChange={(v) => onUpdate(index, { value: v?.label ?? undefined })}
+            onChange={(value) => onUpdate(index, { value: value?.label ?? undefined })}
             placeholder={t("pickStatus")}
             size="sm"
           />
@@ -255,7 +214,7 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
           <Combobox
             options={selectOptions}
             value={typeof filter.value === "string" ? filter.value : ""}
-            onChange={(v) => onUpdate(index, { value: v || undefined })}
+            onChange={(value) => onUpdate(index, { value: value || undefined })}
             nullable
             size="sm"
             placeholder={t("pickOption")}
@@ -267,7 +226,7 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
         <div className="w-28">
           <NumberInput
             value={filter.value != null ? Number(filter.value) : null}
-            onChange={(v) => onUpdate(index, { value: v ?? undefined })}
+            onChange={(value) => onUpdate(index, { value: value ?? undefined })}
             placeholder={t("value")}
             size="sm"
           />
@@ -278,7 +237,7 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
         <div className="flex-1 min-w-0">
           <DateInput
             value={typeof filter.value === "string" ? filter.value : ""}
-            onChange={(v) => onUpdate(index, { value: v || undefined })}
+            onChange={(value) => onUpdate(index, { value: value || undefined })}
             size="sm"
           />
         </div>
@@ -311,17 +270,17 @@ export function FilterPanel() {
   const [hasPendingRow, setHasPendingRow] = useState(false);
   const t = useTranslations("FilterPanel");
 
-  const propertyOptions: ComboboxOption[] = properties.map((p) => ({ value: `prop:${p.id}`, label: p.name }));
+  const propertyOptions: ComboboxOption[] = properties.map((property) => ({ value: `prop:${property.id}`, label: property.name }));
   const allOptions: ComboboxOption[] = [
-    ...META_OPTIONS.map((opt) => ({ ...opt, label: t(opt.label as unknown as string) })),
+    ...META_OPTIONS.map((option) => ({ ...option, label: t(option.label as unknown as string) })),
     ...propertyOptions,
   ];
 
-  function confirmPendingFilter(val: string) {
-    if (!val) return;
+  function confirmPendingFilter(value: string) {
+    if (!value) return;
     let newFilter: RecordFilterDto;
-    if (val.startsWith("meta:")) {
-      const field = val.slice(5) as FilterField;
+    if (value.startsWith("meta:")) {
+      const field = value.slice(5) as FilterField;
       newFilter = {
         field,
         propertyId: undefined as unknown as string,
@@ -330,9 +289,9 @@ export function FilterPanel() {
         values: undefined,
       };
     } else {
-      const propId = val.slice(5);
-      const prop = properties.find((p) => p.id === propId);
-      const propType = (prop?.type as string) ?? PropertyType.TEXT;
+      const propId = value.slice(5);
+      const prop = properties.find((property) => property.id === propId);
+      const propType = (prop?.type as PropertyType) ?? PropertyType.TEXT;
       newFilter = {
         field: undefined,
         propertyId: propId,
@@ -346,7 +305,7 @@ export function FilterPanel() {
   }
 
   function updateFilter(index: number, patch: Partial<RecordFilterDto>) {
-    setFilters(filters.map((f, i) => (i === index ? { ...f, ...patch } : f)));
+    setFilters(filters.map((filter, i) => (i === index ? { ...filter, ...patch } : filter)));
   }
 
   function removeFilter(index: number) {
@@ -390,13 +349,7 @@ export function FilterPanel() {
           <div className="flex items-center gap-1.5">
             <span className="w-9 shrink-0" />
             <div className="w-40 shrink-0">
-              <Combobox
-                options={allOptions}
-                value=""
-                size="sm"
-                placeholder={t("selectProperty")}
-                onChange={confirmPendingFilter}
-              />
+              <Combobox options={allOptions} value="" size="sm" placeholder={t("selectProperty")} onChange={confirmPendingFilter} />
             </div>
             <button
               type="button"
@@ -409,13 +362,7 @@ export function FilterPanel() {
         )}
       </div>
 
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => setHasPendingRow(true)}
-        disabled={hasPendingRow}
-        className="mt-1 self-start"
-      >
+      <Button variant="secondary" size="sm" onClick={() => setHasPendingRow(true)} disabled={hasPendingRow} className="mt-1 self-start">
         + {t("addFilter")}
       </Button>
     </div>

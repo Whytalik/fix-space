@@ -58,10 +58,7 @@ export async function setupE2eApp() {
   app.useGlobalPipes(new I18nValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   const appLogger = app.get(AppLogger);
-  app.useGlobalFilters(
-    new I18nValidationExceptionFilter({ detailedErrors: true }),
-    new GlobalExceptionFilter(appLogger),
-  );
+  app.useGlobalFilters(new I18nValidationExceptionFilter({ detailedErrors: true }), new GlobalExceptionFilter(appLogger));
 
   await app.init();
   const agent = supertest.agent(app.getHttpServer() as Parameters<typeof supertest.agent>[0]);
@@ -69,13 +66,15 @@ export async function setupE2eApp() {
   return { app, agent, moduleRef };
 }
 
-export async function cleanupE2eApp(app: INestApplication, marker = E2E_EMAIL_MARKER) {
+export async function cleanupE2eApp(app?: INestApplication, marker = E2E_EMAIL_MARKER) {
   try {
     await prisma.user.deleteMany({ where: { email: { contains: marker } } });
   } catch {
     // Ignore errors during cleanup if user doesn't exist
   } finally {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
     await prisma.$disconnect();
     if (pool) {
       await pool.end();

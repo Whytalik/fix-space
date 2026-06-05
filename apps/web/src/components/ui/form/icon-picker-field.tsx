@@ -25,9 +25,7 @@ export function IconPickerField({ value, onChange, placeholder = "Choose an icon
         {value ? (
           <span className="flex items-center gap-2">
             <IconDisplay value={value} size={16} />
-            <span className="text-xs text-ink-secondary">
-              {getAllIcons().find((i) => `icon:${i.name}` === value)?.displayName}
-            </span>
+            <span className="text-xs text-ink-secondary">{getAllIcons().find((i) => `icon:${i.name}` === value)?.displayName}</span>
           </span>
         ) : (
           <span className="text-ink-muted">{placeholder}</span>

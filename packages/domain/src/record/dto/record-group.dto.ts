@@ -10,7 +10,7 @@ export class RecordGroupDto {
   @IsEnum(GroupField, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   field: GroupField;
 
-  @ValidateIf((o) => o.field === GroupField.PROPERTY)
+  @ValidateIf((item) => item.field === GroupField.PROPERTY)
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   propertyId?: string;

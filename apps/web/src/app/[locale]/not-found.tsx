@@ -13,9 +13,7 @@ export default async function NotFound() {
       </div>
 
       <div className="animate-fade-up flex flex-col gap-2" style={{ animationDelay: "0.18s" }}>
-        <h1 className="text-[clamp(28px,5vw,42px)] font-extrabold tracking-[-0.04em] text-ink leading-none">
-          {t("title")}
-        </h1>
+        <h1 className="text-[clamp(28px,5vw,42px)] font-extrabold tracking-[-0.04em] text-ink leading-none">{t("title")}</h1>
         <p className="text-sm text-ink-secondary max-w-72 leading-relaxed">{t("description")}</p>
       </div>
 

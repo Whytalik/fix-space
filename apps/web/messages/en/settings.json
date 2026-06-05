@@ -50,7 +50,10 @@
     "placeholderDateFormat": "e.g. DD/MM/YYYY",
     "deleteSpace": "Delete space",
     "deleteSpaceDesc": "All databases and records inside will be permanently deleted. This action cannot be undone.",
-    "delete": "Delete"
+    "delete": "Delete",
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "cannotDeleteDefault": "Cannot delete default space"
   },
   "DatabaseSettingsComp": {
     "settingsSaved": "Settings saved.",

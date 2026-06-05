@@ -5,13 +5,11 @@ import { AppLogger } from "../../../common/logger/app-logger.service";
 import { t } from "../../../common/utils/i18n.helper";
 import { hashPassword } from "../../../common/utils/password";
 import { MailService } from "../../mail/mail.service";
-import { InitializeUserSpaceUseCase } from "../../../modules/space/providers/initialize-user-space.usecase";
 import { TokenService } from "../token.service";
 
 @Injectable()
 export class RegisterUserUseCase {
   constructor(
-    private readonly initializeUserSpaceUseCase: InitializeUserSpaceUseCase,
     private readonly tokenService: TokenService,
     private readonly mailService: MailService,
     private readonly logger: AppLogger,
@@ -61,8 +59,6 @@ export class RegisterUserUseCase {
       userId: user.id,
       username: user.username,
     });
-
-    await this.initializeUserSpaceUseCase.initialize(user.id, registerUserDto.username);
 
     const verificationToken = await this.tokenService.createVerificationToken(user.id);
     await this.mailService.sendVerificationEmail(user.email, user.username, verificationToken);

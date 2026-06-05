@@ -5,12 +5,7 @@ import { i18nValidationMessage } from "nestjs-i18n";
 import { I18nTranslations } from "../../generated/i18n.generated";
 
 import { STATUS_CATEGORY_VALUES, type StatusCategory } from "./status.constants";
-export {
-  STATUS_CATEGORY_VALUES,
-  type StatusCategory,
-  STATUS_OPTION_COLOR_VALUES,
-  type StatusOptionColor,
-} from "./status.constants";
+export { STATUS_CATEGORY_VALUES, type StatusCategory, STATUS_OPTION_COLOR_VALUES, type StatusOptionColor } from "./status.constants";
 
 export class StatusOption {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
@@ -29,6 +24,10 @@ export class StatusOption {
 export class StatusCategoryConfig {
   @IsEnum(STATUS_CATEGORY_VALUES, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   category: StatusCategory;
+
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  label?: string;
 
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })

@@ -1,14 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import {
   DEFAULT_FORMULA_PROPERTY,
+  FilterOperator,
   FORMULA_OUTPUT_TYPE_VALUES,
   FormulaOutputType,
+  OPERATORS_BY_PROPERTY_TYPE,
   PropertyType,
 } from "@fixspace/domain";
-import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
+import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
-export class FormulaHandler implements PropertyConfigHandler, PropertyValueHandler {
+export class FormulaHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.FORMULA;
 
   getDefaultConfig(): Record<string, unknown> {
@@ -64,5 +66,17 @@ export class FormulaHandler implements PropertyConfigHandler, PropertyValueHandl
 
   getDefaultValue(): unknown {
     return null;
+  }
+
+  isEmpty(value: unknown): boolean {
+    return value === null || value === undefined;
+  }
+
+  convertFrom(_value: unknown, _fromType: PropertyType, _fromConfig: Record<string, unknown>, _toConfig: Record<string, unknown>): unknown {
+    return null;
+  }
+
+  getFilterOperators(): FilterOperator[] {
+    return OPERATORS_BY_PROPERTY_TYPE[this.type];
   }
 }

@@ -1,16 +1,17 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
-import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerModule } from "@nestjs/throttler";
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from "nestjs-i18n";
 import * as path from "path";
 
 import { AuthModule } from "./core/auth/auth.module";
 import { RequestContextMiddleware } from "./common/context/request-context.middleware";
 import { LoggerModule } from "./common/logger/logger.module";
-import { validate } from "./core/config/env.validation";
+import { validate } from "./core/config";
 import { DatabaseModule } from "./modules/database/database.module";
 import { HealthModule } from "./core/health/health.module";
+import { E2EThrottlerGuard } from "./core/auth/guards/e2e-throttler.guard";
 import { JwtAuthGuard } from "./core/jwt/jwt-auth.guard";
 import { JwtModule } from "./core/jwt/jwt.module";
 import { PropertyValueModule } from "./modules/property-value/property-value.module";
@@ -35,11 +36,7 @@ import { UserModule } from "./modules/user/user.module";
         path: path.join(__dirname, "core/i18n/"),
         watch: true,
       },
-      resolvers: [
-        new QueryResolver(["lang", "locale"]),
-        new HeaderResolver(["x-custom-lang"]),
-        new AcceptLanguageResolver(),
-      ],
+      resolvers: [new QueryResolver(["lang", "locale"]), new HeaderResolver(["x-custom-lang"]), new AcceptLanguageResolver()],
     }),
     ThrottlerModule.forRoot([
       {
@@ -71,7 +68,7 @@ import { UserModule } from "./modules/user/user.module";
       : [
           {
             provide: APP_GUARD,
-            useClass: ThrottlerGuard,
+            useClass: E2EThrottlerGuard,
           },
         ]),
   ],

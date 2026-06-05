@@ -37,11 +37,7 @@ export function DropdownMenu({ items, onClose, anchorEl }: DropdownMenuProps) {
   const style = getPopoverStyle(anchorEl);
 
   return createPortal(
-    <div
-      ref={menuRef}
-      style={style}
-      className="min-w-36 bg-elevated border border-stroke rounded-lg shadow-lg overflow-hidden py-1"
-    >
+    <div ref={menuRef} style={style} className="min-w-36 bg-elevated border border-stroke rounded-lg shadow-lg overflow-hidden py-1">
       {items.map((item) => (
         <button
           key={item.label}

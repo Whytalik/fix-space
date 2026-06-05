@@ -28,6 +28,7 @@
   "SPACE_NOT_FOUND": "Простір не знайдено",
   "DATABASE_NOT_FOUND": "Базу даних не знайдено",
   "DATABASE_NOT_FOUND_ID": "Базу даних з id {id} не знайдено",
+  "CANNOT_DELETE_PRESET_DATABASE": "Неможливо видалити системну базу даних",
   "SECTION_NOT_FOUND": "Секцію не знайдено в цьому просторі",
   "PROPERTY_NOT_FOUND": "Властивість не знайдено",
   "PROPERTY_NOT_FOUND_ID": "Властивість з id {id} не знайдено",
@@ -53,5 +54,16 @@
   "QUERY_VALIDATION_FAILED": "Помилка валідації запиту",
   "NOT_FOUND": "Ресурс не знайдено",
   "QUERY_LIMIT_EXCEEDED": "Перевищено ліміт запитів до бази даних",
-  "INTERNAL_ERROR": "Внутрішня помилка сервера"
+  "INTERNAL_ERROR": "Внутрішня помилка сервера",
+  "RECORD_NOT_FOUND": "Запис не знайдено",
+  "RECORD_NOT_FOUND_ID": "Запис з id {id} не знайдено",
+  "PROPERTY_VALUE_NOT_FOUND_ID": "Значення властивості з id {id} не знайдено",
+  "INVALID_PROPERTY_VALUE": "Недійсне значення для типу властивості {type}: {errors}",
+  "SECTION_NOT_FOUND_ID": "Секцію з id {id} не знайдено",
+  "SECTION_NOT_IN_SPACE": "Секція не належить до цього простору",
+  "SECTION_NAME_TAKEN": "Секція з такою назвою вже існує в цьому просторі",
+  "SECTION_CREATE_REQUIRES_DATA": "Операція CREATE вимагає поле \"create\" з даними секції",
+  "SECTION_OPERATION_REQUIRES_ID": "Операція вимагає поле \"id\"",
+  "PROPERTY_TYPE_NOT_REGISTERED": "Обробник для типу властивості {type} не зареєстровано",
+  "PROPERTY_VALUE_REQUIRED": "Властивість \"{name}\" є обов'язковою і не може бути порожньою"
 }

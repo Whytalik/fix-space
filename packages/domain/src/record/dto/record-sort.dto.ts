@@ -13,7 +13,7 @@ export class RecordSortDto {
   @IsEnum(SortDirection, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   direction: SortDirection;
 
-  @ValidateIf((o) => o.field === SortField.PROPERTY)
+  @ValidateIf((item) => item.field === SortField.PROPERTY)
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   propertyId?: string;

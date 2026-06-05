@@ -20,14 +20,8 @@ export function ErrorModal({ messages, onClose }: ErrorModalProps) {
   }, [onClose]);
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-[3px] bg-canvas/50"
-      onClick={onClose}
-    >
-      <div
-        className="w-96 bg-elevated border border-stroke rounded-xl shadow-lg overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-[3px] bg-canvas/50" onClick={onClose}>
+      <div className="w-96 bg-elevated border border-stroke rounded-xl shadow-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="px-5 pt-5 pb-4 flex items-start gap-3">
           <AlertTriangle size={18} className="text-error shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../../common/logger/app-logger.service";
-import { SettingsCategory } from "./settings.constants";
-import { SettingsRepository } from "./settings.repository";
+import { SettingsCategory } from "./constants/settings.constants";
+import { SettingsRepository } from "./repositories/settings.repository";
 
 @Injectable()
 export class SettingsService {
@@ -32,12 +32,7 @@ export class SettingsService {
     return result;
   }
 
-  async updateSettings<T extends object>(
-    userId: string,
-    category: SettingsCategory,
-    updateDto: Partial<T>,
-    defaultValues: T,
-  ): Promise<T> {
+  async updateSettings<T extends object>(userId: string, category: SettingsCategory, updateDto: Partial<T>, defaultValues: T): Promise<T> {
     this.logger.debug("Updating settings", { userId, category });
 
     const operations = Object.entries({

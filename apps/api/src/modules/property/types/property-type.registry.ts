@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable, OnModuleInit } from "@nestjs/common";
 import { PropertyType } from "@fixspace/domain";
-import { PropertyConfigHandler, PropertyValueHandler } from "./handler.interface";
+import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "./interfaces";
 import { PROPERTY_TYPE_HANDLERS } from "./property-type.tokens";
 
-type FullHandler = PropertyConfigHandler & PropertyValueHandler;
+type FullHandler = PropertyConfigHandler & PropertyValueHandler & PropertyQueryHandler;
 
 @Injectable()
 export class PropertyTypeRegistry implements OnModuleInit {
@@ -37,5 +37,16 @@ export class PropertyTypeRegistry implements OnModuleInit {
       throw new BadRequestException(`No handler registered for property type: ${type}`);
     }
     return handler;
+  }
+
+  resolveHandlerAndConfig(property: { type: string; config: unknown }): {
+    handler: FullHandler;
+    config: Record<string, unknown>;
+  } {
+    const handler = this.handlers.get(property.type as PropertyType);
+    if (!handler) {
+      throw new BadRequestException(`No handler registered for property type: ${property.type}`);
+    }
+    return { handler, config: (property.config as Record<string, unknown>) ?? {} };
   }
 }

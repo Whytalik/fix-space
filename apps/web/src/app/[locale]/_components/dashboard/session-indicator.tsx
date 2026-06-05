@@ -82,21 +82,21 @@ export function SessionIndicator() {
         { name: t("tokyo"), startUTC: 23, color: "text-error" },
       ];
 
-      let nextS = schedule.find((s) => s.startUTC * 60 > currentUTCMinutes);
+      let nextSchedule = schedule.find((s) => s.startUTC * 60 > currentUTCMinutes);
       const nextDate = new Date(now);
 
-      if (!nextS) {
-        nextS = schedule[0] as { name: string; startUTC: number; color: string };
+      if (!nextSchedule) {
+        nextSchedule = schedule[0] as { name: string; startUTC: number; color: string };
         nextDate.setUTCDate(nextDate.getUTCDate() + 1);
       }
 
-      nextDate.setUTCHours(nextS.startUTC, 0, 0, 0);
+      nextDate.setUTCHours(nextSchedule.startUTC, 0, 0, 0);
 
       const timeStr = format.dateTime(nextDate, { hour: "2-digit", minute: "2-digit", hour12: false });
       const isDifferentDay = nextDate.getDate() !== now.getDate() || nextDate.getMonth() !== now.getMonth();
       const dateStr = isDifferentDay ? format.dateTime(nextDate, { day: "numeric", month: "short" }) : "";
 
-      setNextSession({ name: nextS.name, timeStr, dateStr, color: nextS.color });
+      setNextSession({ name: nextSchedule.name, timeStr, dateStr, color: nextSchedule.color });
     };
 
     update();
@@ -107,9 +107,7 @@ export function SessionIndicator() {
   return (
     <div className="flex flex-col items-end bg-surface px-6 py-4 rounded-xl border border-stroke shadow-sm h-full justify-center">
       <div className="text-sm font-medium text-ink-secondary mb-1">{currentDate || t("loadingDate")}</div>
-      <div className="text-3xl font-mono font-medium text-ink tracking-tight leading-none mb-3">
-        {time || "00:00:00"}
-      </div>
+      <div className="text-3xl font-mono font-medium text-ink tracking-tight leading-none mb-3">{time || "00:00:00"}</div>
 
       <div className="flex items-center gap-2 mb-1 flex-wrap justify-end max-w-[240px]">
         {activeSessions.length > 0 ? (

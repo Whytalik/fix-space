@@ -7,6 +7,10 @@ import { RequestContext, requestContextStorage } from "./request-context";
 @Injectable()
 export class RequestContextMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
+    this.useHandler(req, res, next);
+  }
+
+  useHandler(req: Request, res: Response, next: (error?: any) => void) {
     const context: RequestContext = {
       requestId: (req.headers["x-request-id"] as string) || randomUUID(),
       method: req.method,

@@ -1,12 +1,13 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/components/property-icon";
+import { PropertyIcon } from "@/features/property/property-icon";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { useEscape } from "@/hooks/useEscape";
-import { useMutation } from "@/hooks/useMutation";
+import { useMutation } from "@tanstack/react-query";
+import { parseApiError } from "@/lib/api/client";
 import { createProperty, updateProperty } from "@/lib/api/property";
 import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain";
 import { PropertyType } from "@fixspace/domain/enums";
@@ -53,7 +54,6 @@ export function PropertyFormModal({
     (property?.config as unknown as Record<string, unknown>) ?? getDefaultConfig(property?.type ?? PropertyType.TEXT),
   );
 
-  const savedRef = useRef<PropertyResponseDto | null>(null);
   const isViewMode = mode === "view";
   const t = useTranslations("PropertyForm");
 
@@ -76,34 +76,39 @@ export function PropertyFormModal({
 
   const {
     mutate: save,
-    isLoading: isSaving,
-    error,
-  } = useMutation(async () => {
-    const payload = {
-      name: name.trim(),
-      hint: hint.trim() || undefined,
-      group: group.trim() || undefined,
-      icon: icon || undefined,
-      isRequired,
-      config,
-    };
-    if (mode === "create") {
-      savedRef.current = await createProperty(databaseId, {
-        ...payload,
-        type: selectedType,
-        position: 9999,
-      });
-    } else if (mode === "edit") {
-      savedRef.current = await updateProperty(property!.id, { ...payload, type: selectedType });
-    }
+    isPending: isSaving,
+    error: mutationError,
+  } = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        name: name.trim(),
+        hint: hint.trim() || undefined,
+        group: group.trim() || undefined,
+        icon: icon || undefined,
+        isRequired,
+        config,
+      };
+      if (mode === "create") {
+        return createProperty(databaseId, {
+          ...payload,
+          type: selectedType,
+          position: 9999,
+        });
+      } else {
+        return updateProperty(property!.id, { ...payload, type: selectedType });
+      }
+    },
+    onSuccess: (saved) => {
+      onSaved(saved);
+      onClose();
+    },
   });
+
+  const error = mutationError ? parseApiError(mutationError) : null;
 
   async function handleSubmit() {
     if (!name.trim()) return;
-    const ok = await save();
-    if (!ok) return;
-    onSaved(savedRef.current!);
-    onClose();
+    save();
   }
 
   if (!mounted) return null;
@@ -113,13 +118,10 @@ export function PropertyFormModal({
   if (step === 1) {
     return createPortal(
       <div className={backdropClass} onClick={onClose}>
-        <div
-          className="w-130 bg-elevated border border-stroke rounded-xl shadow-lg overflow-hidden"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="w-130 bg-elevated border border-stroke rounded-xl shadow-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between px-5 py-4 border-b border-stroke">
             <h2 className="type-modal-title">
-              {t("addProperty")} — {t("chooseType")}
+              {t("addProperty")} · {t("chooseType")}
             </h2>
             <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink">
               <X size={16} />
@@ -136,11 +138,7 @@ export function PropertyFormModal({
                   onClick={() => handleSelectType(type)}
                   className="flex items-start gap-3 p-3 rounded-lg border border-stroke hover:border-accent hover:bg-surface text-left transition-colors group"
                 >
-                  <PropertyIcon
-                    type={type}
-                    size={15}
-                    className="text-ink-muted group-hover:text-accent shrink-0 mt-0.5"
-                  />
+                  <PropertyIcon type={type} size={15} className="text-ink-muted group-hover:text-accent shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-ink">{meta.label}</p>
                     <p className="text-xs text-ink-muted mt-0.5 leading-snug">{meta.description}</p>
@@ -169,11 +167,7 @@ export function PropertyFormModal({
           )}
           <PropertyIcon type={selectedType} size={15} className="text-ink-muted shrink-0" />
           <h2 className="type-modal-title flex-1">
-            {mode === "create"
-              ? `Add ${TYPE_META[selectedType].label} property`
-              : mode === "view"
-                ? t("viewProperty")
-                : t("editProperty")}
+            {mode === "create" ? `Add ${TYPE_META[selectedType].label} property` : mode === "view" ? t("viewProperty") : t("editProperty")}
           </h2>
           <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink shrink-0">
             <X size={16} />
@@ -194,11 +188,7 @@ export function PropertyFormModal({
                     <PropertyIcon type={selectedType} size={14} className="text-ink-muted shrink-0" />
                     <span>{TYPE_META[selectedType].label}</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="text-xs text-accent hover:underline shrink-0"
-                  >
+                  <button type="button" onClick={() => setStep(1)} className="text-xs text-accent hover:underline shrink-0">
                     {t("change")}
                   </button>
                 </div>
@@ -211,15 +201,13 @@ export function PropertyFormModal({
                 <button
                   ref={iconButtonRef}
                   type="button"
-                  onClick={() => setShowIconPicker((v) => !v)}
+                  onClick={() => setShowIconPicker((value) => !value)}
                   className="flex items-center gap-2 rounded-lg border border-stroke bg-canvas px-3 py-2 text-sm text-ink hover:border-accent transition-colors"
                 >
                   {icon ? (
                     <>
                       <IconDisplay value={icon} size={16} />
-                      <span className="text-ink-secondary text-xs">
-                        {icon.startsWith("icon:") ? icon.slice(5) : icon}
-                      </span>
+                      <span className="text-ink-secondary text-xs">{icon.startsWith("icon:") ? icon.slice(5) : icon}</span>
                     </>
                   ) : (
                     <span className="text-ink-muted text-xs">Choose an icon…</span>
@@ -228,8 +216,8 @@ export function PropertyFormModal({
                 {showIconPicker && (
                   <IconPicker
                     value={icon}
-                    onChange={(v) => {
-                      setIcon(v);
+                    onChange={(value) => {
+                      setIcon(value);
                       setShowIconPicker(false);
                     }}
                     onClose={() => setShowIconPicker(false)}
@@ -260,7 +248,7 @@ export function PropertyFormModal({
               <label className="type-field-label">{t("group")}</label>
               <div className="mt-1">
                 <Combobox
-                  options={existingGroups.map((g) => ({ value: g, label: g }))}
+                  options={existingGroups.map((group) => ({ value: group, label: group }))}
                   value={group}
                   onChange={setGroup}
                   placeholder={t("groupPlaceholder")}
@@ -291,13 +279,7 @@ export function PropertyFormModal({
             <p className="text-sm font-semibold text-ink border-b border-stroke pb-2 text-center">
               {TYPE_META[selectedType].label} {t("settings")}
             </p>
-            <PropertyTypeConfig
-              type={selectedType}
-              config={config}
-              databases={databases}
-              isViewMode={isViewMode}
-              onPatch={patchConfig}
-            />
+            <PropertyTypeConfig type={selectedType} config={config} databases={databases} isViewMode={isViewMode} onPatch={patchConfig} />
           </div>
         </div>
 

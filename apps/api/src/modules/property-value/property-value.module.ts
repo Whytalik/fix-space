@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { PropertyModule } from "../property/property.module";
 import { PropertyValueController } from "./property-value.controller";
-import { PropertyValueRepository } from "./property-value.repository";
+import { PropertyValueRepository } from "./repositories/property-value.repository";
 import { PropertyValueService } from "./property-value.service";
 
 @Module({

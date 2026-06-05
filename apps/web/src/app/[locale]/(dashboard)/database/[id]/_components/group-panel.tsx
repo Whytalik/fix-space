@@ -3,9 +3,9 @@
 import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { useDatabaseContext } from "@/context/database-context";
-import { ColorPicker, COLOR_SWATCHES } from "@/components/ui/color-picker/color-picker";
+import { ColorPicker } from "@/components/ui/color-picker/color-picker";
 import type { RecordGroupDto } from "@fixspace/domain";
-import { DateGroupGranularity, GroupField, PropertyType } from "@fixspace/domain/enums";
+import { DateGroupGranularity, GroupField, PALETTE_COLOR_VALUES, PropertyType } from "@fixspace/domain/enums";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -29,15 +29,14 @@ type GroupPanelProps = {
 };
 
 export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
-  const { properties, groupedRecords, groupColors, setGroupColor, hiddenGroups, toggleHiddenGroup } =
-    useDatabaseContext();
+  const { properties, groupedRecords, groupColors, setGroupColor, hiddenGroups, toggleHiddenGroup } = useDatabaseContext();
   const [colorPickerKey, setColorPickerKey] = useState<string | null>(null);
   const [colorPickerAnchor, setColorPickerAnchor] = useState<HTMLButtonElement | null>(null);
   const t = useTranslations("GroupPanel");
 
   const propertyOptions: ComboboxOption[] = properties
-    .filter((p) => p.type !== PropertyType.RELATION)
-    .map((p) => ({ value: p.id, label: p.name }));
+    .filter((property) => property.type !== PropertyType.RELATION)
+    .map((property) => ({ value: property.id, label: property.name }));
 
   function handleFieldChange(value: string) {
     if (!value) {
@@ -48,8 +47,7 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
     onChange({
       field,
       propertyId: field === GroupField.PROPERTY ? (propertyOptions[0]?.value ?? undefined) : undefined,
-      granularity:
-        field === GroupField.CREATED_AT || field === GroupField.UPDATED_AT ? DateGroupGranularity.DAY : undefined,
+      granularity: field === GroupField.CREATED_AT || field === GroupField.UPDATED_AT ? DateGroupGranularity.DAY : undefined,
     });
   }
 
@@ -75,7 +73,7 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
       <Combobox
         options={[
           { value: "", label: t("noGrouping") },
-          ...FIELD_OPTIONS.map((opt) => ({ ...opt, label: t(opt.label as unknown as string) })),
+          ...FIELD_OPTIONS.map((option) => ({ ...option, label: t(option.label as unknown as string) })),
         ]}
         value={grouping?.field ?? ""}
         onChange={handleFieldChange}
@@ -105,13 +103,13 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
           <div className="h-px bg-stroke my-1" />
           <span className="text-xs font-semibold text-ink-muted uppercase tracking-wide">{t("groups")}</span>
           <div className="flex flex-col gap-1 max-h-52 overflow-y-auto scrollbar">
-            {visibleGroups.map((g, idx) => {
-              const color = groupColors[g.key] ?? COLOR_SWATCHES[idx % COLOR_SWATCHES.length];
-              const hidden = hiddenGroups.has(g.key);
-              const pickerOpen = colorPickerKey === g.key;
+            {visibleGroups.map((group, index) => {
+              const color = groupColors[group.key] ?? PALETTE_COLOR_VALUES[index % PALETTE_COLOR_VALUES.length];
+              const hidden = hiddenGroups.has(group.key);
+              const pickerOpen = colorPickerKey === group.key;
 
               return (
-                <div key={g.key} className="flex items-center gap-2 px-1 py-0.5 rounded-md hover:bg-elevated">
+                <div key={group.key} className="flex items-center gap-2 px-1 py-0.5 rounded-md hover:bg-elevated">
                   <span className="shrink-0">
                     <button
                       type="button"
@@ -120,7 +118,7 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
                           setColorPickerKey(null);
                           setColorPickerAnchor(null);
                         } else {
-                          setColorPickerKey(g.key);
+                          setColorPickerKey(group.key);
                           setColorPickerAnchor(e.currentTarget);
                         }
                       }}
@@ -131,11 +129,10 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
                   </span>
                   {pickerOpen && (
                     <ColorPicker
-                      value={groupColors[g.key] ?? ""}
-                      showSwatches
+                      value={groupColors[group.key] ?? ""}
                       anchorEl={colorPickerAnchor}
-                      onChange={(c) => {
-                        setGroupColor(g.key, c);
+                      onChange={(color) => {
+                        setGroupColor(group.key, color);
                         setColorPickerKey(null);
                         setColorPickerAnchor(null);
                       }}
@@ -146,16 +143,14 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
                     />
                   )}
 
-                  <span
-                    className={`flex-1 text-xs truncate ${hidden ? "text-ink-muted line-through" : "text-ink-secondary"}`}
-                  >
-                    {g.label}
+                  <span className={`flex-1 text-xs truncate ${hidden ? "text-ink-muted line-through" : "text-ink-secondary"}`}>
+                    {group.label}
                   </span>
-                  <span className="text-tiny text-ink-muted shrink-0">{g.records.length}</span>
+                  <span className="text-tiny text-ink-muted shrink-0">{group.records.length}</span>
 
                   <button
                     type="button"
-                    onClick={() => toggleHiddenGroup(g.key)}
+                    onClick={() => toggleHiddenGroup(group.key)}
                     className="shrink-0 text-ink-muted hover:text-ink transition-colors"
                     title={hidden ? t("showGroup") : t("hideGroup")}
                   >

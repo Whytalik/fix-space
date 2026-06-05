@@ -18,10 +18,10 @@ export class ProgressProperty {
   defaultValue: number | null;
 
   @IsNumber({}, { message: i18nValidationMessage<I18nTranslations>("validation.IS_NUMBER") })
-  min: number;
+  minValue: number;
 
   @IsNumber({}, { message: i18nValidationMessage<I18nTranslations>("validation.IS_NUMBER") })
-  max: number;
+  maxValue: number;
 
   @IsNumber({}, { message: i18nValidationMessage<I18nTranslations>("validation.IS_NUMBER") })
   @Min(0.000001)

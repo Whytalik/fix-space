@@ -5,6 +5,56 @@
 
 ---
 
+## 0. Теорія: ключові поняття
+
+### Backlog
+
+Список **всіх задач**, які потрібно виконати в проекті. Упорядкований за пріоритетом — найважливіше зверху. Задача в backlog — це не деталізований план, а намір: "треба зробити X".
+
+```
+Backlog FIX Space:
+  [Must] Створення Space
+  [Must] Редагування Space
+  [Must] Видалення Space
+  [Should] Дублювання Space
+  [Could] Експорт даних
+  ...
+```
+
+### WIP Limit (Work In Progress Limit)
+
+Максимальна кількість задач, які можна виконувати **одночасно**. У Personal Kanban для solo dev — WIP limit = 1.
+
+**Навіщо:** переключення між задачами коштує часу і уваги. Одна задача від початку до кінця — швидше, ніж п'ять задач "в процесі".
+
+### Milestone
+
+Milestone (контрольна точка) — це **набір задач**, завершення яких формує робочу версію продукту. Не прив'язаний до конкретної дати як дедлайн — прив'язаний до набору функцій.
+
+```
+Milestone v0.1 — Auth + Space + Database (MVP)
+Milestone v0.2 — Record + Property + PropertyValue
+Milestone v1.0 — Template + View + Settings + Search
+```
+
+Milestone закривається коли всі його задачі у статусі Done і всі тести зелені.
+
+### Definition of Done (DoD)
+
+Чіткий список умов, при яких задача вважається **завершеною**. Без DoD — задача "майже готова" нескінченно.
+
+### Канбан-дошка
+
+Візуальне відображення стану роботи. Мінімальна структура для solo dev:
+
+```
+Backlog → In Progress → Done
+```
+
+Задача рухається зліва направо. В "In Progress" одночасно максимум 1 задача (WIP limit).
+
+---
+
 ## 1. Загальна картина
 
 ```
@@ -23,6 +73,67 @@ Issue        дошка         branch         workflow      Flow        merge  
 - **Кожен шар тестується одразу** — не переходиш далі, поки тест не зелений
 - **Conventional Commits** — commitlint блокує неправильні коміти
 - **Squash merge** — історія `develop` залишається чистою
+
+---
+
+## 1.1. Дослідження та обґрунтування вибору Git-воркфлоу
+
+### Що досліджували
+
+Порівняно три основні Git-воркфлоу:
+
+| Воркфлоу                                        | Джерело                                                                        | Рік  |
+| ----------------------------------------------- | ------------------------------------------------------------------------------ | ---- |
+| **Git Flow** (A successful Git branching model) | [nvie.com](https://nvie.com/posts/a-successful-git-branching-model/)           | 2010 |
+| **GitHub Flow**                                 | [GitHub Docs](https://docs.github.com/en/get-started/using-github/github-flow) | 2024 |
+| **Trunk-Based Development**                     | [Atlassian](https://www.atlassian.com/git/tutorials/comparing-workflows)       | 2024 |
+
+Також враховано:
+
+- **Conventional Commits** — специфікація форматів комітів ([conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0.0/))
+- **commitlint + husky** — індустріальний стандарт валідації комітів (18.5k зірок на GitHub)
+- **GitHub Projects** — канбан-дошка з полями Priority, Status, Assignee
+- Методологія проекту: **Hybrid PMBoK 7** (Predictive Planning + Personal Kanban, WIP=1)
+
+### Чому не Git Flow (стара методологія)
+
+Git Flow був популярним стандартом, але має фундаментальні проблеми для нашого контексту:
+
+| Проблема                          | Пояснення                                                                                                                                                   |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Створений не для веб-додатків** | Git Flow писався для versioned software (десктоп, мобілки), де треба підтримувати v1.0, v1.1, v2.0 одночасно. FIX Space — веб-додаток з continuous delivery |
+| **Автор сам відмовився**          | Vincent Driessen у 2020 додав примітку: _"If your team is doing continuous delivery, adopt a much simpler workflow like GitHub flow"_                       |
+| **5 типів гілок замість 2**       | `master` + `develop` + `feature/*` + `release/*` + `hotfix/*` — для solo dev це занадто без користі                                                         |
+| **Release-гілки — зайві**         | У Git Flow кожен реліз = окрема гілка з bugfix-ами. У нас — milestone + тег на `main`                                                                       |
+| **Подвійні merge**                | Кожен release/hotfix merge-иться в `master` І в `develop` — більше конфліктів, більше ручної роботи                                                         |
+| **Не сумісний з Kanban**          | Git Flow передбачає "release cycles". Personal Kanban — потік задач без циклів                                                                              |
+
+### Чому обрали GitHub Flow
+
+| Перевага                       | Чому це важливо для FIX Space                                    |
+| ------------------------------ | ---------------------------------------------------------------- |
+| **Одна гілка `main`**          | Завжди робочий стан, ніяких "develop vs master" плутанин         |
+| **Кожна задача = своя гілка**  | Ізольована робота, чиста історія через squash merge              |
+| **PR = code review + DoD**     | Чеклист тестування автоматично підставляється                    |
+| **Auto-labels**                | GitHub сам вішає лейбли по змінених файлах                       |
+| **Conventional Commits**       | commitlint блокує неправильні коміти — історія завжди читабельна |
+| **Сумісний з Personal Kanban** | Backlog → In Progress → Done = feature branch → PR → merge       |
+| **Теги замість release-гілок** | `git tag v0.1` коли milestone готовий — ніяких додаткових гілок  |
+
+### Висновок
+
+GitHub Flow + Conventional Commits + Personal Kanban = **мінімум процесу, максимум контролю**. Ідеально для solo dev, який працює ітеративно з чіткими milestone.
+
+### Порівняння з Git Flow
+
+|               | Git Flow                                                            | GitHub Flow (наш)             |
+| ------------- | ------------------------------------------------------------------- | ----------------------------- |
+| Гілок         | 5 типів (`master`, `develop`, `feature/*`, `release/*`, `hotfix/*`) | 2 (`main`, `feature/*`)       |
+| Реліз         | release-гілка + merge в `master` + `develop`                        | тег на `develop`              |
+| Hotfix        | `hotfix/*` з `master` → merge в обидві                              | `fix/*` з `develop` → PR      |
+| Складність    | Висока (10+ кроків на реліз)                                        | Низька (4 кроки)              |
+| Підходить для | Versioned software, multi-version support                           | Continuous delivery, web apps |
+| Solo dev      | Overhead                                                            | Ідеально                      |
 
 ---
 
@@ -285,6 +396,26 @@ turbo test:e2e      # e2e тести (потребує Docker)
 | v0.2 — Feature Complete | `v0.2` | Custom DB, Settings, Statistics, Search, CSV, Automation, Button               |
 | v0.3 — Polished         | `v0.3` | Settings, Onboarding, Notification, Duplicate, Content blocks                  |
 | v1.0 — Full Release     | `v1.0` | Integrations, Advanced blocks, Formula in view                                 |
+
+---
+
+## 3.1. Branch Protection (рекомендовано)
+
+Для `main`:
+
+- [ ] Require pull request before merging
+- [ ] Require status checks to pass (`turbo test`, `turbo lint`)
+- [ ] Require conversation resolution before merging
+- [ ] Include administrators
+- [ ] Allow squash merging only
+
+Це запобігає прямому push в `develop` — тільки через PR.
+
+---
+
+## 3.2. CI/CD Pipeline та гілкова стратегія
+
+_Детальний опис конвеєра CI/CD, умов запуску пайплайну та конфігурації середовищ знаходиться в [ci-cd.md](../07-deployment/ci-cd.md)._
 
 ---
 

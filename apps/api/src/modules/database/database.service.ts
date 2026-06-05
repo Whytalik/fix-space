@@ -1,17 +1,13 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
-import {
-  CreateDatabaseDto,
-  DatabaseConfigDto,
-  DatabaseResponseDto,
-  PropertyType,
-  UpdateDatabaseDto,
-} from "@fixspace/domain";
+import { CreateDatabaseDto, DatabaseResponseDto, UpdateDatabaseDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { filterUndefined } from "../../common/utils/filter-undefined";
 import { t } from "../../common/utils/i18n.helper";
-import { defaultInitializationConfig } from "../../core/config/initialization.config";
+import { defaultInitializationConfig } from "../../core/config/initialization/initialization.config";
 import { PropertyTypeRegistry } from "../property/types";
-import { DatabaseRepository } from "./database.repository";
+import { DatabaseRepository } from "./repositories/database.repository";
+import { toDatabaseResponseDto } from "./utils/to-database-response.util";
 
 @Injectable()
 export class DatabaseService {
@@ -45,27 +41,29 @@ export class DatabaseService {
       throw new ConflictException(t("errors.DATABASE_NAME_TAKEN"));
     }
 
-    return await this.databaseRepo.transaction(async (tx) => {
+    return await this.databaseRepo.transaction(async (transaction) => {
       const database = await this.databaseRepo.create(
         {
           name: createDatabaseDto.name,
           title: createDatabaseDto.title,
+          type: createDatabaseDto.type,
           icon: createDatabaseDto.icon,
           spaceId,
           sectionId: createDatabaseDto.sectionId,
           recordLimit: createDatabaseDto.recordLimit ?? 10,
+          isPreset: createDatabaseDto.isPreset ?? false,
         },
-        tx,
+        transaction,
       );
 
       const propertiesToCreate = createDatabaseDto.properties ?? defaultInitializationConfig.defaultDatabaseProperties;
 
       for (const propertyDef of propertiesToCreate) {
-        const handler = this.typeRegistry.getConfigHandler(propertyDef.type as PropertyType);
+        const handler = this.typeRegistry.getConfigHandler(propertyDef.type);
         const defaultConfig = handler.getDefaultConfig();
         const mergedConfig = propertyDef.config ? { ...defaultConfig, ...propertyDef.config } : defaultConfig;
 
-        await tx.property.create({
+        await transaction.property.create({
           data: {
             name: propertyDef.name,
             type: propertyDef.type,
@@ -79,40 +77,37 @@ export class DatabaseService {
         });
       }
 
-      this.logger.log("Database created with properties", {
+      this.logger.log("Database created", {
         databaseId: database.id,
         spaceId,
-        propertyCount: propertiesToCreate.length,
       });
 
-      return new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto });
+      return toDatabaseResponseDto(database);
     });
   }
 
   async findAll(spaceId: string, userId: string): Promise<DatabaseResponseDto[]> {
     this.logger.debug("Finding all databases", { spaceId });
     const databases = await this.databaseRepo.findAllBySpace(spaceId, userId);
-    return databases.map(
-      (database) => new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto }),
-    );
+    return databases.map(toDatabaseResponseDto);
   }
 
-  async findOne(id: string, userId: string): Promise<DatabaseResponseDto> {
+  async findOne(id: string): Promise<DatabaseResponseDto> {
     this.logger.debug("Finding database", { id });
 
-    const database = await this.databaseRepo.findByIdWithOwner(id, userId);
+    const database = await this.databaseRepo.findById(id);
 
     if (!database) {
       throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id }));
     }
 
-    return new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto });
+    return toDatabaseResponseDto(database);
   }
 
-  async update(id: string, updateDatabaseDto: UpdateDatabaseDto, userId: string): Promise<DatabaseResponseDto> {
+  async update(id: string, updateDatabaseDto: UpdateDatabaseDto): Promise<DatabaseResponseDto> {
     this.logger.debug("Updating database", { id });
 
-    const existingDatabase = await this.databaseRepo.findByIdWithOwner(id, userId);
+    const existingDatabase = await this.databaseRepo.findById(id);
 
     if (!existingDatabase) {
       throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id }));
@@ -125,33 +120,39 @@ export class DatabaseService {
       }
     }
 
-    const database = await this.databaseRepo.update(id, {
-      name: updateDatabaseDto.name,
-      title: updateDatabaseDto.title,
-      icon: updateDatabaseDto.icon,
-      sectionId: updateDatabaseDto.sectionId,
-      ...(updateDatabaseDto.recordLimit !== undefined && { recordLimit: updateDatabaseDto.recordLimit ?? null }),
-      ...(updateDatabaseDto.useDefaultTemplate !== undefined && {
+    const updateData = filterUndefined({
+      fields: {
+        name: updateDatabaseDto.name,
+        title: updateDatabaseDto.title,
+        icon: updateDatabaseDto.icon,
+        sectionId: updateDatabaseDto.sectionId,
         useDefaultTemplate: updateDatabaseDto.useDefaultTemplate,
-      }),
+      },
+      nullableFields: { recordLimit: updateDatabaseDto.recordLimit },
     });
 
+    const database = await this.databaseRepo.update(id, updateData);
+
     this.logger.log("Database updated", { id });
-    return new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto });
+    return toDatabaseResponseDto(database);
   }
 
-  async remove(id: string, userId: string): Promise<DatabaseResponseDto> {
+  async remove(id: string): Promise<DatabaseResponseDto> {
     this.logger.debug("Removing database", { id });
 
-    const existingDatabase = await this.databaseRepo.findByIdWithOwner(id, userId);
+    const existingDatabase = await this.databaseRepo.findById(id);
 
     if (!existingDatabase) {
       throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id }));
     }
 
+    if (existingDatabase.isPreset) {
+      throw new BadRequestException(t("errors.CANNOT_DELETE_PRESET_DATABASE"));
+    }
+
     const database = await this.databaseRepo.delete(id);
 
     this.logger.log("Database removed", { id });
-    return new DatabaseResponseDto({ ...database, config: database.config as unknown as DatabaseConfigDto });
+    return toDatabaseResponseDto(database);
   }
 }

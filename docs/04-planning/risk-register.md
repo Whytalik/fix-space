@@ -8,8 +8,6 @@
 
 ## 1. Модель оцінки
 
-_Джерело: PMBoK 6th Edition, §11.3 — Perform Qualitative Risk Analysis._
-
 **Score = Probability × Impact**
 
 ### Числові шкали

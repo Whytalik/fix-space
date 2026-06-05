@@ -1,4 +1,5 @@
 import { prisma } from "@fixspace/database";
+import type { SpaceResponseDto } from "@fixspace/domain";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
@@ -6,6 +7,7 @@ import { Test } from "@nestjs/testing";
 import { AppLogger } from "../../../common/logger/app-logger.service";
 import * as passwordUtils from "../../../common/utils/password";
 import { UserService } from "../../../modules/user/user.service";
+import { InitializeUserSpaceUseCase } from "../../../modules/space/providers/initialize-user-space.usecase";
 import { MailService } from "../../mail/mail.service";
 import { AuthService } from "../auth.service";
 import { TokenService } from "../token.service";
@@ -23,6 +25,9 @@ jest.mock("@fixspace/database", () => ({
     passwordResetToken: {
       update: jest.fn(),
     },
+    space: {
+      findFirst: jest.fn(),
+    },
     $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
   },
 }));
@@ -32,6 +37,10 @@ describe("AuthService", () => {
 
   const mockUserService: jest.Mocked<Pick<UserService, "findById">> = {
     findById: jest.fn(),
+  };
+
+  const mockInitializeUserSpaceUseCase: jest.Mocked<Pick<InitializeUserSpaceUseCase, "initialize">> = {
+    initialize: jest.fn(),
   };
 
   const mockTokenService: jest.Mocked<
@@ -82,6 +91,7 @@ describe("AuthService", () => {
         { provide: UserService, useValue: mockUserService },
         { provide: TokenService, useValue: mockTokenService },
         { provide: MailService, useValue: mockMailService },
+        { provide: InitializeUserSpaceUseCase, useValue: mockInitializeUserSpaceUseCase },
         { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();
@@ -101,8 +111,9 @@ describe("AuthService", () => {
       isVerified: true,
     };
 
-    it("should login successfully with valid credentials", async () => {
+    it("should login successfully and not initialize space if it already exists", async () => {
       (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(mockUser);
+      (prisma.space.findFirst as jest.Mock<any>).mockResolvedValue({ id: "space-123" });
       jest.spyOn(passwordUtils, "verifyPassword").mockResolvedValue(true);
       mockTokenService.generateAccessToken.mockReturnValue("access_token");
       mockTokenService.createRefreshToken.mockResolvedValue("refresh_token");
@@ -111,7 +122,23 @@ describe("AuthService", () => {
 
       expect(result).toHaveProperty("accessToken", "access_token");
       expect(result).toHaveProperty("refreshToken", "refresh_token");
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({ where: { email: loginDto.email } });
+      expect(prisma.space.findFirst).toHaveBeenCalledWith({ where: { ownerId: mockUser.id } });
+      expect(mockInitializeUserSpaceUseCase.initialize).not.toHaveBeenCalled();
+    });
+
+    it("should login successfully and initialize space if it does not exist", async () => {
+      (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(mockUser);
+      (prisma.space.findFirst as jest.Mock<any>).mockResolvedValue(null);
+      jest.spyOn(passwordUtils, "verifyPassword").mockResolvedValue(true);
+      mockTokenService.generateAccessToken.mockReturnValue("access_token");
+      mockTokenService.createRefreshToken.mockResolvedValue("refresh_token");
+
+      const result = await service.login(loginDto);
+
+      expect(result).toHaveProperty("accessToken", "access_token");
+      expect(result).toHaveProperty("refreshToken", "refresh_token");
+      expect(prisma.space.findFirst).toHaveBeenCalledWith({ where: { ownerId: mockUser.id } });
+      expect(mockInitializeUserSpaceUseCase.initialize).toHaveBeenCalledWith(mockUser.id, mockUser.username);
     });
 
     it("should throw UnauthorizedException if user not found", async () => {
@@ -180,24 +207,22 @@ describe("AuthService", () => {
   describe("verifyEmail", () => {
     const token = "valid_token";
     const validationResult = { userId: "user-1", tokenId: "token-1" };
+    const mockUser = { id: "user-1", username: "testuser", isVerified: true };
 
-    it("should verify email successfully", async () => {
+    it("should verify email and initialize space successfully", async () => {
       mockTokenService.validateVerificationToken.mockResolvedValue(validationResult);
+      (prisma.user.update as jest.Mock<any>).mockResolvedValue(mockUser);
+      mockInitializeUserSpaceUseCase.initialize.mockResolvedValue({} as SpaceResponseDto);
 
       const result = await service.verifyEmail(token);
 
       expect(prisma.user.update).toHaveBeenCalled();
       expect(prisma.emailVerificationToken.update).toHaveBeenCalled();
+      expect(mockInitializeUserSpaceUseCase.initialize).toHaveBeenCalledWith(mockUser.id, mockUser.username);
       expect(result).toHaveProperty("message");
     });
 
     it("should throw BadRequestException if token is invalid", async () => {
-      mockTokenService.validateVerificationToken.mockResolvedValue(null);
-
-      await expect(service.verifyEmail(token)).rejects.toThrow(BadRequestException);
-    });
-
-    it("should throw BadRequestException if token is expired", async () => {
       mockTokenService.validateVerificationToken.mockResolvedValue(null);
 
       await expect(service.verifyEmail(token)).rejects.toThrow(BadRequestException);
@@ -290,18 +315,6 @@ describe("AuthService", () => {
     });
 
     it("should throw BadRequestException if token is invalid", async () => {
-      mockTokenService.validatePasswordResetToken.mockResolvedValue(null);
-
-      await expect(service.resetPassword(token, newPassword)).rejects.toThrow(BadRequestException);
-    });
-
-    it("should throw BadRequestException if token is expired", async () => {
-      mockTokenService.validatePasswordResetToken.mockResolvedValue(null);
-
-      await expect(service.resetPassword(token, newPassword)).rejects.toThrow(BadRequestException);
-    });
-
-    it("should throw BadRequestException if token was already used", async () => {
       mockTokenService.validatePasswordResetToken.mockResolvedValue(null);
 
       await expect(service.resetPassword(token, newPassword)).rejects.toThrow(BadRequestException);

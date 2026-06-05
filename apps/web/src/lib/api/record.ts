@@ -24,7 +24,5 @@ export function deleteRecord(recordId: string) {
 }
 
 export function searchRecords(spaceId: string, q: string) {
-  return apiFetch<SpaceSearchResultDto[]>(
-    `/records/search?spaceId=${encodeURIComponent(spaceId)}&q=${encodeURIComponent(q)}`,
-  );
+  return apiFetch<SpaceSearchResultDto[]>(`/records/search?spaceId=${encodeURIComponent(spaceId)}&q=${encodeURIComponent(q)}`);
 }

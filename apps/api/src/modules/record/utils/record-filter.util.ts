@@ -5,7 +5,6 @@ import { FilterField, FilterOperator, PropertyType } from "@fixspace/domain";
 export type RecordWithValues = Prisma.RecordGetPayload<{
   include: {
     values: { include: { property: { select: { type: true; position: true } } } };
-    content: true;
   };
 }>;
 
@@ -15,21 +14,21 @@ function isValidDate(date: Date | null): boolean {
 
 function compareDates(dateValue: Date | null, filterDateValue: Date | null, operator: FilterOperator): boolean {
   if (!isValidDate(dateValue) || !isValidDate(filterDateValue)) return false;
-  const a = dateValue!.getTime();
-  const b = filterDateValue!.getTime();
+  const dateTimestamp = dateValue!.getTime();
+  const filterTimestamp = filterDateValue!.getTime();
   switch (operator) {
     case FilterOperator.EQUALS:
-      return a === b;
+      return dateTimestamp === filterTimestamp;
     case FilterOperator.NOT_EQUALS:
-      return a !== b;
+      return dateTimestamp !== filterTimestamp;
     case FilterOperator.BEFORE:
-      return a < b;
+      return dateTimestamp < filterTimestamp;
     case FilterOperator.AFTER:
-      return a > b;
+      return dateTimestamp > filterTimestamp;
     case FilterOperator.ON_OR_BEFORE:
-      return a <= b;
+      return dateTimestamp <= filterTimestamp;
     case FilterOperator.ON_OR_AFTER:
-      return a >= b;
+      return dateTimestamp >= filterTimestamp;
     default:
       return true;
   }
@@ -190,11 +189,7 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
     }
 
     case PropertyType.RELATION: {
-      const relationValues: string[] = Array.isArray(rawValue)
-        ? (rawValue as string[])
-        : rawValue !== null
-          ? [String(rawValue)]
-          : [];
+      const relationValues: string[] = Array.isArray(rawValue) ? (rawValue as string[]) : rawValue !== null ? [String(rawValue)] : [];
       const filterRelationValue = value !== null ? String(value) : "";
       const filterValues: string[] = (values as string[] | undefined) ?? [];
       switch (operator) {

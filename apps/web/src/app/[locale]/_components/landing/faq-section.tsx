@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export function FaqSection() {
   const t = useTranslations("Landing.faq");
-  const [openCategoryId, setOpenCategoryId] = useState<string | null>("0");
+  const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null);
 
   const categories = [
@@ -48,16 +48,12 @@ export function FaqSection() {
                     <Icon size={16} />
                   </div>
                   <h3
-                    className={`type-landing-eyebrow-lg transition-colors duration-300 ${
-                      isCatOpen ? "text-ink" : "group-hover:text-ink"
-                    }`}
+                    className={`type-landing-eyebrow-lg transition-colors duration-300 ${isCatOpen ? "text-ink" : "group-hover:text-ink"}`}
                   >
                     {t(`categories.${cat.key}.title`)}
                   </h3>
                 </div>
-                <div
-                  className={`text-ink-muted transition-transform duration-500 ${isCatOpen ? "rotate-180 text-accent" : ""}`}
-                >
+                <div className={`text-ink-muted transition-transform duration-500 ${isCatOpen ? "rotate-180 text-accent" : ""}`}>
                   <ChevronDown size={14} />
                 </div>
               </button>

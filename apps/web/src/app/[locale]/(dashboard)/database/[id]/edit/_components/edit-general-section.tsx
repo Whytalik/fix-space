@@ -13,12 +13,12 @@ type EditGeneralSectionProps = {
   recordLimit: number | null;
   useDefaultTemplate: boolean;
   wrapCells: boolean;
-  onIconChange: (val: string) => void;
+  onIconChange: (value: string) => void;
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onTitleBlur: () => void;
-  onRecordLimitChange: (val: number | null) => void;
-  onUseDefaultTemplateChange: (val: boolean) => void;
-  onWrapCellsChange: (val: boolean) => void;
+  onRecordLimitChange: (value: number | null) => void;
+  onUseDefaultTemplateChange: (value: boolean) => void;
+  onWrapCellsChange: (value: boolean) => void;
 };
 
 const RECORD_LIMIT_OPTIONS: ComboboxOption[] = [
@@ -48,11 +48,11 @@ export function EditGeneralSection({
   const t = useTranslations("DatabaseEdit");
 
   function handleToggleIconPicker() {
-    setShowIconPicker((v) => !v);
+    setShowIconPicker((prev) => !prev);
   }
 
-  function handleIconChange(val: string) {
-    onIconChange(val);
+  function handleIconChange(value: string) {
+    onIconChange(value);
     setShowIconPicker(false);
   }
 
@@ -86,12 +86,7 @@ export function EditGeneralSection({
               )}
             </button>
             {showIconPicker && (
-              <IconPicker
-                value={icon}
-                onChange={handleIconChange}
-                onClose={handleIconPickerClose}
-                anchorEl={iconButtonRef.current}
-              />
+              <IconPicker value={icon} onChange={handleIconChange} onClose={handleIconPickerClose} anchorEl={iconButtonRef.current} />
             )}
           </div>
 
@@ -106,8 +101,7 @@ export function EditGeneralSection({
               placeholder={t("placeholderTitle")}
             />
             <p className="mt-1.5 type-hint">
-              {t("internalName")}:{" "}
-              <span className="font-mono text-ink-secondary">[DB] {title || "Trading Journal"}</span>
+              {t("internalName")}: <span className="font-mono text-ink-secondary">[DB] {title || "Trading Journal"}</span>
             </p>
           </div>
         </div>
@@ -120,12 +114,12 @@ export function EditGeneralSection({
         <div className="px-5 py-4">
           <label className="block mb-1.5 type-field-label">{t("recordLimit")}</label>
           <Combobox
-            options={RECORD_LIMIT_OPTIONS.map((opt) => ({
-              ...opt,
-              label: opt.value === "" ? t("noLimit") : opt.label,
+            options={RECORD_LIMIT_OPTIONS.map((option) => ({
+              ...option,
+              label: option.value === "" ? t("noLimit") : option.label,
             }))}
             value={recordLimit === null ? "" : String(recordLimit)}
-            onChange={(v) => onRecordLimitChange(v === "" ? null : Number(v))}
+            onChange={(value) => onRecordLimitChange(value === "" ? null : Number(value))}
             placeholder={t("noLimit")}
             nullable
           />

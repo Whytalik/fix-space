@@ -1,4 +1,4 @@
-import { Exclude, Expose, Type } from "class-transformer";
+import { Exclude, Expose, Transform, TransformationType } from "class-transformer";
 import {
   ButtonProperty,
   CheckboxProperty,
@@ -14,6 +14,7 @@ import {
   TextProperty,
 } from "../types";
 import { PropertyType } from "./create-property.dto";
+import { VisibilityConditionDto } from "./visibility-condition.dto";
 
 @Exclude()
 export class PropertyResponseDto {
@@ -54,31 +55,36 @@ export class PropertyResponseDto {
   isProtected: boolean;
 
   @Expose()
+  visibilityCondition?: VisibilityConditionDto | null;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()
   updatedAt: Date;
 
   @Expose()
-  @Type(() => Object, {
-    keepDiscriminatorProperty: true,
-    discriminator: {
-      property: "type",
-      subTypes: [
-        { value: TextProperty, name: PropertyType.TEXT },
-        { value: NumberProperty, name: PropertyType.NUMBER },
-        { value: DateProperty, name: PropertyType.DATE },
-        { value: CheckboxProperty, name: PropertyType.CHECKBOX },
-        { value: DurationProperty, name: PropertyType.DURATION },
-        { value: SelectProperty, name: PropertyType.SELECT },
-        { value: StatusProperty, name: PropertyType.STATUS },
-        { value: RelationProperty, name: PropertyType.RELATION },
-        { value: FormulaProperty, name: PropertyType.FORMULA },
-        { value: RatingProperty, name: PropertyType.RATING },
-        { value: ProgressProperty, name: PropertyType.PROGRESS },
-        { value: ButtonProperty, name: PropertyType.BUTTON },
-      ],
-    },
+  @Transform((params: any) => {
+    const { value, type, object, obj } = params;
+    if (type === TransformationType.CLASS_TO_PLAIN) return value;
+    if (!value) return value;
+    const subTypeMap: Record<string, new (...args: unknown[]) => unknown> = {
+      [PropertyType.TEXT]: TextProperty,
+      [PropertyType.NUMBER]: NumberProperty,
+      [PropertyType.DATE]: DateProperty,
+      [PropertyType.CHECKBOX]: CheckboxProperty,
+      [PropertyType.DURATION]: DurationProperty,
+      [PropertyType.SELECT]: SelectProperty,
+      [PropertyType.STATUS]: StatusProperty,
+      [PropertyType.RELATION]: RelationProperty,
+      [PropertyType.FORMULA]: FormulaProperty,
+      [PropertyType.RATING]: RatingProperty,
+      [PropertyType.PROGRESS]: ProgressProperty,
+      [PropertyType.BUTTON]: ButtonProperty,
+    };
+    const targetObj = obj || object;
+    const Ctor = subTypeMap[targetObj?.type as string];
+    return Ctor ? Object.assign(new Ctor() as object, value) : value;
   })
   config?:
     | TextProperty

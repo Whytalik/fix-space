@@ -11,7 +11,7 @@ export class RecordFilterDto {
   @IsEnum(FilterField, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   field?: FilterField;
 
-  @ValidateIf((o: RecordFilterDto) => !o.field || o.field === FilterField.PROPERTY)
+  @ValidateIf((item: RecordFilterDto) => !item.field || item.field === FilterField.PROPERTY)
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   propertyId: string;
 

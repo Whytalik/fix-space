@@ -11,17 +11,8 @@ type NumberInputProps = {
   size?: "md" | "sm";
 };
 
-export function NumberInput({
-  value,
-  onChange,
-  placeholder = "0",
-  min,
-  max,
-  step,
-  disabled,
-  size = "md",
-}: NumberInputProps) {
-  const cls =
+export function NumberInput({ value, onChange, placeholder = "0", min, max, step, disabled, size = "md" }: NumberInputProps) {
+  const className =
     size === "sm"
       ? "field-input w-full !py-1 !text-xs font-mono tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
       : "field-input w-full font-mono tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden";
@@ -36,7 +27,7 @@ export function NumberInput({
       max={max}
       step={step}
       disabled={disabled}
-      className={cls}
+      className={className}
     />
   );
 }

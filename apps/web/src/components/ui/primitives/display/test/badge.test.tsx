@@ -54,7 +54,7 @@ describe("StatusDot", () => {
     const { container, rerender } = render(<StatusDot variant="success" label="Active" />);
     let dot = container.querySelector(".rounded-full");
     let text = screen.getByText("Active");
-    
+
     expect(dot).toHaveClass("bg-success");
     expect(text).toHaveClass("text-success");
 

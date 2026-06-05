@@ -1,14 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseInterceptors } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
-import {
-  DevVerifyUserDto,
-  ForgotPasswordDto,
-  LoginUserDto,
-  RegisterUserDto,
-  ResetPasswordDto,
-  VerifyEmailDto,
-} from "@fixspace/domain";
+import { DevVerifyUserDto, ForgotPasswordDto, LoginUserDto, RegisterUserDto, ResetPasswordDto, VerifyEmailDto } from "@fixspace/domain";
 import { Request } from "express";
 import { AuthCookiesInterceptor } from "./interceptors/auth-cookies.interceptor";
 import { AuthService } from "./auth.service";

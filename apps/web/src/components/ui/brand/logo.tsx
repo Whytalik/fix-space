@@ -14,10 +14,7 @@ export function Logo({ size = 28, href, className, withText = true }: LogoProps)
   const content = withText ? (
     <>
       <LogoIcon size={size} />
-      <span
-        className="font-extrabold tracking-[-0.04em] leading-none text-ink"
-        style={{ fontSize: Math.round(size * 0.57) }}
-      >
+      <span className="font-extrabold tracking-[-0.04em] leading-none text-ink" style={{ fontSize: Math.round(size * 0.57) }}>
         FIX Space
       </span>
     </>

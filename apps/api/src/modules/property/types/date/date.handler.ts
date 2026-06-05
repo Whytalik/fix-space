@@ -3,14 +3,16 @@ import {
   DATA_FORMATS_VALUES,
   DataFormat,
   DEFAULT_DATE_PROPERTY,
+  FilterOperator,
+  OPERATORS_BY_PROPERTY_TYPE,
   PropertyType,
   TIME_FORMATS_VALUES,
   TimeFormat,
 } from "@fixspace/domain";
-import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
+import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
-export class DateHandler implements PropertyConfigHandler, PropertyValueHandler {
+export class DateHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.DATE;
 
   getDefaultConfig(): Record<string, unknown> {
@@ -70,5 +72,22 @@ export class DateHandler implements PropertyConfigHandler, PropertyValueHandler 
 
   getDefaultValue(config: Record<string, unknown>): unknown {
     return (config.defaultValue as string | null | undefined) ?? null;
+  }
+
+  isEmpty(value: unknown): boolean {
+    return value === null || value === undefined;
+  }
+
+  convertFrom(value: unknown, _fromType: PropertyType, _fromConfig: Record<string, unknown>, _toConfig: Record<string, unknown>): unknown {
+    if (value === null || value === undefined) return null;
+    if (typeof value === "string" || typeof value === "number") {
+      const parsedDate = new Date(value);
+      if (!Number.isNaN(parsedDate.getTime())) return parsedDate.toISOString();
+    }
+    return null;
+  }
+
+  getFilterOperators(): FilterOperator[] {
+    return OPERATORS_BY_PROPERTY_TYPE[this.type];
   }
 }

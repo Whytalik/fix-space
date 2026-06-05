@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/components/property-icon";
+import { PropertyIcon } from "@/features/property/property-icon";
 import {
   closestCenter,
   DndContext,
@@ -54,9 +54,7 @@ function SortableTableRow({ row, onToggleVisibility }: { row: TableRow; onToggle
 
       <PropertyIcon type={row.prop.type} size={14} className="text-ink-muted shrink-0" />
 
-      <span className={`flex-1 text-sm ${row.prop.isVisible === false ? "text-ink-muted" : "text-ink"}`}>
-        {row.prop.name}
-      </span>
+      <span className={`flex-1 text-sm ${row.prop.isVisible === false ? "text-ink-muted" : "text-ink"}`}>{row.prop.name}</span>
 
       {row.isPrimary && (
         <span className="text-tiny font-semibold uppercase tracking-widest text-ink-muted bg-surface border border-stroke rounded px-1.5 py-0.5 mr-1">
@@ -99,46 +97,46 @@ export function EditTableView({ properties, onPropertiesChange, onPropertyUpdate
     }));
   }, [properties]);
 
-  const primaryRow = rows.find((r) => r.isPrimary) ?? null;
-  const nonPrimaryRows = rows.filter((r) => !r.isPrimary);
+  const primaryRow = rows.find((row) => row.isPrimary) ?? null;
+  const nonPrimaryRows = rows.filter((row) => !row.isPrimary);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiveId(null);
     if (!over || active.id === over.id) return;
 
-    const oldIdx = nonPrimaryRows.findIndex((r) => r.id === String(active.id));
-    const newIdx = nonPrimaryRows.findIndex((r) => r.id === String(over.id));
+    const oldIdx = nonPrimaryRows.findIndex((row) => row.id === String(active.id));
+    const newIdx = nonPrimaryRows.findIndex((row) => row.id === String(over.id));
     if (oldIdx === -1 || newIdx === -1) return;
 
     const reordered = arrayMove(nonPrimaryRows, oldIdx, newIdx);
 
     const updatedProps: PropertyResponseDto[] = [
       ...(primaryRow ? [primaryRow.prop] : []),
-      ...reordered.map((r, i) => ({ ...r.prop, position: i + 1 })),
+      ...reordered.map((row, i) => ({ ...row.prop, position: i + 1 })),
     ];
 
     onPropertiesChange(updatedProps);
 
-    const origMap = new Map(properties.map((p) => [p.id, p]));
-    for (const p of updatedProps) {
-      const orig = origMap.get(p.id);
-      if (orig && orig.position !== p.position) {
-        onPropertyUpdate(p.id, { position: p.position });
+    const origMap = new Map(properties.map((prop) => [prop.id, prop]));
+    for (const prop of updatedProps) {
+      const orig = origMap.get(prop.id);
+      if (orig && orig.position !== prop.position) {
+        onPropertyUpdate(prop.id, { position: prop.position });
       }
     }
   }
 
   function handleToggleVisibility(propId: string) {
-    const prop = properties.find((p) => p.id === propId);
+    const prop = properties.find((property) => property.id === propId);
     if (!prop) return;
     const newVisible = prop.isVisible !== false ? false : true;
-    const updated = properties.map((p) => (p.id === propId ? { ...p, isVisible: newVisible } : p));
+    const updated = properties.map((property) => (property.id === propId ? { ...property, isVisible: newVisible } : property));
     onPropertiesChange(updated);
     onPropertyUpdate(propId, { isVisible: newVisible });
   }
 
-  const activeRow = nonPrimaryRows.find((r) => r.id === activeId) ?? null;
+  const activeRow = nonPrimaryRows.find((row) => row.id === activeId) ?? null;
 
   if (rows.length === 0) {
     return (
@@ -153,14 +151,12 @@ export function EditTableView({ properties, onPropertiesChange, onPropertyUpdate
       sensors={sensors}
       collisionDetection={closestCenter}
       modifiers={[verticalOnly]}
-      onDragStart={(e) => setActiveId(String(e.active.id))}
+      onDragStart={(event) => setActiveId(String(event.active.id))}
       onDragEnd={handleDragEnd}
     >
       <div className="rounded-lg border border-stroke overflow-hidden">
-        {primaryRow && (
-          <SortableTableRow row={primaryRow} onToggleVisibility={() => handleToggleVisibility(primaryRow.prop.id)} />
-        )}
-        <SortableContext items={nonPrimaryRows.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+        {primaryRow && <SortableTableRow row={primaryRow} onToggleVisibility={() => handleToggleVisibility(primaryRow.prop.id)} />}
+        <SortableContext items={nonPrimaryRows.map((row) => row.id)} strategy={verticalListSortingStrategy}>
           {nonPrimaryRows.map((row) => (
             <SortableTableRow key={row.id} row={row} onToggleVisibility={() => handleToggleVisibility(row.prop.id)} />
           ))}

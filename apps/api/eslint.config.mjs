@@ -14,6 +14,6 @@ export default [
     },
   },
   {
-    ignores: ['.prettierrc.mjs', 'eslint.config.mjs'],
+    ignores: ['.prettierrc.mjs', 'eslint.config.mjs', 'src/modules/_disabled/**/*'],
   },
 ];

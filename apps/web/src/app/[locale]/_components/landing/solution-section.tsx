@@ -24,9 +24,7 @@ export function SolutionSection() {
             </div>
             <div>
               <h3 className="type-landing-h2">FIX Space</h3>
-              <p className="type-landing-eyebrow mt-0.5">
-                Purpose-built & flexible
-              </p>
+              <p className="type-landing-eyebrow mt-0.5">Purpose-built & flexible</p>
             </div>
           </div>
 

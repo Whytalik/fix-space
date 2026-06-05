@@ -28,6 +28,7 @@
   "SPACE_NOT_FOUND": "Space not found",
   "DATABASE_NOT_FOUND": "Database not found",
   "DATABASE_NOT_FOUND_ID": "Database with id {id} not found",
+  "CANNOT_DELETE_PRESET_DATABASE": "Cannot delete system database",
   "SECTION_NOT_FOUND": "Section not found in this space",
   "PROPERTY_NOT_FOUND": "Property not found",
   "PROPERTY_NOT_FOUND_ID": "Property with id {id} not found",
@@ -52,5 +53,16 @@
   "QUERY_VALIDATION_FAILED": "Query validation failed",
   "NOT_FOUND": "Resource not found",
   "QUERY_LIMIT_EXCEEDED": "Database query limit exceeded",
-  "INTERNAL_ERROR": "Internal server error"
+  "INTERNAL_ERROR": "Internal server error",
+  "RECORD_NOT_FOUND": "Record not found",
+  "RECORD_NOT_FOUND_ID": "Record with id {id} not found",
+  "PROPERTY_VALUE_NOT_FOUND_ID": "PropertyValue with id {id} not found",
+  "INVALID_PROPERTY_VALUE": "Invalid value for property type {type}: {errors}",
+  "SECTION_NOT_FOUND_ID": "Section with id {id} not found",
+  "SECTION_NOT_IN_SPACE": "Section does not belong to this space",
+  "SECTION_NAME_TAKEN": "Section with this name already exists in this space",
+  "SECTION_CREATE_REQUIRES_DATA": "CREATE operation requires \"create\" field with section data",
+  "SECTION_OPERATION_REQUIRES_ID": "Operation requires \"id\" field",
+  "PROPERTY_TYPE_NOT_REGISTERED": "No handler registered for property type: {type}",
+  "PROPERTY_VALUE_REQUIRED": "Property \"{name}\" is required and cannot be empty"
 }

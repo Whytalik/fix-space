@@ -18,19 +18,19 @@ const PRISMA_ERROR_MAP: Record<string, { status: number; i18nKey: string }> = {
 };
 
 function colorMethod(method: string): string {
-  const m = method.toUpperCase();
-  switch (m) {
+  const uppercaseMethod = method.toUpperCase();
+  switch (uppercaseMethod) {
     case "GET":
-      return `\x1b[32m${m}\x1b[0m`;
+      return `\x1b[32m${uppercaseMethod}\x1b[0m`;
     case "POST":
-      return `\x1b[33m${m}\x1b[0m`;
+      return `\x1b[33m${uppercaseMethod}\x1b[0m`;
     case "PUT":
     case "PATCH":
-      return `\x1b[34m${m}\x1b[0m`;
+      return `\x1b[34m${uppercaseMethod}\x1b[0m`;
     case "DELETE":
-      return `\x1b[31m${m}\x1b[0m`;
+      return `\x1b[31m${uppercaseMethod}\x1b[0m`;
     default:
-      return `\x1b[36m${m}\x1b[0m`;
+      return `\x1b[36m${uppercaseMethod}\x1b[0m`;
   }
 }
 
@@ -101,9 +101,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       if (mapped) {
         status = mapped.status;
         message = t(mapped.i18nKey);
-        this.logger.warn(
-          `\x1b[33m✖\x1b[0m  [\x1b[31m${errorType}\x1b[0m] ${prismaCode} | [${colorMethod(method)}] ${url} | ${message}`,
-        );
+        this.logger.warn(`\x1b[33m✖\x1b[0m  [\x1b[31m${errorType}\x1b[0m] ${prismaCode} | [${colorMethod(method)}] ${url} | ${message}`);
       } else {
         status = HttpStatus.INTERNAL_SERVER_ERROR;
         message = t("errors.INTERNAL_ERROR");

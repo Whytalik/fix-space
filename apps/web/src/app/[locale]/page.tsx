@@ -1,5 +1,5 @@
 import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header/header";
+import { Header } from "@/components/layout/header/landing/header";
 import { getMeServer } from "@/lib/auth-server";
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
@@ -15,12 +15,8 @@ import { LandingSection } from "./_components/landing/landing-section";
 import { SolutionSection } from "./_components/landing/solution-section";
 import { SpecializedSection } from "./_components/landing/specialized-section";
 
-const TemplatesSection = dynamic(() =>
-  import("./_components/landing/templates-section").then((mod) => mod.TemplatesSection),
-);
-const HowItWorksSection = dynamic(() =>
-  import("./_components/landing/how-it-works-section").then((mod) => mod.HowItWorksSection),
-);
+const TemplatesSection = dynamic(() => import("./_components/landing/templates-section").then((mod) => mod.TemplatesSection));
+const HowItWorksSection = dynamic(() => import("./_components/landing/how-it-works-section").then((mod) => mod.HowItWorksSection));
 const ImportSection = dynamic(() => import("./_components/landing/import-section").then((mod) => mod.ImportSection));
 const FaqSection = dynamic(() => import("./_components/landing/faq-section").then((mod) => mod.FaqSection));
 const CtaSection = dynamic(() => import("./_components/landing/cta-section").then((mod) => mod.CtaSection));

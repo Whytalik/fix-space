@@ -1,14 +1,18 @@
 import { Module } from "@nestjs/common";
 import { PropertyController } from "./property.controller";
-import { PropertyRepository } from "./property.repository";
+import { PropertyRepository } from "./repositories/property.repository";
 import { PropertyService } from "./property.service";
 import {
+  ButtonHandler,
   CheckboxHandler,
   DateHandler,
+  DurationHandler,
   FormulaHandler,
   NumberHandler,
   PROPERTY_TYPE_HANDLERS,
+  ProgressHandler,
   PropertyTypeRegistry,
+  RatingHandler,
   RelationHandler,
   SelectHandler,
   StatusHandler,
@@ -20,10 +24,14 @@ const handlers = [
   NumberHandler,
   CheckboxHandler,
   DateHandler,
+  DurationHandler,
   SelectHandler,
   StatusHandler,
   RelationHandler,
   FormulaHandler,
+  RatingHandler,
+  ProgressHandler,
+  ButtonHandler,
 ];
 
 @Module({

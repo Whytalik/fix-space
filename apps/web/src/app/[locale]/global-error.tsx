@@ -22,9 +22,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <AlertTriangle size={40} className="text-error" />
 
           <div className="flex flex-col gap-2">
-            <h1 className="text-[clamp(28px,5vw,42px)] font-extrabold tracking-[-0.04em] text-ink leading-none">
-              {t("title")}
-            </h1>
+            <h1 className="text-[clamp(28px,5vw,42px)] font-extrabold tracking-[-0.04em] text-ink leading-none">{t("title")}</h1>
             <p className="text-sm text-ink-secondary max-w-72 leading-relaxed">{t("description")}</p>
             {error.digest && <p className="text-xs text-ink-muted mt-2">Digest: {error.digest}</p>}
           </div>

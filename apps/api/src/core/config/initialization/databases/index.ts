@@ -1,0 +1,9 @@
+export { tradingJournalProperties } from "./trading-journal.config";
+export { dailyRoutineProperties } from "./daily-routine.config";
+export { notesProperties } from "./notes.config";
+export { mistakesProperties } from "./mistakes.config";
+export { accountsProperties } from "./accounts.config";
+export { operationsProperties } from "./operations.config";
+export { tradingSystemProperties } from "./trading-system.config";
+export { routineLibraryProperties } from "./routine-library.config";
+export { performanceReviewProperties } from "./performance-review.config";

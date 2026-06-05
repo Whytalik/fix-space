@@ -1,0 +1,52 @@
+{
+  "PrivacyPolicy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: June 4, 2026",
+    "introduction": "We value your privacy. This Policy explains how FIX Space collects, uses, and protects your data.",
+    "dataCollection": {
+      "title": "1. Data Collection",
+      "description": "We collect the following types of data:",
+      "items": [
+        "Account data: Email and name during registration or via Google OAuth.",
+        "Workspace data: Databases, records, and automation configurations created by you.",
+        "Integrations: Your API keys (Binance, Bybit, etc.) are stored exclusively in encrypted form."
+      ]
+    },
+    "security": {
+      "title": "2. Security and Protection",
+      "description": "Your data is protected using modern standards:",
+      "items": [
+        "Password hashing using the bcrypt algorithm.",
+        "Authentication via JWT (JSON Web Tokens) in secure HttpOnly cookies.",
+        "Complete data isolation between different workspaces."
+      ]
+    },
+    "rights": {
+      "title": "3. Your Rights (GDPR)",
+      "description": "You have the right to access, correct, or delete your personal data at any time through profile settings or by contacting us."
+    }
+  },
+  "TermsOfService": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: June 4, 2026",
+    "agreement": "By using FIX Space, you agree to these Terms.",
+    "usageLimits": {
+      "title": "1. Usage Limits",
+      "description": "The platform has the following limits to ensure stability:",
+      "items": [
+        "Up to 5 workspaces per account.",
+        "Up to 5 automations per database.",
+        "Maximum size for CSV import file — 25 MB."
+      ]
+    },
+    "disclaimer": {
+      "title": "2. Disclaimer",
+      "description": "FIX Space is a diploma project. The platform is provided on an 'as is' basis. We are not responsible for any financial losses or data loss during the use of the service."
+    }
+  },
+  "Footer": {
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  }
+}

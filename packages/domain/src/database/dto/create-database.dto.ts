@@ -22,21 +22,25 @@ import { DatabaseConfigDto } from "./database-config.dto";
 export type DatabaseType =
   | "trading-journal"
   | "daily-routine"
+  | "routine-library"
   | "notes"
   | "mistakes"
   | "accounts"
   | "operations"
   | "trading-system"
+  | "performance-review"
   | "custom";
 
 export const DATABASE_TYPES: DatabaseType[] = [
   "trading-journal",
   "daily-routine",
+  "routine-library",
   "notes",
   "mistakes",
   "accounts",
   "operations",
   "trading-system",
+  "performance-review",
   "custom",
 ];
 
@@ -82,6 +86,10 @@ export class CreateDatabaseDto {
   @Min(1, { message: i18nValidationMessage<I18nTranslations>("validation.MIN") })
   @Max(100, { message: i18nValidationMessage<I18nTranslations>("validation.MAX") })
   recordLimit?: number;
+
+  @IsOptional()
+  @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
+  isPreset?: boolean;
 
   @IsOptional()
   @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })

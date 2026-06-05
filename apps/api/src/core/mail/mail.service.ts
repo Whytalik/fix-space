@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as nodemailer from "nodemailer";
 import { Transporter } from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { Resend } from "resend";
 import { AppLogger } from "../../common/logger/app-logger.service";
 import { t } from "../../common/utils/i18n.helper";
@@ -36,11 +37,9 @@ export class MailService implements OnModuleInit {
       return;
     }
 
-    // Default to SMTP (Nodemailer) for development or if Resend is not configured
     const smtpHost = this.configService.get<string>("SMTP_HOST");
 
     if (!smtpHost) {
-      // Development mode: use Ethereal test account
       this.logger.log("No SMTP_HOST or RESEND_API_KEY configured, creating Ethereal test account");
       const testAccount = await nodemailer.createTestAccount();
 
@@ -54,11 +53,8 @@ export class MailService implements OnModuleInit {
         },
       });
 
-      this.logger.log(
-        `Ethereal test account created: ${testAccount.user} (emails will be captured at https://ethereal.email)`,
-      );
+      this.logger.log(`Ethereal test account created: ${testAccount.user} (emails will be captured at https://ethereal.email)`);
     } else {
-      // Production fallback or custom SMTP
       this.transporter = nodemailer.createTransport({
         host: smtpHost,
         port: this.configService.get<number>("SMTP_PORT", 587),
@@ -229,8 +225,7 @@ export class MailService implements OnModuleInit {
         this.logger.log(`Verification email sent to ${to} via SMTP`);
 
         if (!this.configService.get("SMTP_HOST")) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const previewUrl = nodemailer.getTestMessageUrl(info as any);
+          const previewUrl = nodemailer.getTestMessageUrl(info as SMTPTransport.SentMessageInfo);
           this.logger.log(`Ethereal email preview: ${previewUrl || "Preview URL not available"}`);
         }
       } catch (err) {
@@ -282,8 +277,7 @@ export class MailService implements OnModuleInit {
         this.logger.log(`Password reset email sent to ${to} via SMTP`);
 
         if (!this.configService.get("SMTP_HOST")) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          const previewUrl = nodemailer.getTestMessageUrl(info as any);
+          const previewUrl = nodemailer.getTestMessageUrl(info as SMTPTransport.SentMessageInfo);
           this.logger.log(`Ethereal email preview: ${previewUrl || "Preview URL not available"}`);
         }
       } catch (err) {

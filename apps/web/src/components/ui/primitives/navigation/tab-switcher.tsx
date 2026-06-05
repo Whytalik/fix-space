@@ -13,12 +13,7 @@ type TabSwitcherProps<T extends string = string> = {
   orientation?: "horizontal" | "vertical";
 };
 
-export function TabSwitcher<T extends string = string>({
-  items,
-  active,
-  onChange,
-  orientation = "horizontal",
-}: TabSwitcherProps<T>) {
+export function TabSwitcher<T extends string = string>({ items, active, onChange, orientation = "horizontal" }: TabSwitcherProps<T>) {
   const isVertical = orientation === "vertical";
 
   return (

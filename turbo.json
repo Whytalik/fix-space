@@ -18,6 +18,8 @@
     "CORS_ORIGIN",
     "APP_URL",
     "COOKIE_DOMAIN",
+    "COOKIE_SECURE",
+    "INTERNAL_API_URL",
     "MAIL_FROM",
     "SPACE_NAME_TEMPLATE",
     "VERIFICATION_TOKEN_EXPIRATION_HOURS",
@@ -32,7 +34,11 @@
     "PGDATA",
     "SSL_CERT_DAYS",
     "RAILWAY_DEPLOYMENT_DRAINING_SECONDS",
-    "CI"
+    "CI",
+    "CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET",
+    "CLOUDINARY_AVATAR_FOLDER"
   ],
 
   "tasks": {
@@ -59,7 +65,7 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
+      "outputs": []
     },
     "test:e2e": {
       "dependsOn": ["^build"],

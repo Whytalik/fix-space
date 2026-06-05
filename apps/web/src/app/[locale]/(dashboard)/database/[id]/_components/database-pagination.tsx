@@ -31,12 +31,7 @@ export function DatabasePagination() {
         <div className="flex items-center gap-1.5">
           <span className="text-ink-muted">{t("rowsPerPage")}</span>
           <div className="w-20">
-            <Combobox
-              options={PAGE_SIZE_OPTIONS}
-              value={String(pageSize)}
-              onChange={(v) => setPageSize(Number(v))}
-              placement="top"
-            />
+            <Combobox options={PAGE_SIZE_OPTIONS} value={String(pageSize)} onChange={(v) => setPageSize(Number(v))} placement="top" />
           </div>
         </div>
 

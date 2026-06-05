@@ -1,9 +1,17 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_SELECT_PROPERTY, PropertyType, SelectCategory, SelectOption, SelectProperty } from "@fixspace/domain";
-import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
+import {
+  DEFAULT_SELECT_PROPERTY,
+  FilterOperator,
+  OPERATORS_BY_PROPERTY_TYPE,
+  PropertyType,
+  SelectCategory,
+  SelectOption,
+  SelectProperty,
+} from "@fixspace/domain";
+import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
-export class SelectHandler implements PropertyConfigHandler, PropertyValueHandler {
+export class SelectHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.SELECT;
 
   private parseConfig(config: Record<string, unknown>): SelectProperty {
@@ -35,23 +43,13 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
           } else {
             for (const rawOption of category.options as unknown[]) {
               if (typeof rawOption === "string") continue; // backward compat
-              if (
-                typeof rawOption !== "object" ||
-                rawOption === null ||
-                typeof (rawOption as SelectOption).value !== "string"
-              ) {
+              if (typeof rawOption !== "object" || rawOption === null || typeof (rawOption as SelectOption).value !== "string") {
                 errors.push("each option must be an object with a string value");
               } else {
-                if (
-                  (rawOption as SelectOption).color !== undefined &&
-                  typeof (rawOption as SelectOption).color !== "string"
-                ) {
+                if ((rawOption as SelectOption).color !== undefined && typeof (rawOption as SelectOption).color !== "string") {
                   errors.push("option color must be a string");
                 }
-                if (
-                  (rawOption as SelectOption).icon !== undefined &&
-                  typeof (rawOption as SelectOption).icon !== "string"
-                ) {
+                if ((rawOption as SelectOption).icon !== undefined && typeof (rawOption as SelectOption).icon !== "string") {
                   errors.push("option icon must be a string");
                 }
               }
@@ -67,23 +65,21 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
   validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
     if (value === null) return null;
 
-    const { categories, isMultiSelect: isMulti } = this.parseConfig(config);
+    const { categories, isMultiSelect } = this.parseConfig(config);
 
     const allOptions = categories
-      ? categories.flatMap((category) =>
-          category.options.map((option) => (typeof option === "string" ? option : option.value)),
-        )
+      ? categories.flatMap((category) => category.options.map((option) => (typeof option === "string" ? option : option.value)))
       : [];
 
-    function extractLabel(v: unknown): string | null {
-      if (typeof v === "string") return v;
-      if (typeof v === "object" && v !== null && typeof (v as Record<string, unknown>).label === "string") {
-        return (v as Record<string, unknown>).label as string;
+    function extractLabel(value: unknown): string | null {
+      if (typeof value === "string") return value;
+      if (typeof value === "object" && value !== null && typeof (value as Record<string, unknown>).label === "string") {
+        return (value as Record<string, unknown>).label as string;
       }
       return null;
     }
 
-    if (isMulti) {
+    if (isMultiSelect) {
       if (!Array.isArray(value)) {
         return ["Multi-select value must be an array or null"];
       }
@@ -126,5 +122,37 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
 
   getDefaultValue(config: Record<string, unknown>): unknown {
     return this.parseConfig(config).isMultiSelect ? [] : null;
+  }
+
+  isEmpty(value: unknown): boolean {
+    return value === null || value === undefined || (Array.isArray(value) && value.length === 0);
+  }
+
+  convertFrom(
+    value: unknown,
+    _fromType: PropertyType,
+    _fromConfig: Record<string, unknown>,
+    targetConfig: Record<string, unknown>,
+  ): unknown {
+    const { isMultiSelect, categories } = this.parseConfig(targetConfig);
+    const allOptions = categories
+      ? categories.flatMap((category) => category.options.map((option) => (typeof option === "string" ? option : option.value)))
+      : [];
+    const rawValue = Array.isArray(value) ? (value as unknown[])[0] : value;
+    let label: string | null = null;
+    if (typeof rawValue === "string") label = rawValue;
+    else if (typeof rawValue === "object" && rawValue !== null && typeof (rawValue as Record<string, unknown>).label === "string") {
+      label = (rawValue as Record<string, unknown>).label as string;
+    } else if (rawValue !== null && rawValue !== undefined) {
+      label = String(rawValue);
+    }
+    if (label === null || (allOptions.length > 0 && !allOptions.includes(label))) {
+      return this.getDefaultValue(targetConfig);
+    }
+    return isMultiSelect ? [label] : label;
+  }
+
+  getFilterOperators(): FilterOperator[] {
+    return OPERATORS_BY_PROPERTY_TYPE[this.type];
   }
 }

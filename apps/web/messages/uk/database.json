@@ -98,7 +98,8 @@
     "delete": "Видалити",
     "deleteDatabase": "Видалити базу даних",
     "deleteDatabaseDesc": "Цю базу даних та всі її записи буде видалено назавжди.",
-    "deleting": "Видалення…"
+    "deleting": "Видалення…",
+    "preset": "Пресет"
   },
   "AddDatabaseModal": {
     "addDatabase": "Нова база даних",
@@ -116,7 +117,8 @@
   },
   "DatabaseHeader": {
     "edit": "Редагувати",
-    "addItem": "Додати запис"
+    "addItem": "Додати запис",
+    "preset": "Пресет"
   },
   "TemplatePickerModal": {
     "chooseTemplate": "Вибрати шаблон",

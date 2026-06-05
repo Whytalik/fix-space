@@ -5,5 +5,7 @@ export const DEFAULT_NUMBER_PROPERTY = {
   defaultValue: 0,
   format: "float" as NumberFormat,
   decimalPlaces: 2,
-  currencySymbol: "$",
+  currencySymbol: "",
+  prefix: "",
+  suffix: "",
 };

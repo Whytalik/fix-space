@@ -1,15 +1,16 @@
 "use client";
 
-import { AuthPageShell } from "@/features/auth/components/auth-page-shell";
+import { AuthPageShell } from "@/features/auth/auth-page-shell";
 import { FormErrors } from "@/components/ui/form/form-errors";
 import { FormField } from "@/components/ui/form/form-field";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { login } from "@/lib/api/auth";
 import { parseApiErrors } from "@/lib/api/client";
+import { storage } from "@/lib/storage";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Header } from "@/components/layout/header/header";
+import { Header } from "@/components/layout/header/landing/header";
 import { Footer } from "@/components/layout/footer";
 
 export default function LoginPage() {
@@ -24,7 +25,8 @@ export default function LoginPage() {
     setErrors([]);
     setLoading(true);
     try {
-      await login({ email, password });
+      const result = await login({ email, password });
+      storage.setToken(result.accessToken);
       window.location.href = "/";
     } catch (err) {
       setErrors(parseApiErrors(err));
@@ -66,10 +68,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t("placeholderPassword")}
               />
-              <Link
-                href="/forgot-password"
-                className="self-end text-xs text-ink-secondary hover:text-accent transition-colors"
-              >
+              <Link href="/forgot-password" className="self-end text-xs text-ink-secondary hover:text-accent transition-colors">
                 {t("forgotPassword")}
               </Link>
             </div>

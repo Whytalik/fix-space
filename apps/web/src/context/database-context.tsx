@@ -1,9 +1,11 @@
 "use client";
 
-import { ApiError } from "@/lib/api/client";
-import { getProperties } from "@/lib/api/property";
+import { usePropertiesQuery } from "@/hooks/usePropertiesQuery";
+import { useRecordsQuery } from "@/hooks/useRecordsQuery";
+import { queryKeys } from "@/lib/api/query-keys";
+import { useQueryClient } from "@tanstack/react-query";
 import { getRecords } from "@/lib/api/record";
-import { clearCached, getCached, setCached } from "@/lib/cache";
+import { parseApiError } from "@/lib/api/client";
 import {
   loadFilterLogic,
   loadFilters,
@@ -13,7 +15,7 @@ import {
   saveFilters,
   saveSorts,
   saveWrapCells,
-} from "@/lib/utils/db-view-storage";
+} from "@/utils/db-view-storage";
 import type {
   DatabaseResponseDto,
   PropertyResponseDto,
@@ -34,12 +36,7 @@ import { useParams } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useAppContext } from "./app-context";
 
-const PROPS_TTL = 5 * 60 * 1000;
-const RECS_TTL = 60 * 1000;
 const DEFAULT_PAGE_SIZE = 25;
-
-const propsKey = (id: string) => `db-props:${id}`;
-const recsKey = (id: string) => `db-recs:${id}`;
 
 interface DatabaseContextValue {
   database: DatabaseResponseDto | null;
@@ -128,18 +125,18 @@ async function fetchRelatedRecords(props: PropertyResponseDto[]): Promise<Record
 export function DatabaseProvider({ children, databaseId: propId }: { children: React.ReactNode; databaseId?: string }) {
   const params = useParams<{ id?: string }>();
   const id = propId ?? params.id ?? "";
-  const { databases, isLoading: appLoading, clearSession, setCurrentDatabaseId } = useAppContext();
+  const { databases, isLoading: appLoading, updateDatabaseInSpace, setCurrentDatabaseId } = useAppContext();
 
-  const spaceDatabase = databases.find((d) => d.id === id) ?? null;
+  const queryClient = useQueryClient();
 
-  const [databaseOverride, setDatabaseOverride] = useState<DatabaseResponseDto | null>(null);
-  const database = databaseOverride ?? spaceDatabase;
+  const database = useMemo(() => databases.find((d) => d.id === id) ?? null, [databases, id]);
 
-  const [properties, setProperties] = useState<PropertyResponseDto[]>([]);
-  const [allRecords, setAllRecords] = useState<RecordResponseDto[]>([]);
+  const { data: properties = [], isLoading: isPropsLoading, error: propsError } = usePropertiesQuery(id, { enabled: !appLoading && !!id });
+
+  const { data: allRecords = [], isLoading: isRecsLoading, error: recsError } = useRecordsQuery(id, { enabled: !appLoading && !!id });
+
   const [relatedRecordsMap, setRelatedRecordsMap] = useState<Record<string, RecordResponseDto[]>>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isRelatedLoading, setIsRelatedLoading] = useState(false);
 
   const [search, setSearch] = useState("");
   const [sorts, setSortsState] = useState<RecordSortDto[]>([]);
@@ -166,6 +163,18 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
     setSearch("");
     setGroup(null);
   }, [id]);
+
+  useEffect(() => {
+    if (properties.length === 0) {
+      setRelatedRecordsMap({});
+      return;
+    }
+    setIsRelatedLoading(true);
+    fetchRelatedRecords(properties)
+      .then(setRelatedRecordsMap)
+      .catch(() => {})
+      .finally(() => setIsRelatedLoading(false));
+  }, [properties]);
 
   const setSorts = useCallback(
     (value: RecordSortDto[]) => {
@@ -250,60 +259,30 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
   }, [filteredRecords, group]);
 
   const invalidateRecords = useCallback(() => {
-    clearCached(recsKey(id));
-  }, [id]);
+    queryClient.invalidateQueries({ queryKey: queryKeys.records.all(id) });
+  }, [id, queryClient]);
 
   const refresh = useCallback(() => {
-    if (appLoading || !id) return;
+    queryClient.invalidateQueries({ queryKey: queryKeys.properties.all(id) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.records.all(id) });
+  }, [id, queryClient]);
 
-    setIsLoading(true);
-    setError(null);
+  const applyDatabaseUpdate = useCallback(
+    (updated: DatabaseResponseDto) => {
+      updateDatabaseInSpace(updated);
+    },
+    [updateDatabaseInSpace],
+  );
 
-    Promise.all([getProperties(id), getRecords(id)])
-      .then(([props, recs]) => {
-        setProperties(props);
-        setAllRecords(recs);
-        setCached(propsKey(id), props, PROPS_TTL);
-        setCached(recsKey(id), recs, RECS_TTL);
-        return fetchRelatedRecords(props);
-      })
-      .then((map) => setRelatedRecordsMap(map))
-      .catch((err: unknown) => {
-        if (err instanceof ApiError) {
-          if (err.status === 401) {
-            clearSession();
-            return;
-          }
-          setError(err.messages[0] ?? "Failed to load database content.");
-        } else {
-          setError("Failed to load database content.");
-        }
-      })
-      .finally(() => setIsLoading(false));
-  }, [id, appLoading, clearSession]);
+  const applyPropertiesUpdate = useCallback(
+    (updated: PropertyResponseDto[]) => {
+      queryClient.setQueryData(queryKeys.properties.all(id), updated);
+    },
+    [id, queryClient],
+  );
 
-  useEffect(() => {
-    setDatabaseOverride(null);
-    setProperties([]);
-    setAllRecords([]);
-    setIsLoading(true);
-    setError(null);
-
-    if (appLoading || !id) return;
-
-    const cachedProps = getCached<PropertyResponseDto[]>(propsKey(id));
-    const cachedRecs = getCached<RecordResponseDto[]>(recsKey(id));
-
-    if (cachedProps && cachedRecs) {
-      setProperties(cachedProps);
-      setAllRecords(cachedRecs);
-      fetchRelatedRecords(cachedProps).then(setRelatedRecordsMap);
-      setIsLoading(false);
-      return;
-    }
-
-    refresh();
-  }, [id, appLoading, refresh]);
+  const isLoading = appLoading || isPropsLoading || isRecsLoading || isRelatedLoading;
+  const error = propsError ? parseApiError(propsError) : recsError ? parseApiError(recsError) : null;
 
   return (
     <DatabaseContext.Provider
@@ -328,8 +307,8 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
         wrapCells,
         refresh,
         invalidateRecords,
-        applyDatabaseUpdate: setDatabaseOverride,
-        applyPropertiesUpdate: setProperties,
+        applyDatabaseUpdate,
+        applyPropertiesUpdate,
         setPage,
         setPageSize,
         setSearch: handleSetSearch,

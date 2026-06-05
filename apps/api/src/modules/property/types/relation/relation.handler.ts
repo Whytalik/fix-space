@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_RELATION_PROPERTY, PropertyType, RelationProperty } from "@fixspace/domain";
-import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
+import { DEFAULT_RELATION_PROPERTY, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, PropertyType, RelationProperty } from "@fixspace/domain";
+import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
-export class RelationHandler implements PropertyConfigHandler, PropertyValueHandler {
+export class RelationHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.RELATION;
 
   private parseConfig(config: Record<string, unknown>): RelationProperty {
@@ -61,5 +61,22 @@ export class RelationHandler implements PropertyConfigHandler, PropertyValueHand
 
   getDefaultValue(config: Record<string, unknown>): unknown {
     return this.parseConfig(config).multiple ? [] : null;
+  }
+
+  isEmpty(value: unknown): boolean {
+    return value === null || value === undefined || (Array.isArray(value) && value.length === 0);
+  }
+
+  convertFrom(
+    _value: unknown,
+    _fromType: PropertyType,
+    _fromConfig: Record<string, unknown>,
+    targetConfig: Record<string, unknown>,
+  ): unknown {
+    return this.getDefaultValue(targetConfig);
+  }
+
+  getFilterOperators(): FilterOperator[] {
+    return OPERATORS_BY_PROPERTY_TYPE[this.type];
   }
 }

@@ -12,19 +12,9 @@ type TextInputProps = {
   hint?: string;
 };
 
-export function TextInput({
-  value,
-  onChange,
-  placeholder,
-  multiline,
-  rows = 3,
-  disabled,
-  size = "md",
-  error,
-  hint,
-}: TextInputProps) {
+export function TextInput({ value, onChange, placeholder, multiline, rows = 3, disabled, size = "md", error, hint }: TextInputProps) {
   const base = size === "sm" ? "field-input !py-1 !text-xs" : "field-input";
-  const cls = `${base}${error ? " !border-error" : ""}`;
+  const className = `${base}${error ? " !border-error" : ""}`;
 
   const input = multiline ? (
     <textarea
@@ -33,7 +23,7 @@ export function TextInput({
       placeholder={placeholder}
       rows={rows}
       disabled={disabled}
-      className={`${cls} resize-none`}
+      className={`${className} resize-none`}
     />
   ) : (
     <input
@@ -42,7 +32,7 @@ export function TextInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       disabled={disabled}
-      className={cls}
+      className={className}
     />
   );
 

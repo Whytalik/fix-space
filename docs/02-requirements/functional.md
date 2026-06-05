@@ -30,13 +30,17 @@
 
 ### ⚙️ Типи властивостей
 
-- [3.20 TEXT](./functional/property-types/3.20-text.md)
-- [3.21 NUMBER](./functional/property-types/3.21-number.md)
-- [3.22 DATE](./functional/property-types/3.22-date.md)
-- [3.23 CHECKBOX](./functional/property-types/3.23-checkbox.md)
-- [3.24 DURATION](./functional/property-types/3.24-duration.md)
-- [3.25 SELECT](./functional/property-types/3.25-select.md)
-- [3.26 STATUS](./functional/property-types/3.26-status.md)
-- [3.27 RELATION](./functional/property-types/3.27-relation.md)
-- [3.28 RATING](./functional/property-types/3.28-rating.md)
-- [3.29 PROGRESS](./functional/property-types/3.29-progress.md)
+| Тип      | Опис                                                                             | Специфікація                                         |
+| -------- | -------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| TEXT     | Текстове значення: простий рядок або форматований текст (rich text)              | [3.20](./functional/property-types/3.20-text.md)     |
+| NUMBER   | Числове значення з гнучким форматуванням (integer, float, currency, percentage)  | [3.21](./functional/property-types/3.21-number.md)   |
+| DATE     | Дата або дата з часом у форматі ISO 8601                                         | [3.22](./functional/property-types/3.22-date.md)     |
+| CHECKBOX | Булеве значення: відмічено / не відмічено                                        | [3.23](./functional/property-types/3.23-checkbox.md) |
+| DURATION | Тривалість як ціле число секунд                                                  | [3.24](./functional/property-types/3.24-duration.md) |
+| SELECT   | Один або кілька варіантів зі згрупованого списку                                 | [3.25](./functional/property-types/3.25-select.md)   |
+| STATUS   | Статус виконання з трьома семантичними категоріями (todo, in_progress, complete) | [3.26](./functional/property-types/3.26-status.md)   |
+| RELATION | Посилання на записи іншої бази даних                                             | [3.27](./functional/property-types/3.27-relation.md) |
+| RATING   | Числова оцінка у форматі зірок                                                   | [3.28](./functional/property-types/3.28-rating.md)   |
+| PROGRESS | Числовий прогрес у діапазоні, відображається як бар                              | [3.29](./functional/property-types/3.29-progress.md) |
+| FORMULA  | Автоматично обчислюване поле лише для читання                                    | [3.13](./functional/3.13-formulas.md)                |
+| BUTTON   | Тип дії без збереження значення; запускає операції над записом                   | [3.15](./functional/3.15-button.md)                  |

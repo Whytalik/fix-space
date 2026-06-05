@@ -13,6 +13,7 @@ export interface RequireOwnershipOptions {
   model: PrismaModelKey;
   param?: string;
   ownerField?: string;
+  ownerPath?: string[];
 }
 
 export const RequireOwnership = (options: RequireOwnershipOptions) => SetMetadata(REQUIRE_OWNERSHIP_KEY, options);

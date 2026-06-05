@@ -9,7 +9,7 @@ describe("CheckboxInput", () => {
     const checkbox = screen.getByRole("checkbox", { name: "Accept Terms" });
     expect(checkbox).toBeInTheDocument();
     expect(checkbox).toHaveAttribute("aria-checked", "false");
-    
+
     const checkIcon = checkbox.querySelector("svg");
     expect(checkIcon).not.toBeInTheDocument();
   });
