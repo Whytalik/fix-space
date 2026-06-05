@@ -5,7 +5,7 @@ import { parseApiErrors } from "@/lib/api/client";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Header } from "@/components/layout/header/header";
+import { Header } from "@/components/layout/header/landing/header";
 import { Footer } from "@/components/layout/footer";
 import { Card } from "@/components/ui/primitives/display/card";
 import { ResendVerificationForm } from "./_components/resend-verification-form";
@@ -29,7 +29,7 @@ function VerifyContent() {
     async function doVerify() {
       try {
         await verifyEmail(token!);
-        window.location.href = "/";
+        window.location.href = "/login";
       } catch (err) {
         const errors = parseApiErrors(err);
         setError(errors[0] || t("failedGeneric"));

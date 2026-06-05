@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthPageShell } from "@/features/auth/components/auth-page-shell";
+import { AuthPageShell } from "@/features/auth/auth-page-shell";
 import { FormErrors } from "@/components/ui/form/form-errors";
 import { FormField } from "@/components/ui/form/form-field";
 import { Button } from "@/components/ui/primitives/actions/button";

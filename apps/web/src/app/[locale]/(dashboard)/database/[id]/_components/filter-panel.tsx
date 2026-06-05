@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/components/property-icon";
+import { PropertyIcon } from "@/features/property/property-icon";
 import { Button } from "@/components/ui/primitives/actions/button";
 import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
@@ -8,11 +8,11 @@ import { useState } from "react";
 import { DateInput } from "@/components/ui/primitives/inputs/date-input";
 import { NumberInput } from "@/components/ui/primitives/inputs/number-input";
 import { TextInput } from "@/components/ui/primitives/inputs/text-input";
-import { StatusPropertyInput } from "@/features/property/components/inputs/status-property-input";
-import type { StatusPropertyOption } from "@/features/property/components/inputs/status-property-input";
+import { StatusPropertyInput } from "@/features/property/inputs/status-property-input";
+import type { StatusPropertyOption } from "@/features/property/inputs/status-property-input";
 import { useDatabaseContext } from "@/context/database-context";
 import type { RecordFilterDto } from "@fixspace/domain";
-import { FilterField, FilterLogic, FilterOperator, PropertyType } from "@fixspace/domain/enums";
+import { FilterField, FilterLogic, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, PropertyType } from "@fixspace/domain/enums";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -27,67 +27,26 @@ const MULTI_VALUE_OPERATORS = new Set([FilterOperator.IN, FilterOperator.NOT_IN]
 
 type OperatorDef = { value: FilterOperator; label: string };
 
-const OPERATORS_BY_TYPE: Record<string, { value: FilterOperator; label: string }[]> = {
-  [PropertyType.TEXT]: [
-    { value: FilterOperator.EQUALS, label: "operators.equals" },
-    { value: FilterOperator.NOT_EQUALS, label: "operators.notEquals" },
-    { value: FilterOperator.CONTAINS, label: "operators.contains" },
-    { value: FilterOperator.NOT_CONTAINS, label: "operators.notContains" },
-    { value: FilterOperator.STARTS_WITH, label: "operators.startsWith" },
-    { value: FilterOperator.ENDS_WITH, label: "operators.endsWith" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.NUMBER]: [
-    { value: FilterOperator.EQUALS, label: "operators.equals" },
-    { value: FilterOperator.NOT_EQUALS, label: "operators.notEquals" },
-    { value: FilterOperator.GREATER_THAN, label: "operators.greaterThan" },
-    { value: FilterOperator.LESS_THAN, label: "operators.lessThan" },
-    { value: FilterOperator.GREATER_THAN_OR_EQUAL, label: "operators.greaterThanOrEqual" },
-    { value: FilterOperator.LESS_THAN_OR_EQUAL, label: "operators.lessThanOrEqual" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.DATE]: [
-    { value: FilterOperator.EQUALS, label: "operators.on" },
-    { value: FilterOperator.BEFORE, label: "operators.before" },
-    { value: FilterOperator.AFTER, label: "operators.after" },
-    { value: FilterOperator.ON_OR_BEFORE, label: "operators.onOrBefore" },
-    { value: FilterOperator.ON_OR_AFTER, label: "operators.onOrAfter" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.CHECKBOX]: [
-    { value: FilterOperator.IS_CHECKED, label: "operators.isChecked" },
-    { value: FilterOperator.IS_UNCHECKED, label: "operators.isUnchecked" },
-  ],
-  [PropertyType.SELECT]: [
-    { value: FilterOperator.EQUALS, label: "operators.isExactly" },
-    { value: FilterOperator.NOT_EQUALS, label: "operators.isNotExactly" },
-    { value: FilterOperator.IN, label: "operators.isOneOf" },
-    { value: FilterOperator.NOT_IN, label: "operators.isNotOneOf" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.STATUS]: [
-    { value: FilterOperator.EQUALS, label: "operators.isExactly" },
-    { value: FilterOperator.NOT_EQUALS, label: "operators.isNotExactly" },
-    { value: FilterOperator.IN, label: "operators.isOneOf" },
-    { value: FilterOperator.NOT_IN, label: "operators.isNotOneOf" },
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-  [PropertyType.RELATION]: [
-    { value: FilterOperator.IS_EMPTY, label: "operators.isEmpty" },
-    { value: FilterOperator.IS_NOT_EMPTY, label: "operators.isNotEmpty" },
-  ],
-};
-
-function getOperators(type: string): OperatorDef[] {
-  return OPERATORS_BY_TYPE[type] ?? OPERATORS_BY_TYPE[PropertyType.TEXT] ?? [];
+function getOperatorLabel(operator: FilterOperator, type: PropertyType): string {
+  if (type === PropertyType.DATE && operator === FilterOperator.EQUALS) return "operators.on";
+  if (type === PropertyType.SELECT || type === PropertyType.STATUS) {
+    if (operator === FilterOperator.EQUALS) return "operators.isExactly";
+    if (operator === FilterOperator.NOT_EQUALS) return "operators.isNotExactly";
+    if (operator === FilterOperator.IN) return "operators.isOneOf";
+    if (operator === FilterOperator.NOT_IN) return "operators.isNotOneOf";
+  }
+  return `operators.${operator}`;
 }
 
-function defaultOperator(type: string): FilterOperator {
+function getOperators(type: PropertyType): OperatorDef[] {
+  const operators = OPERATORS_BY_PROPERTY_TYPE[type] || OPERATORS_BY_PROPERTY_TYPE[PropertyType.TEXT] || [];
+  return operators.map((op) => ({
+    value: op,
+    label: getOperatorLabel(op, type),
+  }));
+}
+
+function defaultOperator(type: PropertyType): FilterOperator {
   return getOperators(type)[0]?.value ?? FilterOperator.EQUALS;
 }
 
@@ -111,7 +70,7 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
 
   const isMeta = filter.field === FilterField.CREATED_AT || filter.field === FilterField.UPDATED_AT;
   const property = isMeta ? undefined : properties.find((p) => p.id === filter.propertyId);
-  const propType = isMeta ? PropertyType.DATE : ((property?.type as string) ?? PropertyType.TEXT);
+  const propType = isMeta ? PropertyType.DATE : ((property?.type as PropertyType) ?? PropertyType.TEXT);
   const operators = getOperators(propType).map((op) => ({ ...op, label: t(op.label as unknown as string) }));
   const noValue = NO_VALUE_OPERATORS.has(filter.operator);
   const isMulti = MULTI_VALUE_OPERATORS.has(filter.operator);
@@ -141,7 +100,7 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
     } else {
       const propId = val.slice(5);
       const newProp = properties.find((p) => p.id === propId);
-      const newType = (newProp?.type as string) ?? PropertyType.TEXT;
+      const newType = (newProp?.type as PropertyType) ?? PropertyType.TEXT;
       onUpdate(index, {
         field: undefined,
         propertyId: propId,
@@ -155,9 +114,9 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
   const selectOptions: ComboboxOption[] =
     propType === PropertyType.SELECT
       ? (
-          (
-            property?.config as { categories?: Array<{ options: Array<{ value: string }> }> } | null
-          )?.categories?.flatMap((c) => c.options) ?? []
+          (property?.config as { categories?: Array<{ options: Array<{ value: string }> }> } | null)?.categories?.flatMap(
+            (c) => c.options,
+          ) ?? []
         ).map((o) => ({ value: o.value, label: o.value }))
       : propType === PropertyType.STATUS
         ? (
@@ -171,9 +130,9 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
 
   const statusOptions: StatusPropertyOption[] =
     propType === PropertyType.STATUS
-      ? ((
-          property?.config as { categories?: Array<{ options: Array<{ name: string; color: string }> }> } | null
-        )?.categories?.flatMap((c) => c.options) ?? [])
+      ? ((property?.config as { categories?: Array<{ options: Array<{ name: string; color: string }> }> } | null)?.categories?.flatMap(
+          (c) => c.options,
+        ) ?? [])
       : [];
 
   return (
@@ -332,7 +291,7 @@ export function FilterPanel() {
     } else {
       const propId = val.slice(5);
       const prop = properties.find((p) => p.id === propId);
-      const propType = (prop?.type as string) ?? PropertyType.TEXT;
+      const propType = (prop?.type as PropertyType) ?? PropertyType.TEXT;
       newFilter = {
         field: undefined,
         propertyId: propId,
@@ -390,13 +349,7 @@ export function FilterPanel() {
           <div className="flex items-center gap-1.5">
             <span className="w-9 shrink-0" />
             <div className="w-40 shrink-0">
-              <Combobox
-                options={allOptions}
-                value=""
-                size="sm"
-                placeholder={t("selectProperty")}
-                onChange={confirmPendingFilter}
-              />
+              <Combobox options={allOptions} value="" size="sm" placeholder={t("selectProperty")} onChange={confirmPendingFilter} />
             </div>
             <button
               type="button"
@@ -409,13 +362,7 @@ export function FilterPanel() {
         )}
       </div>
 
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => setHasPendingRow(true)}
-        disabled={hasPendingRow}
-        className="mt-1 self-start"
-      >
+      <Button variant="secondary" size="sm" onClick={() => setHasPendingRow(true)} disabled={hasPendingRow} className="mt-1 self-start">
         + {t("addFilter")}
       </Button>
     </div>

@@ -1,14 +1,14 @@
 "use client";
 
 import { logout } from "@/lib/api/auth";
-import { useRouter } from "next/navigation";
+import { storage } from "@/lib/storage";
 import { useCallback } from "react";
 
 export function useLogout() {
-  const router = useRouter();
-
   return useCallback(async () => {
     await logout().catch(() => {});
-    router.push("/");
-  }, [router]);
+    storage.clearAuth();
+    storage.clearLastSpaceId();
+    window.location.href = "/login";
+  }, []);
 }

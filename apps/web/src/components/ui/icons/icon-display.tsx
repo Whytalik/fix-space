@@ -1,5 +1,6 @@
 "use client";
 
+import { CUSTOM_TRADING_ICONS } from "./trading-icons";
 import { icons, type LucideIcon } from "lucide-react";
 
 function toDisplayName(name: string): string {
@@ -10,18 +11,18 @@ function toDisplayName(name: string): string {
 }
 
 type IconEntry = { name: string; displayName: string; icon: LucideIcon };
-let _cache: IconEntry[] | null = null;
+let iconCache: IconEntry[] | null = null;
 
 export function getAllIcons(): IconEntry[] {
-  if (_cache) return _cache;
-  _cache = Object.entries(icons)
+  if (iconCache) return iconCache;
+  iconCache = Object.entries(icons)
     .map(([name, icon]) => ({
       name,
       displayName: toDisplayName(name),
       icon,
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-  return _cache;
+    .sort((left, right) => left.name.localeCompare(right.name));
+  return iconCache;
 }
 
 interface IconDisplayProps {
@@ -29,28 +30,39 @@ interface IconDisplayProps {
   size?: number;
 }
 
+const iconStyle = (size: number) =>
+  ({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: size,
+    height: size,
+    flexShrink: 0,
+  }) as const;
+
 export function IconDisplay({ value, size = 16 }: IconDisplayProps) {
   if (!value) return null;
-  if (value.startsWith("icon:")) {
-    const name = value.slice(5);
-    const entry = getAllIcons().find((i) => i.name === name);
-    if (!entry) return null;
-    const Icon = entry.icon;
+
+  if (value.startsWith("trading:")) {
+    const Icon = CUSTOM_TRADING_ICONS[value.slice(8)];
+    if (!Icon) return null;
     return (
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: size,
-          height: size,
-          flexShrink: 0,
-        }}
-      >
+      <span style={iconStyle(size)}>
         <Icon size={size} />
       </span>
     );
   }
+
+  if (value.startsWith("icon:")) {
+    const Icon = getAllIcons().find((entry) => entry.name === value.slice(5))?.icon;
+    if (!Icon) return null;
+    return (
+      <span style={iconStyle(size)}>
+        <Icon size={size} />
+      </span>
+    );
+  }
+
   return (
     <span
       style={{

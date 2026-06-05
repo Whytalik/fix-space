@@ -52,11 +52,7 @@ export function Toast({ message, variant = "info", onDismiss }: ToastProps) {
       } ${VARIANT_STYLES[variant]}`}
     >
       <span>{message}</span>
-      <button
-        type="button"
-        onClick={handleDismiss}
-        className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
-      >
+      <button type="button" onClick={handleDismiss} className="shrink-0 opacity-60 hover:opacity-100 transition-opacity">
         <X size={14} />
       </button>
     </div>,

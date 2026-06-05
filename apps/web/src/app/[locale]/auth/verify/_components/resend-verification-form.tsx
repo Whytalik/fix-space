@@ -33,9 +33,7 @@ export function ResendVerificationForm({ initialEmail = "" }: ResendVerification
   }
 
   if (success) {
-    return (
-      <div className="p-4 text-sm rounded-md bg-success-bg border border-success text-ink">{t("resendSuccess")}</div>
-    );
+    return <div className="p-4 text-sm rounded-md bg-success-bg border border-success text-ink">{t("resendSuccess")}</div>;
   }
 
   return (

@@ -1,15 +1,5 @@
 import { Card } from "@/components/ui/primitives/display/card";
-import {
-  AlertTriangle,
-  ArrowLeftRight,
-  BookOpen,
-  CalendarClock,
-  CalendarRange,
-  FileText,
-  GitBranch,
-  Library,
-  Wallet,
-} from "lucide-react";
+import { AlertTriangle, ArrowLeftRight, BookOpen, CalendarClock, CalendarRange, FileText, GitBranch, Library, Wallet } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { SectionHeader } from "./section-header";
 

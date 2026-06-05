@@ -22,7 +22,7 @@ export function RegisterSuccess({ email }: RegisterSuccessProps) {
     setDevVerifying(true);
     try {
       await devVerifyUser(email);
-      window.location.href = "/";
+      window.location.href = "/login";
     } finally {
       setDevVerifying(false);
     }

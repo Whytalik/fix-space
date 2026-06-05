@@ -29,7 +29,11 @@
     "logIn": "Увійти",
     "getStarted": "Почати",
     "profile": "Профіль",
-    "logOut": "Вийти"
+    "settings": "Налаштування",
+    "logOut": "Вийти",
+    "search": "Пошук",
+    "notifications": "Сповіщення",
+    "leaveFeedback": "Залишити відгук"
   },
   "Sidebar": {
     "search": "Пошук",
@@ -157,5 +161,12 @@
     "at": "о",
     "closed": "Закрито",
     "loadingDate": "Завантаження дати…"
+  },
+  "NotificationsModal": {
+    "title": "Сповіщення",
+    "markAllAsRead": "Позначити всі як прочитані",
+    "noNotifications": "Немає нових сповіщень",
+    "clearAll": "Очистити все",
+    "unread": "Непрочитані"
   }
 }

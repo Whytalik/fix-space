@@ -87,9 +87,7 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
       });
       const retryData = await retryRes.json().catch(() => ({}));
       if (!retryRes.ok) {
-        const messages = Array.isArray(retryData.message)
-          ? retryData.message
-          : [retryData.message ?? "Something went wrong"];
+        const messages = Array.isArray(retryData.message) ? retryData.message : [retryData.message ?? "Something went wrong"];
         throw new ApiError(retryRes.status, messages);
       }
       return retryData as T;

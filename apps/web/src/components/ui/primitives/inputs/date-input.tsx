@@ -9,7 +9,7 @@ type DateInputProps = {
 };
 
 export function DateInput({ value, onChange, includeTime, disabled, size = "md" }: DateInputProps) {
-  const cls = size === "sm" ? "field-input w-full !py-1 !text-xs" : "field-input w-full";
+  const className = size === "sm" ? "field-input w-full !py-1 !text-xs" : "field-input w-full";
 
   return (
     <input
@@ -17,7 +17,7 @@ export function DateInput({ value, onChange, includeTime, disabled, size = "md" 
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className={cls}
+      className={className}
     />
   );
 }

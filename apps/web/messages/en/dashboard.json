@@ -29,7 +29,11 @@
     "logIn": "Log in",
     "getStarted": "Start for free",
     "profile": "Profile",
-    "logOut": "Log out"
+    "settings": "Settings",
+    "logOut": "Log out",
+    "search": "Search",
+    "notifications": "Notifications",
+    "leaveFeedback": "Leave feedback"
   },
   "Sidebar": {
     "search": "Search",
@@ -157,5 +161,12 @@
     "at": "at",
     "closed": "Closed",
     "loadingDate": "Loading date…"
+  },
+  "NotificationsModal": {
+    "title": "Notifications",
+    "markAllAsRead": "Mark all as read",
+    "noNotifications": "No new notifications",
+    "clearAll": "Clear all",
+    "unread": "Unread"
   }
 }

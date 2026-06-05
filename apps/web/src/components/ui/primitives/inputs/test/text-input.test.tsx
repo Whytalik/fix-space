@@ -34,21 +34,17 @@ describe("TextInput", () => {
 
   it("displays error message and applies error styles", () => {
     render(<TextInput value="" onChange={jest.fn()} placeholder="Input" error="This field is required" />);
-    
+
     expect(screen.getByText("This field is required")).toBeInTheDocument();
     const input = screen.getByPlaceholderText("Input");
     expect(input).toHaveClass("!border-error");
   });
 
   it("displays hint message when error is not present", () => {
-    const { rerender } = render(
-      <TextInput value="" onChange={jest.fn()} placeholder="Input" hint="Min 8 characters" />,
-    );
+    const { rerender } = render(<TextInput value="" onChange={jest.fn()} placeholder="Input" hint="Min 8 characters" />);
     expect(screen.getByText("Min 8 characters")).toBeInTheDocument();
 
-    rerender(
-      <TextInput value="" onChange={jest.fn()} placeholder="Input" error="Error message" hint="Min 8 characters" />,
-    );
+    rerender(<TextInput value="" onChange={jest.fn()} placeholder="Input" error="Error message" hint="Min 8 characters" />);
     expect(screen.getByText("Error message")).toBeInTheDocument();
     expect(screen.queryByText("Min 8 characters")).not.toBeInTheDocument();
   });

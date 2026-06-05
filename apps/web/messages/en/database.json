@@ -108,7 +108,8 @@
   },
   "DatabaseHeader": {
     "edit": "Edit",
-    "addItem": "Add Item"
+    "addItem": "Add Item",
+    "preset": "Preset"
   },
   "TemplatePickerModal": {
     "chooseTemplate": "Choose a template",
@@ -150,6 +151,7 @@
     "delete": "Delete",
     "deleteDatabase": "Delete database",
     "deleteDatabaseDesc": "This database and all its records will be permanently deleted.",
-    "deleting": "Deleting…"
+    "deleting": "Deleting…",
+    "preset": "Preset"
   }
 }

@@ -41,10 +41,5 @@ export async function LandingJsonLd({ locale }: { locale: string }) {
     mainEntity: faqItems,
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify([softwareSchema, faqSchema]) }}
-    />
-  );
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([softwareSchema, faqSchema]) }} />;
 }

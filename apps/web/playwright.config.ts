@@ -16,12 +16,20 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
   ],
   webServer: {
     command: "pnpm --prefix ../.. dev",
     url: "http://localhost:3001",
     reuseExistingServer: !process.env.CI,
-    timeout: 180000, // 3 minutes for slow cold starts
+    timeout: 180000,
     stdout: "pipe",
     stderr: "pipe",
   },

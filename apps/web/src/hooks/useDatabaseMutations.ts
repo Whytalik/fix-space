@@ -53,9 +53,7 @@ export function useDatabaseMutations(applyPatch: ApplyPatch, space: SpaceRespons
       if (targetSectionId) {
         return {
           ...prev,
-          sections: newSections.map((s) =>
-            s.id === targetSectionId ? { ...s, databases: [...(s.databases ?? []), updatedDb] } : s,
-          ),
+          sections: newSections.map((s) => (s.id === targetSectionId ? { ...s, databases: [...(s.databases ?? []), updatedDb] } : s)),
           databases: newDatabases,
         };
       }

@@ -37,9 +37,7 @@ export default function Profile() {
                 <p className="text-sm text-ink mt-1">{user.username}</p>
               </div>
               <div>
-                <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">
-                  {t("emailAddress")}
-                </label>
+                <label className="text-xs font-medium text-ink-muted uppercase tracking-wider">{t("emailAddress")}</label>
                 <p className="text-sm text-ink mt-1">{user.email}</p>
               </div>
             </div>

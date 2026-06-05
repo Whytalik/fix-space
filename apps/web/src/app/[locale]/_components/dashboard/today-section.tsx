@@ -2,9 +2,9 @@
 
 import { TodayCard } from "./today-card";
 import { useAppContext } from "@/context/app-context";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { getRecords } from "@/lib/api/record";
-import { useRouter } from "next/navigation";
+import { queryKeys } from "@/lib/api/query-keys";
 import { createRecord } from "@/lib/api/record";
 import { useUIContext } from "@/context/ui-context";
 import { motion, type Variants } from "framer-motion";
@@ -36,7 +36,7 @@ const itemVariants: Variants = {
 
 export function TodaySection() {
   const { databases } = useAppContext();
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const { showError } = useUIContext();
   const t = useTranslations("Dashboard");
 
@@ -54,7 +54,7 @@ export function TodaySection() {
 
   const results = useQueries({
     queries: dbInfos.map((info) => ({
-      queryKey: ["records", info.db?.id],
+      queryKey: info.db ? queryKeys.records.all(info.db.id) : ["records", "undefined"],
       queryFn: () => (info.db ? getRecords(info.db.id) : Promise.resolve([])),
       enabled: !!info.db,
     })),
@@ -62,8 +62,8 @@ export function TodaySection() {
 
   const handleAdd = async (dbId: string) => {
     try {
-      const record = await createRecord(dbId, {});
-      router.push(`/record/${record.id}?edit=true`);
+      await createRecord(dbId, {});
+      queryClient.invalidateQueries({ queryKey: queryKeys.records.all(dbId) });
     } catch (err) {
       showError(err);
     }
@@ -88,8 +88,8 @@ export function TodaySection() {
 
           const todayRecords =
             data?.filter((r: RecordResponseDto) => {
-              const d = new Date(r.createdAt);
-              return d >= todayStart;
+              const recordDate = new Date(r.createdAt);
+              return recordDate >= todayStart;
             }) || [];
 
           return (

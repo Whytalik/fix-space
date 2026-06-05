@@ -17,11 +17,7 @@ describe("Card", () => {
   });
 
   it("applies custom inline style", () => {
-    render(
-      <Card style={{ backgroundColor: "red", marginTop: "10px" }}>
-        Styled Content
-      </Card>,
-    );
+    render(<Card style={{ backgroundColor: "red", marginTop: "10px" }}>Styled Content</Card>);
     const card = screen.getByText("Styled Content");
     expect(card).toHaveStyle({
       backgroundColor: "red",

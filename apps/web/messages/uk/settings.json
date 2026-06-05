@@ -70,7 +70,10 @@
     "placeholderDateFormat": "напр. DD/MM/YYYY",
     "deleteSpace": "Видалити простір",
     "deleteSpaceDesc": "Всі бази даних та записи всередині будуть видалені назавжди. Цю дію не можна скасувати.",
-    "delete": "Видалити"
+    "delete": "Видалити",
+    "edit": "Редагувати",
+    "duplicate": "Дублювати",
+    "cannotDeleteDefault": "Не можна видалити простір за замовчуванням"
   },
   "SectionSettingsComp": {
     "settingsSaved": "Налаштування збережено.",

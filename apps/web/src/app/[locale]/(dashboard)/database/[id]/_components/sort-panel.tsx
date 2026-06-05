@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/components/property-icon";
+import { PropertyIcon } from "@/features/property/property-icon";
 import { Button } from "@/components/ui/primitives/actions/button";
 import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
@@ -23,13 +23,7 @@ import { ArrowDown, ArrowUp, GripVertical, X } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
-const SORTABLE_TYPES = new Set([
-  PropertyType.TEXT,
-  PropertyType.NUMBER,
-  PropertyType.DATE,
-  PropertyType.STATUS,
-  PropertyType.SELECT,
-]);
+const SORTABLE_TYPES = new Set([PropertyType.TEXT, PropertyType.NUMBER, PropertyType.DATE, PropertyType.STATUS, PropertyType.SELECT]);
 
 interface SortPanelProps {
   onClose: () => void;
@@ -101,7 +95,6 @@ function SortRow({ item, rowOptions, prop, onApplyOption, onToggleDirection, onR
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function SortPanel({ onClose }: SortPanelProps) {
   const { properties, sorts, setSorts } = useDatabaseContext();
   const [hasPendingRow, setHasPendingRow] = useState(false);
@@ -250,7 +243,7 @@ export function SortPanel({ onClose }: SortPanelProps) {
           <div className="flex flex-col gap-1">
             <SortableContext items={sortItems.map((s) => s.id)} strategy={verticalListSortingStrategy}>
               {sortItems.map((item) => {
-                const i = sorts.findIndex((s) => optionValue(s) === item.id);
+                const sortIndex = sorts.findIndex((s) => optionValue(s) === item.id);
                 const prop = getPropertyForSort(item);
                 const rowOptions = allOptions.filter((o) => !usedValues.has(o.value) || o.value === optionValue(item));
                 return (
@@ -259,9 +252,9 @@ export function SortPanel({ onClose }: SortPanelProps) {
                     item={item}
                     rowOptions={rowOptions}
                     prop={prop}
-                    onApplyOption={(v) => applyOption(i, v)}
-                    onToggleDirection={() => toggleDirection(i)}
-                    onRemove={() => removeSort(i)}
+                    onApplyOption={(v) => applyOption(sortIndex, v)}
+                    onToggleDirection={() => toggleDirection(sortIndex)}
+                    onRemove={() => removeSort(sortIndex)}
                   />
                 );
               })}

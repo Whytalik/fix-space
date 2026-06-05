@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/components/property-icon";
+import { PropertyIcon } from "@/features/property/property-icon";
 import {
   closestCenter,
   DndContext,
@@ -54,9 +54,7 @@ function SortableTableRow({ row, onToggleVisibility }: { row: TableRow; onToggle
 
       <PropertyIcon type={row.prop.type} size={14} className="text-ink-muted shrink-0" />
 
-      <span className={`flex-1 text-sm ${row.prop.isVisible === false ? "text-ink-muted" : "text-ink"}`}>
-        {row.prop.name}
-      </span>
+      <span className={`flex-1 text-sm ${row.prop.isVisible === false ? "text-ink-muted" : "text-ink"}`}>{row.prop.name}</span>
 
       {row.isPrimary && (
         <span className="text-tiny font-semibold uppercase tracking-widest text-ink-muted bg-surface border border-stroke rounded px-1.5 py-0.5 mr-1">
@@ -157,9 +155,7 @@ export function EditTableView({ properties, onPropertiesChange, onPropertyUpdate
       onDragEnd={handleDragEnd}
     >
       <div className="rounded-lg border border-stroke overflow-hidden">
-        {primaryRow && (
-          <SortableTableRow row={primaryRow} onToggleVisibility={() => handleToggleVisibility(primaryRow.prop.id)} />
-        )}
+        {primaryRow && <SortableTableRow row={primaryRow} onToggleVisibility={() => handleToggleVisibility(primaryRow.prop.id)} />}
         <SortableContext items={nonPrimaryRows.map((r) => r.id)} strategy={verticalListSortingStrategy}>
           {nonPrimaryRows.map((row) => (
             <SortableTableRow key={row.id} row={row} onToggleVisibility={() => handleToggleVisibility(row.prop.id)} />

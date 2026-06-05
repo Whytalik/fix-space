@@ -86,12 +86,7 @@ export function EditGeneralSection({
               )}
             </button>
             {showIconPicker && (
-              <IconPicker
-                value={icon}
-                onChange={handleIconChange}
-                onClose={handleIconPickerClose}
-                anchorEl={iconButtonRef.current}
-              />
+              <IconPicker value={icon} onChange={handleIconChange} onClose={handleIconPickerClose} anchorEl={iconButtonRef.current} />
             )}
           </div>
 
@@ -106,8 +101,7 @@ export function EditGeneralSection({
               placeholder={t("placeholderTitle")}
             />
             <p className="mt-1.5 type-hint">
-              {t("internalName")}:{" "}
-              <span className="font-mono text-ink-secondary">[DB] {title || "Trading Journal"}</span>
+              {t("internalName")}: <span className="font-mono text-ink-secondary">[DB] {title || "Trading Journal"}</span>
             </p>
           </div>
         </div>

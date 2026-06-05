@@ -16,9 +16,7 @@ export function CtaSection() {
       </div>
 
       <div className="relative z-10 max-w-xl">
-        <h2 className="type-landing-title-lg">
-          {t("cta.title")}
-        </h2>
+        <h2 className="type-landing-title-lg">{t("cta.title")}</h2>
         <p className="mt-4 type-landing-body-lg">{t("cta.description")}</p>
       </div>
 

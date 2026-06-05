@@ -11,39 +11,36 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { EditGeneralSection } from "./_components/edit-general-section";
 import { EditPropertiesSection } from "./_components/edit-properties-section";
-import { EditTemplatesSection } from "./_components/edit-templates-section";
+// import { EditTemplatesSection } from "./_components/edit-templates-section";
 import { PropertyFormModal } from "./_components/property-form-modal";
 import { useTranslations } from "next-intl";
 
-type EditTab = "general" | "properties" | "templates";
+type EditTab = "general" | "properties";
 
 const EDIT_TABS: TabItem<EditTab>[] = [
   { id: "general", label: "general" },
   { id: "properties", label: "properties" },
-  { id: "templates", label: "templates" },
+  // { id: "templates", label: "templates" },
 ];
 
 const DB_PREFIX = "[DB] ";
 
 export default function EditDatabasePage() {
   const searchParams = useSearchParams();
-  const { database, properties, applyDatabaseUpdate, applyPropertiesUpdate, wrapCells, setWrapCells } =
-    useDatabaseContext();
+  const { database, properties, applyDatabaseUpdate, applyPropertiesUpdate, wrapCells, setWrapCells } = useDatabaseContext();
   const { updateDatabaseInSpace, databases: allDatabases } = useAppContext();
   const { showError } = useUIContext();
   const t = useTranslations("DatabaseEdit");
 
   const [activeTab, setActiveTab] = useState<EditTab>(() => {
     const tab = searchParams.get("tab");
-    return tab === "properties" || tab === "templates" ? tab : "general";
+    return tab === "properties" ? tab : "general";
   });
   const [icon, setIcon] = useState(() => database?.icon ?? "");
   const [title, setTitle] = useState(() => database?.title ?? "");
   const [recordLimit, setRecordLimit] = useState<number | null>(() => database?.recordLimit ?? null);
   const [useDefaultTemplate, setUseDefaultTemplate] = useState(() => database?.useDefaultTemplate ?? true);
-  const [propertyModal, setPropertyModal] = useState<
-    { mode: "create" } | { mode: "edit"; property: PropertyResponseDto } | null
-  >(null);
+  const [propertyModal, setPropertyModal] = useState<{ mode: "create" } | { mode: "edit"; property: PropertyResponseDto } | null>(null);
 
   useEffect(() => {
     if (!database) return;
@@ -54,9 +51,7 @@ export default function EditDatabasePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [database?.id]);
 
-  async function saveDatabase(
-    patch: Partial<{ icon: string; title: string; recordLimit: number | null; useDefaultTemplate: boolean }>,
-  ) {
+  async function saveDatabase(patch: Partial<{ icon: string; title: string; recordLimit: number | null; useDefaultTemplate: boolean }>) {
     if (!database) return;
     try {
       const updated = await updateDatabase(database.spaceId, database.id, {
@@ -96,18 +91,12 @@ export default function EditDatabasePage() {
     saveDatabase({ useDefaultTemplate: val });
   }
 
-  function handlePropertyUpdate(
-    id: string,
-    data: Partial<{ position: number; group: string | null; isVisible: boolean }>,
-  ) {
+  function handlePropertyUpdate(id: string, data: Partial<{ position: number; group: string | null; isVisible: boolean }>) {
     applyPropertiesUpdate(properties.map((p) => (p.id === id ? { ...p, ...data } : p)));
     updateProperty(id, data).catch(showError);
   }
 
-  const existingGroups = useMemo(
-    () => [...new Set(properties.map((p) => p.group).filter(Boolean) as string[])],
-    [properties],
-  );
+  const existingGroups = useMemo(() => [...new Set(properties.map((p) => p.group).filter(Boolean) as string[])], [properties]);
 
   function handleAddProperty() {
     setPropertyModal({ mode: "create" });
@@ -182,7 +171,7 @@ export default function EditDatabasePage() {
           />
         )}
 
-        {activeTab === "templates" && <EditTemplatesSection database={database} />}
+        {/* {activeTab === "templates" && <EditTemplatesSection database={database} />} */}
       </div>
 
       {propertyModal && database && (

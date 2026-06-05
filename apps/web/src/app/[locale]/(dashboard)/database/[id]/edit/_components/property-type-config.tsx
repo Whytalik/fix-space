@@ -4,13 +4,7 @@ import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import type {
-  DatabaseResponseDto,
-  SelectCategory,
-  SelectOption,
-  StatusCategoryConfig,
-  StatusOptionColor,
-} from "@fixspace/domain";
+import type { DatabaseResponseDto, SelectCategory, SelectOption, StatusCategoryConfig, StatusOptionColor } from "@fixspace/domain";
 import {
   DATA_FORMATS_VALUES,
   DEFAULT_STATUS_PROPERTY,
@@ -61,17 +55,13 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
 
   function addSelectOption(catIdx: number) {
     onPatch({
-      categories: selectCategories.map((c, i) =>
-        i === catIdx ? { ...c, options: [...c.options, { value: "" } as SelectOption] } : c,
-      ),
+      categories: selectCategories.map((c, i) => (i === catIdx ? { ...c, options: [...c.options, { value: "" } as SelectOption] } : c)),
     });
   }
 
   function removeSelectOption(catIdx: number, optIdx: number) {
     onPatch({
-      categories: selectCategories.map((c, i) =>
-        i === catIdx ? { ...c, options: c.options.filter((_, j) => j !== optIdx) } : c,
-      ),
+      categories: selectCategories.map((c, i) => (i === catIdx ? { ...c, options: c.options.filter((_, j) => j !== optIdx) } : c)),
     });
   }
 
@@ -108,10 +98,7 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
         i === catIdx
           ? {
               ...c,
-              options: [
-                ...c.options,
-                { name: "New option", color: STATUS_OPTION_COLOR_VALUES[0] as StatusOptionColor },
-              ],
+              options: [...c.options, { name: "New option", color: STATUS_OPTION_COLOR_VALUES[0] as StatusOptionColor }],
             }
           : c,
       ),
@@ -120,9 +107,7 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
 
   function removeStatusOption(catIdx: number, optIdx: number) {
     onPatch({
-      categories: statusCategories.map((c, i) =>
-        i === catIdx ? { ...c, options: c.options.filter((_, j) => j !== optIdx) } : c,
-      ),
+      categories: statusCategories.map((c, i) => (i === catIdx ? { ...c, options: c.options.filter((_, j) => j !== optIdx) } : c)),
     });
   }
 
@@ -313,29 +298,19 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
                     placeholder="Category label…"
                     className="flex-1 text-xs font-medium bg-transparent outline-none text-ink placeholder:text-ink-muted"
                   />
-                  <button
-                    type="button"
-                    onClick={() => removeSelectCategory(catIdx)}
-                    className="text-ink-muted hover:text-error shrink-0"
-                  >
+                  <button type="button" onClick={() => removeSelectCategory(catIdx)} className="text-ink-muted hover:text-error shrink-0">
                     <Trash2 size={12} />
                   </button>
                 </div>
                 {(cat.options as SelectOption[]).map((opt, optIdx) => (
                   <div key={optIdx} className="flex items-center gap-2 px-3 py-1.5 border-t border-stroke">
-                    {opt.color && (
-                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: opt.color }} />
-                    )}
+                    {opt.color && <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: opt.color }} />}
                     <button
                       type="button"
                       onClick={(e) => setIconPickerState({ el: e.currentTarget, catIdx, optIdx, propType: "select" })}
                       className="w-5 h-5 flex items-center justify-center rounded hover:bg-surface shrink-0"
                     >
-                      {opt.icon ? (
-                        <IconDisplay value={opt.icon} size={12} />
-                      ) : (
-                        <ImageIcon size={11} className="text-ink-muted" />
-                      )}
+                      {opt.icon ? <IconDisplay value={opt.icon} size={12} /> : <ImageIcon size={11} className="text-ink-muted" />}
                     </button>
                     <input
                       type="text"
@@ -383,9 +358,7 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
           </div>
           {iconPickerState?.propType === "select" && (
             <IconPicker
-              value={
-                (selectCategories[iconPickerState.catIdx]?.options[iconPickerState.optIdx] as SelectOption)?.icon ?? ""
-              }
+              value={(selectCategories[iconPickerState.catIdx]?.options[iconPickerState.optIdx] as SelectOption)?.icon ?? ""}
               onChange={(icon) => {
                 updateSelectOptionIcon(iconPickerState.catIdx, iconPickerState.optIdx, icon);
                 setIconPickerState(null);
@@ -422,21 +395,14 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
               </p>
               <div className="rounded-lg border border-stroke overflow-hidden">
                 {cat.options.map((opt, optIdx) => (
-                  <div
-                    key={optIdx}
-                    className="flex items-center gap-2 px-3 py-2 border-b border-stroke last:border-b-0"
-                  >
+                  <div key={optIdx} className="flex items-center gap-2 px-3 py-2 border-b border-stroke last:border-b-0">
                     <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: opt.color }} />
                     <button
                       type="button"
                       onClick={(e) => setIconPickerState({ el: e.currentTarget, catIdx, optIdx, propType: "status" })}
                       className="w-5 h-5 flex items-center justify-center rounded hover:bg-surface shrink-0"
                     >
-                      {opt.icon ? (
-                        <IconDisplay value={opt.icon} size={12} />
-                      ) : (
-                        <ImageIcon size={11} className="text-ink-muted" />
-                      )}
+                      {opt.icon ? <IconDisplay value={opt.icon} size={12} /> : <ImageIcon size={11} className="text-ink-muted" />}
                     </button>
                     <input
                       type="text"
@@ -498,7 +464,7 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
                 options={databases.map((db) => ({ value: db.id, label: db.title ?? db.name }))}
                 value={String(config.relatedEntityId ?? "")}
                 onChange={(v) => onPatch({ relatedEntityId: v || undefined })}
-                placeholder="— Select database —"
+                placeholder="Select database"
                 nullable
               />
             </div>

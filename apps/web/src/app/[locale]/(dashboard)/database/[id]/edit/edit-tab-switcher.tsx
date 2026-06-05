@@ -1,11 +1,11 @@
 "use client";
 
-export type EditTab = "general" | "properties" | "templates";
+export type EditTab = "general" | "properties";
 
 const TABS: { id: EditTab; label: string }[] = [
   { id: "general", label: "General" },
   { id: "properties", label: "Properties" },
-  { id: "templates", label: "Templates" },
+  // { id: "templates", label: "Templates" },
 ];
 
 type EditTabSwitcherProps = {

@@ -99,9 +99,7 @@ export function Combobox(props: ComboboxProps) {
             placeholder={selected.length === 0 ? (props.placeholder ?? "Search…") : "Add more…"}
             className={inputCls}
           />
-          {open && available.length > 0 && (
-            <ComboboxDropdown options={available} onSelect={(v) => handleAdd(v)} placement={placement} />
-          )}
+          {open && available.length > 0 && <ComboboxDropdown options={available} onSelect={(v) => handleAdd(v)} placement={placement} />}
         </div>
       </div>
     );
@@ -114,13 +112,9 @@ export function Combobox(props: ComboboxProps) {
     size = "md",
   } = props as { freeText?: boolean; nullable?: boolean; placement?: "top" | "bottom"; size?: "md" | "sm" };
   const inputCls = size === "sm" ? "field-input w-full !py-1 !text-xs" : "field-input w-full";
-  const currentLabel = freeText
-    ? (props.value as string)
-    : (props.options.find((o) => o.value === props.value)?.label ?? "");
+  const currentLabel = freeText ? (props.value as string) : (props.options.find((o) => o.value === props.value)?.label ?? "");
 
-  const filtered = props.options.filter(
-    (o) => query === currentLabel || o.label.toLowerCase().includes(query.toLowerCase()),
-  );
+  const filtered = props.options.filter((o) => query === currentLabel || o.label.toLowerCase().includes(query.toLowerCase()));
 
   function handleFocus() {
     setQuery(currentLabel);
@@ -160,12 +154,7 @@ export function Combobox(props: ComboboxProps) {
         className={inputCls}
       />
       {open && filtered.length > 0 && (
-        <ComboboxDropdown
-          options={filtered}
-          onSelect={handleSelect}
-          selectedValue={props.value as string}
-          placement={placement}
-        />
+        <ComboboxDropdown options={filtered} onSelect={handleSelect} selectedValue={props.value as string} placement={placement} />
       )}
     </div>
   );

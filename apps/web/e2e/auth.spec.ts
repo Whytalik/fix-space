@@ -90,9 +90,9 @@ test.describe("Authentication E2E", () => {
 
     await page.reload();
     await expect(page).toHaveURL(/\/en$/);
-    await expect(page.getByRole("navigation")).toBeVisible();
+    await expect(page.locator("aside")).toBeVisible();
 
-    await page.getByRole("button", { name: testUser.username }).click();
+    await page.getByRole("button", { name: testUser.username }).first().click();
     await page.getByRole("button", { name: /log out|вийти/i }).click();
 
     await expect(page).toHaveURL(/\/en\/login$/);
@@ -107,10 +107,10 @@ test.describe("Authentication E2E", () => {
     await page.goto("http://localhost:3001/en/auth/verify?token=invalid-token-123");
 
     await expect(page.getByText(/failed|не вдалася/i)).toBeVisible();
-    await expect(page.getByText(/resend|надіслати/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /resend/i })).toBeVisible();
 
     await page.getByLabel(/email/i).fill(testUser.email);
-    await page.getByRole("button", { name: /resend|надіслати/i }).click();
+    await page.getByRole("button", { name: /resend link|надіслати/i }).click();
 
     await expect(page.getByText(/sent|надіслано/i)).toBeVisible();
   });

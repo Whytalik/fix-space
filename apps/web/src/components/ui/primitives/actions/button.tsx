@@ -8,10 +8,24 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "md" | "sm" | "icon";
   loading?: boolean;
   active?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "primary", size = "md", loading = false, active = false, children, disabled, className = "", ...rest },
+  {
+    variant = "primary",
+    size = "md",
+    loading = false,
+    active = false,
+    leftIcon,
+    rightIcon,
+    children,
+    disabled,
+    className = "",
+    type = "button",
+    ...rest
+  },
   ref,
 ) {
   const isDisabled = disabled || loading;
@@ -35,8 +49,16 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const spinnerColor = variant === "primary" || variant === "danger" ? "white" : "default";
 
   return (
-    <button ref={ref} {...rest} disabled={isDisabled} className={`${base} ${state} ${variantCls} ${className}`}>
-      {loading ? <Spinner size="sm" color={spinnerColor} /> : children}
+    <button ref={ref} type={type} {...rest} disabled={isDisabled} className={`${base} ${state} ${variantCls} ${className}`}>
+      {loading ? (
+        <Spinner size="sm" color={spinnerColor} />
+      ) : (
+        <>
+          {leftIcon && <span className="inline-flex shrink-0 items-center justify-center">{leftIcon}</span>}
+          {children}
+          {rightIcon && <span className="inline-flex shrink-0 items-center justify-center">{rightIcon}</span>}
+        </>
+      )}
     </button>
   );
 });

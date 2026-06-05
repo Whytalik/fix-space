@@ -3,9 +3,9 @@
 import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { useDatabaseContext } from "@/context/database-context";
-import { ColorPicker, COLOR_SWATCHES } from "@/components/ui/color-picker/color-picker";
+import { ColorPicker } from "@/components/ui/color-picker/color-picker";
 import type { RecordGroupDto } from "@fixspace/domain";
-import { DateGroupGranularity, GroupField, PropertyType } from "@fixspace/domain/enums";
+import { DateGroupGranularity, GroupField, PALETTE_COLOR_VALUES, PropertyType } from "@fixspace/domain/enums";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -29,8 +29,7 @@ type GroupPanelProps = {
 };
 
 export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
-  const { properties, groupedRecords, groupColors, setGroupColor, hiddenGroups, toggleHiddenGroup } =
-    useDatabaseContext();
+  const { properties, groupedRecords, groupColors, setGroupColor, hiddenGroups, toggleHiddenGroup } = useDatabaseContext();
   const [colorPickerKey, setColorPickerKey] = useState<string | null>(null);
   const [colorPickerAnchor, setColorPickerAnchor] = useState<HTMLButtonElement | null>(null);
   const t = useTranslations("GroupPanel");
@@ -48,8 +47,7 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
     onChange({
       field,
       propertyId: field === GroupField.PROPERTY ? (propertyOptions[0]?.value ?? undefined) : undefined,
-      granularity:
-        field === GroupField.CREATED_AT || field === GroupField.UPDATED_AT ? DateGroupGranularity.DAY : undefined,
+      granularity: field === GroupField.CREATED_AT || field === GroupField.UPDATED_AT ? DateGroupGranularity.DAY : undefined,
     });
   }
 
@@ -106,7 +104,7 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
           <span className="text-xs font-semibold text-ink-muted uppercase tracking-wide">{t("groups")}</span>
           <div className="flex flex-col gap-1 max-h-52 overflow-y-auto scrollbar">
             {visibleGroups.map((g, idx) => {
-              const color = groupColors[g.key] ?? COLOR_SWATCHES[idx % COLOR_SWATCHES.length];
+              const color = groupColors[g.key] ?? PALETTE_COLOR_VALUES[idx % PALETTE_COLOR_VALUES.length];
               const hidden = hiddenGroups.has(g.key);
               const pickerOpen = colorPickerKey === g.key;
 
@@ -132,7 +130,6 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
                   {pickerOpen && (
                     <ColorPicker
                       value={groupColors[g.key] ?? ""}
-                      showSwatches
                       anchorEl={colorPickerAnchor}
                       onChange={(c) => {
                         setGroupColor(g.key, c);
@@ -146,9 +143,7 @@ export function GroupPanel({ grouping, onChange }: GroupPanelProps) {
                     />
                   )}
 
-                  <span
-                    className={`flex-1 text-xs truncate ${hidden ? "text-ink-muted line-through" : "text-ink-secondary"}`}
-                  >
+                  <span className={`flex-1 text-xs truncate ${hidden ? "text-ink-muted line-through" : "text-ink-secondary"}`}>
                     {g.label}
                   </span>
                   <span className="text-tiny text-ink-muted shrink-0">{g.records.length}</span>

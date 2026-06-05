@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/components/property-icon";
+import { PropertyIcon } from "@/features/property/property-icon";
 import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { TabSwitcher, type TabItem } from "@/components/ui/primitives/navigation/tab-switcher";
@@ -20,14 +20,7 @@ import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain"
 import { Check, ChevronRight, GripVertical, Plus, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GroupHeader, PropertyRow } from "./property-list-items";
-import {
-  buildFlatItems,
-  flatItemsToProperties,
-  moveGroupBlock,
-  type FlatItem,
-  type GroupItem,
-  type PropItem,
-} from "./property-list.utils";
+import { buildFlatItems, flatItemsToProperties, moveGroupBlock, type FlatItem, type GroupItem, type PropItem } from "./property-list.utils";
 import { EditTableView } from "./edit-table-view";
 import { useTranslations } from "next-intl";
 
@@ -207,9 +200,7 @@ export function EditPropertiesSection({
   function handleDeleteGroup(name: string) {
     const orphans = flatItems.filter((i) => i.kind === "property" && ((i as PropItem).prop.group ?? "") === name);
     const newItems = [
-      ...flatItems.filter(
-        (i) => i.id !== `group:${name}` && !(i.kind === "property" && ((i as PropItem).prop.group ?? "") === name),
-      ),
+      ...flatItems.filter((i) => i.id !== `group:${name}` && !(i.kind === "property" && ((i as PropItem).prop.group ?? "") === name)),
       ...orphans,
     ];
     setCollapsedGroups((prev) => {
@@ -258,8 +249,8 @@ export function EditPropertiesSection({
     let total = 0;
     for (const item of flatItems) {
       if (item.kind === "property") {
-        const g = (item as PropItem).prop.group ?? "";
-        map.set(g, (map.get(g) ?? 0) + 1);
+        const group = (item as PropItem).prop.group ?? "";
+        map.set(group, (map.get(group) ?? 0) + 1);
         total++;
       }
     }
@@ -276,12 +267,7 @@ export function EditPropertiesSection({
           </h2>
           {subTab === "record" && (
             <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                className="flex items-center gap-1.5"
-                onClick={() => setAddingGroup(true)}
-              >
+              <Button variant="secondary" size="sm" className="flex items-center gap-1.5" onClick={() => setAddingGroup(true)}>
                 <Plus size={13} />
                 {t("addGroup")}
               </Button>
@@ -300,11 +286,7 @@ export function EditPropertiesSection({
       </div>
 
       {subTab === "table" && (
-        <EditTableView
-          properties={properties}
-          onPropertiesChange={onPropertiesChange}
-          onPropertyUpdate={onPropertyUpdate}
-        />
+        <EditTableView properties={properties} onPropertiesChange={onPropertiesChange} onPropertyUpdate={onPropertyUpdate} />
       )}
 
       {subTab === "record" && addingGroup && (
@@ -356,21 +338,21 @@ export function EditPropertiesSection({
             <SortableContext items={visibleItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
               {visibleItems.map((item) => {
                 if (item.kind === "group") {
-                  const g = item as GroupItem;
+                  const groupItem = item as GroupItem;
                   return (
                     <GroupHeader
-                      key={g.id}
-                      item={g}
-                      count={groupCountMap.get(g.name) ?? 0}
-                      isCollapsed={collapsedGroups.has(g.name)}
-                      isEditing={editingGroupId === g.id}
+                      key={groupItem.id}
+                      item={groupItem}
+                      count={groupCountMap.get(groupItem.name) ?? 0}
+                      isCollapsed={collapsedGroups.has(groupItem.name)}
+                      isEditing={editingGroupId === groupItem.id}
                       editValue={editGroupValue}
-                      onToggleCollapse={() => handleToggleCollapse(g.name)}
-                      onEditStart={() => handleEditStart(g.id, g.name)}
+                      onToggleCollapse={() => handleToggleCollapse(groupItem.name)}
+                      onEditStart={() => handleEditStart(groupItem.id, groupItem.name)}
                       onEditChange={setEditGroupValue}
-                      onEditConfirm={() => handleRenameGroup(g.name)}
+                      onEditConfirm={() => handleRenameGroup(groupItem.name)}
                       onEditCancel={() => setEditingGroupId(null)}
-                      onDelete={() => handleDeleteGroup(g.name)}
+                      onDelete={() => handleDeleteGroup(groupItem.name)}
                     />
                   );
                 }
@@ -395,9 +377,7 @@ export function EditPropertiesSection({
                 <span className="flex-1 text-xs font-semibold uppercase tracking-widest text-ink-secondary">
                   {(activeItem as GroupItem).name}
                 </span>
-                <span className="text-xs text-ink-muted tabular-nums">
-                  {groupCountMap.get((activeItem as GroupItem).name) ?? 0}
-                </span>
+                <span className="text-xs text-ink-muted tabular-nums">{groupCountMap.get((activeItem as GroupItem).name) ?? 0}</span>
               </div>
             )}
             {activeItem?.kind === "property" && (

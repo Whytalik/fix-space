@@ -97,13 +97,13 @@ export function AvatarUpload({ username, icon, size = "md", onUpdate }: AvatarUp
           type="button"
           onClick={handleRemove}
           disabled={isUploading}
-          className="text-xs text-ink-secondary hover:text-red-500 transition-colors"
+          className="text-xs text-ink-secondary hover:text-error transition-colors"
         >
           Remove photo
         </button>
       )}
 
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-xs text-error">{error}</p>}
     </div>
   );
 }

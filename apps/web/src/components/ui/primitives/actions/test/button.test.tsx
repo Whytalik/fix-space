@@ -61,4 +61,25 @@ describe("Button", () => {
     const button = screen.getByRole("button", { name: /click/i });
     expect(button).toHaveClass("custom-class");
   });
+
+  it("renders leftIcon and rightIcon correctly", () => {
+    render(
+      <Button leftIcon={<span data-testid="left-icon">←</span>} rightIcon={<span data-testid="right-icon">→</span>}>
+        Navigate
+      </Button>,
+    );
+    expect(screen.getByTestId("left-icon")).toBeInTheDocument();
+    expect(screen.getByTestId("right-icon")).toBeInTheDocument();
+    expect(screen.getByText("Navigate")).toBeInTheDocument();
+  });
+
+  it("defaults to type='button' and allows overriding", () => {
+    const { rerender } = render(<Button>Default Type</Button>);
+    let button = screen.getByRole("button", { name: /default type/i });
+    expect(button).toHaveAttribute("type", "button");
+
+    rerender(<Button type="submit">Submit Type</Button>);
+    button = screen.getByRole("button", { name: /submit type/i });
+    expect(button).toHaveAttribute("type", "submit");
+  });
 });

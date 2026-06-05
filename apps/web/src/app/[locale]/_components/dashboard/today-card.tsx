@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/primitives/display/card";
 import { Inbox, Plus, FileText } from "lucide-react";
 import { Button } from "@/components/ui/primitives/actions/button";
 import type { RecordResponseDto } from "@fixspace/domain";
-import Link from "next/link";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { useTranslations, useFormatter } from "next-intl";
 
@@ -49,11 +48,7 @@ export function TodayCard({ title, records = [], iconColor = "text-ink-muted", o
       ) : (
         <div className="flex-1 overflow-y-auto scrollbar flex flex-col gap-1 pr-1">
           {records.map((record) => (
-            <Link
-              key={record.id}
-              href={`/record/${record.id}`}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-hover transition-colors"
-            >
+            <div key={record.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-ink">
               <span className="text-ink-muted leading-none flex-shrink-0 flex items-center">
                 {record.icon ? <IconDisplay value={record.icon} size={14} /> : <FileText size={14} />}
               </span>
@@ -61,7 +56,7 @@ export function TodayCard({ title, records = [], iconColor = "text-ink-muted", o
               <span className="text-xs text-ink-secondary shrink-0">
                 {format.dateTime(new Date(record.createdAt), { hour: "2-digit", minute: "2-digit" })}
               </span>
-            </Link>
+            </div>
           ))}
         </div>
       )}

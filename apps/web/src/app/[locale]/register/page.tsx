@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthPageShell } from "@/features/auth/components/auth-page-shell";
+import { AuthPageShell } from "@/features/auth/auth-page-shell";
 import { FormErrors } from "@/components/ui/form/form-errors";
 import { FormField } from "@/components/ui/form/form-field";
 import { Button } from "@/components/ui/primitives/actions/button";
@@ -8,7 +8,7 @@ import { register } from "@/lib/api/auth";
 import { parseApiErrors } from "@/lib/api/client";
 import { useState } from "react";
 import { RegisterSuccess } from "./_components/register-success";
-import { Header } from "@/components/layout/header/header";
+import { Header } from "@/components/layout/header/landing/header";
 import { Footer } from "@/components/layout/footer";
 import { useTranslations } from "next-intl";
 

@@ -58,9 +58,7 @@ export function ImportSection() {
           <LogoIcon size={40} className="relative z-10" />
           <div className="text-center relative z-10">
             <p className="type-landing-h3 tracking-tight">FIX Space</p>
-            <p className="type-landing-eyebrow mt-1">
-              {t("unifiedWorkspace")}
-            </p>
+            <p className="type-landing-eyebrow mt-1">{t("unifiedWorkspace")}</p>
           </div>
           <div className="w-full h-px bg-accent/20 relative z-10" />
           <div className="flex flex-col gap-2.5 w-full relative z-10">
