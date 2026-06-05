@@ -51,10 +51,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)), new LoggingInterceptor(appLogger));
-  app.useGlobalFilters(
-    new I18nValidationExceptionFilter({ detailedErrors: true }),
-    new GlobalExceptionFilter(appLogger),
-  );
+  app.useGlobalFilters(new I18nValidationExceptionFilter({ detailedErrors: true }), new GlobalExceptionFilter(appLogger));
   await app.listen(port);
   Logger.log(`API running at http://localhost:${port}`, "Bootstrap");
   Logger.log(`Swagger docs at http://localhost:${port}/api/docs`, "Bootstrap");

@@ -4,33 +4,33 @@ import { BaseRepository } from "../../../common/utils/base.repository";
 
 @Injectable()
 export class SectionRepository extends BaseRepository {
-  async create(data: Prisma.SectionUncheckedCreateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).section.create({ data });
+  async create(data: Prisma.SectionUncheckedCreateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).section.create({ data });
   }
 
-  async findById(id: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).section.findUnique({ where: { id } });
+  async findById(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).section.findUnique({ where: { id } });
   }
 
-  async findLastPosition(spaceId: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).section.findFirst({
+  async findLastPosition(spaceId: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).section.findFirst({
       where: { spaceId },
       orderBy: { position: "desc" },
       select: { position: true },
     });
   }
 
-  async findDuplicate(name: string, spaceId: string, excludeId: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).section.findFirst({
+  async findDuplicate(name: string, spaceId: string, excludeId: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).section.findFirst({
       where: { name, spaceId, id: { not: excludeId } },
     });
   }
 
-  async update(id: string, data: Prisma.SectionUpdateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).section.update({ where: { id }, data });
+  async update(id: string, data: Prisma.SectionUpdateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).section.update({ where: { id }, data });
   }
 
-  async delete(id: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).section.delete({ where: { id } });
+  async delete(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).section.delete({ where: { id } });
   }
 }

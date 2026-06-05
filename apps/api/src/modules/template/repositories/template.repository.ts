@@ -14,15 +14,13 @@ export class TemplateRepository extends BaseRepository {
     return prisma.property.findMany({ where: { databaseId } });
   }
 
-  async findByIdWithOwner(id: string, userId: string) {
-    return prisma.template.findFirst({
-      where: { id, database: { space: { ownerId: userId } } },
-    });
+  async findById(id: string) {
+    return prisma.template.findUnique({ where: { id } });
   }
 
-  async findByIdWithValues(id: string, userId: string) {
-    return prisma.template.findFirst({
-      where: { id, database: { space: { ownerId: userId } } },
+  async findByIdWithValues(id: string) {
+    return prisma.template.findUnique({
+      where: { id },
       include: { values: true },
     });
   }
@@ -35,52 +33,43 @@ export class TemplateRepository extends BaseRepository {
     });
   }
 
-  async count(databaseId: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).template.count({ where: { databaseId } });
+  async count(databaseId: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).template.count({ where: { databaseId } });
   }
 
-  async create(data: Prisma.TemplateUncheckedCreateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).template.create({ data });
+  async create(data: Prisma.TemplateUncheckedCreateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).template.create({ data });
   }
 
-  async findUniqueOrThrowWithValues(id: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).template.findUniqueOrThrow({
+  async findUniqueOrThrowWithValues(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).template.findUniqueOrThrow({
       where: { id },
       include: { values: true },
     });
   }
 
-  async update(
-    id: string,
-    data: Prisma.TemplateUpdateInput,
-    include?: Prisma.TemplateInclude,
-    tx?: Prisma.TransactionClient,
-  ) {
-    return (tx ?? prisma).template.update({ where: { id }, data, include });
+  async update(id: string, data: Prisma.TemplateUpdateInput, include?: Prisma.TemplateInclude, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).template.update({ where: { id }, data, include });
   }
 
-  async updateMany(
-    where: Prisma.TemplateWhereInput,
-    data: Prisma.TemplateUpdateManyMutationInput,
-    tx?: Prisma.TransactionClient,
-  ) {
-    return (tx ?? prisma).template.updateMany({ where, data });
+  async updateMany(where: Prisma.TemplateWhereInput, data: Prisma.TemplateUpdateManyMutationInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).template.updateMany({ where, data });
   }
 
-  async findFirstInDatabase(databaseId: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).template.findFirst({
+  async findFirstInDatabase(databaseId: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).template.findFirst({
       where: { databaseId },
       orderBy: { position: "asc" },
     });
   }
 
-  async findDefaultInDatabase(databaseId: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).template.findFirst({
+  async findDefaultInDatabase(databaseId: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).template.findFirst({
       where: { databaseId, isDefault: true },
     });
   }
 
-  async delete(id: string, include?: Prisma.TemplateInclude, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).template.delete({ where: { id }, include });
+  async delete(id: string, include?: Prisma.TemplateInclude, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).template.delete({ where: { id }, include });
   }
 }

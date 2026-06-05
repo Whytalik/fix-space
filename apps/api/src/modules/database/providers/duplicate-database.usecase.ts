@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
-import { DatabaseConfigDto, DatabaseResponseDto } from "@fixspace/domain";
+import { DatabaseResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../../common/logger/app-logger.service";
+import { t } from "../../../common/utils/i18n.helper";
 import { DatabaseRepository } from "../repositories/database.repository";
+import { generateUniqueName, generateUniqueSlug } from "../../../common/utils/generate-unique-name";
+import { toDatabaseResponseDto } from "../utils/to-database-response.util";
 
 @Injectable()
 export class DuplicateDatabaseUseCase {
@@ -13,21 +16,21 @@ export class DuplicateDatabaseUseCase {
     this.logger.setContext(DuplicateDatabaseUseCase.name);
   }
 
-  async execute(databaseId: string, userId: string): Promise<DatabaseResponseDto> {
-    const source = await this.databaseRepo.findByIdForDuplicate(databaseId, userId);
+  async execute(databaseId: string): Promise<DatabaseResponseDto> {
+    const source = await this.databaseRepo.findByIdForDuplicate(databaseId);
 
     if (!source) {
-      throw new NotFoundException("Database not found");
+      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
     }
 
-    const newName = `${source.title} Copy`;
+    const newName = generateUniqueName(source.title);
 
-    return this.databaseRepo.transaction(async (tx) => {
-      const newDb = await tx.database.create({
+    return this.databaseRepo.transaction(async (transaction) => {
+      const newDatabase = await transaction.database.create({
         data: {
           spaceId: source.spaceId,
           sectionId: source.sectionId,
-          name: `${source.name}_copy`,
+          name: generateUniqueSlug(source.name),
           title: newName,
           icon: source.icon,
         },
@@ -35,23 +38,23 @@ export class DuplicateDatabaseUseCase {
 
       const propertyIdMap = new Map<string, string>();
 
-      for (const prop of source.properties) {
-        const newProp = await tx.property.create({
+      for (const property of source.properties) {
+        const newProperty = await transaction.property.create({
           data: {
-            ...prop,
+            ...property,
             id: undefined,
-            databaseId: newDb.id,
-            config: prop.config as Prisma.InputJsonValue,
+            databaseId: newDatabase.id,
+            config: property.config as Prisma.InputJsonValue,
           },
         });
 
-        propertyIdMap.set(prop.id, newProp.id);
+        propertyIdMap.set(property.id, newProperty.id);
       }
 
       for (const record of source.records) {
-        const newRecord = await tx.record.create({
+        const newRecord = await transaction.record.create({
           data: {
-            databaseId: newDb.id,
+            databaseId: newDatabase.id,
             name: record.name,
             icon: record.icon,
           },
@@ -62,7 +65,7 @@ export class DuplicateDatabaseUseCase {
 
           if (!newPropertyId) continue;
 
-          await tx.propertyValue.create({
+          await transaction.propertyValue.create({
             data: {
               recordId: newRecord.id,
               propertyId: newPropertyId,
@@ -73,7 +76,7 @@ export class DuplicateDatabaseUseCase {
         }
       }
 
-      return new DatabaseResponseDto({ ...newDb, config: newDb.config as unknown as DatabaseConfigDto });
+      return toDatabaseResponseDto(newDatabase);
     });
   }
 }

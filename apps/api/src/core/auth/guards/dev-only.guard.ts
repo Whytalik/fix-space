@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AppLogger } from "../../../common/logger/app-logger.service";
+import { t } from "../../../common/utils/i18n.helper";
 
 @Injectable()
 export class DevOnlyGuard implements CanActivate {
@@ -22,7 +23,7 @@ export class DevOnlyGuard implements CanActivate {
 
     if (env !== "development" && env !== "test") {
       this.logger.error(`Forbidden access to dev-only route. Env: ${env}`);
-      throw new ForbiddenException("This action is only available in development or test environments");
+      throw new ForbiddenException(t("errors.DEV_ONLY"));
     }
     return true;
   }

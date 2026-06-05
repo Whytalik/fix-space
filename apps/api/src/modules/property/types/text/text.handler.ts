@@ -1,9 +1,17 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_TEXT_PROPERTY, PropertyType, TextProperty, URL_HANDLING_VALUES, UrlHandling } from "@fixspace/domain";
-import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
+import {
+  DEFAULT_TEXT_PROPERTY,
+  FilterOperator,
+  OPERATORS_BY_PROPERTY_TYPE,
+  PropertyType,
+  TextProperty,
+  URL_HANDLING_VALUES,
+  UrlHandling,
+} from "@fixspace/domain";
+import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
-export class TextHandler implements PropertyConfigHandler, PropertyValueHandler {
+export class TextHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.TEXT;
 
   private parseConfig(config: Record<string, unknown>): TextProperty {
@@ -48,5 +56,39 @@ export class TextHandler implements PropertyConfigHandler, PropertyValueHandler 
 
   getDefaultValue(config: Record<string, unknown>): unknown {
     return this.parseConfig(config).defaultValue ?? "";
+  }
+
+  isEmpty(value: unknown): boolean {
+    return value === null || value === undefined || value === "";
+  }
+
+  convertFrom(
+    value: unknown,
+    _fromType: PropertyType,
+    _fromConfig: Record<string, unknown>,
+    targetConfig: Record<string, unknown>,
+  ): unknown {
+    if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
+    if (typeof value === "boolean") return value ? "true" : "false";
+    if (typeof value === "number") return String(value);
+    if (Array.isArray(value)) {
+      return (value as unknown[])
+        .map((item) => {
+          if (typeof item === "string") return item;
+          if (typeof item === "object" && item !== null && typeof (item as Record<string, unknown>).label === "string") {
+            return (item as Record<string, unknown>).label as string;
+          }
+          return String(item);
+        })
+        .join(", ");
+    }
+    if (typeof value === "object" && value !== null && typeof (value as Record<string, unknown>).label === "string") {
+      return (value as Record<string, unknown>).label as string;
+    }
+    return String(value);
+  }
+
+  getFilterOperators(): FilterOperator[] {
+    return OPERATORS_BY_PROPERTY_TYPE[this.type];
   }
 }

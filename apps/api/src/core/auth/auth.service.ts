@@ -6,6 +6,7 @@ import { t } from "../../common/utils/i18n.helper";
 import { MailService } from "../mail/mail.service";
 import { hashPassword, verifyPassword } from "../../common/utils/password";
 import { UserService } from "../../modules/user/user.service";
+import { InitializeUserSpaceUseCase } from "../../modules/space/providers/initialize-user-space.usecase";
 import { TokenService } from "./token.service";
 
 @Injectable()
@@ -14,6 +15,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly tokenService: TokenService,
     private readonly mailService: MailService,
+    private readonly initializeUserSpaceUseCase: InitializeUserSpaceUseCase,
     private readonly logger: AppLogger,
   ) {
     this.logger.setContext(AuthService.name);
@@ -49,6 +51,14 @@ export class AuthService {
         email: user.email,
       });
       throw new UnauthorizedException(t("errors.EMAIL_NOT_VERIFIED"));
+    }
+
+    const existingSpace = await prisma.space.findFirst({
+      where: { ownerId: user.id },
+    });
+
+    if (!existingSpace) {
+      await this.initializeUserSpaceUseCase.initialize(user.id, user.username);
     }
 
     const accessToken = this.tokenService.generateAccessToken(user.id, user.username);
@@ -111,21 +121,25 @@ export class AuthService {
       throw new BadRequestException(t("errors.INVALID_VERIFICATION_TOKEN"));
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.user.update({
+    const user = await prisma.$transaction(async (transaction) => {
+      const updatedUser = await transaction.user.update({
         where: { id: validated.userId },
         data: { isVerified: true },
       });
 
-      await tx.emailVerificationToken.update({
+      await transaction.emailVerificationToken.update({
         where: { id: validated.tokenId },
         data: { usedAt: new Date() },
       });
+
+      return updatedUser;
     });
 
     this.logger.log("Email verified successfully", {
       userId: validated.userId,
     });
+
+    await this.initializeUserSpaceUseCase.initialize(user.id, user.username);
 
     return { message: t("errors.EMAIL_VERIFIED") };
   }
@@ -202,13 +216,13 @@ export class AuthService {
 
     const passwordHash = await hashPassword(newPassword);
 
-    await prisma.$transaction(async (tx) => {
-      await tx.user.update({
+    await prisma.$transaction(async (transaction) => {
+      await transaction.user.update({
         where: { id: validated.userId },
         data: { passwordHash },
       });
 
-      await tx.passwordResetToken.update({
+      await transaction.passwordResetToken.update({
         where: { id: validated.tokenId },
         data: { usedAt: new Date() },
       });
@@ -239,6 +253,14 @@ export class AuthService {
     });
 
     this.logger.log("Dev: user verified", { userId: user.id, email });
+
+    const existingSpace = await prisma.space.findFirst({
+      where: { ownerId: user.id },
+    });
+
+    if (!existingSpace) {
+      await this.initializeUserSpaceUseCase.initialize(user.id, user.username);
+    }
 
     return { message: t("errors.DEV_USER_VERIFIED", { email }) };
   }

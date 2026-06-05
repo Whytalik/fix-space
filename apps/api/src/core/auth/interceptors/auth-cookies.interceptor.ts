@@ -3,12 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { Response } from "express";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import {
-  clearAuthCookies,
-  parseDurationToMs,
-  setAccessTokenCookie,
-  setRefreshTokenCookie,
-} from "../utils/cookie.helper";
+import { clearAuthCookies, parseDurationToMs, setAccessTokenCookie, setRefreshTokenCookie } from "../utils/cookie.helper";
 
 export interface AuthCookieData {
   accessToken?: string;
@@ -27,7 +22,7 @@ export class AuthCookiesInterceptor implements NestInterceptor {
         const response = context.switchToHttp().getResponse<Response>();
         const cookieOptions = {
           domain: this.configService.get("COOKIE_DOMAIN", "localhost"),
-          secure: this.configService.get("NODE_ENV") === "production",
+          secure: this.configService.get("NODE_ENV") === "production" && this.configService.get("COOKIE_SECURE") !== "false",
         };
 
         if (cookieData.clearCookies) {

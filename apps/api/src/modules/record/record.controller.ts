@@ -1,20 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put, Query } from "@nestjs/common";
-import {
-  CreateRecordDto,
-  FilterLogic,
-  RecordContentResponseDto,
-  RecordFilterDto,
-  RecordSortDto,
-  SpaceSearchResultDto,
-  UpdateRecordContentDto,
-  UpdateRecordDto,
-} from "@fixspace/domain";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { CreateRecordDto, FilterLogic, RecordFilterDto, RecordSortDto, SpaceSearchResultDto, UpdateRecordDto } from "@fixspace/domain";
 import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
+import { RequireOwnership } from "../../core/auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "../../core/auth/guards/resource-owner.guard";
 import { parseJson } from "../../common/utils/parse-json";
 import { FindRecordsUseCase } from "./providers/find-records.usecase";
-import { GetRecordContentUseCase } from "./providers/get-record-content.usecase";
 import { SearchRecordsUseCase } from "./providers/search-records.usecase";
-import { UpdateRecordContentUseCase } from "./providers/update-record-content.usecase";
 import { RecordService } from "./record.service";
 
 @Controller("records")
@@ -23,50 +14,30 @@ export class RecordController {
     private readonly recordService: RecordService,
     private readonly findRecordsUseCase: FindRecordsUseCase,
     private readonly searchRecordsUseCase: SearchRecordsUseCase,
-    private readonly getRecordContentUseCase: GetRecordContentUseCase,
-    private readonly updateRecordContentUseCase: UpdateRecordContentUseCase,
   ) {}
 
   @Post()
-  create(
-    @CurrentUser("userId")
-    userId: string,
-    @Body()
-    createRecordDto: CreateRecordDto,
-  ) {
+  create(@CurrentUser("userId") userId: string, @Body() createRecordDto: CreateRecordDto) {
     return this.recordService.create(createRecordDto.databaseId, createRecordDto, userId);
   }
 
   @Get("search")
-  search(
-    @Query("spaceId") spaceId: string,
-    @Query("q") q: string,
-    @CurrentUser("userId") userId: string,
-  ): Promise<SpaceSearchResultDto[]> {
+  search(@Query("spaceId") spaceId: string, @Query("q") q: string, @CurrentUser("userId") userId: string): Promise<SpaceSearchResultDto[]> {
     return this.searchRecordsUseCase.execute(spaceId, userId, q);
   }
 
   @Get()
   findAll(
-    @Query("databaseId")
-    databaseId: string,
-    @Query("page", new ParseIntPipe({ optional: true }))
-    page: number | undefined,
-    @Query("pageSize", new ParseIntPipe({ optional: true }))
-    pageSize: number | undefined,
-    @Query("sort")
-    sortRaw: string | undefined,
-    @Query("filters")
-    filtersRaw: string | undefined,
-    @Query("filterLogic")
-    filterLogic: FilterLogic | undefined,
-    @Query("search")
-    search: string | undefined,
-    @CurrentUser("userId")
-    userId: string,
+    @Query("databaseId") databaseId: string,
+    @Query("page", new ParseIntPipe({ optional: true })) page: number | undefined,
+    @Query("pageSize", new ParseIntPipe({ optional: true })) pageSize: number | undefined,
+    @Query("sort") sortRaw: string | undefined,
+    @Query("filters") filtersRaw: string | undefined,
+    @Query("filterLogic") filterLogic: FilterLogic | undefined,
+    @Query("search") search: string | undefined,
+    @CurrentUser("userId") userId: string,
   ) {
-    const hasAdvanced =
-      sortRaw !== undefined || filtersRaw !== undefined || filterLogic !== undefined || search !== undefined;
+    const hasAdvanced = sortRaw !== undefined || filtersRaw !== undefined || filterLogic !== undefined || search !== undefined;
 
     if (!hasAdvanced) {
       if (page !== undefined && pageSize !== undefined) {
@@ -82,45 +53,32 @@ export class RecordController {
   }
 
   @Get(":id")
-  findOne(
-    @Param("id") id: string,
-    @CurrentUser("userId")
-    userId: string,
-  ) {
-    return this.recordService.findOne(id, userId);
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "record",
+    ownerPath: ["database", "space", "ownerId"],
+  })
+  findOne(@Param("id") id: string) {
+    return this.recordService.findOne(id);
   }
 
   @Patch(":id")
-  update(
-    @Param("id") id: string,
-    @CurrentUser("userId")
-    userId: string,
-    @Body()
-    updateRecordDto: UpdateRecordDto,
-  ) {
-    return this.recordService.update(id, updateRecordDto, userId);
-  }
-
-  @Get(":id/content")
-  getContent(@Param("id") id: string, @CurrentUser("userId") userId: string): Promise<RecordContentResponseDto> {
-    return this.getRecordContentUseCase.execute(id, userId);
-  }
-
-  @Put(":id/content")
-  updateContent(
-    @Param("id") id: string,
-    @CurrentUser("userId") userId: string,
-    @Body() updateRecordContentDto: UpdateRecordContentDto,
-  ): Promise<RecordContentResponseDto> {
-    return this.updateRecordContentUseCase.execute(id, userId, updateRecordContentDto.content);
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "record",
+    ownerPath: ["database", "space", "ownerId"],
+  })
+  update(@Param("id") id: string, @Body() updateRecordDto: UpdateRecordDto) {
+    return this.recordService.update(id, updateRecordDto);
   }
 
   @Delete(":id")
-  remove(
-    @Param("id") id: string,
-    @CurrentUser("userId")
-    userId: string,
-  ) {
-    return this.recordService.remove(id, userId);
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "record",
+    ownerPath: ["database", "space", "ownerId"],
+  })
+  remove(@Param("id") id: string) {
+    return this.recordService.remove(id);
   }
 }

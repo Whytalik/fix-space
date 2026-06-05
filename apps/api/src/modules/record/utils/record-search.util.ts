@@ -15,23 +15,18 @@ export function matchesSearch(record: SearchableRecord, term: string): boolean {
     return true;
   }
 
-  const searchableTypes = new Set<string>([
-    PropertyType.TEXT,
-    PropertyType.SELECT,
-    PropertyType.STATUS,
-    PropertyType.FORMULA,
-  ]);
+  const searchableTypes = new Set<string>([PropertyType.TEXT, PropertyType.SELECT, PropertyType.STATUS, PropertyType.FORMULA]);
 
   for (const propertyValue of record.values) {
     if (!searchableTypes.has(propertyValue.property.type)) continue;
 
-    const val = propertyValue.value;
-    if (val === null || val === undefined) continue;
+    const fieldValue = propertyValue.value;
+    if (fieldValue === null || fieldValue === undefined) continue;
 
-    if (typeof val === "string" && val.toLowerCase().includes(lower)) return true;
+    if (typeof fieldValue === "string" && fieldValue.toLowerCase().includes(lower)) return true;
 
-    if (Array.isArray(val)) {
-      if (val.some((item) => typeof item === "string" && item.toLowerCase().includes(lower))) return true;
+    if (Array.isArray(fieldValue)) {
+      if (fieldValue.some((item) => typeof item === "string" && item.toLowerCase().includes(lower))) return true;
     }
 
     if (typeof val === "object" && !Array.isArray(val)) {

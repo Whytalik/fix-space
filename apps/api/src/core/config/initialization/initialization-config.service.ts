@@ -8,8 +8,4 @@ export class InitializationConfigService {
   getConfig(): InitializationConfig {
     return this.config;
   }
-
-  interpolateSpaceName(username: string): string {
-    return this.config.spaceNameTemplate.replace("{{username}}", username);
-  }
 }

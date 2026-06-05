@@ -50,9 +50,7 @@ export class PropertyService {
 
     const configErrors = handler.validateConfig(mergedConfig);
     if (configErrors) {
-      throw new BadRequestException(
-        t("errors.INVALID_CONFIG", { type: createPropertyDto.type, errors: configErrors.join("; ") }),
-      );
+      throw new BadRequestException(t("errors.INVALID_CONFIG", { type: createPropertyDto.type, errors: configErrors.join("; ") }));
     }
 
     const [property] = await this.propertyRepo.transaction(async (tx) => {
@@ -130,11 +128,7 @@ export class PropertyService {
     }
 
     if (updatePropertyDto.name && updatePropertyDto.name !== existingProperty.name) {
-      const isPropertyNameTaken = await this.propertyRepo.findByNameExcluding(
-        updatePropertyDto.name,
-        existingProperty.databaseId,
-        id,
-      );
+      const isPropertyNameTaken = await this.propertyRepo.findByNameExcluding(updatePropertyDto.name, existingProperty.databaseId, id);
 
       if (isPropertyNameTaken) {
         this.logger.warn("Duplicate property name on update", {
@@ -161,9 +155,7 @@ export class PropertyService {
       };
       const configErrors = handler.validateConfig(merged);
       if (configErrors) {
-        throw new BadRequestException(
-          t("errors.INVALID_CONFIG", { type: effectiveType, errors: configErrors.join("; ") }),
-        );
+        throw new BadRequestException(t("errors.INVALID_CONFIG", { type: effectiveType, errors: configErrors.join("; ") }));
       }
       configToSave = merged;
     }

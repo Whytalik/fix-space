@@ -1,6 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import {
   DEFAULT_STATUS_PROPERTY,
+  FilterOperator,
+  OPERATORS_BY_PROPERTY_TYPE,
   PropertyType,
   STATUS_CATEGORY_VALUES,
   STATUS_OPTION_COLOR_VALUES,
@@ -8,10 +10,10 @@ import {
   StatusOptionColor,
   StatusProperty,
 } from "@fixspace/domain";
-import { PropertyConfigHandler, PropertyValueHandler } from "../handler.interface";
+import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
-export class StatusHandler implements PropertyConfigHandler, PropertyValueHandler {
+export class StatusHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.STATUS;
 
   private parseConfig(config: Record<string, unknown>): StatusProperty {
@@ -105,5 +107,29 @@ export class StatusHandler implements PropertyConfigHandler, PropertyValueHandle
 
   getDefaultValue(config: Record<string, unknown>): unknown {
     return this.parseConfig(config).defaultOption ?? DEFAULT_STATUS_PROPERTY.defaultOption;
+  }
+
+  isEmpty(value: unknown): boolean {
+    return value === null || value === undefined || value === "";
+  }
+
+  convertFrom(
+    value: unknown,
+    _fromType: PropertyType,
+    _fromConfig: Record<string, unknown>,
+    targetConfig: Record<string, unknown>,
+  ): unknown {
+    if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
+    const stringValue = typeof value === "string" ? value : String(value);
+    const { categories } = this.parseConfig(targetConfig);
+    if (categories) {
+      const allOptions = categories.flatMap((c) => c.options.map((o) => o.name));
+      if (allOptions.includes(stringValue)) return stringValue;
+    }
+    return this.getDefaultValue(targetConfig);
+  }
+
+  getFilterOperators(): FilterOperator[] {
+    return OPERATORS_BY_PROPERTY_TYPE[this.type];
   }
 }

@@ -12,13 +12,13 @@ export class DatabaseRepository extends BaseRepository {
     return prisma.database.findFirst({ where: { name, spaceId } });
   }
 
-  async findByIdWithOwner(id: string, userId: string) {
-    return prisma.database.findFirst({ where: { id, space: { ownerId: userId } } });
+  async findById(id: string) {
+    return prisma.database.findUnique({ where: { id } });
   }
 
-  async findByIdForDuplicate(id: string, userId: string) {
-    return prisma.database.findFirst({
-      where: { id, space: { ownerId: userId } },
+  async findByIdForDuplicate(id: string) {
+    return prisma.database.findUnique({
+      where: { id },
       include: {
         properties: true,
         records: { include: { values: true } },
@@ -34,8 +34,8 @@ export class DatabaseRepository extends BaseRepository {
     return prisma.section.findFirst({ where: { id: sectionId, spaceId } });
   }
 
-  async create(data: Prisma.DatabaseUncheckedCreateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).database.create({ data });
+  async create(data: Prisma.DatabaseUncheckedCreateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).database.create({ data });
   }
 
   async update(id: string, data: Prisma.DatabaseUncheckedUpdateInput) {

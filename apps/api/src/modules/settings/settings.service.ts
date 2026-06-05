@@ -32,12 +32,7 @@ export class SettingsService {
     return result;
   }
 
-  async updateSettings<T extends object>(
-    userId: string,
-    category: SettingsCategory,
-    updateDto: Partial<T>,
-    defaultValues: T,
-  ): Promise<T> {
+  async updateSettings<T extends object>(userId: string, category: SettingsCategory, updateDto: Partial<T>, defaultValues: T): Promise<T> {
     this.logger.debug("Updating settings", { userId, category });
 
     const operations = Object.entries({

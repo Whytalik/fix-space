@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { InitializationConfigModule } from "../../core/config/initialization-config.module";
+import { InitializationConfigModule } from "../../core/config/initialization/initialization-config.module";
 import { DatabaseModule } from "../database/database.module";
 import { PropertyModule } from "../property/property.module";
 import { PropertyValueModule } from "../property-value/property-value.module";
@@ -15,31 +15,9 @@ import { SpaceRepository } from "./repositories/space.repository";
 import { SpaceService } from "./space.service";
 
 @Module({
-  imports: [
-    DatabaseModule,
-    PropertyModule,
-    PropertyValueModule,
-    RecordModule,
-    InitializationConfigModule,
-    SettingsModule,
-    TemplateModule,
-  ],
+  imports: [DatabaseModule, PropertyModule, PropertyValueModule, RecordModule, TemplateModule, InitializationConfigModule, SettingsModule],
   controllers: [SpaceController],
-  providers: [
-    SpaceService,
-    SpaceRepository,
-    SectionService,
-    SectionRepository,
-    InitializeUserSpaceUseCase,
-    DuplicateSpaceUseCase,
-  ],
-  exports: [
-    SpaceService,
-    SpaceRepository,
-    SectionService,
-    SectionRepository,
-    InitializeUserSpaceUseCase,
-    DuplicateSpaceUseCase,
-  ],
+  providers: [SpaceService, SpaceRepository, SectionService, SectionRepository, InitializeUserSpaceUseCase, DuplicateSpaceUseCase],
+  exports: [SpaceService, SpaceRepository, SectionService, SectionRepository, InitializeUserSpaceUseCase, DuplicateSpaceUseCase],
 })
 export class SpaceModule {}

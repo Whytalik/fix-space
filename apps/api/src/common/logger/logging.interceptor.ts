@@ -17,19 +17,19 @@ function sanitizeBody(body: Record<string, unknown>): Record<string, unknown> {
 }
 
 function colorMethod(method: string): string {
-  const m = method.toUpperCase();
-  switch (m) {
+  const uppercaseMethod = method.toUpperCase();
+  switch (uppercaseMethod) {
     case "GET":
-      return `\x1b[32m${m}\x1b[0m`;
+      return `\x1b[32m${uppercaseMethod}\x1b[0m`;
     case "POST":
-      return `\x1b[33m${m}\x1b[0m`;
+      return `\x1b[33m${uppercaseMethod}\x1b[0m`;
     case "PUT":
     case "PATCH":
-      return `\x1b[34m${m}\x1b[0m`;
+      return `\x1b[34m${uppercaseMethod}\x1b[0m`;
     case "DELETE":
-      return `\x1b[31m${m}\x1b[0m`;
+      return `\x1b[31m${uppercaseMethod}\x1b[0m`;
     default:
-      return `\x1b[36m${m}\x1b[0m`;
+      return `\x1b[36m${uppercaseMethod}\x1b[0m`;
   }
 }
 
@@ -88,9 +88,7 @@ export class LoggingInterceptor implements NestInterceptor {
           const duration = Date.now() - now;
           const status = response.statusCode;
           const icon = status < 400 ? `\x1b[32m✔\x1b[0m` : `\x1b[31m✖\x1b[0m`;
-          this.logger.log(
-            `${icon}  [${colorMethod(method)}] ${url} ${colorStatus(status)} (${colorDuration(duration)})`,
-          );
+          this.logger.log(`${icon}  [${colorMethod(method)}] ${url} ${colorStatus(status)} (${colorDuration(duration)})`);
         },
       }),
     );

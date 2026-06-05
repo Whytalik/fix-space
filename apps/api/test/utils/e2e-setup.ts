@@ -58,10 +58,7 @@ export async function setupE2eApp() {
   app.useGlobalPipes(new I18nValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   const appLogger = app.get(AppLogger);
-  app.useGlobalFilters(
-    new I18nValidationExceptionFilter({ detailedErrors: true }),
-    new GlobalExceptionFilter(appLogger),
-  );
+  app.useGlobalFilters(new I18nValidationExceptionFilter({ detailedErrors: true }), new GlobalExceptionFilter(appLogger));
 
   await app.init();
   const agent = supertest.agent(app.getHttpServer() as Parameters<typeof supertest.agent>[0]);

@@ -8,8 +8,8 @@ type SpaceWithSections = Prisma.SpaceGetPayload<{ include: typeof sectionsInclud
 export function toSpaceResponseDto(space: SpaceWithSections | Record<string, unknown>): SpaceResponseDto {
   return new SpaceResponseDto({
     ...space,
-    config: space.config as unknown as SpaceConfigDto,
-    databases: (space.databases ?? []) as unknown as SpaceResponseDto["databases"],
-    sections: (space.sections ?? []) as unknown as SpaceResponseDto["sections"],
+    config: space.config as SpaceConfigDto,
+    databases: (space.databases ?? []) as SpaceResponseDto["databases"],
+    sections: (space.sections ?? []) as SpaceResponseDto["sections"],
   });
 }

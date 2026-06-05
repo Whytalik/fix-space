@@ -6,7 +6,6 @@ import { Test } from "@nestjs/testing";
 import { AppLogger } from "../../../common/logger/app-logger.service";
 import * as passwordUtils from "../../../common/utils/password";
 import { MailService } from "../../mail/mail.service";
-import { InitializeUserSpaceUseCase } from "../../../modules/space/providers/initialize-user-space.usecase";
 import { RegisterUserUseCase } from "../providers/register-user.usecase";
 import { TokenService } from "../token.service";
 
@@ -21,10 +20,6 @@ jest.mock("@fixspace/database", () => ({
 
 describe("RegisterUserUseCase", () => {
   let useCase: RegisterUserUseCase;
-
-  const mockInitializeUserSpaceUseCase = {
-    initialize: jest.fn<() => Promise<void>>(),
-  };
 
   const mockTokenService: jest.Mocked<Pick<TokenService, "createVerificationToken">> = {
     createVerificationToken: jest.fn(),
@@ -58,7 +53,6 @@ describe("RegisterUserUseCase", () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RegisterUserUseCase,
-        { provide: InitializeUserSpaceUseCase, useValue: mockInitializeUserSpaceUseCase },
         { provide: TokenService, useValue: mockTokenService },
         { provide: MailService, useValue: mockMailService },
         { provide: AppLogger, useValue: mockLogger },
@@ -75,7 +69,6 @@ describe("RegisterUserUseCase", () => {
       (prisma.user.create as jest.Mock<any>).mockResolvedValue(mockUser);
       jest.spyOn(passwordUtils, "hashPassword").mockResolvedValue("hashed_password");
       mockTokenService.createVerificationToken.mockResolvedValue("verification_token");
-      mockInitializeUserSpaceUseCase.initialize.mockResolvedValue(undefined);
 
       const result = await useCase.register(registerDto);
 
@@ -102,21 +95,19 @@ describe("RegisterUserUseCase", () => {
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
 
-    it("should NOT call initialize or sendVerificationEmail if email is taken", async () => {
+    it("should NOT call sendVerificationEmail if email is taken", async () => {
       (prisma.user.findUnique as jest.Mock<any>).mockResolvedValueOnce(mockUser);
 
       await expect(useCase.register(registerDto)).rejects.toThrow(ConflictException);
 
-      expect(mockInitializeUserSpaceUseCase.initialize).not.toHaveBeenCalled();
       expect(mockMailService.sendVerificationEmail).not.toHaveBeenCalled();
     });
 
-    it("should NOT call initialize or sendVerificationEmail if username is taken", async () => {
+    it("should NOT call sendVerificationEmail if username is taken", async () => {
       (prisma.user.findUnique as jest.Mock<any>).mockResolvedValueOnce(null).mockResolvedValueOnce(mockUser);
 
       await expect(useCase.register(registerDto)).rejects.toThrow(ConflictException);
 
-      expect(mockInitializeUserSpaceUseCase.initialize).not.toHaveBeenCalled();
       expect(mockMailService.sendVerificationEmail).not.toHaveBeenCalled();
     });
 
@@ -125,7 +116,6 @@ describe("RegisterUserUseCase", () => {
       (prisma.user.create as jest.Mock<any>).mockResolvedValue(mockUser);
       const hashSpy = jest.spyOn(passwordUtils, "hashPassword").mockResolvedValue("hashed_password");
       mockTokenService.createVerificationToken.mockResolvedValue("token");
-      mockInitializeUserSpaceUseCase.initialize.mockResolvedValue(undefined);
 
       await useCase.register(registerDto);
 
@@ -135,32 +125,15 @@ describe("RegisterUserUseCase", () => {
       );
     });
 
-    it("should call initialize with correct userId and username", async () => {
-      (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(null);
-      (prisma.user.create as jest.Mock<any>).mockResolvedValue(mockUser);
-      jest.spyOn(passwordUtils, "hashPassword").mockResolvedValue("hashed_password");
-      mockTokenService.createVerificationToken.mockResolvedValue("token");
-      mockInitializeUserSpaceUseCase.initialize.mockResolvedValue(undefined);
-
-      await useCase.register(registerDto);
-
-      expect(mockInitializeUserSpaceUseCase.initialize).toHaveBeenCalledWith(mockUser.id, registerDto.username);
-    });
-
     it("should call sendVerificationEmail with email, username, and token", async () => {
       (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(null);
       (prisma.user.create as jest.Mock<any>).mockResolvedValue(mockUser);
       jest.spyOn(passwordUtils, "hashPassword").mockResolvedValue("hashed_password");
       mockTokenService.createVerificationToken.mockResolvedValue("verification_token");
-      mockInitializeUserSpaceUseCase.initialize.mockResolvedValue(undefined);
 
       await useCase.register(registerDto);
 
-      expect(mockMailService.sendVerificationEmail).toHaveBeenCalledWith(
-        mockUser.email,
-        mockUser.username,
-        "verification_token",
-      );
+      expect(mockMailService.sendVerificationEmail).toHaveBeenCalledWith(mockUser.email, mockUser.username, "verification_token");
     });
   });
 });

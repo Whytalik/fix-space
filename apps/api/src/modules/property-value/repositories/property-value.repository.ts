@@ -14,9 +14,9 @@ export class PropertyValueRepository extends BaseRepository {
     return prisma.property.findUnique({ where: { id: propertyId } });
   }
 
-  async findByIdWithOwner(id: string, userId: string) {
-    return prisma.propertyValue.findFirst({
-      where: { id, record: { database: { space: { ownerId: userId } } } },
+  async findById(id: string) {
+    return prisma.propertyValue.findUnique({
+      where: { id },
       include: { property: true },
     });
   }

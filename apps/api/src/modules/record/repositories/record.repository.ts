@@ -1,11 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
-import type { RecordContent } from "@fixspace/database";
-import { ContainerBlock } from "@fixspace/domain";
 import { BaseRepository } from "../../../common/utils/base.repository";
-
-type DbRecordContent = RecordContent;
-export type RecordContentData = Omit<DbRecordContent, "content"> & { content: ContainerBlock };
 
 @Injectable()
 export class RecordRepository extends BaseRepository {
@@ -20,44 +15,17 @@ export class RecordRepository extends BaseRepository {
     return prisma.property.findMany({ where: { databaseId } });
   }
 
-  async findTemplateById(templateId: string, databaseId: string) {
-    return prisma.template.findFirst({
-      where: { id: templateId, databaseId },
+  async findById(id: string) {
+    return prisma.record.findUnique({
+      where: { id },
       include: { values: true },
-    });
-  }
-
-  async findDefaultTemplate(databaseId: string) {
-    return (
-      (await prisma.template.findFirst({
-        where: { databaseId, isDefault: true },
-        include: { values: true },
-      })) ??
-      (await prisma.template.findFirst({
-        where: { databaseId },
-        orderBy: { position: "asc" },
-        include: { values: true },
-      }))
-    );
-  }
-
-  async findByIdWithOwner(id: string, userId: string) {
-    return prisma.record.findFirst({
-      where: { id, database: { space: { ownerId: userId } } },
-      include: { values: true, content: true },
-    });
-  }
-
-  async findByIdForOwnerCheck(id: string, userId: string) {
-    return prisma.record.findFirst({
-      where: { id, database: { space: { ownerId: userId } } },
     });
   }
 
   async findAllByDatabase(databaseId: string, userId: string) {
     return prisma.record.findMany({
       where: { databaseId, database: { space: { ownerId: userId } } },
-      include: { values: true, content: true },
+      include: { values: true },
       orderBy: { createdAt: "desc" },
     });
   }
@@ -67,7 +35,7 @@ export class RecordRepository extends BaseRepository {
     return Promise.all([
       prisma.record.findMany({
         where,
-        include: { values: true, content: true },
+        include: { values: true },
         orderBy: { createdAt: "desc" },
         skip,
         take,
@@ -90,7 +58,6 @@ export class RecordRepository extends BaseRepository {
       },
       include: {
         values: { include: { property: { select: { type: true, position: true } } } },
-        content: true,
       },
       ...(orderBy ? { orderBy } : {}),
     });
@@ -112,14 +79,14 @@ export class RecordRepository extends BaseRepository {
     });
   }
 
-  async create(data: Prisma.RecordUncheckedCreateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).record.create({ data });
+  async create(data: Prisma.RecordUncheckedCreateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).record.create({ data });
   }
 
-  async findUniqueOrThrowWithValues(id: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).record.findUniqueOrThrow({
+  async findUniqueOrThrowWithValues(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).record.findUniqueOrThrow({
       where: { id },
-      include: { values: true, content: true },
+      include: { values: true },
     });
   }
 
@@ -127,27 +94,11 @@ export class RecordRepository extends BaseRepository {
     return prisma.record.update({
       where: { id },
       data,
-      include: { values: true, content: true },
+      include: { values: true },
     });
   }
 
   async delete(id: string) {
     return prisma.record.delete({ where: { id } });
-  }
-
-  async findContent(recordId: string): Promise<RecordContentData | null> {
-    const result = await prisma.recordContent.findUnique({ where: { recordId } });
-    if (!result) return null;
-    return { ...result, content: result.content as unknown as ContainerBlock };
-  }
-
-  async upsertContent(recordId: string, content: ContainerBlock): Promise<RecordContentData> {
-    const json = content as unknown as Prisma.InputJsonValue;
-    const result = await prisma.recordContent.upsert({
-      where: { recordId },
-      update: { content: json },
-      create: { recordId, content: json },
-    });
-    return { ...result, content: result.content as unknown as ContainerBlock };
   }
 }

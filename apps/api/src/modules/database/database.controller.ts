@@ -1,9 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
-import { CreateDatabaseDto, UpdateDatabaseDto } from "@fixspace/domain";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { HttpCode, HttpStatus } from "@nestjs/common";
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { CreateDatabaseDto, DatabaseResponseDto, UpdateDatabaseDto } from "@fixspace/domain";
 import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
+import { RequireOwnership } from "../../core/auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "../../core/auth/guards/resource-owner.guard";
 import { DatabaseService } from "./database.service";
 import { DuplicateDatabaseUseCase } from "./providers/duplicate-database.usecase";
 
+@ApiTags("Databases")
+@ApiBearerAuth("access-token")
 @Controller("databases")
 export class DatabaseController {
   constructor(
@@ -12,47 +18,85 @@ export class DatabaseController {
   ) {}
 
   @Post()
-  create(
-    @CurrentUser("userId")
-    userId: string,
-    @Body()
-    createDatabaseDto: CreateDatabaseDto,
-  ) {
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create a new database in a workspace" })
+  @ApiBody({ type: CreateDatabaseDto })
+  @ApiResponse({ status: 201, description: "Database created successfully.", type: DatabaseResponseDto })
+  @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 404, description: "Workspace not found." })
+  create(@CurrentUser("userId") userId: string, @Body() createDatabaseDto: CreateDatabaseDto) {
+    createDatabaseDto.isPreset = false;
     return this.databaseService.create(createDatabaseDto.spaceId, createDatabaseDto, userId);
   }
 
   @Get()
-  findAll(
-    @Query("spaceId")
-    spaceId: string,
-    @CurrentUser("userId")
-    userId: string,
-  ) {
+  @ApiOperation({ summary: "Get all databases in a workspace" })
+  @ApiQuery({ name: "spaceId", type: String, description: "Workspace ID" })
+  @ApiResponse({ status: 200, description: "List of databases.", type: [DatabaseResponseDto] })
+  @ApiResponse({ status: 404, description: "Workspace not found." })
+  findAll(@Query("spaceId") spaceId: string, @CurrentUser("userId") userId: string) {
     return this.databaseService.findAll(spaceId, userId);
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string, @CurrentUser("userId") userId: string) {
-    return this.databaseService.findOne(id, userId);
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "database",
+    ownerPath: ["space", "ownerId"],
+  })
+  @ApiOperation({ summary: "Get database by ID" })
+  @ApiParam({ name: "id", type: String })
+  @ApiResponse({ status: 200, description: "Database found.", type: DatabaseResponseDto })
+  @ApiResponse({ status: 404, description: "Database not found." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  findOne(@Param("id") id: string) {
+    return this.databaseService.findOne(id);
   }
 
   @Patch(":id")
-  update(
-    @Param("id") id: string,
-    @CurrentUser("userId") userId: string,
-    @Body()
-    updateDatabaseDto: UpdateDatabaseDto,
-  ) {
-    return this.databaseService.update(id, updateDatabaseDto, userId);
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "database",
+    ownerPath: ["space", "ownerId"],
+  })
+  @ApiOperation({ summary: "Update database" })
+  @ApiParam({ name: "id", type: String })
+  @ApiBody({ type: UpdateDatabaseDto })
+  @ApiResponse({ status: 200, description: "Database updated.", type: DatabaseResponseDto })
+  @ApiResponse({ status: 404, description: "Database not found." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  update(@Param("id") id: string, @Body() updateDatabaseDto: UpdateDatabaseDto) {
+    return this.databaseService.update(id, updateDatabaseDto);
   }
 
   @Post(":id/duplicate")
-  duplicate(@Param("id") id: string, @CurrentUser("userId") userId: string) {
-    return this.duplicateDatabaseUseCase.execute(id, userId);
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "database",
+    ownerPath: ["space", "ownerId"],
+  })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Duplicate database with all structure (properties, records, templates)" })
+  @ApiParam({ name: "id", type: String })
+  @ApiResponse({ status: 201, description: "Database duplicated.", type: DatabaseResponseDto })
+  @ApiResponse({ status: 404, description: "Database not found." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  duplicate(@Param("id") id: string) {
+    return this.duplicateDatabaseUseCase.execute(id);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string, @CurrentUser("userId") userId: string) {
-    return this.databaseService.remove(id, userId);
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "database",
+    ownerPath: ["space", "ownerId"],
+  })
+  @ApiOperation({ summary: "Delete database" })
+  @ApiParam({ name: "id", type: String })
+  @ApiResponse({ status: 200, description: "Database deleted.", type: DatabaseResponseDto })
+  @ApiResponse({ status: 400, description: "Cannot delete system database." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  remove(@Param("id") id: string) {
+    return this.databaseService.remove(id);
   }
 }

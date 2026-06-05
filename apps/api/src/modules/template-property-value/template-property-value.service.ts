@@ -1,12 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
-import {
-  CreateTemplatePropertyValueDto,
-  PropertyType,
-  TemplatePropertyValueResponseDto,
-  UpdateTemplatePropertyValueDto,
-} from "@fixspace/domain";
+import { CreateTemplatePropertyValueDto, TemplatePropertyValueResponseDto, UpdateTemplatePropertyValueDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { filterUndefined } from "../../common/utils/filter-undefined";
 import { PropertyTypeRegistry } from "../property/types";
 import { TemplatePropertyValueRepository } from "./repositories/template-property-value.repository";
 
@@ -15,36 +11,27 @@ export class TemplatePropertyValueService {
   constructor(
     private readonly logger: AppLogger,
     private readonly typeRegistry: PropertyTypeRegistry,
-    private readonly tpvRepo: TemplatePropertyValueRepository,
+    private readonly templatePropertyValueRepo: TemplatePropertyValueRepository,
   ) {
     this.logger.setContext(TemplatePropertyValueService.name);
   }
 
-  private resolveHandlerAndConfig(property: { type: string; config: unknown }) {
-    const type = property.type as PropertyType;
-    const handler = this.typeRegistry.getValueHandler(type);
-    const config =
-      (property.config as Record<string, unknown> | null) ??
-      this.typeRegistry.getConfigHandler(type).getDefaultConfig();
-    return { handler, config };
-  }
-
-  async create(dto: CreateTemplatePropertyValueDto, userId: string): Promise<TemplatePropertyValueResponseDto> {
+  async create(createDto: CreateTemplatePropertyValueDto, userId: string): Promise<TemplatePropertyValueResponseDto> {
     this.logger.debug("Creating template property value", {
-      templateId: dto.templateId,
-      propertyId: dto.propertyId,
+      templateId: createDto.templateId,
+      propertyId: createDto.propertyId,
     });
 
-    const template = await this.tpvRepo.findTemplateByOwner(dto.templateId, userId);
+    const template = await this.templatePropertyValueRepo.findTemplateByOwner(createDto.templateId, userId);
 
     if (!template) {
-      throw new NotFoundException(`Template with id ${dto.templateId} not found`);
+      throw new NotFoundException(`Template with id ${createDto.templateId} not found`);
     }
 
-    const property = await this.tpvRepo.findPropertyById(dto.propertyId);
+    const property = await this.templatePropertyValueRepo.findPropertyById(createDto.propertyId);
 
     if (!property) {
-      throw new NotFoundException(`Property with id ${dto.propertyId} not found`);
+      throw new NotFoundException(`Property with id ${createDto.propertyId} not found`);
     }
 
     if (property.databaseId !== template.databaseId) {
@@ -55,9 +42,9 @@ export class TemplatePropertyValueService {
       throw new ConflictException("Property does not belong to the same database as the template");
     }
 
-    const { handler, config } = this.resolveHandlerAndConfig(property);
+    const { handler, config } = this.typeRegistry.resolveHandlerAndConfig(property);
 
-    const rawValue = dto.value !== undefined ? dto.value : handler.getDefaultValue(config);
+    const rawValue = createDto.value !== undefined ? createDto.value : handler.getDefaultValue(config);
 
     const valueErrors = handler.validateValue(rawValue, config);
     if (valueErrors) {
@@ -66,87 +53,81 @@ export class TemplatePropertyValueService {
 
     const formattedValue = handler.formatValue(rawValue, config);
 
-    const templatePropertyValue = await this.tpvRepo.upsert(
-      dto.templateId,
-      dto.propertyId,
+    const result = await this.templatePropertyValueRepo.upsert(
+      createDto.templateId,
+      createDto.propertyId,
       formattedValue as Prisma.InputJsonValue,
     );
 
     this.logger.log("Template property value created", {
-      templatePropertyValueId: templatePropertyValue.id,
-      templateId: dto.templateId,
+      id: result.id,
+      templateId: createDto.templateId,
     });
-    return new TemplatePropertyValueResponseDto(templatePropertyValue);
+    return new TemplatePropertyValueResponseDto(result as unknown as Partial<TemplatePropertyValueResponseDto>);
   }
 
   async findAll(templateId: string, userId: string): Promise<TemplatePropertyValueResponseDto[]> {
     this.logger.debug("Finding all template property values", { templateId });
-
-    const values = await this.tpvRepo.findAllByTemplate(templateId, userId);
-
-    return values.map((v) => new TemplatePropertyValueResponseDto(v));
+    const values = await this.templatePropertyValueRepo.findAllByTemplate(templateId, userId);
+    return values.map((value) => new TemplatePropertyValueResponseDto(value as unknown as Partial<TemplatePropertyValueResponseDto>));
   }
 
-  async findOne(id: string, userId: string): Promise<TemplatePropertyValueResponseDto> {
+  async findOne(id: string): Promise<TemplatePropertyValueResponseDto> {
     this.logger.debug("Finding template property value", { id });
 
-    const value = await this.tpvRepo.findByIdWithOwner(id, userId);
+    const value = await this.templatePropertyValueRepo.findById(id);
 
     if (!value) {
-      throw new NotFoundException(`TemplatePropertyValue with id ${id} not found`);
+      throw new NotFoundException(`Template property value with id ${id} not found`);
     }
 
-    return new TemplatePropertyValueResponseDto(value);
+    return new TemplatePropertyValueResponseDto(value as unknown as Partial<TemplatePropertyValueResponseDto>);
   }
 
-  async update(
-    id: string,
-    dto: UpdateTemplatePropertyValueDto,
-    userId: string,
-  ): Promise<TemplatePropertyValueResponseDto> {
+  async update(id: string, updateDto: UpdateTemplatePropertyValueDto): Promise<TemplatePropertyValueResponseDto> {
     this.logger.debug("Updating template property value", { id });
 
-    const existing = await this.tpvRepo.findByIdWithOwner(id, userId);
+    const existing = await this.templatePropertyValueRepo.findById(id);
 
     if (!existing) {
-      throw new NotFoundException(`TemplatePropertyValue with id ${id} not found`);
+      throw new NotFoundException(`Template property value with id ${id} not found`);
     }
 
     let formattedValue: unknown = undefined;
 
-    if (dto.value !== undefined) {
-      const { handler, config } = this.resolveHandlerAndConfig(existing.property);
+    if (updateDto.value !== undefined) {
+      const { handler, config } = this.typeRegistry.resolveHandlerAndConfig(existing.property);
 
-      const valueErrors = handler.validateValue(dto.value, config);
+      const valueErrors = handler.validateValue(updateDto.value, config);
       if (valueErrors) {
-        throw new BadRequestException(
-          `Invalid value for property type ${existing.property.type}: ${valueErrors.join("; ")}`,
-        );
+        throw new BadRequestException(`Invalid value for property type ${existing.property.type}: ${valueErrors.join("; ")}`);
       }
 
-      formattedValue = handler.formatValue(dto.value, config);
+      formattedValue = handler.formatValue(updateDto.value, config);
     }
 
-    const value = await this.tpvRepo.update(id, {
-      ...(formattedValue !== undefined && { value: formattedValue as Prisma.InputJsonValue }),
+    const updateData = filterUndefined({
+      jsonFields: { value: formattedValue },
     });
 
+    const result = await this.templatePropertyValueRepo.update(id, updateData);
+
     this.logger.log("Template property value updated", { id });
-    return new TemplatePropertyValueResponseDto(value);
+    return new TemplatePropertyValueResponseDto(result as unknown as Partial<TemplatePropertyValueResponseDto>);
   }
 
-  async remove(id: string, userId: string): Promise<TemplatePropertyValueResponseDto> {
+  async remove(id: string): Promise<TemplatePropertyValueResponseDto> {
     this.logger.debug("Removing template property value", { id });
 
-    const existing = await this.tpvRepo.findByIdWithOwner(id, userId);
+    const existing = await this.templatePropertyValueRepo.findById(id);
 
     if (!existing) {
-      throw new NotFoundException(`TemplatePropertyValue with id ${id} not found`);
+      throw new NotFoundException(`Template property value with id ${id} not found`);
     }
 
-    const value = await this.tpvRepo.delete(id);
+    const result = await this.templatePropertyValueRepo.delete(id);
 
     this.logger.log("Template property value removed", { id });
-    return new TemplatePropertyValueResponseDto(value);
+    return new TemplatePropertyValueResponseDto(result as unknown as Partial<TemplatePropertyValueResponseDto>);
   }
 }

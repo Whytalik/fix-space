@@ -21,38 +21,30 @@ export class SpaceRepository extends BaseRepository {
           include: {
             properties: true,
             records: { include: { values: true, content: true } },
+            templates: { include: { values: true } },
           },
         },
       },
     });
   }
 
-  async findOwner(id: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).space.findUnique({
+  async findOwner(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).space.findUnique({
       where: { id },
       select: { ownerId: true, isDefault: true },
     });
   }
 
-  async create(data: Prisma.SpaceUncheckedCreateInput, include?: Prisma.SpaceInclude, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).space.create({ data, include });
+  async create(data: Prisma.SpaceUncheckedCreateInput, include?: Prisma.SpaceInclude, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).space.create({ data, include });
   }
 
-  async update(
-    id: string,
-    data: Prisma.SpaceUpdateInput,
-    include?: Prisma.SpaceInclude,
-    tx?: Prisma.TransactionClient,
-  ) {
-    return (tx ?? prisma).space.update({ where: { id }, data, include });
+  async update(id: string, data: Prisma.SpaceUpdateInput, include?: Prisma.SpaceInclude, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).space.update({ where: { id }, data, include });
   }
 
-  async updateMany(
-    where: Prisma.SpaceWhereInput,
-    data: Prisma.SpaceUpdateManyMutationInput,
-    tx?: Prisma.TransactionClient,
-  ) {
-    return (tx ?? prisma).space.updateMany({ where, data });
+  async updateMany(where: Prisma.SpaceWhereInput, data: Prisma.SpaceUpdateManyMutationInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).space.updateMany({ where, data });
   }
 
   async delete(id: string) {

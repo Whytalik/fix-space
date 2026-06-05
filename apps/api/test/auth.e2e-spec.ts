@@ -54,30 +54,22 @@ describe("AuthController (e2e)", () => {
       const email = uniqueEmail(E2E_AUTH_MARKER);
       await agent.post("/auth/register").send({ email, username: uniqueUsername(), password: "Password123!" });
 
-      const res = await agent
-        .post("/auth/register")
-        .send({ email, username: uniqueUsername(), password: "Password123!" });
+      const res = await agent.post("/auth/register").send({ email, username: uniqueUsername(), password: "Password123!" });
 
       expect(res.status).toBe(409);
     });
 
     it("should return 409 if username is already taken", async () => {
       const username = uniqueUsername();
-      await agent
-        .post("/auth/register")
-        .send({ email: uniqueEmail(E2E_AUTH_MARKER), username, password: "Password123!" });
+      await agent.post("/auth/register").send({ email: uniqueEmail(E2E_AUTH_MARKER), username, password: "Password123!" });
 
-      const res = await agent
-        .post("/auth/register")
-        .send({ email: uniqueEmail(E2E_AUTH_MARKER), username, password: "Password123!" });
+      const res = await agent.post("/auth/register").send({ email: uniqueEmail(E2E_AUTH_MARKER), username, password: "Password123!" });
 
       expect(res.status).toBe(409);
     });
 
     it("should return 400 if email is invalid", async () => {
-      const res = await agent
-        .post("/auth/register")
-        .send({ email: "not-an-email", username: uniqueUsername(), password: "Password123!" });
+      const res = await agent.post("/auth/register").send({ email: "not-an-email", username: uniqueUsername(), password: "Password123!" });
 
       expect(res.status).toBe(400);
     });
@@ -142,9 +134,7 @@ describe("AuthController (e2e)", () => {
     });
 
     it("should return 401 if user does not exist", async () => {
-      const res = await agent
-        .post("/auth/login")
-        .send({ email: "ghost@nowhere.example.com", password: "Password123!" });
+      const res = await agent.post("/auth/login").send({ email: "ghost@nowhere.example.com", password: "Password123!" });
 
       expect(res.status).toBe(401);
     });
@@ -206,10 +196,7 @@ describe("AuthController (e2e)", () => {
       const accessToken = loginRes.body.accessToken as string;
       const refreshCookie = extractRefreshCookie(loginRes.headers["set-cookie"] as unknown as string[]);
 
-      const res = await agent
-        .post("/auth/logout")
-        .set("Authorization", `Bearer ${accessToken}`)
-        .set("Cookie", refreshCookie);
+      const res = await agent.post("/auth/logout").set("Authorization", `Bearer ${accessToken}`).set("Cookie", refreshCookie);
 
       expect(res.status).toBe(200);
     });
@@ -281,15 +268,12 @@ describe("AuthController (e2e)", () => {
     });
 
     it("should allow login with new password after reset", async () => {
-      // Note: This relies on the previous test having succeeded
       const loginRes = await agent.post("/auth/login").send({ email: sharedEmail, password: "NewPassword456!" });
       expect(loginRes.status).toBe(200);
     });
 
     it("should return 400 if token is invalid", async () => {
-      const res = await agent
-        .post("/auth/reset-password")
-        .send({ token: "invalid-reset-token", newPassword: "NewPassword456!" });
+      const res = await agent.post("/auth/reset-password").send({ token: "invalid-reset-token", newPassword: "NewPassword456!" });
 
       expect(res.status).toBe(400);
     });
@@ -298,7 +282,6 @@ describe("AuthController (e2e)", () => {
       const email = uniqueEmail(E2E_AUTH_MARKER);
       await registerAndVerify(email, uniqueUsername(), "Password123!");
 
-      // We need a new token for this user to test weak password on a valid token
       jest.clearAllMocks();
       await agent.post("/auth/forgot-password").send({ email });
       const token = mockMailService.sendPasswordResetEmail.mock.calls[0]?.[1] as string;

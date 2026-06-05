@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { CreateSpaceDto, SectionOperationDto, SpaceResponseDto, UpdateSpaceDto } from "@fixspace/domain";
+import { CreateSpaceDto, SpaceResponseDto, UpdateSpaceDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { filterUndefined } from "../../common/utils/filter-undefined";
 import { t } from "../../common/utils/i18n.helper";
 import { SectionService } from "./providers/section.service";
 import { SpaceRepository } from "./repositories/space.repository";
 import { sectionsInclude } from "./constants/space.constants";
-import { toSpaceResponseDto } from "./utils/to-space-response.dto";
+import { toSpaceResponseDto } from "./utils/to-space-response.util";
 
 @Injectable()
 export class SpaceService {
@@ -23,21 +24,15 @@ export class SpaceService {
       name: dto.name,
     });
 
-    const space = await this.spaceRepo.transaction(async (tx) => {
-      if (dto.isDefault) {
-        await this.spaceRepo.updateMany({ ownerId, isDefault: true }, { isDefault: false }, tx);
-      }
-      return this.spaceRepo.create(
-        {
-          name: dto.name,
-          icon: dto.icon,
-          isDefault: dto.isDefault ?? false,
-          ownerId,
-        },
-        sectionsInclude,
-        tx,
-      );
-    });
+    const space = await this.spaceRepo.create(
+      {
+        name: dto.name,
+        icon: dto.icon,
+        isDefault: dto.isDefault ?? false,
+        ownerId,
+      },
+      sectionsInclude,
+    );
 
     this.logger.log("Space created", { spaceId: space.id, ownerId });
     return toSpaceResponseDto(space);
@@ -61,40 +56,36 @@ export class SpaceService {
     return toSpaceResponseDto(space);
   }
 
-  async update(id: string, dto: UpdateSpaceDto): Promise<SpaceResponseDto> {
+  async update(id: string, updateSpaceDto: UpdateSpaceDto): Promise<SpaceResponseDto> {
     this.logger.debug("Updating space", { id });
-    const { sectionOperations, ...spaceData } = dto;
+    const { sectionOperations, ...spaceData } = updateSpaceDto;
 
-    return this.spaceRepo.transaction(async (tx) => {
+    return this.spaceRepo.transaction(async (transaction) => {
       if (sectionOperations?.length) {
         this.logger.debug("Processing section operations", {
           spaceId: id,
           count: sectionOperations.length,
         });
-        await this.sectionService.processOperations(tx, id, sectionOperations as SectionOperationDto[]);
+        await this.sectionService.processOperations(transaction, id, sectionOperations);
       }
 
       if (spaceData.isDefault === true) {
-        const current = await this.spaceRepo.findOwner(id, tx);
+        const current = await this.spaceRepo.findOwner(id, transaction);
         if (current) {
           await this.spaceRepo.updateMany(
             { ownerId: current.ownerId, isDefault: true, id: { not: id } },
             { isDefault: false },
-            tx,
+            transaction,
           );
         }
       }
 
-      const space = await this.spaceRepo.update(
-        id,
-        {
-          name: spaceData.name,
-          icon: spaceData.icon,
-          isDefault: spaceData.isDefault,
-        },
-        sectionsInclude,
-        tx,
-      );
+      const updateData = filterUndefined({
+        fields: { name: spaceData.name, icon: spaceData.icon, isDefault: spaceData.isDefault },
+        jsonFields: { config: spaceData.config },
+      });
+
+      const space = await this.spaceRepo.update(id, updateData, sectionsInclude, transaction);
 
       this.logger.log("Space updated", { spaceId: id });
       return toSpaceResponseDto(space);

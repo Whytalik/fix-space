@@ -11,10 +11,12 @@ import {
   SortField,
 } from "@fixspace/domain";
 import { AppLogger } from "../../../common/logger/app-logger.service";
+import { t } from "../../../common/utils/i18n.helper";
 import { RecordRepository } from "../repositories/record.repository";
 import { matchesFilter, RecordWithValues } from "../utils/record-filter.util";
 import { matchesSearch } from "../utils/record-search.util";
 import { compareRecords } from "../utils/record-sort.util";
+import { toRecordResponseDto } from "../utils/to-record-response.util";
 
 interface RecordQueryOptions {
   page?: number;
@@ -62,11 +64,10 @@ export class FindRecordsUseCase {
 
     if (query.page !== undefined && query.pageSize !== undefined) {
       if (query.page < 1 || query.pageSize < 1) {
-        throw new BadRequestException("page and pageSize must be positive integers");
+        throw new BadRequestException(t("errors.PAGE_PAGE_SIZE_MUST_BE_POSITIVE"));
       }
     }
 
-    // Deduplicate sorts
     const seen = new Set<string>();
     const deduped = (query.sort ?? []).filter((sort) => {
       const key = sort.field === SortField.PROPERTY ? `prop:${sort.propertyId}` : `meta:${sort.field}`;
@@ -74,13 +75,11 @@ export class FindRecordsUseCase {
       seen.add(key);
       return true;
     });
-    const sorts: RecordSortDto[] =
-      deduped.length > 0 ? deduped : [{ field: SortField.CREATED_AT, direction: SortDirection.DESC }];
+    const sorts: RecordSortDto[] = deduped.length > 0 ? deduped : [{ field: SortField.CREATED_AT, direction: SortDirection.DESC }];
 
     const allFilters = query.filters ?? [];
     const filterLogic = query.filterLogic ?? FilterLogic.AND;
 
-    // Push meta-field filters to Prisma WHERE when using AND logic
     const prismaMetaWhere: Prisma.RecordWhereInput = {};
     const pushedToDb = new Set<RecordFilterDto>();
 
@@ -90,15 +89,14 @@ export class FindRecordsUseCase {
         const cond = buildMetaDateCondition(filterDto.operator, filterDto.value);
         if (cond === null) continue;
         if (filterDto.field === FilterField.CREATED_AT) {
-          prismaMetaWhere.createdAt = { ...(prismaMetaWhere.createdAt as object), ...cond };
+          prismaMetaWhere.createdAt = { ...(prismaMetaWhere.createdAt as Prisma.DateTimeFilter), ...cond };
         } else {
-          prismaMetaWhere.updatedAt = { ...(prismaMetaWhere.updatedAt as object), ...cond };
+          prismaMetaWhere.updatedAt = { ...(prismaMetaWhere.updatedAt as Prisma.DateTimeFilter), ...cond };
         }
         pushedToDb.add(filterDto);
       }
     }
 
-    // Push meta-only sorts to Prisma ORDER BY
     const hasPropertySort = sorts.some((sort) => sort.field === SortField.PROPERTY);
     const prismaOrderBy: Prisma.RecordOrderByWithRelationInput[] | undefined = hasPropertySort
       ? undefined
@@ -117,9 +115,7 @@ export class FindRecordsUseCase {
       filtered = filtered.filter((record) => matchesSearch(record, query.search!));
     }
 
-    // In-memory filters: OR logic uses all filters; AND logic uses only unpushed filters
-    const inMemoryFilters =
-      filterLogic === FilterLogic.OR ? allFilters : allFilters.filter((filterDto) => !pushedToDb.has(filterDto));
+    const inMemoryFilters = filterLogic === FilterLogic.OR ? allFilters : allFilters.filter((filterDto) => !pushedToDb.has(filterDto));
 
     if (inMemoryFilters.length > 0) {
       filtered = filtered.filter((record) => {
@@ -130,7 +126,6 @@ export class FindRecordsUseCase {
       });
     }
 
-    // In-memory sort only when property sorts are present (meta sorts already applied by Prisma)
     if (hasPropertySort) {
       filtered = filtered.slice().sort((recordA, recordB) => compareRecords(recordA, recordB, sorts));
     }
@@ -144,13 +139,13 @@ export class FindRecordsUseCase {
       this.logger.debug("Advanced paged records found", { databaseId, total, page, pageSize });
 
       return {
-        data: slice.map((record) => new RecordResponseDto(record)),
+        data: slice.map((record) => toRecordResponseDto(record)),
         total,
         page,
         pageSize,
       };
     }
 
-    return filtered.map((record) => new RecordResponseDto(record));
+    return filtered.map((record) => toRecordResponseDto(record));
   }
 }

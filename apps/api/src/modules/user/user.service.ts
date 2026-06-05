@@ -1,9 +1,11 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { type User } from "@fixspace/database";
+import { Prisma, type User } from "@fixspace/database";
 import { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../common/logger/app-logger.service";
+import { filterUndefined } from "../../common/utils/filter-undefined";
+import { t } from "../../common/utils/i18n.helper";
 import { verifyPassword, hashPassword } from "../../common/utils/password";
-import { StorageService } from "./storage.service";
+import { StorageService } from "./providers/storage.service";
 import { UserRepository } from "./repositories/user.repository";
 import { TokenService } from "../../core/auth/token.service";
 import { MailService } from "../../core/mail/mail.service";
@@ -35,12 +37,12 @@ export class UserService {
     this.logger.debug("Updating user", { id });
     const { password, ...rest } = dto;
 
-    const user = await this.userRepo.update(id, {
-      ...rest,
-      ...(password && {
-        passwordHash: await hashPassword(password),
-      }),
-    });
+    const updateData: Prisma.UserUpdateInput = filterUndefined({ fields: rest });
+    if (password) {
+      updateData.passwordHash = await hashPassword(password);
+    }
+
+    const user = await this.userRepo.update(id, updateData);
 
     this.logger.log("User updated", { id });
     return new UserResponseDto(user);
@@ -53,7 +55,7 @@ export class UserService {
 
     const isValid = await verifyPassword(dto.currentPassword, user.passwordHash);
     if (!isValid) {
-      throw new UnauthorizedException("Current password is incorrect");
+      throw new UnauthorizedException(t("errors.CURRENT_PASSWORD_INCORRECT"));
     }
 
     await this.userRepo.update(id, { passwordHash: await hashPassword(dto.newPassword) });
@@ -72,9 +74,9 @@ export class UserService {
       const user = await this.userRepo.update(id, { icon: iconPath });
       this.logger.log("Avatar updated", { id });
       return new UserResponseDto(user);
-    } catch (err) {
+    } catch (error) {
       await this.storageService.removeAvatarFiles(id);
-      throw err;
+      throw error;
     }
   }
 

@@ -2,6 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { Prisma } from "@fixspace/database";
 import { CreateSectionDto, SectionOperationDto, SectionOperationType, SectionResponseDto } from "@fixspace/domain";
 import { AppLogger } from "../../../common/logger/app-logger.service";
+import { filterUndefined } from "../../../common/utils/filter-undefined";
+import { t } from "../../../common/utils/i18n.helper";
 import { SectionRepository } from "../repositories/section.repository";
 
 @Injectable()
@@ -30,30 +32,30 @@ export class SectionService {
     return new SectionResponseDto(section);
   }
 
-  async processOperations(tx: Prisma.TransactionClient, spaceId: string, operations: SectionOperationDto[]) {
+  async processOperations(transaction: Prisma.TransactionClient, spaceId: string, operations: SectionOperationDto[]) {
     for (const operation of operations) {
       switch (operation.operation) {
         case SectionOperationType.CREATE:
-          await this.createInternal(tx, spaceId, operation);
+          await this.createInternal(transaction, spaceId, operation);
           break;
         case SectionOperationType.UPDATE:
-          await this.updateInternal(tx, spaceId, operation);
+          await this.updateInternal(transaction, spaceId, operation);
           break;
         case SectionOperationType.DELETE:
-          await this.deleteInternal(tx, spaceId, operation);
+          await this.deleteInternal(transaction, spaceId, operation);
           break;
       }
     }
   }
 
-  private async createInternal(tx: Prisma.TransactionClient, spaceId: string, operation: SectionOperationDto) {
+  private async createInternal(transaction: Prisma.TransactionClient, spaceId: string, operation: SectionOperationDto) {
     if (!operation.create) {
-      throw new BadRequestException('CREATE operation requires "create" field with section data');
+      throw new BadRequestException(t("errors.SECTION_CREATE_REQUIRES_DATA"));
     }
 
     let position = operation.create.position;
     if (position === undefined) {
-      const last = await this.sectionRepo.findLastPosition(spaceId, tx);
+      const last = await this.sectionRepo.findLastPosition(spaceId, transaction);
       position = last !== null ? last.position + 1 : 0;
     }
 
@@ -65,65 +67,65 @@ export class SectionService {
         color: operation.create.color,
         spaceId,
       },
-      tx,
+      transaction,
     );
   }
 
-  private async updateInternal(tx: Prisma.TransactionClient, spaceId: string, operation: SectionOperationDto) {
+  private async updateInternal(transaction: Prisma.TransactionClient, spaceId: string, operation: SectionOperationDto) {
     if (!operation.id) {
-      throw new BadRequestException('UPDATE operation requires "id" field');
+      throw new BadRequestException(t("errors.SECTION_OPERATION_REQUIRES_ID"));
     }
 
-    const section = await this.sectionRepo.findById(operation.id, tx);
+    const section = await this.sectionRepo.findById(operation.id, transaction);
 
     if (!section) {
-      throw new NotFoundException(`Section with id ${operation.id} not found`);
+      throw new NotFoundException(t("errors.SECTION_NOT_FOUND_ID", { id: operation.id }));
     }
 
     if (section.spaceId !== spaceId) {
-      throw new BadRequestException(`Section with id ${operation.id} does not belong to this space`);
+      throw new BadRequestException(t("errors.SECTION_NOT_IN_SPACE"));
     }
 
     if (operation.update?.name) {
-      const duplicate = await this.sectionRepo.findDuplicate(operation.update.name, spaceId, operation.id, tx);
+      const duplicate = await this.sectionRepo.findDuplicate(operation.update.name, spaceId, operation.id, transaction);
 
       if (duplicate) {
         this.logger.warn("Duplicate section name", {
           spaceId,
           name: operation.update.name,
         });
-        throw new BadRequestException(`Section with name "${operation.update.name}" already exists in this space`);
+        throw new BadRequestException(t("errors.SECTION_NAME_TAKEN"));
       }
     }
 
-    await this.sectionRepo.update(
-      operation.id,
-      {
+    const updateData = filterUndefined({
+      fields: {
         name: operation.update?.name,
         position: operation.update?.position,
         icon: operation.update?.icon,
-        color: operation.update?.color !== undefined ? operation.update.color || null : undefined,
       },
-      tx,
-    );
+      nullableFields: { color: operation.update?.color },
+    });
+
+    await this.sectionRepo.update(operation.id, updateData, transaction);
   }
 
-  private async deleteInternal(tx: Prisma.TransactionClient, spaceId: string, operation: SectionOperationDto) {
+  private async deleteInternal(transaction: Prisma.TransactionClient, spaceId: string, operation: SectionOperationDto) {
     if (!operation.id) {
-      throw new BadRequestException('DELETE operation requires "id" field');
+      throw new BadRequestException(t("errors.SECTION_OPERATION_REQUIRES_ID"));
     }
 
-    const section = await this.sectionRepo.findById(operation.id, tx);
+    const section = await this.sectionRepo.findById(operation.id, transaction);
 
     if (!section) {
-      throw new NotFoundException(`Section with id ${operation.id} not found`);
+      throw new NotFoundException(t("errors.SECTION_NOT_FOUND_ID", { id: operation.id }));
     }
 
     if (section.spaceId !== spaceId) {
-      throw new BadRequestException(`Section with id ${operation.id} does not belong to this space`);
+      throw new BadRequestException(t("errors.SECTION_NOT_IN_SPACE"));
     }
 
-    await this.sectionRepo.delete(operation.id, tx);
+    await this.sectionRepo.delete(operation.id, transaction);
 
     this.logger.log("Section deleted", {
       sectionId: operation.id,
