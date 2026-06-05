@@ -53,13 +53,13 @@ describe("RegisterUserDto", () => {
     });
 
     it("passes at max boundary (128 chars)", async () => {
-      const pwd = "Aa1@" + "x".repeat(124);
-      expect(await validateDto({ ...VALID, password: pwd })).not.toContain("password");
+      const password = "Aa1@" + "x".repeat(124);
+      expect(await validateDto({ ...VALID, password })).not.toContain("password");
     });
 
     it("fails above max boundary (129 chars)", async () => {
-      const pwd = "Aa1@" + "x".repeat(125);
-      expect(await validateDto({ ...VALID, password: pwd })).toContain("password");
+      const password = "Aa1@" + "x".repeat(125);
+      expect(await validateDto({ ...VALID, password })).toContain("password");
     });
 
     it("fails without uppercase letter", async () => {

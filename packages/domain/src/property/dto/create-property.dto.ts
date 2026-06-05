@@ -1,16 +1,5 @@
 import { Type } from "class-transformer";
-import {
-  IsBoolean,
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-  Min,
-  MinLength,
-  ValidateNested,
-} from "class-validator";
+import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min, MinLength, ValidateNested } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
@@ -31,6 +20,20 @@ import {
 } from "../types";
 
 export { PropertyType } from "../property-type.enum";
+
+export type PropertyConfig =
+  | TextProperty
+  | NumberProperty
+  | DateProperty
+  | CheckboxProperty
+  | DurationProperty
+  | SelectProperty
+  | StatusProperty
+  | RelationProperty
+  | FormulaProperty
+  | RatingProperty
+  | ProgressProperty
+  | ButtonProperty;
 
 export class CreatePropertyDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })

@@ -1,6 +1,7 @@
 export { PropertyType } from "./property/property-type.enum";
 export { BlockType } from "./record-content/enums/block-type.enum";
 export { FilterLogic, FilterField, FilterOperator } from "./record/dto/record-filter.enums";
+export { OPERATORS_BY_PROPERTY_TYPE } from "./record/dto/record-filter-operators.constants";
 export { SortDirection, SortField } from "./record/dto/record-sort.enums";
 export { GroupField, DateGroupGranularity } from "./record/dto/record-group.enums";
 export {
@@ -26,3 +27,4 @@ export { DEFAULT_RATING_PROPERTY } from "./property/types/rating.constants";
 export { DEFAULT_PROGRESS_PROPERTY } from "./property/types/progress.constants";
 export { DEFAULT_FORMULA_PROPERTY } from "./property/types/formula.constants";
 export { DEFAULT_SECTION_SETTINGS } from "./settings/types/section-settings.constants";
+export { PALETTE_COLORS, type PaletteColorName, PALETTE_COLOR_VALUES } from "./common/colors";

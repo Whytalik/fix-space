@@ -2,6 +2,7 @@ export * from "./dto/create-record.dto";
 export * from "./dto/mass-update-records.dto";
 export * from "./dto/record-filter.dto";
 export * from "./dto/record-filter.enums";
+export * from "./dto/record-filter-operators.constants";
 export * from "./dto/record-group.dto";
 export * from "./dto/record-response.dto";
 export * from "./dto/record-sort.dto";

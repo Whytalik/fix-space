@@ -1,5 +1,4 @@
 import { Exclude, Expose } from "class-transformer";
-import { ContainerBlock } from "./content-node.dto";
 
 @Exclude()
 export class RecordContentResponseDto {
@@ -10,7 +9,7 @@ export class RecordContentResponseDto {
   recordId: string;
 
   @Expose()
-  content: ContainerBlock;
+  content: Record<string, unknown>;
 
   @Expose()
   lastEditedAt: Date;
