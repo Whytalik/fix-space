@@ -63,6 +63,10 @@
       "inputs": ["$TURBO_DEFAULT$", ".eslintrc*", "eslint.config.*"],
       "outputs": []
     },
+    "check-types": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
     "format": {
       "inputs": ["$TURBO_DEFAULT$", ".prettierrc*"],
       "cache": false,
@@ -70,6 +74,11 @@
     },
     "test": {
       "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "cache": false,
       "outputs": []
     },
     "test:e2e": {

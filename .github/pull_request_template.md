@@ -17,7 +17,9 @@
 - [ ] Database: migrations apply (`turbo db:generate`)
 - [ ] Lint: `turbo lint` — no errors
 - [ ] Types: `pnpm --filter @fixspace/web check-types` — no errors
-- [ ] Tests: `turbo test` — green
+- [ ] Tests: Unit tests pass (`turbo test`)
+- [ ] Tests: Integration tests pass (`pnpm --filter @fixspace/api test:integration`)
+- [ ] Tests: E2E Playwright tests pass (`pnpm --filter @fixspace/web test:e2e`)
 
 ## Documentation
 

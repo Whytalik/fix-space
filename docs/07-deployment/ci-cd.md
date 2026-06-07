@@ -54,7 +54,7 @@
 Виконується після успішного проходження модульних тестів.
 
 - **Інструмент**: Supertest + NestJS TestingModule (in-process, без реального HTTP-порту).
-- **Валідація бізнес-логіки**: запуск набору E2E тестів API через `pnpm --filter @fixspace/api test:e2e`. MailService та InitializeUserSpaceUseCase замінені на mocks.
+- **Валідація бізнес-логіки**: запуск Integration тестів API через `pnpm --filter @fixspace/api test:integration`. MailService та InitializeUserSpaceUseCase замінені на mocks.
 
 #### 4b. Web E2E (`test-web-e2e`)
 
