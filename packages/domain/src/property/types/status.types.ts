@@ -39,7 +39,7 @@ export class StatusCategoryConfig {
   options: StatusOption[];
 }
 
-export class StatusProperty {
+export class StatusPropertyConfig {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   defaultOption: string;

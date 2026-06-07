@@ -6,7 +6,7 @@ import { I18nTranslations } from "../../generated/i18n.generated";
 import { DATA_FORMATS_VALUES, type DataFormat, TIME_FORMATS_VALUES, type TimeFormat } from "./date.constants";
 export { DATA_FORMATS_VALUES, type DataFormat, TIME_FORMATS_VALUES, type TimeFormat } from "./date.constants";
 
-export class DateProperty {
+export class DatePropertyConfig {
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   defaultValue: string | null;

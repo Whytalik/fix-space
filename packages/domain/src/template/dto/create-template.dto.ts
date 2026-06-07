@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from "class-validator";
+import { IsBoolean, IsInt, IsNotEmpty, IsObject, IsOptional, IsString, MaxLength, Min } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
 import { ApiProperty } from "@nestjs/swagger";
@@ -45,4 +45,9 @@ export class CreateTemplateDto {
   @IsInt({ message: i18nValidationMessage<I18nTranslations>("validation.IS_INT") })
   @Min(0, { message: i18nValidationMessage<I18nTranslations>("validation.MIN") })
   position?: number;
+
+  @ApiProperty({ description: "Config", required: false })
+  @IsOptional()
+  @IsObject({ message: i18nValidationMessage<I18nTranslations>("validation.IS_OBJECT") })
+  config?: unknown;
 }

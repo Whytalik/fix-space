@@ -16,6 +16,10 @@ export class SpaceSearchResultDto {
   @Expose()
   databaseTitle: string;
 
+  @ApiProperty({ description: "Section name", required: false, example: "Daily" })
+  @Expose()
+  sectionName: string | null;
+
   @ApiProperty({ description: "Record name", example: "Record 1" })
   @Expose()
   name: string;
@@ -36,6 +40,10 @@ export class SpaceSearchResultDto {
   @Expose()
   @Type(() => PropertyValueResponseDto)
   values?: PropertyValueResponseDto[];
+
+  @ApiProperty({ description: "Record content JSON", required: false })
+  @Expose()
+  content?: any;
 
   constructor(partial: Partial<SpaceSearchResultDto>) {
     Object.assign(this, partial);

@@ -11,6 +11,11 @@ export class CreateRecordDto {
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   databaseId: string;
 
+  @ApiProperty({ description: "View ID for contextual defaults", example: "uuid", required: false })
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  viewId?: string;
+
   @ApiProperty({ description: "Record name", example: "My Record", required: false })
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })

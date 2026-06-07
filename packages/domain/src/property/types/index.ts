@@ -1,7 +1,6 @@
 export * from "./checkbox.types";
 export * from "./date.types";
 export * from "./duration.types";
-export * from "./button.types";
 export * from "./formula.types";
 export * from "./number.types";
 export * from "./progress.types";

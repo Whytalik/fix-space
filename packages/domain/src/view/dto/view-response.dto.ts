@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Expose, Type } from "class-transformer";
-import { RecordFilterDto } from "../../record/dto/record-filter.dto";
+import { FilterLogic, RecordFilterDto } from "../../record/dto/record-filter.dto";
 import { RecordSortDto } from "../../record/dto/record-sort.dto";
+import { SummaryMetric } from "../../record/dto/record-summary.enums";
 
 @Exclude()
 export class ViewResponseDto {
@@ -17,10 +18,6 @@ export class ViewResponseDto {
   @Expose()
   name: string;
 
-  @ApiProperty({ description: "Is default view", example: false, required: true })
-  @Expose()
-  isDefault: boolean;
-
   @ApiProperty({ description: "Is view locked", example: false, required: true })
   @Expose()
   isLocked: boolean;
@@ -29,10 +26,26 @@ export class ViewResponseDto {
   @Expose()
   pageSize: number;
 
+  @ApiProperty({ description: "Maximum number of records", example: 50, required: false, nullable: true })
+  @Expose()
+  recordLimit: number | null;
+
+  @ApiProperty({ description: "Whether to use default template", example: true, required: true })
+  @Expose()
+  useDefaultTemplate: boolean;
+
+  @ApiProperty({ description: "Default template ID", example: "uuid", required: false, nullable: true })
+  @Expose()
+  defaultTemplateId: string | null;
+
   @ApiProperty({ description: "Filters", required: true })
   @Expose()
   @Type(() => RecordFilterDto)
   filters: RecordFilterDto[];
+
+  @ApiProperty({ enum: FilterLogic, description: "Filter logic", required: true })
+  @Expose()
+  filterLogic: FilterLogic;
 
   @ApiProperty({ description: "Sort configuration", required: true })
   @Expose()
@@ -51,9 +64,25 @@ export class ViewResponseDto {
   @Expose()
   columnWidths: Record<string, number> | null;
 
+  @ApiProperty({ description: "Column summaries", example: {}, required: true })
+  @Expose()
+  columnSummaries: Record<string, SummaryMetric>;
+
+  @ApiProperty({ description: "Group colors", example: {}, required: true })
+  @Expose()
+  groupColors: Record<string, string>;
+
+  @ApiProperty({ description: "Hidden groups", example: [], required: true })
+  @Expose()
+  hiddenGroups: string[];
+
   @ApiProperty({ description: "Text wrap enabled", example: true, required: true })
   @Expose()
   textWrap: boolean;
+
+  @ApiProperty({ description: "Use relative dates", example: true, required: true })
+  @Expose()
+  relativeDates: boolean;
 
   @ApiProperty({ description: "Search query", example: null, required: true, nullable: true })
   @Expose()

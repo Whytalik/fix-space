@@ -1,18 +1,17 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Expose, Transform, TransformationType } from "class-transformer";
 import {
-  ButtonProperty,
-  CheckboxProperty,
-  DateProperty,
-  DurationProperty,
-  FormulaProperty,
-  NumberProperty,
-  ProgressProperty,
-  RatingProperty,
-  RelationProperty,
-  SelectProperty,
-  StatusProperty,
-  TextProperty,
+  CheckboxPropertyConfig,
+  DatePropertyConfig,
+  DurationPropertyConfig,
+  FormulaPropertyConfig,
+  NumberPropertyConfig,
+  ProgressPropertyConfig,
+  RatingPropertyConfig,
+  RelationPropertyConfig,
+  SelectPropertyConfig,
+  StatusPropertyConfig,
+  TextPropertyConfig,
 } from "../types";
 import { PropertyType } from "./create-property.dto";
 import { VisibilityConditionDto } from "./visibility-condition.dto";
@@ -82,40 +81,38 @@ export class PropertyResponseDto {
   @ApiProperty({ description: "Property type-specific configuration", required: false })
   @Expose()
   @Transform((params: any) => {
-    const { value, type, object, obj } = params;
+    const { value, type, object, obj: parentObject } = params;
     if (type === TransformationType.CLASS_TO_PLAIN) return value;
     if (!value) return value;
     const subTypeMap: Record<string, new (...args: unknown[]) => unknown> = {
-      [PropertyType.TEXT]: TextProperty,
-      [PropertyType.NUMBER]: NumberProperty,
-      [PropertyType.DATE]: DateProperty,
-      [PropertyType.CHECKBOX]: CheckboxProperty,
-      [PropertyType.DURATION]: DurationProperty,
-      [PropertyType.SELECT]: SelectProperty,
-      [PropertyType.STATUS]: StatusProperty,
-      [PropertyType.RELATION]: RelationProperty,
-      [PropertyType.FORMULA]: FormulaProperty,
-      [PropertyType.RATING]: RatingProperty,
-      [PropertyType.PROGRESS]: ProgressProperty,
-      [PropertyType.BUTTON]: ButtonProperty,
+      [PropertyType.TEXT]: TextPropertyConfig,
+      [PropertyType.NUMBER]: NumberPropertyConfig,
+      [PropertyType.DATE]: DatePropertyConfig,
+      [PropertyType.CHECKBOX]: CheckboxPropertyConfig,
+      [PropertyType.DURATION]: DurationPropertyConfig,
+      [PropertyType.SELECT]: SelectPropertyConfig,
+      [PropertyType.STATUS]: StatusPropertyConfig,
+      [PropertyType.RELATION]: RelationPropertyConfig,
+      [PropertyType.FORMULA]: FormulaPropertyConfig,
+      [PropertyType.RATING]: RatingPropertyConfig,
+      [PropertyType.PROGRESS]: ProgressPropertyConfig,
     };
-    const targetObj = obj || object;
-    const Ctor = subTypeMap[targetObj?.type as string];
+    const targetObject = parentObject ?? object;
+    const Ctor = subTypeMap[targetObject?.type as string];
     return Ctor ? Object.assign(new Ctor() as object, value) : value;
   })
   config?:
-    | TextProperty
-    | NumberProperty
-    | DateProperty
-    | CheckboxProperty
-    | DurationProperty
-    | SelectProperty
-    | StatusProperty
-    | RelationProperty
-    | FormulaProperty
-    | RatingProperty
-    | ProgressProperty
-    | ButtonProperty;
+    | TextPropertyConfig
+    | NumberPropertyConfig
+    | DatePropertyConfig
+    | CheckboxPropertyConfig
+    | DurationPropertyConfig
+    | SelectPropertyConfig
+    | StatusPropertyConfig
+    | RelationPropertyConfig
+    | FormulaPropertyConfig
+    | RatingPropertyConfig
+    | ProgressPropertyConfig;
 
   constructor(partial: Partial<PropertyResponseDto>) {
     Object.assign(this, partial);

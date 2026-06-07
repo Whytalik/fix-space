@@ -6,7 +6,7 @@ import { I18nTranslations } from "../../generated/i18n.generated";
 import { NUMBER_FORMAT_VALUES, type NumberFormat } from "./number.constants";
 export { NUMBER_FORMAT_VALUES, type NumberFormat } from "./number.constants";
 
-export class NumberProperty {
+export class NumberPropertyConfig {
   @IsNumber({}, { message: i18nValidationMessage<I18nTranslations>("validation.IS_NUMBER") })
   defaultValue: number;
 

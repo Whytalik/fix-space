@@ -40,13 +40,13 @@ export class DatabaseResponseDto {
   @Expose()
   updatedAt: Date;
 
+  @ApiProperty({ description: "Position for ordering", example: 0 })
+  @Expose()
+  position: number;
+
   @ApiProperty({ description: "Section ID" })
   @Expose()
   sectionId: string | null;
-
-  @ApiProperty({ description: "Maximum number of records", example: 50 })
-  @Expose()
-  recordLimit: number | null;
 
   @ApiProperty({ description: "Whether this is a preset database", example: false })
   @Expose()
@@ -55,10 +55,6 @@ export class DatabaseResponseDto {
   @ApiProperty({ description: "Whether the database is locked", example: false })
   @Expose()
   isLocked: boolean;
-
-  @ApiProperty({ description: "Whether to use default template", example: true })
-  @Expose()
-  useDefaultTemplate: boolean;
 
   @ApiProperty({ description: "Whether statistics are enabled", example: true })
   @Expose()

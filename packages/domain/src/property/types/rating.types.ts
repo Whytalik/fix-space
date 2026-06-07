@@ -3,7 +3,7 @@ import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 
-export class RatingProperty {
+export class RatingPropertyConfig {
   @IsOptional()
   @IsNumber({}, { message: i18nValidationMessage<I18nTranslations>("validation.IS_NUMBER") })
   @Min(0)

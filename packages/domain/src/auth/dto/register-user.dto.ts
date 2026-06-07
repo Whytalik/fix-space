@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
@@ -29,4 +29,9 @@ export class RegisterUserDto {
     message: i18nValidationMessage<I18nTranslations>("validation.INVALID_PASSWORD"),
   })
   password: string;
+
+  @ApiPropertyOptional({ example: "Europe/Kyiv", description: "IANA timezone detected from browser" })
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  timezone?: string;
 }

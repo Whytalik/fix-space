@@ -54,7 +54,7 @@ export type FormulaOutput =
   | FormulaOutputRelation
   | FormulaOutputArray;
 
-export class FormulaProperty {
+export class FormulaPropertyConfig {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   formula: string;
 

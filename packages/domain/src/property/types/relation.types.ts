@@ -3,7 +3,7 @@ import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 
-export class RelationProperty {
+export class RelationPropertyConfig {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   relatedEntityId: string;

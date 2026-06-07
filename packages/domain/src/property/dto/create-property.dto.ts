@@ -6,35 +6,33 @@ import { i18nValidationMessage } from "nestjs-i18n";
 import { I18nTranslations } from "../../generated/i18n.generated";
 import { PropertyType } from "../property-type.enum";
 import {
-  ButtonProperty,
-  CheckboxProperty,
-  DateProperty,
-  DurationProperty,
-  FormulaProperty,
-  NumberProperty,
-  ProgressProperty,
-  RatingProperty,
-  RelationProperty,
-  SelectProperty,
-  StatusProperty,
-  TextProperty,
+  CheckboxPropertyConfig,
+  DatePropertyConfig,
+  DurationPropertyConfig,
+  FormulaPropertyConfig,
+  NumberPropertyConfig,
+  ProgressPropertyConfig,
+  RatingPropertyConfig,
+  RelationPropertyConfig,
+  SelectPropertyConfig,
+  StatusPropertyConfig,
+  TextPropertyConfig,
 } from "../types";
 
 export { PropertyType } from "../property-type.enum";
 
 export type PropertyConfig =
-  | TextProperty
-  | NumberProperty
-  | DateProperty
-  | CheckboxProperty
-  | DurationProperty
-  | SelectProperty
-  | StatusProperty
-  | RelationProperty
-  | FormulaProperty
-  | RatingProperty
-  | ProgressProperty
-  | ButtonProperty;
+  | TextPropertyConfig
+  | NumberPropertyConfig
+  | DatePropertyConfig
+  | CheckboxPropertyConfig
+  | DurationPropertyConfig
+  | SelectPropertyConfig
+  | StatusPropertyConfig
+  | RelationPropertyConfig
+  | FormulaPropertyConfig
+  | RatingPropertyConfig
+  | ProgressPropertyConfig;
 
 export class CreatePropertyDto {
   @ApiProperty({ description: "Database ID" })
@@ -97,32 +95,30 @@ export class CreatePropertyDto {
     discriminator: {
       property: "type",
       subTypes: [
-        { value: TextProperty, name: PropertyType.TEXT },
-        { value: NumberProperty, name: PropertyType.NUMBER },
-        { value: DateProperty, name: PropertyType.DATE },
-        { value: CheckboxProperty, name: PropertyType.CHECKBOX },
-        { value: DurationProperty, name: PropertyType.DURATION },
-        { value: SelectProperty, name: PropertyType.SELECT },
-        { value: StatusProperty, name: PropertyType.STATUS },
-        { value: RelationProperty, name: PropertyType.RELATION },
-        { value: FormulaProperty, name: PropertyType.FORMULA },
-        { value: RatingProperty, name: PropertyType.RATING },
-        { value: ProgressProperty, name: PropertyType.PROGRESS },
-        { value: ButtonProperty, name: PropertyType.BUTTON },
+        { value: TextPropertyConfig, name: PropertyType.TEXT },
+        { value: NumberPropertyConfig, name: PropertyType.NUMBER },
+        { value: DatePropertyConfig, name: PropertyType.DATE },
+        { value: CheckboxPropertyConfig, name: PropertyType.CHECKBOX },
+        { value: DurationPropertyConfig, name: PropertyType.DURATION },
+        { value: SelectPropertyConfig, name: PropertyType.SELECT },
+        { value: StatusPropertyConfig, name: PropertyType.STATUS },
+        { value: RelationPropertyConfig, name: PropertyType.RELATION },
+        { value: FormulaPropertyConfig, name: PropertyType.FORMULA },
+        { value: RatingPropertyConfig, name: PropertyType.RATING },
+        { value: ProgressPropertyConfig, name: PropertyType.PROGRESS },
       ],
     },
   })
   config?:
-    | TextProperty
-    | NumberProperty
-    | DateProperty
-    | CheckboxProperty
-    | DurationProperty
-    | SelectProperty
-    | StatusProperty
-    | RelationProperty
-    | FormulaProperty
-    | RatingProperty
-    | ProgressProperty
-    | ButtonProperty;
+    | TextPropertyConfig
+    | NumberPropertyConfig
+    | DatePropertyConfig
+    | CheckboxPropertyConfig
+    | DurationPropertyConfig
+    | SelectPropertyConfig
+    | StatusPropertyConfig
+    | RelationPropertyConfig
+    | FormulaPropertyConfig
+    | RatingPropertyConfig
+    | ProgressPropertyConfig;
 }

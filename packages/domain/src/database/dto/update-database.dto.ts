@@ -38,6 +38,12 @@ export class UpdateDatabaseDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   key?: string;
 
+  @ApiProperty({ description: "Position for ordering", example: 0, required: false })
+  @IsOptional()
+  @IsInt({ message: i18nValidationMessage<I18nTranslations>("validation.IS_INT") })
+  @Min(0, { message: i18nValidationMessage<I18nTranslations>("validation.MIN") })
+  position?: number;
+
   @ApiProperty({ description: "Section ID", required: false })
   @IsOptional()
   @IsUUID("4", { message: i18nValidationMessage<I18nTranslations>("validation.IS_UUID") })
@@ -53,22 +59,15 @@ export class UpdateDatabaseDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   icon?: string;
 
-  @ApiProperty({ description: "Maximum number of records (1-100)", example: 50, required: false })
+  @ApiProperty({ description: "Whether database is a preset", example: false, required: false })
   @IsOptional()
-  @IsInt({ message: i18nValidationMessage<I18nTranslations>("validation.IS_INT") })
-  @Min(1, { message: i18nValidationMessage<I18nTranslations>("validation.MIN") })
-  @Max(100, { message: i18nValidationMessage<I18nTranslations>("validation.MAX") })
-  recordLimit?: number | null;
+  @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
+  isPreset?: boolean;
 
   @ApiProperty({ description: "Whether the database is locked", example: false, required: false })
   @IsOptional()
   @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
   isLocked?: boolean;
-
-  @ApiProperty({ description: "Whether to use default template", example: true, required: false })
-  @IsOptional()
-  @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
-  useDefaultTemplate?: boolean;
 
   @ApiProperty({ description: "Whether to enable statistics", example: true, required: false })
   @IsOptional()

@@ -10,5 +10,4 @@ export enum PropertyType {
   FORMULA = "FORMULA",
   RATING = "RATING",
   PROGRESS = "PROGRESS",
-  BUTTON = "BUTTON",
 }

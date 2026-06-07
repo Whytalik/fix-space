@@ -10,10 +10,8 @@ export class Database {
   type?: string;
   key?: string;
   icon?: string;
-  recordLimit?: number;
   isPreset: boolean;
   isLocked: boolean;
-  useDefaultTemplate: boolean;
   enableStats: boolean;
   createdAt: Date;
   updatedAt: Date;

@@ -1,11 +1,31 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsArray, IsBoolean, IsOptional, IsString, MaxLength, MinLength, ValidateNested } from "class-validator";
+import { IsArray, IsBoolean, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength, ValidateNested } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 import { SectionOperationDto } from "../../section/dto/section-operation.dto";
 import { SpaceConfigDto } from "./space-config.dto";
+
+class DatabaseOperationUpdateDto {
+  @ApiProperty({ description: "Position for ordering", example: 0, required: false })
+  @IsOptional()
+  @IsInt({ message: i18nValidationMessage<I18nTranslations>("validation.IS_INT") })
+  @Min(0, { message: i18nValidationMessage<I18nTranslations>("validation.MIN") })
+  position?: number;
+}
+
+class DatabaseOperationItemDto {
+  @ApiProperty({ description: "Database ID", example: "uuid" })
+  @IsUUID("4", { message: i18nValidationMessage<I18nTranslations>("validation.IS_UUID") })
+  id: string;
+
+  @ApiProperty({ description: "Update data", required: false })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DatabaseOperationUpdateDto)
+  update?: DatabaseOperationUpdateDto;
+}
 
 export class UpdateSpaceDto {
   @ApiProperty({ description: "Space name (1-120 chars)", example: "My Updated Journal", required: false })
@@ -37,4 +57,11 @@ export class UpdateSpaceDto {
   @ValidateNested({ each: true })
   @Type(() => SectionOperationDto)
   sectionOperations?: SectionOperationDto[];
+
+  @ApiProperty({ description: "Database operations (batch update)", required: false, type: () => DatabaseOperationItemDto, isArray: true })
+  @IsOptional()
+  @IsArray({ message: i18nValidationMessage<I18nTranslations>("validation.IS_ARRAY") })
+  @ValidateNested({ each: true })
+  @Type(() => DatabaseOperationItemDto)
+  databaseOperations?: DatabaseOperationItemDto[];
 }
