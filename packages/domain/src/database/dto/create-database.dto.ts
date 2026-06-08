@@ -1,18 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import {
-  IsBoolean,
-  IsIn,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUUID,
-  Max,
-  MaxLength,
-  Min,
-  MinLength,
-  ValidateNested,
-} from "class-validator";
+import { IsBoolean, IsIn, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, MinLength, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { i18nValidationMessage } from "nestjs-i18n";
 

@@ -43,7 +43,7 @@ export class SpaceSearchResultDto {
 
   @ApiProperty({ description: "Record content JSON", required: false })
   @Expose()
-  content?: any;
+  content?: Record<string, unknown>;
 
   constructor(partial: Partial<SpaceSearchResultDto>) {
     Object.assign(this, partial);

@@ -24,6 +24,7 @@ export const OPERATORS_BY_PROPERTY_TYPE: Record<PropertyType, FilterOperator[]> 
   ],
   [PropertyType.DATE]: [
     FilterOperator.EQUALS,
+    FilterOperator.NOT_EQUALS,
     FilterOperator.BEFORE,
     FilterOperator.AFTER,
     FilterOperator.ON_OR_BEFORE,

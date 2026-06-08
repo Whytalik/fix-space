@@ -64,19 +64,19 @@ export class LoggingInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<Request>();
     const { method, url, body } = request;
-    const reqContext = getRequestContext();
+    const requestContext = getRequestContext();
 
-    if (reqContext && request.user) {
+    if (requestContext && request.user) {
       const user = request.user as { userId?: string; username?: string };
-      reqContext.userId = user.userId;
-      reqContext.username = user.username;
+      requestContext.userId = user.userId;
+      requestContext.username = user.username;
     }
 
     this.logger.log(`\x1b[32m➜\x1b[0m  [${colorMethod(method)}] ${url}`);
 
-    const bodyObj = (body as Record<string, unknown>) || {};
-    if (Object.keys(bodyObj).length > 0) {
-      this.logger.debug(`🔍 Body: \x1b[90m${JSON.stringify(sanitizeBody(bodyObj))}\x1b[0m`);
+    const parsedBody = (body as Record<string, unknown>) || {};
+    if (Object.keys(parsedBody).length > 0) {
+      this.logger.debug(`🔍 Body: \x1b[90m${JSON.stringify(sanitizeBody(parsedBody))}\x1b[0m`);
     }
 
     const now = Date.now();

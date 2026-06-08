@@ -43,10 +43,10 @@ export class AppLogger {
     }
 
     if (details && Object.keys(details).length > 0) {
-      const detailStr = Object.entries(details)
+      const detailsText = Object.entries(details)
         .map(([k, v]) => `\x1b[90m${k}=\x1b[0m${typeof v === "object" ? JSON.stringify(v) : v}`)
         .join(" \x1b[90m,\x1b[0m ");
-      parts.push(`\x1b[90m|\x1b[0m ${detailStr}`);
+      parts.push(`\x1b[90m|\x1b[0m ${detailsText}`);
     }
 
     return parts.join(" ");

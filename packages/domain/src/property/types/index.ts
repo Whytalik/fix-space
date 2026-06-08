@@ -4,6 +4,7 @@ export * from "./duration.types";
 export * from "./formula.types";
 export * from "./number.types";
 export * from "./progress.types";
+export * from "./property-config.utils";
 export * from "./rating.types";
 export * from "./relation.types";
 export * from "./select.types";

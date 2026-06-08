@@ -11,7 +11,6 @@ export class Property {
   icon?: string;
   hint?: string;
   group?: string;
-  isRequired: boolean;
   isVisible: boolean;
   isProtected: boolean;
   createdAt: Date;

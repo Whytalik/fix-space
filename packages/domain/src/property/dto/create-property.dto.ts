@@ -57,11 +57,6 @@ export class CreatePropertyDto {
   @Min(0, { message: i18nValidationMessage<I18nTranslations>("validation.MIN") })
   position: number;
 
-  @ApiProperty({ description: "Whether the property is required", example: false, required: false })
-  @IsOptional()
-  @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
-  isRequired?: boolean;
-
   @ApiProperty({ description: "Whether the property is visible", example: true, required: false })
   @IsOptional()
   @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })

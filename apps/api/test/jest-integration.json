@@ -2,15 +2,16 @@
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
   "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
+  "testRegex": ".integration-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": [
       "ts-jest",
-      { "tsconfig": "<rootDir>/../tsconfig.e2e.json" }
+      { "tsconfig": "<rootDir>/../tsconfig.integration.json" }
     ]
   },
   "collectCoverage": false,
   "moduleNameMapper": {
-    "^@fixspace/database$": "<rootDir>/../../../packages/database/src/client.ts"
+    "^@fixspace/database$": "<rootDir>/../../../packages/database/src/client.ts",
+    "^@/(.*)$": "<rootDir>/../src/$1"
   }
 }

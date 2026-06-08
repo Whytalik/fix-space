@@ -8,6 +8,19 @@ export interface WorkflowStep {
   name: string;
   isCompleted: boolean;
   databaseId?: string;
+  recordCount: number;
+}
+
+export interface TodayRecord {
+  id: string;
+  name: string;
+  icon: string | null;
+}
+
+export interface TodayDatabaseInfo {
+  title: string;
+  databaseId?: string;
+  records: TodayRecord[];
 }
 
 export interface DashboardResponseDto {
@@ -19,14 +32,9 @@ export interface DashboardResponseDto {
   };
   dailyWorkflow: WorkflowStep[];
   todayItems: {
-    tradingJournal: any[];
-    dailyRoutine: any[];
-    notes: any[];
-    mistakes: any[];
-  };
-  overviewCharts: {
-    pnlCurve: any;
-    winRateDynamics: any;
-    rrDeviation: any;
+    tradingJournal: TodayDatabaseInfo;
+    dailyRoutine: TodayDatabaseInfo;
+    notes: TodayDatabaseInfo;
+    mistakes: TodayDatabaseInfo;
   };
 }

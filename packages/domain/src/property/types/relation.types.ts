@@ -1,10 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsUUID } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 
 export class RelationPropertyConfig {
-  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  @IsUUID("4", { message: i18nValidationMessage<I18nTranslations>("validation.IS_UUID") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   relatedEntityId: string;
 

@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { prisma } from "@fixspace/database";
-import { AppLogger } from "../../common/logger/app-logger.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
 import { parseDurationToMs } from "./utils/cookie.helper";
 import { generateRandomToken, hashToken } from "./utils/token.helper";
 

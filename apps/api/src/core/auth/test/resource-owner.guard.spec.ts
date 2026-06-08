@@ -1,7 +1,7 @@
 import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import type { AppLogger } from "../../../common/logger/app-logger.service";
+import type { AppLogger } from "@/common/logger/app-logger.service";
 import { ResourceOwnerGuard } from "../guards/resource-owner.guard";
 
 jest.mock("@fixspace/database", () => ({
@@ -32,7 +32,6 @@ function createMockContext(params: Record<string, string>, user?: { userId: stri
     switchToHttp: () => ({
       getRequest: () => request,
     }),
-    _request: request,
   };
 }
 

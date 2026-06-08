@@ -315,7 +315,6 @@ model Property {
   icon        String?
   hint        String?
   group       String?
-  isRequired  Boolean      @default(false)
   isVisible   Boolean      @default(true)
   isProtected Boolean      @default(false)
   createdAt   DateTime     @default(now())
@@ -434,6 +433,7 @@ model View {
   id                 String   @id @default(uuid())
   databaseId         String
   name               String
+  icon               String?
   isDefault          Boolean  @default(false)
   isLocked           Boolean  @default(false)
   pageSize           Int      @default(50)

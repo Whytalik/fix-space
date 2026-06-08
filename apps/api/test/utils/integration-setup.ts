@@ -13,14 +13,14 @@ import { AppLogger } from "../../src/common/logger/app-logger.service";
 import { MailService } from "../../src/core/mail/mail.service";
 import { InitializeUserSpaceUseCase } from "../../src/modules/space/providers/initialize-user-space.usecase";
 
-export const E2E_EMAIL_MARKER = "e2e-test";
+export const INTEGRATION_EMAIL_MARKER = "integration-test";
 
-export function uniqueEmail(marker = E2E_EMAIL_MARKER): string {
+export function uniqueEmail(marker = INTEGRATION_EMAIL_MARKER): string {
   return `${marker}-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
 }
 
 export function uniqueUsername(): string {
-  return `e2e${Date.now()}${Math.floor(Math.random() * 9999)}`;
+  return `int${Date.now()}${Math.floor(Math.random() * 9999)}`;
 }
 
 export const mockMailService: Record<keyof MailService, jest.Mock> = {
@@ -36,7 +36,7 @@ export const mockInitializeUserSpaceUseCase: Record<keyof InitializeUserSpaceUse
   createAndSeed: jest.fn(),
 };
 
-export async function setupE2eApp() {
+export async function setupIntegrationApp() {
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(MailService)
     .useValue(mockMailService)
@@ -50,9 +50,8 @@ export async function setupE2eApp() {
     if (throttlerGuard) {
       jest.spyOn(throttlerGuard, "canActivate").mockResolvedValue(true);
     }
-  } catch {
-    // ThrottlerGuard might not be available as a direct provider
-  }
+    // eslint-disable-next-line no-empty
+  } catch {}
 
   app.use(cookieParser());
   app.useGlobalPipes(new I18nValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
@@ -66,11 +65,11 @@ export async function setupE2eApp() {
   return { app, agent, moduleRef };
 }
 
-export async function cleanupE2eApp(app?: INestApplication, marker = E2E_EMAIL_MARKER) {
+export async function cleanupIntegrationApp(app?: INestApplication, marker = INTEGRATION_EMAIL_MARKER) {
   try {
     await prisma.user.deleteMany({ where: { email: { contains: marker } } });
+    // eslint-disable-next-line no-empty
   } catch {
-    // Ignore errors during cleanup if user doesn't exist
   } finally {
     if (app) {
       await app.close();

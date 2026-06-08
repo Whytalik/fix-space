@@ -1,7 +1,7 @@
 import type { Response } from "express";
 
 export interface CookieOptions {
-  domain: string;
+  domain?: string;
   secure: boolean;
 }
 

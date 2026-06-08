@@ -1,9 +1,11 @@
 import { ConflictException, Injectable } from "@nestjs/common";
 import { prisma } from "@fixspace/database";
-import { RegisterUserDto } from "@fixspace/domain";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import { t } from "../../../common/utils/i18n.helper";
-import { hashPassword } from "../../../common/utils/password";
+import { DEFAULT_USER_SETTINGS, RegisterUserDto } from "@fixspace/domain";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { t } from "@/common/utils/i18n.helper";
+import { hashPassword } from "@/common/utils/password";
+import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
+import { SettingsService } from "@/modules/settings/settings.service";
 import { MailService } from "../../mail/mail.service";
 import { TokenService } from "../token.service";
 
@@ -12,6 +14,7 @@ export class RegisterUserUseCase {
   constructor(
     private readonly tokenService: TokenService,
     private readonly mailService: MailService,
+    private readonly settingsService: SettingsService,
     private readonly logger: AppLogger,
   ) {
     this.logger.setContext(RegisterUserUseCase.name);
@@ -59,6 +62,15 @@ export class RegisterUserUseCase {
       userId: user.id,
       username: user.username,
     });
+
+    if (registerUserDto.timezone) {
+      await this.settingsService.updateSettings(
+        user.id,
+        SettingsCategory.USER,
+        { timezone: registerUserDto.timezone },
+        DEFAULT_USER_SETTINGS,
+      );
+    }
 
     const verificationToken = await this.tokenService.createVerificationToken(user.id);
     await this.mailService.sendVerificationEmail(user.email, user.username, verificationToken);

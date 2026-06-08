@@ -3,12 +3,19 @@ import { ConfigService } from "@nestjs/config";
 import { Response } from "express";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { clearAuthCookies, parseDurationToMs, setAccessTokenCookie, setRefreshTokenCookie } from "../utils/cookie.helper";
+import {
+  clearAuthCookies,
+  parseDurationToMs,
+  setAccessTokenCookie,
+  setRefreshTokenCookie,
+  type CookieOptions,
+} from "../utils/cookie.helper";
 
 export interface AuthCookieData {
   accessToken?: string;
   refreshToken?: string;
   clearCookies?: boolean;
+  redirectUrl?: string;
 }
 
 @Injectable()
@@ -21,7 +28,7 @@ export class AuthCookiesInterceptor implements NestInterceptor {
         const cookieData = (data ?? {}) as AuthCookieData;
         const response = context.switchToHttp().getResponse<Response>();
         const cookieDomain = this.configService.get<string>("COOKIE_DOMAIN", "");
-        const cookieOptions: any = {
+        const cookieOptions: CookieOptions = {
           secure: this.configService.get("NODE_ENV") === "production" && this.configService.get("COOKIE_SECURE") !== "false",
         };
         if (cookieDomain && cookieDomain !== "localhost") {
@@ -50,9 +57,14 @@ export class AuthCookiesInterceptor implements NestInterceptor {
           );
         }
 
+        if (cookieData.redirectUrl) {
+          response.redirect(String(cookieData.redirectUrl));
+          return undefined;
+        }
+
         const rest: Record<string, unknown> = { ...cookieData };
-        delete rest["refreshToken"];
         delete rest["clearCookies"];
+        delete rest["redirectUrl"];
         return rest;
       }),
     );

@@ -18,6 +18,10 @@ export class ViewResponseDto {
   @Expose()
   name: string;
 
+  @ApiProperty({ description: "View icon", example: "icon:LayoutGrid", required: false, nullable: true })
+  @Expose()
+  icon: string | null;
+
   @ApiProperty({ description: "Is view locked", example: false, required: true })
   @Expose()
   isLocked: boolean;

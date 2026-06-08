@@ -8,7 +8,7 @@ export default [
     languageOptions: {
       parserOptions: {
         projectService: false,
-        project: ['./tsconfig.e2e.json'],
+        project: ['./tsconfig.integration.json'],
         tsconfigRootDir: import.meta.dirname,
       },
     },

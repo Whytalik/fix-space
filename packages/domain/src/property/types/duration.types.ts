@@ -3,8 +3,8 @@ import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 
-export const DURATION_FORMAT_VALUES = ["HH:mm", "HH:mm:ss", "Xh Ym", "minutes", "seconds"] as const;
-export type DurationFormat = (typeof DURATION_FORMAT_VALUES)[number];
+import { DURATION_FORMAT_VALUES, type DurationFormat } from "./duration.constants";
+export { DURATION_FORMAT_VALUES, type DurationFormat } from "./duration.constants";
 
 export class DurationPropertyConfig {
   @IsOptional()
@@ -16,7 +16,4 @@ export class DurationPropertyConfig {
   format: DurationFormat;
 }
 
-export const DEFAULT_DURATION_PROPERTY: DurationPropertyConfig = {
-  defaultValue: null,
-  format: "HH:mm",
-};
+export { DEFAULT_DURATION_PROPERTY } from "./duration.constants";

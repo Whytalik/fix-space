@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { t } from "../../../common/utils/i18n.helper";
+import { t } from "@/common/utils/i18n.helper";
 
 type JwtPayload = {
   sub: string;

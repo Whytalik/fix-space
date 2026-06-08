@@ -1,8 +1,8 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { prisma } from "@fixspace/database";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import { t } from "../../../common/utils/i18n.helper";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { t } from "@/common/utils/i18n.helper";
 import {
   PRISMA_MODEL_NAMES,
   PrismaModelKey,

@@ -32,6 +32,11 @@ export class CreateViewDto {
   @MaxLength(255, { message: i18nValidationMessage<I18nTranslations>("validation.MAX_LENGTH") })
   name: string;
 
+  @ApiProperty({ description: "View icon", example: "icon:LayoutGrid", required: false })
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  icon?: string;
+
   @ApiProperty({ description: "Is view locked", example: false, required: false })
   @IsOptional()
   @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Exclude, Expose, Transform, TransformationType } from "class-transformer";
+import { Exclude, Expose, Transform, TransformationType, TransformFnParams } from "class-transformer";
 import {
   CheckboxPropertyConfig,
   DatePropertyConfig,
@@ -54,10 +54,6 @@ export class PropertyResponseDto {
   @Expose()
   groupId: string | null;
 
-  @ApiProperty({ description: "Whether the property is required", example: false })
-  @Expose()
-  isRequired: boolean;
-
   @ApiProperty({ description: "Whether the property is visible", example: true })
   @Expose()
   isVisible: boolean;
@@ -80,8 +76,8 @@ export class PropertyResponseDto {
 
   @ApiProperty({ description: "Property type-specific configuration", required: false })
   @Expose()
-  @Transform((params: any) => {
-    const { value, type, object, obj: parentObject } = params;
+  @Transform((params: TransformFnParams) => {
+    const { value, type, object } = params;
     if (type === TransformationType.CLASS_TO_PLAIN) return value;
     if (!value) return value;
     const subTypeMap: Record<string, new (...args: unknown[]) => unknown> = {
@@ -97,8 +93,7 @@ export class PropertyResponseDto {
       [PropertyType.RATING]: RatingPropertyConfig,
       [PropertyType.PROGRESS]: ProgressPropertyConfig,
     };
-    const targetObject = parentObject ?? object;
-    const Ctor = subTypeMap[targetObject?.type as string];
+    const Ctor = subTypeMap[object?.type as string];
     return Ctor ? Object.assign(new Ctor() as object, value) : value;
   })
   config?:
