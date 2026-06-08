@@ -51,7 +51,7 @@
 ## Pre-release (перед тегом версії)
 
 - [ ] `turbo test` — всі unit-тести (API + Web) зелені
-- [ ] `turbo test:e2e` — всі e2e-сценарії (API + UI) зелені
+- [ ] `pnpm --filter @fixspace/api test:integration` — всі integration-сценарії API зелені
+- [ ] `turbo test:e2e` — всі E2E-сценарії Playwright зелені
 - [ ] Smoke test: `POST /auth/login` → 200, `GET /spaces` → 200
-- [ ] `docs/06-testing/coverage-report-after-development.md` оновлено
-- [ ] `git tag vX.X` створено після merge
+- [ ] Statement coverage ≥ 70% підтверджено фінальним звітом

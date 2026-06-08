@@ -317,7 +317,7 @@ git commit -m "test(auth): add unit tests for auth service"
 | `revert`   | скасування попереднього коміту      |
 
 **Скоупи:**
-`auth` · `workspace` · `database` · `property` · `record` · `view` · `template` · `content` · `formula` · `automation` · `statistics` · `settings` · `onboarding` · `notification` · `search` · `import-export` · `integration` · `section` · `api` · `web` · `deps`
+`auth` · `workspace` · `database` · `property` · `record` · `view` · `template` · `content` · `formula` · `automation` · `statistics` · `settings` · `notification` · `search` · `import-export` · `integration` · `section` · `api` · `web` · `deps`
 
 **Commitlint** автоматично перевіряє. Неправильний коміт блокується:
 
@@ -381,8 +381,9 @@ git tag -a v0.1 -m "MVP Core: Auth + Workspace + Property + Record + View + Cont
 git push origin v0.1
 
 # 2. Запустити повний тест-сюіт
-turbo test          # всі unit-тести
-turbo test:e2e      # e2e тести (потребує Docker)
+turbo test                 # всі unit-тести
+pnpm test:integration      # integration тести API (потребує db-test)
+pnpm test:e2e              # E2E тести Playwright
 
 # 3. Оновити Postman-колекцію
 # Postman → Export → Collection v2.1 → docs/06-testing/postman/postman_collection.json
@@ -394,7 +395,7 @@ turbo test:e2e      # e2e тести (потребує Docker)
 | ----------------------- | ------ | ------------------------------------------------------------------------------ |
 | v0.1 — MVP Core         | `v0.1` | Auth, Workspace, Property (12 типів), Record, View, Template, Content, Formula |
 | v0.2 — Feature Complete | `v0.2` | Custom DB, Settings, Statistics, Search, CSV, Automation, Button               |
-| v0.3 — Polished         | `v0.3` | Settings, Onboarding, Notification, Duplicate, Content blocks                  |
+| v0.3 — Polished         | `v0.3` | Settings, Notification, Duplicate, Content blocks                              |
 | v1.0 — Full Release     | `v1.0` | Integrations, Advanced blocks, Formula in view                                 |
 
 ---

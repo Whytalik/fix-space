@@ -18,10 +18,12 @@
 | `Space`                  | Ізольований робочий простір                                           |
 | `Section`                | Навігаційна група баз даних у сайдбарі                                |
 | `Database`               | Структурована колекція записів із набором властивостей                |
+| `PropertyGroup`          | Група властивостей бази даних для логічного об'єднання                |
 | `Property`               | Колонка бази даних із типом та конфігурацією                          |
 | `Record`                 | Рядок бази даних; набір комірок + контентна область                   |
 | `PropertyValue`          | Значення однієї комірки (пара «запис × властивість»)                  |
 | `RecordContent`          | Контентна область запису (блоки, зображення, чеклісти), 1:1 до Record |
+| `RecordContentSnapshot`  | Історичні бекапи/знімки контенту запису для відновлення даних         |
 | `Template`               | Пресет значень властивостей для прискореного створення записів        |
 | `TemplatePropertyValue`  | Попередньо заповнене значення в шаблоні                               |
 | `View`                   | Збережене подання бази (фільтри, сортування, групування, колонки)     |
@@ -29,18 +31,19 @@
 | `AutomationLog`          | Журнал виконання автоматизації                                        |
 | `ImportMapping`          | Збережений маппінг CSV-стовпців до властивостей бази                  |
 | `ImportHistory`          | Історія імпортів: статус, кількість записів, логи помилок             |
+| `ContentBlockLibrary`    | Персональна бібліотека блоків контенту користувача                    |
 
 ### 1.2. Enums
 
-| Enum                 | Значення                                                                                                                    |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `PropertyType`       | `TEXT`, `NUMBER`, `DATE`, `CHECKBOX`, `SELECT`, `STATUS`, `RELATION`, `FORMULA`, `RATING`, `PROGRESS`, `DURATION`, `BUTTON` |
-| `AutomationTrigger`  | `ON_RECORD_CREATE`, `ON_FIELD_CHANGE`, `ON_SCHEDULE`                                                                        |
-| `AutomationStatus`   | `SUCCESS`, `FAILURE`, `SKIPPED`                                                                                             |
-| `NotificationType`   | `SYSTEM`, `ALERT`, `INTEGRATION`                                                                                            |
-| `IntegrationService` | `BINANCE`, `BYBIT`, `OKX`, `METATRADER5`, `CTRADER`                                                                         |
-| `IntegrationStatus`  | `ACTIVE`, `INACTIVE`, `ERROR`                                                                                               |
-| `ImportStatus`       | `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`                                                                              |
+| Enum                 | Значення                                                                                                          |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `PropertyType`       | `TEXT`, `NUMBER`, `DATE`, `CHECKBOX`, `SELECT`, `STATUS`, `RELATION`, `FORMULA`, `RATING`, `PROGRESS`, `DURATION` |
+| `AutomationTrigger`  | `ON_RECORD_CREATE`, `ON_FIELD_CHANGE`, `ON_SCHEDULE`                                                              |
+| `AutomationStatus`   | `SUCCESS`, `FAILURE`, `SKIPPED`                                                                                   |
+| `NotificationType`   | `SYSTEM`, `ALERT`, `INTEGRATION`                                                                                  |
+| `IntegrationService` | `BINANCE`, `BYBIT`, `OKX`, `METATRADER5`, `CTRADER`                                                               |
+| `IntegrationStatus`  | `ACTIVE`, `INACTIVE`, `ERROR`                                                                                     |
+| `ImportStatus`       | `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`                                                                    |
 
 ### 1.3. ER-діаграма
 
@@ -68,12 +71,15 @@ Space 1──N Database
 
 Section 1──N Database  (onDelete: SetNull)
 
+Database 1──N PropertyGroup
 Database 1──N Property
-Database 1──N Record
 Database 1──N Template
+Database 1──N Record
 Database 1──N View
 Database 1──N Automation
 Database 1──N ImportMapping
+
+PropertyGroup 1──N Property  (onDelete: SetNull / Cascade)
 
 Property 1──N PropertyValue
 Property 1──N TemplatePropertyValue
@@ -82,15 +88,20 @@ Record 1──N PropertyValue
 Record 1──1 RecordContent
 Record N──1 Template (sourceTemplate, onDelete: SetNull)
 
+RecordContent 1──N RecordContentSnapshot
+
 Template 1──N TemplatePropertyValue
 Template 1──N Record
 
 Automation 1──N AutomationLog
 
 ImportMapping 1──N ImportHistory
+
+User 1──N ContentBlockLibrary
+
 ```
 
-## 2. Стратегія видалення даних (Cascade & Soft Deletes)
+## 2. Стратегія видалення даних (Cascade)
 
 - **Hard Deletes (Каскадне видалення):**
   - Видалення `User` → видаляє `Space`, `Section`, `Database`, `Record`, `Property`, `Notification`, `IntegrationConnection`, `Settings`, токени тощо.
@@ -104,8 +115,6 @@ ImportMapping 1──N ImportHistory
 - **SetNull:**
   - Видалення `Section` → `sectionId` у таблиці `Database` стає `null` (бази переносяться у «Несортоване»).
   - Видалення `Template` → `templateId` у `Record` стає `null` (записи зберігаються без прив'язки до шаблону).
-- **Soft Deletes (Кошик):**
-  - Видалення `Record` → встановлюється поле `deletedAt` (Timestamp). Записи з `deletedAt != null` не враховуються у фільтрах, пошуку, статистиці, формулах, `LINKED_VIEW` та лімітах бази. Записи автоматично очищуються через 30 днів (cron job або background worker).
 
 ## 3. Зберігання гнучких структур (JSONB)
 
@@ -153,7 +162,7 @@ _Для забезпечення швидкості (відповідь API < 30
 
 - **B-Tree індекси:**
   - На зовнішні ключі (`spaceId`, `databaseId`, `recordId`, `propertyId`, `templateId`, `automationId`, `importMappingId`).
-  - На поля сортування та фільтрації (`createdAt`, `updatedAt`, `deletedAt`, `position`, `isRead`, `active`, `status`).
+  - На поля сортування та фільтрації (`createdAt`, `updatedAt`, `position`, `isRead`, `active`, `status`).
   - На унікальні поля (`email`, `username`, `userId + key` для Settings, `ownerId + name` для Space, `spaceId + name` для Database, `databaseId + name` для Template/View, `recordId + propertyId` для PropertyValue, `templateId + propertyId` для TemplatePropertyValue).
 - **GIN індекси (опціонально для масштабування):**
   - Для текстового пошуку по полю `content` у JSONB (`RecordContent`).
@@ -180,10 +189,12 @@ _Для забезпечення швидкості (відповідь API < 30
 | `Space`                  | User                | Ізольований робочий простір; мін. 1, макс. 5 на користувача                            |
 | `Section`                | Space               | Іменована навігаційна група баз даних у сайдбарі; не зберігає даних                    |
 | `Database`               | Space (+ Section?)  | Структурована колекція записів із набором властивостей; `recordLimit`, `isLocked`      |
+| `PropertyGroup`          | Database            | Група властивостей (колонок) для логічного об'єднання та відображення в UI             |
 | `Property`               | Database            | Колонка бази даних із фіксованим типом і конфігурацією                                 |
-| `Record`                 | Database            | Рядок бази; набір комірок + контентна область; soft delete → Кошик 30 днів             |
+| `Record`                 | Database            | Рядок бази; набір комірок + контентна область                                          |
 | `PropertyValue`          | Record + Property   | Значення однієї комірки: пара «запис × властивість», унікальна в межах запису          |
 | `RecordContent`          | Record              | Контентна область запису (блоки, зображення, чеклісти); зв'язок 1:1                    |
+| `RecordContentSnapshot`  | RecordContent       | Історичні бекапи/знімки контенту запису для відновлення даних                          |
 | `Template`               | Database            | Пресет значень властивостей та контентної структури для прискореного створення записів |
 | `TemplatePropertyValue`  | Template + Property | Одне попередньо заповнене значення в шаблоні                                           |
 | `View`                   | Database            | Збережене подання: фільтри, сортування, групування, видимість стовпців                 |
@@ -196,6 +207,7 @@ _Для забезпечення швидкості (відповідь API < 30
 | `EmailVerificationToken` | User                | Одноразовий токен підтвердження email (діє 24 год)                                     |
 | `PasswordResetToken`     | User                | Одноразовий токен скидання пароля (діє 1 год)                                          |
 | `GoogleAccount`          | User                | Прив'язка Google OAuth: googleId, email, accessToken, refreshToken                     |
+| `ContentBlockLibrary`    | User                | Персональна бібліотека користувацьких блоків контенту для повторного використання      |
 
 ---
 
@@ -256,8 +268,6 @@ _Для забезпечення швидкості (відповідь API < 30
 | `userId`         | UUID (FK, unique) | —        | → `User`; один користувач — один Google-акаунт |
 | `googleId`       | String (unique)   | —        | Унікальний ідентифікатор Google                |
 | `email`          | String            | —        | Email із Google профілю                        |
-| `displayName`    | String            | —        | Відображуване ім'я з Google                    |
-| `avatarUrl`      | String            | ✓        | URL фото профілю Google                        |
 | `accessToken`    | String            | —        | OAuth access token (зашифровано)               |
 | `refreshToken`   | String            | —        | OAuth refresh token (зашифровано)              |
 | `tokenExpiresAt` | DateTime          | —        | Термін дії access token                        |
@@ -354,41 +364,40 @@ _Для забезпечення швидкості (відповідь API < 30
 
 ### `Property`
 
-| Поле          | Тип          | Nullable | Опис                                                                                                                |
-| ------------- | ------------ | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `id`          | UUID         | —        | Первинний ключ                                                                                                      |
-| `databaseId`  | UUID (FK)    | —        | → `Database`                                                                                                        |
-| `groupId`     | UUID (FK)    | ✓        | → `PropertyGroup` (група властивостей)                                                                              |
-| `name`        | String       | —        | Назва властивості (унікальна в межах бази)                                                                          |
-| `type`        | PropertyType | —        | Тип: TEXT / NUMBER / DATE / CHECKBOX / SELECT / STATUS / RELATION / FORMULA / RATING / PROGRESS / DURATION / BUTTON |
-| `position`    | Int          | —        | Порядок стовпця в таблиці                                                                                           |
-| `icon`        | String       | ✓        | Emoji іконки властивості                                                                                            |
-| `hint`        | String       | ✓        | Підказка-tooltip                                                                                                    |
-| `group`       | String       | ✓        | Група властивостей для візуального групування в картці запису                                                       |
-| `isRequired`  | Boolean      | —        | Поле обов'язкове для заповнення                                                                                     |
-| `isVisible`   | Boolean      | —        | Відображається в таблиці; за замовчуванням `true`                                                                   |
-| `isProtected` | Boolean      | —        | Системна властивість; не можна видалити або змінити тип                                                             |
-| `createdAt`   | DateTime     | —        | Час створення                                                                                                       |
-| `updatedAt`   | DateTime     | —        | Час останньої зміни                                                                                                 |
-| `config`      | Json         | ✓        | Конфігурація специфічна для типу (формати, опції, обмеження)                                                        |
+| Поле          | Тип          | Nullable | Опис                                                                                                       |
+| ------------- | ------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `id`          | UUID         | —        | Первинний ключ                                                                                             |
+| `databaseId`  | UUID (FK)    | —        | → `Database`                                                                                               |
+| `groupId`     | UUID (FK)    | ✓        | → `PropertyGroup` (група властивостей)                                                                     |
+| `name`        | String       | —        | Назва властивості (унікальна в межах бази)                                                                 |
+| `type`        | PropertyType | —        | Тип: TEXT / NUMBER / DATE / CHECKBOX / SELECT / STATUS / RELATION / FORMULA / RATING / PROGRESS / DURATION |
+| `position`    | Int          | —        | Порядок стовпця в таблиці                                                                                  |
+| `icon`        | String       | ✓        | Emoji іконки властивості                                                                                   |
+| `hint`        | String       | ✓        | Підказка-tooltip                                                                                           |
+| `group`       | String       | ✓        | Група властивостей для візуального групування в картці запису                                              |
+| `isRequired`  | Boolean      | —        | Поле обов'язкове для заповнення                                                                            |
+| `isVisible`   | Boolean      | —        | Відображається в таблиці; за замовчуванням `true`                                                          |
+| `isProtected` | Boolean      | —        | Системна властивість; не можна видалити або змінити тип                                                    |
+| `createdAt`   | DateTime     | —        | Час створення                                                                                              |
+| `updatedAt`   | DateTime     | —        | Час останньої зміни                                                                                        |
+| `config`      | Json         | ✓        | Конфігурація специфічна для типу (формати, опції, обмеження)                                               |
 
 ### `Record`
 
-| Поле                  | Тип       | Nullable | Опис                                               |
-| --------------------- | --------- | -------- | -------------------------------------------------- |
-| `id`                  | UUID      | —        | Первинний ключ                                     |
-| `databaseId`          | UUID (FK) | —        | → `Database`                                       |
-| `templateId`          | UUID (FK) | ✓        | → `Template`; шаблон, використаний при створенні   |
-| `sourceIntegrationId` | String    | ✓        | Ідентифікатор джерела інтеграції                   |
-| `sourceLabel`         | String    | ✓        | Мітка джерела інтеграції                           |
-| `sourcePositionId`    | String    | ✓        | Ідентифікатор позиції в зовнішній системі          |
-| `sourceCurrency`      | String    | ✓        | Валюта операції                                    |
-| `name`                | String    | —        | Заголовок запису; за замовчуванням `"Untitled"`    |
-| `icon`                | String    | ✓        | Emoji іконки запису                                |
-| `config`              | Json      | ✓        | Додаткові налаштування запису                      |
-| `deletedAt`           | DateTime  | ✓        | Час переміщення до Кошика; `null` = активний запис |
-| `createdAt`           | DateTime  | —        | Час створення                                      |
-| `updatedAt`           | DateTime  | —        | Час останньої зміни                                |
+| Поле                  | Тип       | Nullable | Опис                                             |
+| --------------------- | --------- | -------- | ------------------------------------------------ |
+| `id`                  | UUID      | —        | Первинний ключ                                   |
+| `databaseId`          | UUID (FK) | —        | → `Database`                                     |
+| `templateId`          | UUID (FK) | ✓        | → `Template`; шаблон, використаний при створенні |
+| `sourceIntegrationId` | String    | ✓        | Ідентифікатор джерела інтеграції                 |
+| `sourceLabel`         | String    | ✓        | Мітка джерела інтеграції                         |
+| `sourcePositionId`    | String    | ✓        | Ідентифікатор позиції в зовнішній системі        |
+| `sourceCurrency`      | String    | ✓        | Валюта операції                                  |
+| `name`                | String    | —        | Заголовок запису; за замовчуванням `"Untitled"`  |
+| `icon`                | String    | ✓        | Emoji іконки запису                              |
+| `config`              | Json      | ✓        | Додаткові налаштування запису                    |
+| `createdAt`           | DateTime  | —        | Час створення                                    |
+| `updatedAt`           | DateTime  | —        | Час останньої зміни                              |
 
 ### `PropertyValue`
 
@@ -507,6 +516,40 @@ _Для забезпечення швидкості (відповідь API < 30
 | `sourceFileInfo`  | Json         | —        | Метадані файлу (ім'я, розмір, кодування)            |
 | `createdAt`       | DateTime     | —        | Час початку імпорту                                 |
 | `completedAt`     | DateTime     | ✓        | Час завершення; `null` якщо ще виконується          |
+
+### `PropertyGroup`
+
+| Поле         | Тип       | Nullable | Опис                                  |
+| ------------ | --------- | -------- | ------------------------------------- |
+| `id`         | UUID      | —        | Первинний ключ                        |
+| `databaseId` | UUID (FK) | —        | → `Database`                          |
+| `name`       | String    | —        | Назва групи властивостей              |
+| `position`   | Int       | —        | Порядок групи властивостей в UI       |
+| `visibility` | Json      | ✓        | Умови відображення групи властивостей |
+| `createdAt`  | DateTime  | —        | Час створення                         |
+| `updatedAt`  | DateTime  | —        | Час останньої зміни                   |
+
+### `RecordContentSnapshot`
+
+| Поле              | Тип       | Nullable | Опис                                                |
+| ----------------- | --------- | -------- | --------------------------------------------------- |
+| `id`              | UUID      | —        | Первинний ключ                                      |
+| `recordContentId` | UUID (FK) | —        | → `RecordContent`                                   |
+| `content`         | Json      | —        | Знімок/бекап структури контенту на момент створення |
+| `createdAt`       | DateTime  | —        | Час знімку                                          |
+
+### `ContentBlockLibrary`
+
+| Поле        | Тип       | Nullable | Опис                                             |
+| ----------- | --------- | -------- | ------------------------------------------------ |
+| `id`        | UUID      | —        | Первинний ключ                                   |
+| `userId`    | UUID (FK) | —        | → `User`                                         |
+| `name`      | String    | —        | Назва блоку контенту                             |
+| `content`   | Json      | —        | Структура та наповнення збереженого блоку        |
+| `isSystem`  | Boolean   | —        | Прапорець системного блоку (доступного для всіх) |
+| `isVisible` | Boolean   | —        | Видимість блоку в бібліотеці                     |
+| `createdAt` | DateTime  | —        | Час створення                                    |
+| `updatedAt` | DateTime  | —        | Час останньої зміни                              |
 
 ---
 

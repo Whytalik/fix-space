@@ -16,7 +16,7 @@
 
 **Auth:** реєстрація, верифікація email, вхід, refresh-токен, вихід, скидання пароля.
 **Workspace:** Space (CRUD), Section (CRUD), Database (CRUD).
-**Property:** 12 типів (TEXT, NUMBER, DATE, CHECKBOX, DURATION, SELECT, STATUS, RELATION, FORMULA, RATING, PROGRESS, BUTTON), type handlers, валідація.
+**Property:** 11 типів (TEXT, NUMBER, DATE, CHECKBOX, DURATION, SELECT, STATUS, RELATION, FORMULA, RATING, PROGRESS), type handlers, валідація.
 **Record:** CRUD, значення властивостей, фільтрація, пошук.
 **View:** серверне збереження конфігурації відображення, фільтри, сортування.
 **Template:** CRUD, шаблон за замовчуванням, TemplatePropertyValue.
@@ -35,7 +35,6 @@
 **Search:** пошук у базі та глобальний пошук (Ctrl+K).
 **Import/Export:** CSV-імпорт (до 25 МБ) і CSV-експорт.
 **Automation:** правила КОЛИ→ТО (3 тригери, 3 дії, до 5 дій на правило, журнал виконань).
-**Button:** BUTTON-властивість і BUTTON-компонент контентної області.
 
 Результат: система готова до повноцінної щоденної роботи трейдера.
 
@@ -43,8 +42,7 @@
 
 ## M3 — v0.3 Polished
 
-**Onboarding:** демо-простір, покроковий тур (10–12 кроків), чеклист активації, контекстні підказки.
-**Notification:** in-app сповіщення (інтеграція, автоматизація, система); badge-лічильник, flyout-панель.
+**Notification:** in-app сповіщення (інтеграція, автоматизація, система); badge-лічильник, модальне вікно.
 **Duplicate:** дублювання простору, бази, запису.
 **Content blocks:** бібліотека блоків, 19 типів компонентів, LINKED_VIEW, трейдерські компоненти (CHART, POSITION_SIZE_CALC, ECONOMIC_CALENDAR).
 
