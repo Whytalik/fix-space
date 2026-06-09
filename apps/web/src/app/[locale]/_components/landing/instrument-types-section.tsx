@@ -38,7 +38,7 @@ export function InstrumentTypesSection() {
         {cards.map((card) => (
           <div
             key={card.key}
-            className="bg-surface border border-stroke rounded-xl p-6 flex flex-col h-full hover:border-accent/50 transition-colors"
+            className="bg-surface border border-stroke rounded-2xl p-6 flex flex-col h-full hover:border-accent/50 transition-colors duration-150"
           >
             <div className="bg-accent/10 w-10 h-10 rounded-lg flex items-center justify-center mb-5">{card.icon}</div>
             <h3 className="type-landing-h3 mb-2">{t(`instrumentTypes.${card.key}.title`)}</h3>

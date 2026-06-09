@@ -8,7 +8,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale = routing.defaultLocale;
   }
 
-  const namespaces = ["auth", "landing", "dashboard", "settings", "database", "components", "legal", "space-switcher"];
+  const namespaces = ["auth", "landing", "dashboard", "settings", "database", "components", "legal", "space-switcher", "record"];
 
   const messages = (
     await Promise.all(
@@ -22,7 +22,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
         }
       }),
     )
-  ).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+  ).reduce((merged, curr) => ({ ...merged, ...curr }), {});
 
   return {
     locale,

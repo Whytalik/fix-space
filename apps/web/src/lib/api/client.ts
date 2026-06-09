@@ -1,4 +1,3 @@
-import { storage } from "@/lib/storage";
 import { API_BASE_URL } from "@/utils/constants";
 
 export class ApiError extends Error {
@@ -19,11 +18,12 @@ interface FetchOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   headers?: Record<string, string>;
+  noRedirect?: boolean;
 }
 
-let refreshPromise: Promise<string | null> | null = null;
+let refreshPromise: Promise<boolean> | null = null;
 
-async function tryRefreshToken(): Promise<string | null> {
+export async function tryRefreshToken(): Promise<boolean> {
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = fetch(`${API_BASE_URL}/auth/refresh`, {
@@ -31,14 +31,8 @@ async function tryRefreshToken(): Promise<string | null> {
     credentials: "include",
     headers: { "Content-Type": "application/json" },
   })
-    .then(async (res) => {
-      if (!res.ok) return null;
-      const data = await res.json();
-      const newToken = data.accessToken as string;
-      storage.setToken(newToken);
-      return newToken;
-    })
-    .catch(() => null)
+    .then((res) => res.ok)
+    .catch(() => false)
     .finally(() => {
       refreshPromise = null;
     });
@@ -48,41 +42,38 @@ async function tryRefreshToken(): Promise<string | null> {
 
 function redirectToLogin() {
   if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-    storage.clearAuth();
     window.location.href = "/login";
   }
 }
 
 export async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
-  const { method = "GET", body, headers = {} } = options;
-
-  const accessToken = storage.getToken();
+  const { method = "GET", body, headers = {}, noRedirect = false } = options;
 
   const isFormData = body instanceof FormData;
-
-  const buildHeaders = (token: string | null): Record<string, string> => ({
-    ...(isFormData ? {} : { "Content-Type": "application/json" }),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...headers,
-  });
 
   const serializeBody = () => (body === undefined ? undefined : isFormData ? (body as FormData) : JSON.stringify(body));
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method,
     credentials: "include",
-    headers: buildHeaders(accessToken),
+    headers: {
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...headers,
+    },
     body: serializeBody(),
   });
 
   if (res.status === 401 && path !== "/auth/refresh" && path !== "/auth/login") {
-    const newToken = await tryRefreshToken();
+    const refreshed = await tryRefreshToken();
 
-    if (newToken) {
+    if (refreshed) {
       const retryRes = await fetch(`${API_BASE_URL}${path}`, {
         method,
         credentials: "include",
-        headers: buildHeaders(newToken),
+        headers: {
+          ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          ...headers,
+        },
         body: serializeBody(),
       });
       const retryData = await retryRes.json().catch(() => ({}));
@@ -93,7 +84,7 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
       return retryData as T;
     }
 
-    redirectToLogin();
+    if (!noRedirect) redirectToLogin();
     throw new ApiError(401, "Session expired. Please log in again.");
   }
 
@@ -107,12 +98,12 @@ export async function apiFetch<T>(path: string, options: FetchOptions = {}): Pro
   return data as T;
 }
 
-export function parseApiError(err: unknown): string {
-  if (err instanceof ApiError) return err.messages[0] ?? "Something went wrong. Please try again.";
+export function parseApiError(error: unknown): string {
+  if (error instanceof ApiError) return error.messages[0] ?? "Something went wrong. Please try again.";
   return "Something went wrong. Please try again.";
 }
 
-export function parseApiErrors(err: unknown): string[] {
-  if (err instanceof ApiError) return err.messages;
+export function parseApiErrors(error: unknown): string[] {
+  if (error instanceof ApiError) return error.messages;
   return ["Something went wrong. Please try again."];
 }

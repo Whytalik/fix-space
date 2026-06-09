@@ -24,9 +24,16 @@ const SERVER_ONLY_PACKAGES = [
 
 const stubPath = path.resolve(__dirname, "src/lib/server-only-stub.js");
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${process.env.INTERNAL_API_URL || "http://127.0.0.1:3000"}/:path*`,
+      },
+    ];
+  },
   outputFileTracingRoot: monorepoRoot,
   allowedDevOrigins: [
     "http://localhost:3000",
@@ -64,7 +71,20 @@ const nextConfig = {
   },
   turbopack: {
     root: monorepoRoot,
-    resolveAlias: {},
+    resolveAlias: {
+      "@nestjs/common": "./src/lib/server-only-stub.js",
+      "@nestjs/core": "./src/lib/server-only-stub.js",
+      "@nestjs/mapped-types": "./src/lib/server-only-stub.js",
+      "@nestjs/microservices": "./src/lib/server-only-stub.js",
+      "@nestjs/websockets": "./src/lib/server-only-stub.js",
+      "@nestjs/platform-express": "./src/lib/server-only-stub.js",
+      "@nestjs/swagger": "./src/lib/server-only-stub.js",
+      "nestjs-i18n": "./src/lib/server-only-stub.js",
+      "class-transformer": "./src/lib/server-only-stub.js",
+      "class-validator": "./src/lib/server-only-stub.js",
+      "reflect-metadata": "./src/lib/server-only-stub.js",
+      "express": "./src/lib/server-only-stub.js",
+    },
   },
 };
 

@@ -17,7 +17,7 @@ export function SolutionSection() {
       />
 
       <div className="max-w-2xl mx-auto mt-10">
-        <div className="bg-surface border border-accent rounded-xl p-8 ring-4 ring-accent-muted shadow-2xl">
+        <div className="bg-surface border border-accent rounded-2xl p-8 ring-4 ring-accent-muted shadow-2xl">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-lg bg-canvas border border-stroke flex items-center justify-center">
               <LogoIcon size={24} />

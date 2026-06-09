@@ -38,12 +38,12 @@ export function TemplatesSection() {
               {templates.map(({ icon: Icon, name }) => (
                 <div
                   key={name}
-                  className="flex flex-col gap-3 bg-surface border border-stroke rounded-xl p-5 cursor-pointer hover:border-accent hover:bg-accent/5 transition-all duration-300 group"
+                  className="flex flex-col gap-3 bg-surface border border-stroke rounded-2xl p-5 cursor-pointer hover:border-accent hover:bg-accent/5 transition-colors duration-150 group"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-elevated flex items-center justify-center shrink-0 border border-stroke group-hover:border-accent/30 transition-colors">
-                    <Icon size={18} className="text-ink-muted group-hover:text-accent transition-colors" />
+                  <div className="w-10 h-10 rounded-lg bg-elevated flex items-center justify-center shrink-0 border border-stroke group-hover:border-accent/30 transition-colors duration-150">
+                    <Icon size={18} className="text-ink-muted group-hover:text-accent transition-colors duration-150" />
                   </div>
-                  <span className="type-landing-nav group-hover:text-ink transition-colors">{name}</span>
+                  <span className="type-landing-nav group-hover:text-ink transition-colors duration-150">{name}</span>
                 </div>
               ))}
             </div>

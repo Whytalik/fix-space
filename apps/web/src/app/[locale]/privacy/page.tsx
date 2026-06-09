@@ -1,5 +1,3 @@
-"use client";
-
 import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header/landing/header";
 import { Footer } from "@/components/layout/footer";

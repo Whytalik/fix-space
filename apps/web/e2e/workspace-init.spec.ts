@@ -49,10 +49,10 @@ async function getDatabasesByTitle(request: APIRequestContext, token: string): P
   const spaces = (await spacesRes.json()) as Array<{ id: string; isDefault: boolean }>;
   const space = spaces.find((s) => s.isDefault) ?? spaces[0]!;
 
-  const dbsRes = await request.get(`${API}/databases?spaceId=${space.id}`, {
+  const databasesResponse = await request.get(`${API}/databases?spaceId=${space.id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  const databases = (await dbsRes.json()) as Array<{ id: string; title?: string; name: string }>;
+  const databases = (await databasesResponse.json()) as Array<{ id: string; title?: string; name: string }>;
 
   const map = new Map<string, string>();
   for (const db of databases) {
@@ -61,16 +61,16 @@ async function getDatabasesByTitle(request: APIRequestContext, token: string): P
   return map;
 }
 
-async function getProperties(request: APIRequestContext, token: string, dbId: string): Promise<PropertyDto[]> {
-  const res = await request.get(`${API}/properties?databaseId=${dbId}`, {
+async function getProperties(request: APIRequestContext, token: string, databaseId: string): Promise<PropertyDto[]> {
+  const res = await request.get(`${API}/properties?databaseId=${databaseId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok()) throw new Error(`GET /properties failed (${res.status()}): ${await res.text()}`);
   return (await res.json()) as PropertyDto[];
 }
 
-async function getTemplates(request: APIRequestContext, token: string, dbId: string): Promise<TemplateDto[]> {
-  const res = await request.get(`${API}/templates?databaseId=${dbId}`, {
+async function getTemplates(request: APIRequestContext, token: string, databaseId: string): Promise<TemplateDto[]> {
+  const res = await request.get(`${API}/templates?databaseId=${databaseId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return (await res.json()) as TemplateDto[];
@@ -184,10 +184,10 @@ test.describe("Workspace API tests (shared user)", () => {
 
   test("TC-WS-003: preset templates created for Trading Journal and Performance Review", async ({ request }) => {
     const tjTemplates = await getTemplates(request, token, dbsByTitle.get("Trading Journal")!);
-    expect(tjTemplates.map((t) => t.name)).toContain("Default");
+    expect(tjTemplates.map((template) => template.name)).toContain("Default");
 
     const prTemplates = await getTemplates(request, token, dbsByTitle.get("Performance Review")!);
-    const prNames = prTemplates.map((t) => t.name);
+    const prNames = prTemplates.map((template) => template.name);
     expect(prNames).toContain("Weekly Review");
     expect(prNames).toContain("Monthly Review");
     expect(prNames).toContain("Quarterly Review");

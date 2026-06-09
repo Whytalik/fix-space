@@ -34,7 +34,7 @@ const sizeMap = {
 
 const FloatingIcon = ({ icon: Icon, className, delay, size = "md", floatDuration = "4s" }: FloatingIconProps) => (
   <div
-    className={`absolute hidden lg:flex items-center justify-center ${sizeMap[size].box} rounded-xl bg-surface border border-stroke shadow-xl ${className}`}
+    className={`absolute hidden lg:flex items-center justify-center ${sizeMap[size].box} rounded-lg bg-surface border border-stroke shadow-xl ${className}`}
     style={{
       animation: `fade-up 0.45s ease ${delay} both, float ${floatDuration} ease-in-out ${delay} infinite`,
       willChange: "transform",

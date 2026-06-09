@@ -16,7 +16,7 @@ export function SpecializedSection() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto mt-10">
-        <div className="bg-canvas border border-stroke rounded-xl p-6">
+        <div className="bg-canvas border border-stroke rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <Table size={18} className="text-ink-secondary" />
             <div>
@@ -44,7 +44,7 @@ export function SpecializedSection() {
           </ul>
         </div>
 
-        <div className="bg-canvas border border-stroke rounded-xl p-6">
+        <div className="bg-canvas border border-stroke rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <Layout size={18} className="text-ink-secondary" />
             <div>
@@ -72,7 +72,7 @@ export function SpecializedSection() {
           </ul>
         </div>
 
-        <div className="bg-canvas border border-stroke rounded-xl p-6">
+        <div className="bg-canvas border border-stroke rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <BarChart2 size={18} className="text-ink-secondary" />
             <div>
