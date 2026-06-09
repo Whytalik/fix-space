@@ -8,11 +8,10 @@ import { useTranslations } from "next-intl";
 interface DatabaseTodayCardProps {
   title: string;
   records: TodayRecord[];
-  spaceId: string;
   databaseId?: string;
 }
 
-export function DatabaseTodayCard({ title, records, spaceId, databaseId }: DatabaseTodayCardProps) {
+export function DatabaseTodayCard({ title, records, databaseId }: DatabaseTodayCardProps) {
   const t = useTranslations("Dashboard");
   const recentRecords = records.slice(0, 3);
 

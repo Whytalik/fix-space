@@ -2,8 +2,10 @@
 
 import { useDatabaseContext } from "@/context/database-context";
 import { PropertyType, SummaryMetric } from "@fixspace/domain/enums";
+import type { RecordResponseDto } from "@fixspace/domain";
 import { calculateSummary, getAvailableMetrics } from "@/utils/record/summary-calculations";
 import { useState, useMemo, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { cn } from "@/utils/ui/cn";
 import { Check, ChevronDown } from "lucide-react";
@@ -14,14 +16,18 @@ interface SummaryCellProps {
   type: PropertyType;
   isPrimary?: boolean;
   className?: string;
+  records?: RecordResponseDto[];
 }
 
-export function SummaryCell({ propertyId, type, isPrimary = false, className }: SummaryCellProps) {
+export function SummaryCell({ propertyId, type, isPrimary = false, className, records: recordsProp }: SummaryCellProps) {
   const t = useTranslations("SummaryMetrics");
   const { allFilteredRecords, columnSummaries, setColumnSummary, isViewLocked } = useDatabaseContext();
   const { formatDate } = useDateFormat();
+  const sourceRecords = recordsProp ?? allFilteredRecords;
 
   const [isOpen, setIsOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const selectedMetric = columnSummaries[propertyId] || null;
@@ -29,18 +35,37 @@ export function SummaryCell({ propertyId, type, isPrimary = false, className }: 
 
   const value = useMemo(() => {
     if (!selectedMetric) return null;
-    return calculateSummary(allFilteredRecords, propertyId, type, selectedMetric, isPrimary);
-  }, [allFilteredRecords, propertyId, type, selectedMetric, isPrimary]);
+    return calculateSummary(sourceRecords, propertyId, type, selectedMetric, isPrimary);
+  }, [sourceRecords, propertyId, type, selectedMetric, isPrimary]);
 
   useEffect(() => {
+    if (!isOpen) return;
     function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
+      if (buttonRef.current?.contains(e.target as Node)) return;
+      if (menuRef.current?.contains(e.target as Node)) return;
+      setIsOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [isOpen]);
+
+  function handleToggle() {
+    if (isViewLocked) return;
+    if (isOpen) {
+      setIsOpen(false);
+      return;
+    }
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (rect) {
+      setMenuStyle({
+        position: "fixed",
+        bottom: window.innerHeight - rect.top + 4,
+        right: window.innerWidth - rect.right,
+        zIndex: 9999,
+      });
+    }
+    setIsOpen(true);
+  }
 
   const formattedValue = useMemo(() => {
     if (value === null || value === undefined) return null;
@@ -60,9 +85,10 @@ export function SummaryCell({ propertyId, type, isPrimary = false, className }: 
   return (
     <div className={cn("relative group", className)}>
       <button
-        onClick={() => !isViewLocked && setIsOpen(!isOpen)}
+        ref={buttonRef}
+        onClick={handleToggle}
         className={cn(
-          "flex items-center justify-end w-full h-8 px-2 text-xs transition-colors duration-150 rounded hover:bg-black/5",
+          "flex items-center justify-end w-full h-8 px-2 text-xs transition-colors duration-150 rounded hover:bg-hover",
           !selectedMetric && "text-ink-muted italic opacity-0 group-hover:opacity-100",
           selectedMetric && "text-ink-secondary font-medium",
           isViewLocked && "cursor-default hover:bg-transparent",
@@ -83,37 +109,40 @@ export function SummaryCell({ propertyId, type, isPrimary = false, className }: 
         )}
       </button>
 
-      {isOpen && (
-        <div
-          ref={menuRef}
-          className="absolute bottom-full right-0 mb-1 w-48 bg-canvas border border-stroke rounded-lg shadow-elevated z-50 py-1 max-h-64 overflow-y-auto scrollbar"
-        >
-          <button
-            onClick={() => {
-              setColumnSummary(propertyId, null);
-              setIsOpen(false);
-            }}
-            className="flex items-center justify-between w-full px-3 py-1.5 text-xs text-ink hover:bg-canvas-subtle transition-colors duration-150"
+      {isOpen &&
+        createPortal(
+          <div
+            ref={menuRef}
+            style={menuStyle}
+            className="w-48 bg-canvas border border-stroke rounded-lg shadow-elevated py-1 max-h-64 overflow-y-auto scrollbar"
           >
-            <span className="italic">{t("none")}</span>
-            {!selectedMetric && <Check size={12} className="text-accent" />}
-          </button>
-          <div className="h-px bg-stroke my-1" />
-          {availableMetrics.map((metric) => (
             <button
-              key={metric}
               onClick={() => {
-                setColumnSummary(propertyId, metric);
+                setColumnSummary(propertyId, null);
                 setIsOpen(false);
               }}
-              className="flex items-center justify-between w-full px-3 py-1.5 text-xs text-ink hover:bg-canvas-subtle transition-colors duration-150"
+              className="flex items-center justify-between w-full px-3 py-1.5 text-xs text-ink hover:bg-hover transition-colors duration-150"
             >
-              <span>{t(`metrics.${metric}`)}</span>
-              {selectedMetric === metric && <Check size={12} className="text-accent" />}
+              <span className="italic">{t("none")}</span>
+              {!selectedMetric && <Check size={12} className="text-accent" />}
             </button>
-          ))}
-        </div>
-      )}
+            <div className="h-px bg-stroke my-1" />
+            {availableMetrics.map((metric) => (
+              <button
+                key={metric}
+                onClick={() => {
+                  setColumnSummary(propertyId, metric);
+                  setIsOpen(false);
+                }}
+                className="flex items-center justify-between w-full px-3 py-1.5 text-xs text-ink hover:bg-hover transition-colors duration-150"
+              >
+                <span>{t(`metrics.${metric}`)}</span>
+                {selectedMetric === metric && <Check size={12} className="text-accent" />}
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

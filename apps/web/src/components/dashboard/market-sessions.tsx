@@ -75,7 +75,7 @@ export function MarketSessions({ data }: MarketSessionsProps) {
                 isActive ? "bg-success-bg border-success text-success font-medium" : "bg-surface border-border text-ink-muted"
               }`}
             >
-              <div className="text-sm">{sessionT(sessionKey as any)}</div>
+              <div className="text-sm">{sessionT(sessionKey as Parameters<typeof sessionT>[0])}</div>
               <div className="text-xs mt-1 opacity-80">{isActive ? t("active") : t("closed")}</div>
             </div>
           );

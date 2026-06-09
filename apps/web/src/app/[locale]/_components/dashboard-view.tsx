@@ -57,32 +57,28 @@ export function DashboardView() {
             </div>
 
             <div className="w-full">
-              <DailyWorkflow steps={dashboard.dailyWorkflow} spaceId={space.id} />
+              <DailyWorkflow steps={dashboard.dailyWorkflow} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <DatabaseTodayCard
                 title={dashboard.todayItems.tradingJournal.title}
                 records={dashboard.todayItems.tradingJournal.records}
-                spaceId={space.id}
                 databaseId={dashboard.todayItems.tradingJournal.databaseId}
               />
               <DatabaseTodayCard
                 title={dashboard.todayItems.dailyRoutine.title}
                 records={dashboard.todayItems.dailyRoutine.records}
-                spaceId={space.id}
                 databaseId={dashboard.todayItems.dailyRoutine.databaseId}
               />
               <DatabaseTodayCard
                 title={dashboard.todayItems.notes.title}
                 records={dashboard.todayItems.notes.records}
-                spaceId={space.id}
                 databaseId={dashboard.todayItems.notes.databaseId}
               />
               <DatabaseTodayCard
                 title={dashboard.todayItems.mistakes.title}
                 records={dashboard.todayItems.mistakes.records}
-                spaceId={space.id}
                 databaseId={dashboard.todayItems.mistakes.databaseId}
               />
             </div>

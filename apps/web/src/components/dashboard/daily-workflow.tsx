@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/primitives/display/card";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import type { WorkflowStep } from "@fixspace/domain";
 import { Check, Plus, Lock, ChevronRight, Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -11,10 +11,9 @@ import { useTranslations } from "next-intl";
 
 interface DailyWorkflowProps {
   steps: WorkflowStep[];
-  spaceId: string;
 }
 
-export function DailyWorkflow({ steps, spaceId }: DailyWorkflowProps) {
+export function DailyWorkflow({ steps }: DailyWorkflowProps) {
   const t = useTranslations("Dashboard");
   const completedCount = steps.filter((s) => s.isCompleted).length;
   const progressPercent = Math.min((completedCount / (steps.length - 1)) * 100, 100);
@@ -52,11 +51,10 @@ export function DailyWorkflow({ steps, spaceId }: DailyWorkflowProps) {
               <WorkflowStepNode
                 key={step.name}
                 step={step}
-                stepDisplayName={t(translationKey as any)}
+                stepDisplayName={t(translationKey as Parameters<typeof t>[0])}
                 idx={idx}
                 isUnlocked={isUnlocked}
                 totalSteps={steps.length}
-                spaceId={spaceId}
               />
             );
           })}
@@ -72,14 +70,12 @@ function WorkflowStepNode({
   idx,
   isUnlocked,
   totalSteps,
-  spaceId,
 }: {
   step: WorkflowStep;
   stepDisplayName: string;
   idx: number;
   isUnlocked: boolean;
   totalSteps: number;
-  spaceId: string;
 }) {
   const t = useTranslations("Dashboard");
   const router = useRouter();
@@ -123,7 +119,7 @@ function WorkflowStepNode({
           if (step.databaseId && isUnlocked && step.isCompleted) {
             router.push(`/database/${step.databaseId}`);
           } else {
-            handleNodeClick(e as any);
+            handleNodeClick(e as React.MouseEvent);
           }
         }}
         className={`flex flex-col items-center group flex-1 relative ${step.databaseId && isUnlocked ? "cursor-pointer" : "cursor-default"}`}

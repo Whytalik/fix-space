@@ -21,7 +21,6 @@ export default function RecordPage() {
   const { data: record, isLoading: isRecordLoading } = useRecordQuery(id);
   const { setCurrentDatabaseId } = useAppContext();
   const queryClient = useQueryClient();
-  const t = useTranslations("DatabaseTable");
   const tr = useTranslations("RecordPage");
   const [showMetadata, setShowMetadata] = useState(true);
   const [titleValue, setTitleValue] = useState("");

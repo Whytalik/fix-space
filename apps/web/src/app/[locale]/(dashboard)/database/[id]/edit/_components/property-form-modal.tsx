@@ -11,7 +11,6 @@ import { parseApiError } from "@/lib/api/client";
 import { createProperty, updateProperty } from "@/lib/api/property";
 import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain";
 import { PropertyType } from "@fixspace/domain/enums";
-import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { ArrowLeft, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
