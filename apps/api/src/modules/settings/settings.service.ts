@@ -1,7 +1,21 @@
 import { Injectable } from "@nestjs/common";
-import { AppLogger } from "../../common/logger/app-logger.service";
+import {
+  DEFAULT_DATABASE_SETTINGS,
+  DEFAULT_RECORD_SETTINGS,
+  DEFAULT_SECTION_SETTINGS,
+  DEFAULT_SPACE_SETTINGS,
+  DEFAULT_VIEW_SETTINGS,
+} from "@fixspace/domain";
+import { AppLogger } from "@/common/logger/app-logger.service";
 import { SettingsCategory } from "./constants/settings.constants";
 import { SettingsRepository } from "./repositories/settings.repository";
+
+type IconCategory =
+  | SettingsCategory.DATABASE
+  | SettingsCategory.RECORD
+  | SettingsCategory.SECTION
+  | SettingsCategory.SPACE
+  | SettingsCategory.VIEW;
 
 @Injectable()
 export class SettingsService {
@@ -54,5 +68,20 @@ export class SettingsService {
     this.logger.log("Settings updated", { userId, category });
 
     return this.getSettings(userId, category, defaultValues);
+  }
+
+  async getDefaultIcon(userId: string, category: IconCategory): Promise<string> {
+    switch (category) {
+      case SettingsCategory.DATABASE:
+        return (await this.getSettings(userId, category, DEFAULT_DATABASE_SETTINGS)).defaultDatabaseIcon;
+      case SettingsCategory.RECORD:
+        return (await this.getSettings(userId, category, DEFAULT_RECORD_SETTINGS)).defaultRecordIcon;
+      case SettingsCategory.SECTION:
+        return (await this.getSettings(userId, category, DEFAULT_SECTION_SETTINGS)).defaultSectionIcon;
+      case SettingsCategory.SPACE:
+        return (await this.getSettings(userId, category, DEFAULT_SPACE_SETTINGS)).defaultSpaceIcon;
+      case SettingsCategory.VIEW:
+        return (await this.getSettings(userId, category, DEFAULT_VIEW_SETTINGS)).defaultViewIcon;
+    }
   }
 }

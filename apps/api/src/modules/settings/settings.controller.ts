@@ -6,22 +6,28 @@ import {
   DEFAULT_RECORD_SETTINGS,
   DEFAULT_SECTION_SETTINGS,
   DEFAULT_SPACE_SETTINGS,
+  DEFAULT_USER_SETTINGS,
+  DEFAULT_VIEW_SETTINGS,
   RecordSettings,
   SectionSettings,
   SpaceSettings,
+  UserSettings,
+  ViewSettings,
 } from "@fixspace/domain";
-import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
+import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
 import { SettingsCategory } from "./constants/settings.constants";
 import { SettingsService } from "./settings.service";
 
 const DEFAULT_SETTINGS_MAP = {
+  [SettingsCategory.USER]: DEFAULT_USER_SETTINGS,
   [SettingsCategory.SPACE]: DEFAULT_SPACE_SETTINGS,
   [SettingsCategory.DATABASE]: DEFAULT_DATABASE_SETTINGS,
   [SettingsCategory.SECTION]: DEFAULT_SECTION_SETTINGS,
   [SettingsCategory.RECORD]: DEFAULT_RECORD_SETTINGS,
+  [SettingsCategory.VIEW]: DEFAULT_VIEW_SETTINGS,
 };
 
-type UpdateSettingsDto = Partial<SpaceSettings | DatabaseSettings | SectionSettings | RecordSettings>;
+type UpdateSettingsDto = Partial<UserSettings | SpaceSettings | DatabaseSettings | SectionSettings | RecordSettings | ViewSettings>;
 
 @ApiTags("Settings")
 @ApiBearerAuth("access-token")
