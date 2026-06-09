@@ -1,10 +1,18 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { CreateRecordDto, FilterLogic, RecordFilterDto, RecordSortDto, SpaceSearchResultDto, UpdateRecordDto } from "@fixspace/domain";
-import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
-import { RequireOwnership } from "../../core/auth/decorators/required-ownership.decorator";
-import { ResourceOwnerGuard } from "../../core/auth/guards/resource-owner.guard";
-import { parseJson } from "../../common/utils/parse-json";
+import {
+  CreateRecordDto,
+  FilterLogic,
+  RecordFilterDto,
+  RecordResponseDto,
+  RecordSortDto,
+  SpaceSearchResultDto,
+  UpdateRecordDto,
+} from "@fixspace/domain";
+import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
+import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
+import { parseJson } from "@/common/utils/parse-json";
 import { FindRecordsUseCase } from "./providers/find-records.usecase";
 import { SearchRecordsUseCase } from "./providers/search-records.usecase";
 import { RecordService } from "./record.service";
@@ -119,5 +127,38 @@ export class RecordController {
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
   remove(@Param("id") id: string) {
     return this.recordService.remove(id);
+  }
+
+  @Post(":id/duplicate")
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "record",
+    ownerPath: ["database", "space", "ownerId"],
+  })
+  @ApiOperation({ summary: "Duplicate a record with all its property values" })
+  @ApiParam({ name: "id", type: String })
+  @ApiResponse({ status: 201, description: "Record duplicated successfully." })
+  @ApiResponse({ status: 404, description: "Record not found." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  duplicate(@Param("id") id: string) {
+    return this.recordService.duplicate(id);
+  }
+
+  @Post(":id/apply-template/:templateId")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "record",
+    ownerPath: ["database", "space", "ownerId"],
+  })
+  @ApiOperation({ summary: "Apply a template to an existing record" })
+  @ApiParam({ name: "id", type: String })
+  @ApiParam({ name: "templateId", type: String })
+  @ApiResponse({ status: 200, description: "Template applied successfully.", type: RecordResponseDto })
+  @ApiResponse({ status: 404, description: "Record or template not found." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  applyTemplate(@Param("id") id: string, @Param("templateId") templateId: string) {
+    return this.recordService.applyTemplate(id, templateId);
   }
 }

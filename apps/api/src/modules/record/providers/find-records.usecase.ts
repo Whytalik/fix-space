@@ -10,8 +10,8 @@ import {
   SortDirection,
   SortField,
 } from "@fixspace/domain";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import { t } from "../../../common/utils/i18n.helper";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { t } from "@/common/utils/i18n.helper";
 import { RecordRepository } from "../repositories/record.repository";
 import { matchesFilter, RecordWithValues } from "../utils/record-filter.util";
 import { matchesSearch } from "../utils/record-search.util";

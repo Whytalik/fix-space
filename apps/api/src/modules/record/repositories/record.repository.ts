@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
-import { BaseRepository } from "../../../common/utils/base.repository";
+import { BaseRepository } from "@/common/utils/base.repository";
 
 @Injectable()
 export class RecordRepository extends BaseRepository {
@@ -11,8 +11,18 @@ export class RecordRepository extends BaseRepository {
     });
   }
 
+  async findDefaultTemplate(databaseId: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).template.findFirst({
+      where: { databaseId, isDefault: true },
+    });
+  }
+
   async findPropertiesByDatabase(databaseId: string) {
     return prisma.property.findMany({ where: { databaseId } });
+  }
+
+  async countByDatabase(databaseId: string) {
+    return prisma.record.count({ where: { databaseId } });
   }
 
   async findById(id: string) {
@@ -57,7 +67,7 @@ export class RecordRepository extends BaseRepository {
         ...where,
       },
       include: {
-        values: { include: { property: { select: { type: true, position: true } } } },
+        values: { include: { property: { select: { type: true, position: true, name: true } } } },
       },
       ...(orderBy ? { orderBy } : {}),
     });
@@ -72,8 +82,15 @@ export class RecordRepository extends BaseRepository {
         },
       },
       include: {
-        database: { select: { id: true, title: true } },
+        database: {
+          select: {
+            id: true,
+            title: true,
+            section: { select: { name: true } },
+          },
+        },
         values: { include: { property: { select: { type: true, name: true } } } },
+        content: { select: { content: true } },
       },
       take: 2000,
     });
