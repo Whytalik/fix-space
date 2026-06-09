@@ -26,10 +26,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "cross-env NEXT_PUBLIC_API_URL=http://localhost:3000 pnpm --prefix ../.. dev",
+    command:
+      "cross-env NEXT_PUBLIC_API_URL=http://localhost:3000 pnpm --prefix ../.. exec turbo dev --filter @fixspace/api --filter @fixspace/web",
     url: "http://localhost:3000/health",
     reuseExistingServer: !process.env.CI,
-    timeout: 180000,
+    timeout: 300000,
     stdout: "pipe",
     stderr: "pipe",
   },
