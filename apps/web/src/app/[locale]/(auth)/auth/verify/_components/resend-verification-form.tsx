@@ -24,8 +24,8 @@ export function ResendVerificationForm({ initialEmail = "" }: ResendVerification
     try {
       await resendVerification(email);
       setSuccess(true);
-    } catch (err) {
-      const errors = parseApiErrors(err);
+    } catch (error) {
+      const errors = parseApiErrors(error);
       setError(errors[0] || t("failedGeneric"));
     } finally {
       setLoading(false);
@@ -63,7 +63,7 @@ export function ResendVerificationForm({ initialEmail = "" }: ResendVerification
       <button
         type="submit"
         disabled={loading}
-        className="px-4 py-2 text-sm font-medium transition-colors bg-accent text-white rounded-md hover:bg-accent/90 disabled:opacity-50"
+        className="px-4 py-2 text-sm font-medium transition-colors duration-150 bg-accent text-white rounded-md hover:bg-accent/90 disabled:opacity-50"
       >
         {loading ? "..." : t("resendButton")}
       </button>

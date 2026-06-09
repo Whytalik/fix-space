@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthPageShell } from "@/features/auth/auth-page-shell";
+import { AuthPageShell } from "@/components/auth/auth-page-shell";
 import { FormErrors } from "@/components/ui/form/form-errors";
 import { FormField } from "@/components/ui/form/form-field";
 import { Button } from "@/components/ui/primitives/actions/button";
@@ -37,8 +37,8 @@ function ResetPasswordContent() {
     try {
       await resetPassword(token, newPassword);
       setSuccess(true);
-    } catch (err) {
-      setErrors(parseApiErrors(err));
+    } catch (error) {
+      setErrors(parseApiErrors(error));
     } finally {
       setLoading(false);
     }

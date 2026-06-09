@@ -1,11 +1,11 @@
 import { API_BASE_URL } from "@/utils/constants";
-import type { UserResponseDto } from "@fixspace/domain";
+import type { SpaceResponseDto } from "@fixspace/domain";
 import { cookies } from "next/headers";
 
-export async function getMeServer(): Promise<UserResponseDto | null> {
+export async function getSpacesServer(): Promise<SpaceResponseDto[]> {
   const cookieStore = await cookies();
 
-  if (!cookieStore.has("access_token")) return null;
+  if (!cookieStore.has("access_token")) return [];
 
   const cookieString = cookieStore
     .getAll()
@@ -13,17 +13,18 @@ export async function getMeServer(): Promise<UserResponseDto | null> {
     .join("; ");
 
   try {
-    const res = await fetch(`${API_BASE_URL}/users/me`, {
+    const res = await fetch(`${API_BASE_URL}/spaces`, {
       headers: {
         Cookie: cookieString,
       },
       next: { revalidate: 0 },
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) return [];
 
     return await res.json();
-  } catch {
-    return null;
+  } catch (e) {
+    console.error("Failed to fetch spaces on server", e);
+    return [];
   }
 }

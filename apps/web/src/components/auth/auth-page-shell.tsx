@@ -25,7 +25,7 @@ export function AuthPageShell({
     <div className="flex items-center justify-center flex-1 p-4">
       <div className="w-full max-w-100">
         <div className="mb-5 text-center">
-          <h1 className="text-2xl font-bold tracking-[-0.03em] text-ink">{title}</h1>
+          <h1 className="type-page-title">{title}</h1>
           <p className="text-sm text-ink-secondary mt-1.5">{subtitle}</p>
         </div>
 
@@ -34,7 +34,7 @@ export function AuthPageShell({
         <p className="text-center mt-5 text-sm text-ink-secondary">
           {footerText}{" "}
           {onFooterLinkClick ? (
-            <button onClick={onFooterLinkClick} className="font-semibold text-accent cursor-pointer">
+            <button type="button" onClick={onFooterLinkClick} className="font-semibold text-accent cursor-pointer">
               {footerLinkText}
             </button>
           ) : (

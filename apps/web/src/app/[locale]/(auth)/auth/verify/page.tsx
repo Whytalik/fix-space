@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { Header } from "@/components/layout/header/landing/header";
 import { Footer } from "@/components/layout/footer";
 import { Card } from "@/components/ui/primitives/display/card";
+import { Spinner } from "@/components/ui/primitives/feedback/spinner";
 import { ResendVerificationForm } from "./_components/resend-verification-form";
 import { Check, X } from "lucide-react";
 
@@ -30,8 +31,8 @@ function VerifyContent() {
       try {
         await verifyEmail(token!);
         window.location.href = "/login";
-      } catch (err) {
-        const errors = parseApiErrors(err);
+      } catch (error) {
+        const errors = parseApiErrors(error);
         setError(errors[0] || t("failedGeneric"));
         setLoading(false);
       }
@@ -47,11 +48,11 @@ function VerifyContent() {
         <Card className="flex flex-col items-center justify-center w-full max-w-md p-8 text-center">
           {loading ? (
             <div className="flex flex-col items-center gap-4">
-              <div className="w-5 h-5 border-2 rounded-full border-stroke border-t-accent animate-spin" />
+              <Spinner />
               <p className="text-ink-secondary">{t("verifying")}</p>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center gap-6 w-full">
+            <div className="flex flex-col items-center gap-6 w-full animate-fade-up">
               <div className="flex items-center justify-center w-12 h-12 border rounded-full bg-error-bg border-error text-error">
                 <X size={20} className="stroke-[2.5]" />
               </div>
@@ -64,7 +65,7 @@ function VerifyContent() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-4 animate-fade-up">
               <div className="flex items-center justify-center w-12 h-12 border rounded-full bg-success-bg border-success text-success">
                 <Check size={20} className="stroke-[2.5]" />
               </div>
