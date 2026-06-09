@@ -93,13 +93,16 @@ describe("SectionService", () => {
 
       expect(result).toBeDefined();
       expect(result.id).toBe("sec-1");
-      expect(sectionRepo.create).toHaveBeenCalledWith({
-        name: "Analytics",
-        position: 1,
-        icon: "📈",
-        color: "blue",
-        spaceId: "space-1",
-      });
+      expect(sectionRepo.create).toHaveBeenCalledWith(
+        {
+          name: "Analytics",
+          position: 1,
+          icon: "📈",
+          color: "blue",
+          spaceId: "space-1",
+        },
+        undefined,
+      );
     });
   });
 

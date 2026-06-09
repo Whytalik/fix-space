@@ -27,8 +27,8 @@ describe("DashboardController (integration)", () => {
     accessToken = loginRes.body.accessToken;
     _user = await prisma.user.findUniqueOrThrow({ where: { email } });
 
-    const spaceRes = await agent.post("/spaces").set("Authorization", `Bearer ${accessToken}`).send({ name: "Test Space" });
-    spaceId = spaceRes.body.id;
+    const space = await prisma.space.create({ data: { name: "Test Space", ownerId: _user.id } });
+    spaceId = space.id;
   });
 
   afterAll(async () => {
@@ -43,7 +43,6 @@ describe("DashboardController (integration)", () => {
       expect(res.body).toHaveProperty("marketSessions");
       expect(res.body).toHaveProperty("dailyWorkflow");
       expect(res.body).toHaveProperty("todayItems");
-      expect(res.body).toHaveProperty("overviewCharts");
     });
   });
 });

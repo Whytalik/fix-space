@@ -43,7 +43,7 @@ test.describe("Authentication E2E", () => {
     await page.goto("/en/login", { waitUntil: "networkidle" });
     await page.getByLabel(/email/i).fill(testUser.email);
     await page.getByLabel(/password/i).fill(testUser.password);
-    await page.getByRole("button", { name: /sign in|увійти/i }).click();
+    await page.getByRole("button", { name: /^sign in$|^увійти$/i }).click();
 
     await page.waitForURL(/\/en$/, { timeout: 15000 });
     await expect(page).toHaveURL(/\/en$/);
@@ -72,7 +72,7 @@ test.describe("Authentication E2E", () => {
     await page.goto("/en/login", { waitUntil: "networkidle" });
     await page.getByLabel(/email/i).fill("nonexistent@example.com");
     await page.getByLabel(/password/i).fill("WrongPassword123!");
-    await page.getByRole("button", { name: /sign in|увійти/i }).click();
+    await page.getByRole("button", { name: /^sign in$|^увійти$/i }).click();
 
     await expect(page.locator(".bg-error-bg")).toContainText(/invalid|credentials|невірні|unauthorized/i, { timeout: 10000 });
   });
@@ -90,7 +90,7 @@ test.describe("Authentication E2E", () => {
     await page.goto("/en/login", { waitUntil: "networkidle" });
     await page.getByLabel(/email/i).fill(testUser.email);
     await page.getByLabel(/password/i).fill(testUser.password);
-    await page.getByRole("button", { name: /sign in|увійти/i }).click();
+    await page.getByRole("button", { name: /^sign in$|^увійти$/i }).click();
 
     await page.waitForURL(/\/en$/, { timeout: 15000 });
 

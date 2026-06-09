@@ -52,7 +52,7 @@ export function TextInput({
 
   return (
     <div className="flex flex-col gap-1">
-      {hint && <p className="type-hint">{hint}</p>}
+      {hint && !error && <p className="type-hint">{hint}</p>}
       {input}
       {error && <p className="text-xs text-error">{error}</p>}
     </div>

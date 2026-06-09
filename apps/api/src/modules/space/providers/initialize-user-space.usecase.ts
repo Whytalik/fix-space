@@ -293,6 +293,7 @@ export class InitializeUserSpaceUseCase {
       await this.seedContent(space.id, userId);
     } catch (error) {
       this.logger.error("Seed failed", { error: (error as Error).message, stack: (error as Error).stack, spaceId: space.id, userId });
+      await this.spaceRepo.delete(space.id);
       throw error;
     }
 

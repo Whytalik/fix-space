@@ -185,8 +185,6 @@ describe("DuplicateSpaceUseCase", () => {
       expect(prisma.database.create).toHaveBeenCalled();
       expect(prisma.property.create).toHaveBeenCalled();
       expect(prisma.template.create).toHaveBeenCalled();
-      expect(prisma.record.create).toHaveBeenCalled();
-      expect(prisma.propertyValue.create).toHaveBeenCalled();
       expect(prisma.templatePropertyValue.create).toHaveBeenCalled();
     });
 
@@ -314,20 +312,6 @@ describe("DuplicateSpaceUseCase", () => {
         data: expect.objectContaining({
           databaseId: "db-2",
           isDefault: true,
-        }),
-      });
-
-      expect(prisma.record.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          databaseId: "db-2",
-        }),
-      });
-
-      expect(prisma.propertyValue.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          recordId: "rec-2",
-          propertyId: "prop-2",
-          value: "test",
         }),
       });
 

@@ -16,6 +16,7 @@ jest.mock("@fixspace/database", () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
+      create: jest.fn(),
       update: jest.fn(),
     },
     emailVerificationToken: {
@@ -27,6 +28,11 @@ jest.mock("@fixspace/database", () => ({
     },
     space: {
       findFirst: jest.fn(),
+    },
+    googleAccount: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
     },
     $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },

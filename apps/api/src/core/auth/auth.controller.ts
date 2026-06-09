@@ -62,7 +62,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Refresh access token" })
   async refresh(@Req() req: Request, @Body() body: { refreshToken?: string }) {
-    const refreshToken = (req.cookies?.["refresh_token"] as string) || body.refreshToken;
+    const refreshToken = (req.cookies?.["refresh_token"] as string) || body?.refreshToken;
     return this.authService.refresh(refreshToken!);
   }
 

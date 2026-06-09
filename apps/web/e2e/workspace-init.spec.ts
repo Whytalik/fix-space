@@ -107,7 +107,7 @@ test.describe("TC-WS-001 / TC-DB-001: Workspace browser flow", () => {
     await page.goto(`${WEB}/en/login`, { waitUntil: "networkidle" });
     await page.getByLabel(/email/i).fill(testUser.email);
     await page.getByLabel(/password/i).fill(testUser.password);
-    await page.getByRole("button", { name: /sign in|увійти/i }).click();
+    await page.getByRole("button", { name: /^sign in$|^увійти$/i }).click();
     await page.waitForURL(/\/en$/, { timeout: 10000 });
 
     const dbLinks = page.locator('a[href*="/database/"]');

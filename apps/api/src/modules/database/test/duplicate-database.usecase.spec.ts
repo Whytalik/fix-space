@@ -121,7 +121,7 @@ describe("DuplicateDatabaseUseCase", () => {
       (prisma.record.create as jest.Mock<any>).mockResolvedValue(newRecord);
       (prisma.propertyValue.create as jest.Mock<any>).mockResolvedValue({ id: "val-2" });
 
-      const result = await useCase.execute("db-1");
+      const result = await useCase.execute("db-1", { includeRecords: true });
 
       expect(result).toBeDefined();
       expect(prisma.database.create).toHaveBeenCalledWith({
@@ -181,7 +181,7 @@ describe("DuplicateDatabaseUseCase", () => {
       (prisma.record.create as jest.Mock<any>).mockResolvedValue(newRecord);
       (prisma.propertyValue.create as jest.Mock<any>).mockResolvedValue({ id: "val-2" });
 
-      await useCase.execute("db-1");
+      await useCase.execute("db-1", { includeRecords: true });
 
       expect(prisma.propertyValue.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
