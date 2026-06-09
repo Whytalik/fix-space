@@ -77,7 +77,7 @@ export class PropertyResponseDto {
   @ApiProperty({ description: "Property type-specific configuration", required: false })
   @Expose()
   @Transform((params: TransformFnParams) => {
-    const { value, type, object } = params;
+    const { value, type } = params;
     if (type === TransformationType.CLASS_TO_PLAIN) return value;
     if (!value) return value;
     const subTypeMap: Record<string, new (...args: unknown[]) => unknown> = {
@@ -93,7 +93,9 @@ export class PropertyResponseDto {
       [PropertyType.RATING]: RatingPropertyConfig,
       [PropertyType.PROGRESS]: ProgressPropertyConfig,
     };
-    const Ctor = subTypeMap[object?.type as string];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const parentObj = (params as any).obj ?? (params as any).object;
+    const Ctor = subTypeMap[parentObj?.type as string];
     return Ctor ? Object.assign(new Ctor() as object, value) : value;
   })
   config?:
