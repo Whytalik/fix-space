@@ -42,6 +42,7 @@ describe("DuplicateSpaceUseCase", () => {
   const mockSpaceRepo = {
     findByIdForDuplicate: jest.fn(),
     transaction: jest.fn((callback) => callback(prisma)),
+    findUniqueSpaceName: jest.fn((name: string) => Promise.resolve(`${name} (copy)`)),
   };
 
   beforeEach(async () => {

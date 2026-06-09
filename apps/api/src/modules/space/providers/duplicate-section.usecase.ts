@@ -4,13 +4,14 @@ import { DuplicateOptionsDto, SectionResponseDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
 import { SectionRepository } from "../repositories/section.repository";
-import { generateUniqueName } from "@/common/utils/generate-unique-name";
+import { DatabaseRepository } from "@/modules/database/repositories/database.repository";
 
 @Injectable()
 export class DuplicateSectionUseCase {
   constructor(
     private readonly logger: AppLogger,
     private readonly sectionRepo: SectionRepository,
+    private readonly databaseRepo: DatabaseRepository,
   ) {
     this.logger.setContext(DuplicateSectionUseCase.name);
   }
@@ -24,7 +25,7 @@ export class DuplicateSectionUseCase {
       throw new NotFoundException(t("errors.SECTION_NOT_FOUND_ID", { id: sectionId }));
     }
 
-    const newName = options.newName ?? generateUniqueName(source.name);
+    const newName = options.newName ?? (await this.sectionRepo.findUniqueSectionName(source.name, source.spaceId));
 
     const result = await this.sectionRepo.transaction(async (transaction) => {
       const lastPosition = await this.sectionRepo.findLastPosition(source.spaceId, transaction);
@@ -44,10 +45,13 @@ export class DuplicateSectionUseCase {
         for (const database of source.databases) {
           const propertyIdMap = new Map<string, string>();
 
+          const newDbSlug = await this.databaseRepo.findUniqueSlug(database.name, source.spaceId, transaction);
+          const newDbTitle = await this.databaseRepo.findUniqueTitle(database.title, source.spaceId, transaction);
+
           const newDatabase = await transaction.database.create({
             data: {
-              name: database.name,
-              title: database.title,
+              name: newDbSlug,
+              title: newDbTitle,
               icon: database.icon,
               spaceId: source.spaceId,
               sectionId: newSection.id,

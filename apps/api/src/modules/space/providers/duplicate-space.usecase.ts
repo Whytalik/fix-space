@@ -5,7 +5,6 @@ import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
 import { sectionsInclude } from "../constants/space.constants";
 import { SpaceRepository } from "../repositories/space.repository";
-import { generateUniqueName } from "@/common/utils/generate-unique-name";
 import { toSpaceResponseDto } from "../utils/to-space-response.util";
 
 @Injectable()
@@ -26,7 +25,7 @@ export class DuplicateSpaceUseCase {
       throw new NotFoundException(t("errors.SPACE_NOT_FOUND_ID", { id }));
     }
 
-    const newName = options.newName ?? generateUniqueName(sourceSpace.name);
+    const newName = options.newName ?? (await this.spaceRepo.findUniqueSpaceName(sourceSpace.name, ownerId));
 
     return this.spaceRepo.transaction(async (transaction) => {
       const newSpace = await transaction.space.create({

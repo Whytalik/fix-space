@@ -4,7 +4,6 @@ import { DuplicateDatabaseDto, DatabaseResponseDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
 import { DatabaseRepository } from "../repositories/database.repository";
-import { generateUniqueName, generateUniqueSlug } from "@/common/utils/generate-unique-name";
 import { toDatabaseResponseDto } from "../utils/to-database-response.util";
 
 @Injectable()
@@ -16,21 +15,22 @@ export class DuplicateDatabaseUseCase {
     this.logger.setContext(DuplicateDatabaseUseCase.name);
   }
 
-  async execute(databaseId: string, options: DuplicateDatabaseDto = {}): Promise<DatabaseResponseDto> {
+  async execute(databaseId: string, userId: string, options: DuplicateDatabaseDto = {}): Promise<DatabaseResponseDto> {
     const source = await this.databaseRepo.findByIdForDuplicate(databaseId);
 
     if (!source) {
       throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
     }
 
-    const newTitle = options.newName ?? generateUniqueName(source.title);
+    const newTitle = options.newName ?? (await this.databaseRepo.findUniqueTitle(source.title, source.spaceId));
+    const newSlug = await this.databaseRepo.findUniqueSlug(source.name, source.spaceId);
 
-    return this.databaseRepo.transaction(async (transaction) => {
+    const result = await this.databaseRepo.transaction(async (transaction) => {
       const newDatabase = await transaction.database.create({
         data: {
           spaceId: source.spaceId,
           sectionId: source.sectionId,
-          name: generateUniqueSlug(source.name),
+          name: newSlug,
           title: newTitle,
           icon: source.icon,
         },
@@ -155,5 +155,7 @@ export class DuplicateDatabaseUseCase {
 
       return toDatabaseResponseDto(newDatabase);
     });
+
+    return result;
   }
 }

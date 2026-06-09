@@ -39,6 +39,7 @@ describe("DuplicateTemplateUseCase", () => {
     create: jest.fn(),
     findUniqueOrThrowWithValues: jest.fn(),
     transaction: jest.fn((callback) => callback(prisma)),
+    findUniqueTemplateName: jest.fn((name: string) => Promise.resolve(`${name} (copy)`)),
   };
 
   beforeEach(async () => {

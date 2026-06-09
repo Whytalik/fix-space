@@ -164,9 +164,11 @@
     "saving": "Saving...",
     "saveChanges": "Save changes",
     "deleteSection": "Delete section",
-    "deleteSectionDesc": "The section will be deleted. Databases inside will become sectionless.",
-    "deleting": "Deleting..."
+    "deleteSectionDesc": "The section will be deleted. Databases inside will become unsectioned.",
+    "deleting": "Deleting...",
+    "sectionDuplicated": "Section duplicated successfully."
   },
+
   "EditActions": {
     "saving": "Saving…",
     "saveChanges": "Save changes",

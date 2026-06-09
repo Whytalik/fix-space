@@ -10,8 +10,36 @@ export class DatabaseRepository extends BaseRepository {
     });
   }
 
-  async findByNameInSpace(name: string, spaceId: string) {
-    return prisma.database.findFirst({ where: { name, spaceId } });
+  async findByNameInSpace(name: string, spaceId: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).database.findFirst({ where: { name, spaceId } });
+  }
+
+  async findUniqueSlug(baseSlug: string, spaceId: string, transaction?: Prisma.TransactionClient): Promise<string> {
+    let slug = `${baseSlug}_copy`;
+    let exists = await this.findByNameInSpace(slug, spaceId, transaction);
+    let counter = 1;
+
+    while (exists) {
+      slug = `${baseSlug}_copy_${counter}`;
+      exists = await this.findByNameInSpace(slug, spaceId, transaction);
+      counter++;
+    }
+
+    return slug;
+  }
+
+  async findUniqueTitle(baseTitle: string, spaceId: string, transaction?: Prisma.TransactionClient): Promise<string> {
+    let title = `${baseTitle} (Copy)`;
+    let exists = await (transaction ?? prisma).database.findFirst({ where: { title, spaceId } });
+    let counter = 1;
+
+    while (exists) {
+      title = `${baseTitle} (Copy ${counter})`;
+      exists = await (transaction ?? prisma).database.findFirst({ where: { title, spaceId } });
+      counter++;
+    }
+
+    return title;
   }
 
   async findById(id: string, transaction?: Prisma.TransactionClient) {

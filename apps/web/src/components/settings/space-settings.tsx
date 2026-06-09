@@ -134,7 +134,7 @@ export function SpaceSettings() {
     saveEdit();
   }
 
-  const { mutate: duplicateSpaceAction, isPending: isDuplicating } = useMutation({
+  const { mutateAsync: duplicateSpaceAction, isPending: isDuplicating } = useMutation({
     mutationFn: ({ spaceId, options }: { spaceId: string; options: DuplicationOptions }) =>
       duplicateSpace(spaceId, {
         newName: options.newName,
@@ -397,7 +397,7 @@ export function SpaceSettings() {
           target="workspace"
           initialName={`${duplicatingSpace.name} (Copy)`}
           onConfirm={async (options) => {
-            duplicateSpaceAction({ spaceId: duplicatingSpace.id, options });
+            await duplicateSpaceAction({ spaceId: duplicatingSpace.id, options });
           }}
           onCancel={() => setDuplicatingSpace(null)}
         />

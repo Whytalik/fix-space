@@ -37,6 +37,20 @@ export class TemplateRepository extends BaseRepository {
     return (transaction ?? prisma).template.count({ where: { databaseId } });
   }
 
+  async findUniqueTemplateName(baseName: string, databaseId: string, transaction?: Prisma.TransactionClient): Promise<string> {
+    let name = `${baseName} (Copy)`;
+    let exists = await (transaction ?? prisma).template.findFirst({ where: { name, databaseId } });
+    let counter = 1;
+
+    while (exists) {
+      name = `${baseName} (Copy ${counter})`;
+      exists = await (transaction ?? prisma).template.findFirst({ where: { name, databaseId } });
+      counter++;
+    }
+
+    return name;
+  }
+
   async create(data: Prisma.TemplateUncheckedCreateInput, transaction?: Prisma.TransactionClient) {
     return (transaction ?? prisma).template.create({ data });
   }

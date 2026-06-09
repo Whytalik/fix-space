@@ -4,7 +4,6 @@ import { TemplateResponseDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
 import { TemplateRepository } from "../repositories/template.repository";
-import { generateUniqueName } from "@/common/utils/generate-unique-name";
 
 @Injectable()
 export class DuplicateTemplateUseCase {
@@ -24,11 +23,13 @@ export class DuplicateTemplateUseCase {
       throw new NotFoundException(t("errors.TEMPLATE_NOT_FOUND"));
     }
 
+    const newName = await this.templateRepo.findUniqueTemplateName(source.name, source.databaseId);
+
     const result = await this.templateRepo.transaction(async (transaction) => {
       const copy = await this.templateRepo.create(
         {
           databaseId: source.databaseId,
-          name: generateUniqueName(source.name),
+          name: newName,
           description: source.description,
           icon: source.icon,
           isDefault: false,
