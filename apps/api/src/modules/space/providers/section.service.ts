@@ -1,12 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@fixspace/database";
-import {
-  CreateSectionDto,
-  DEFAULT_SECTION_SETTINGS,
-  SectionOperationDto,
-  SectionOperationType,
-  SectionResponseDto,
-} from "@fixspace/domain";
+import { Prisma, prisma } from "@fixspace/database";
+import { CreateSectionDto, SectionOperationDto, SectionOperationType, SectionResponseDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
@@ -30,12 +24,22 @@ export class SectionService {
       name: dto.name,
     });
 
+    const space = await (transaction ?? prisma).space.findUnique({
+      where: { id: spaceId },
+      select: { ownerId: true },
+    });
+
+    const { icon, color } = await this.settingsService.resolveDefaults(space?.ownerId ?? "", SettingsCategory.SECTION, {
+      icon: dto.icon,
+      color: dto.color,
+    });
+
     const section = await this.sectionRepo.create(
       {
         name: dto.name,
         position: dto.position,
-        icon: dto.icon,
-        color: dto.color,
+        icon,
+        color,
         spaceId,
       },
       transaction,
@@ -71,24 +75,19 @@ export class SectionService {
       position = last !== null ? last.position + 1 : 0;
     }
 
-    let effectiveIcon = operation.create.icon;
-    let effectiveColor = operation.create.color;
+    const space = await transaction.space.findUnique({ where: { id: spaceId }, select: { ownerId: true } });
 
-    if (!effectiveIcon || effectiveColor === undefined) {
-      const space = await transaction.space.findUnique({ where: { id: spaceId }, select: { ownerId: true } });
-      if (space) {
-        const sectionDefaults = await this.settingsService.getSettings(space.ownerId, SettingsCategory.SECTION, DEFAULT_SECTION_SETTINGS);
-        effectiveIcon ??= sectionDefaults.defaultSectionIcon;
-        effectiveColor ??= sectionDefaults.defaultSectionColor;
-      }
-    }
+    const { icon, color } = await this.settingsService.resolveDefaults(space?.ownerId ?? "", SettingsCategory.SECTION, {
+      icon: operation.create.icon,
+      color: operation.create.color,
+    });
 
     await this.sectionRepo.create(
       {
         name: operation.create.name,
         position,
-        icon: effectiveIcon,
-        color: effectiveColor,
+        icon,
+        color,
         spaceId,
       },
       transaction,

@@ -67,6 +67,7 @@ describe("DatabaseService", () => {
 
   const mockSettingsService = {
     getDefaultIcon: jest.fn().mockResolvedValue("icon:Database"),
+    resolveDefaults: jest.fn().mockImplementation((userId, category, dto) => Promise.resolve(dto)),
   };
 
   const mockSpaceRepo = {

@@ -4,6 +4,7 @@ import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { DatabaseService } from "@/modules/database/database.service";
+import { SettingsService } from "@/modules/settings/settings.service";
 import { SectionService } from "../providers/section.service";
 import { SpaceRepository } from "../repositories/space.repository";
 import { SpaceService } from "../space.service";
@@ -56,11 +57,17 @@ describe("SpaceService", () => {
     processDatabaseOperations: jest.fn(),
   };
 
+  const mockSettingsService = {
+    getSettings: jest.fn(),
+    resolveDefaults: jest.fn().mockImplementation((userId, category, dto) => Promise.resolve(dto)),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SpaceService,
         { provide: DatabaseService, useValue: mockDatabaseService },
+        { provide: SettingsService, useValue: mockSettingsService },
         { provide: SpaceRepository, useValue: mockSpaceRepo },
         { provide: SectionService, useValue: mockSectionService },
         { provide: AppLogger, useValue: mockLogger },

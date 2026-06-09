@@ -84,4 +84,23 @@ export class SettingsService {
         return (await this.getSettings(userId, category, DEFAULT_VIEW_SETTINGS)).defaultViewIcon;
     }
   }
+
+  async resolveDefaults(
+    userId: string,
+    category: SettingsCategory,
+    provided: { icon?: string; color?: string } = {},
+  ): Promise<{ icon: string; color?: string }> {
+    const result: { icon: string; color?: string } = { ...provided } as any;
+
+    if (!result.icon) {
+      result.icon = await this.getDefaultIcon(userId, category as IconCategory);
+    }
+
+    if (category === SettingsCategory.SECTION && result.color === undefined) {
+      const settings = await this.getSettings(userId, SettingsCategory.SECTION, DEFAULT_SECTION_SETTINGS);
+      result.color = settings.defaultSectionColor;
+    }
+
+    return result;
+  }
 }

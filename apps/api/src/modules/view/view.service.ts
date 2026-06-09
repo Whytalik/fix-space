@@ -40,7 +40,9 @@ export class ViewService {
       throw new BadRequestException(t("errors.VIEW_LIMIT_REACHED"));
     }
 
-    const effectiveIcon = dto.icon ?? (await this.settingsService.getDefaultIcon(userId, SettingsCategory.VIEW));
+    const { icon: effectiveIcon } = await this.settingsService.resolveDefaults(userId, SettingsCategory.VIEW, {
+      icon: dto.icon,
+    });
 
     const view = await this.viewRepo.create({
       databaseId,
