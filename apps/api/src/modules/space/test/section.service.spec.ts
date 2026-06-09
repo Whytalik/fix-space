@@ -3,13 +3,17 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import type { Prisma } from "@fixspace/database";
-import { AppLogger } from "../../../common/logger/app-logger.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { SettingsService } from "@/modules/settings/settings.service";
 import { SectionService } from "../providers/section.service";
 import { SectionRepository } from "../repositories/section.repository";
 import { SectionOperationType } from "@fixspace/domain";
 
 jest.mock("@fixspace/database", () => ({
   prisma: {
+    space: {
+      findUnique: jest.fn(),
+    },
     section: {
       create: jest.fn(),
       findUnique: jest.fn(),
@@ -17,7 +21,7 @@ jest.mock("@fixspace/database", () => ({
       update: jest.fn(),
       delete: jest.fn(),
     },
-    $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
+    $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
 
@@ -44,15 +48,26 @@ describe("SectionService", () => {
     delete: jest.fn(),
   };
 
+  const mockSettingsService = {
+    getSettings: jest.fn().mockResolvedValue({ defaultSectionIcon: "icon:FolderOpen", defaultSectionColor: "transparent" }),
+    getDefaultIcon: jest.fn().mockResolvedValue("icon:FolderOpen"),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SectionService, { provide: SectionRepository, useValue: mockSectionRepo }, { provide: AppLogger, useValue: mockLogger }],
+      providers: [
+        SectionService,
+        { provide: SectionRepository, useValue: mockSectionRepo },
+        { provide: SettingsService, useValue: mockSettingsService },
+        { provide: AppLogger, useValue: mockLogger },
+      ],
     }).compile();
 
     service = module.get<SectionService>(SectionService);
     sectionRepo = module.get(SectionRepository);
 
     jest.clearAllMocks();
+    (prisma.space.findUnique as jest.Mock<any>).mockResolvedValue({ ownerId: "user-1" });
   });
 
   describe("create", () => {

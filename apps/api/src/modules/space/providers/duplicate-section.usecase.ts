@@ -1,61 +1,47 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
-import { DuplicateSpaceDto, SpaceResponseDto } from "@fixspace/domain";
+import { DuplicateOptionsDto, SectionResponseDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
-import { sectionsInclude } from "../constants/space.constants";
-import { SpaceRepository } from "../repositories/space.repository";
+import { SectionRepository } from "../repositories/section.repository";
 import { generateUniqueName } from "@/common/utils/generate-unique-name";
-import { toSpaceResponseDto } from "../utils/to-space-response.util";
 
 @Injectable()
-export class DuplicateSpaceUseCase {
+export class DuplicateSectionUseCase {
   constructor(
     private readonly logger: AppLogger,
-    private readonly spaceRepo: SpaceRepository,
+    private readonly sectionRepo: SectionRepository,
   ) {
-    this.logger.setContext(DuplicateSpaceUseCase.name);
+    this.logger.setContext(DuplicateSectionUseCase.name);
   }
 
-  async execute(id: string, ownerId: string, options: DuplicateSpaceDto = {}): Promise<SpaceResponseDto> {
-    this.logger.debug("Duplicating space with options", { id, ownerId, options });
+  async execute(sectionId: string, options: DuplicateOptionsDto & { newName?: string }): Promise<SectionResponseDto> {
+    this.logger.debug("Duplicating section", { sectionId });
 
-    const sourceSpace = await this.spaceRepo.findByIdForDuplicate(id);
+    const source = await this.sectionRepo.findByIdForDuplicate(sectionId);
 
-    if (!sourceSpace) {
-      throw new NotFoundException(t("errors.SPACE_NOT_FOUND_ID", { id }));
+    if (!source) {
+      throw new NotFoundException(t("errors.SECTION_NOT_FOUND_ID", { id: sectionId }));
     }
 
-    const newName = options.newName ?? generateUniqueName(sourceSpace.name);
+    const newName = options.newName ?? generateUniqueName(source.name);
 
-    return this.spaceRepo.transaction(async (transaction) => {
-      const newSpace = await transaction.space.create({
+    const result = await this.sectionRepo.transaction(async (transaction) => {
+      const lastPosition = await this.sectionRepo.findLastPosition(source.spaceId, transaction);
+      const position = lastPosition !== null ? lastPosition.position + 1 : 0;
+
+      const newSection = await transaction.section.create({
         data: {
           name: newName,
-          icon: sourceSpace.icon,
-          ownerId,
+          icon: source.icon,
+          color: source.color,
+          position,
+          spaceId: source.spaceId,
         },
       });
 
-      const sectionIdMap = new Map<string, string>();
-
-      if (options.includeSections !== false) {
-        for (const section of sourceSpace.sections) {
-          const newSection = await transaction.section.create({
-            data: {
-              name: section.name,
-              position: section.position,
-              icon: section.icon,
-              color: section.color,
-              spaceId: newSpace.id,
-            },
-          });
-          sectionIdMap.set(section.id, newSection.id);
-        }
-      }
-
       if (options.includeDatabases !== false) {
-        for (const database of sourceSpace.databases) {
+        for (const database of source.databases) {
           const propertyIdMap = new Map<string, string>();
 
           const newDatabase = await transaction.database.create({
@@ -63,11 +49,8 @@ export class DuplicateSpaceUseCase {
               name: database.name,
               title: database.title,
               icon: database.icon,
-              spaceId: newSpace.id,
-              sectionId: (() => {
-                if (!database.sectionId || options.includeSections === false) return null;
-                return sectionIdMap.get(database.sectionId) ?? null;
-              })(),
+              spaceId: source.spaceId,
+              sectionId: newSection.id,
             },
           });
 
@@ -137,23 +120,10 @@ export class DuplicateSpaceUseCase {
         }
       }
 
-      this.logger.log("Space duplicated", {
-        sourceSpaceId: id,
-        newSpaceId: newSpace.id,
-        ownerId,
-      });
-
-      const result = await transaction.space.findUnique({
-        where: {
-          id: newSpace.id,
-        },
-        include: sectionsInclude,
-      });
-
-      if (!result) {
-        throw new InternalServerErrorException(t("errors.INTERNAL_ERROR"));
-      }
-      return toSpaceResponseDto(result);
+      return new SectionResponseDto(newSection);
     });
+
+    this.logger.log("Section duplicated", { sectionId, newSectionId: result.id });
+    return result;
   }
 }

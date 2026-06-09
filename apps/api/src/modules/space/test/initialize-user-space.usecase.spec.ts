@@ -1,27 +1,27 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import { DatabaseService } from "../../database/database.service";
-import { PropertyRepository } from "../../property/repositories/property.repository";
-import { PropertyService } from "../../property/property.service";
-import { PropertyValueRepository } from "../../property-value/repositories/property-value.repository";
-import { RecordRepository } from "../../record/repositories/record.repository";
-import { TemplateService } from "../../template/template.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { DatabaseService } from "@/modules/database/database.service";
+import { PropertyRepository } from "@/modules/property/repositories/property.repository";
+import { PropertyService } from "@/modules/property/property.service";
+import { PropertyValueRepository } from "@/modules/property-value/repositories/property-value.repository";
+import { RecordRepository } from "@/modules/record/repositories/record.repository";
+import { TemplateService } from "@/modules/template/template.service";
 import { SpaceRepository } from "../repositories/space.repository";
 import { SectionService } from "../providers/section.service";
 import { SpaceService } from "../space.service";
 import { InitializeUserSpaceUseCase } from "../providers/initialize-user-space.usecase";
-import { InitializationConfigService } from "../../../core/config/initialization/initialization-config.service";
+import { InitializationConfigService } from "@/core/config/initialization/initialization-config.service";
 import { PropertyType } from "@fixspace/domain";
-import type { InitializationConfig } from "../../../core/config/initialization/types";
+import type { InitializationConfig } from "@/core/config/initialization/types";
 
 jest.mock("@fixspace/database", () => ({
   Prisma: {
     DbNull: "DbNull",
   },
   prisma: {
-    $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
+    $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
 

@@ -2,7 +2,7 @@ import { NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { AppLogger } from "../../../common/logger/app-logger.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
 import { SpaceRepository } from "../repositories/space.repository";
 import { DuplicateSpaceUseCase } from "../providers/duplicate-space.usecase";
 
@@ -22,7 +22,7 @@ jest.mock("@fixspace/database", () => ({
     record: { create: jest.fn() },
     propertyValue: { create: jest.fn() },
     templatePropertyValue: { create: jest.fn() },
-    $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
+    $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
 
@@ -41,7 +41,7 @@ describe("DuplicateSpaceUseCase", () => {
 
   const mockSpaceRepo = {
     findByIdForDuplicate: jest.fn(),
-    transaction: jest.fn((cb) => cb(prisma)),
+    transaction: jest.fn((callback) => callback(prisma)),
   };
 
   beforeEach(async () => {
@@ -88,7 +88,6 @@ describe("DuplicateSpaceUseCase", () => {
                 type: "select",
                 position: 0,
                 icon: null,
-                isRequired: false,
                 isVisible: true,
                 databaseId: "db-1",
                 config: { options: [] },
@@ -134,6 +133,8 @@ describe("DuplicateSpaceUseCase", () => {
                 content: [],
               },
             ],
+            automations: [],
+            views: [],
           },
         ],
         createdAt: new Date(),
@@ -212,7 +213,6 @@ describe("DuplicateSpaceUseCase", () => {
                 type: "text",
                 position: 0,
                 icon: null,
-                isRequired: false,
                 isVisible: true,
                 databaseId: "db-1",
                 config: {},
@@ -258,6 +258,8 @@ describe("DuplicateSpaceUseCase", () => {
                 content: [],
               },
             ],
+            automations: [],
+            views: [],
           },
         ],
         createdAt: new Date(),

@@ -1,19 +1,29 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
-import { BaseRepository } from "../../../common/utils/base.repository";
+import { BaseRepository } from "@/common/utils/base.repository";
 
 @Injectable()
 export class DatabaseRepository extends BaseRepository {
-  async findSpaceByOwner(spaceId: string, userId: string) {
-    return prisma.space.findFirst({ where: { id: spaceId, ownerId: userId } });
+  async findDatabaseByOwner(databaseId: string, userId: string) {
+    return prisma.database.findFirst({
+      where: { id: databaseId, space: { ownerId: userId } },
+    });
   }
 
   async findByNameInSpace(name: string, spaceId: string) {
     return prisma.database.findFirst({ where: { name, spaceId } });
   }
 
-  async findById(id: string) {
-    return prisma.database.findUnique({ where: { id } });
+  async findById(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).database.findUnique({ where: { id } });
+  }
+
+  async findLastPosition(spaceId: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).database.findFirst({
+      where: { spaceId },
+      orderBy: { position: "desc" },
+      select: { position: true },
+    });
   }
 
   async findByIdForDuplicate(id: string) {
@@ -22,6 +32,9 @@ export class DatabaseRepository extends BaseRepository {
       include: {
         properties: true,
         records: { include: { values: true } },
+        templates: { include: { values: true } },
+        automations: true,
+        views: true,
       },
     });
   }
@@ -38,11 +51,16 @@ export class DatabaseRepository extends BaseRepository {
     return (transaction ?? prisma).database.create({ data });
   }
 
-  async update(id: string, data: Prisma.DatabaseUncheckedUpdateInput) {
-    return prisma.database.update({ where: { id }, data });
+  async update(id: string, data: Prisma.DatabaseUncheckedUpdateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).database.update({ where: { id }, data });
   }
 
-  async delete(id: string) {
-    return prisma.database.delete({ where: { id } });
+  async delete(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).database.delete({ where: { id } });
+  }
+
+  async exists(id: string): Promise<boolean> {
+    const database = await prisma.database.findUnique({ where: { id }, select: { id: true } });
+    return !!database;
   }
 }

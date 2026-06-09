@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
-import { BaseRepository } from "../../../common/utils/base.repository";
+import { BaseRepository } from "@/common/utils/base.repository";
 
 @Injectable()
 export class SpaceRepository extends BaseRepository {
@@ -8,8 +8,12 @@ export class SpaceRepository extends BaseRepository {
     return prisma.space.findMany({ where: { ownerId }, include });
   }
 
-  async findOne(id: string, include?: Prisma.SpaceInclude) {
-    return prisma.space.findUnique({ where: { id }, include });
+  findOne<T extends Prisma.SpaceInclude>(
+    id: string,
+    include?: T,
+    transaction?: Prisma.TransactionClient,
+  ): Promise<Prisma.SpaceGetPayload<{ include: T }> | null> {
+    return (transaction ?? prisma).space.findUnique({ where: { id }, include }) as any;
   }
 
   async findByIdForDuplicate(id: string) {
@@ -20,8 +24,8 @@ export class SpaceRepository extends BaseRepository {
         databases: {
           include: {
             properties: true,
-            records: { include: { values: true, content: true } },
             templates: { include: { values: true } },
+            automations: true,
           },
         },
       },

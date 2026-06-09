@@ -1,33 +1,52 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
 import { CreateDatabaseDto, DatabaseResponseDto, UpdateDatabaseDto } from "@fixspace/domain";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { filterUndefined } from "../../common/utils/filter-undefined";
-import { t } from "../../common/utils/i18n.helper";
-import { defaultInitializationConfig } from "../../core/config/initialization/initialization.config";
-import { PropertyTypeRegistry } from "../property/types";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
+import { defaultInitializationConfig } from "@/core/config/initialization/initialization.config";
+import { PropertyTypeRegistry } from "@/modules/property/types";
+import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
+import { SettingsService } from "@/modules/settings/settings.service";
+import { ViewRepository } from "@/modules/view/repositories/view.repository";
 import { DatabaseRepository } from "./repositories/database.repository";
+import { SpaceRepository } from "@/modules/space/repositories/space.repository";
 import { toDatabaseResponseDto } from "./utils/to-database-response.util";
+
+interface DatabaseOperationDto {
+  id: string;
+  update?: { position?: number };
+}
 
 @Injectable()
 export class DatabaseService {
   constructor(
     private readonly logger: AppLogger,
     private readonly typeRegistry: PropertyTypeRegistry,
+    private readonly settingsService: SettingsService,
     private readonly databaseRepo: DatabaseRepository,
+    private readonly spaceRepo: SpaceRepository,
+    private readonly viewRepo: ViewRepository,
   ) {
     this.logger.setContext(DatabaseService.name);
   }
 
-  async create(spaceId: string, createDatabaseDto: CreateDatabaseDto, userId: string): Promise<DatabaseResponseDto> {
+  async create(
+    spaceId: string,
+    createDatabaseDto: CreateDatabaseDto,
+    userId: string,
+    transaction?: Prisma.TransactionClient,
+  ): Promise<DatabaseResponseDto> {
     this.logger.debug("Creating database", {
       spaceId,
       name: createDatabaseDto.name,
     });
 
-    const space = await this.databaseRepo.findSpaceByOwner(spaceId, userId);
+    this.logger.debug("Attempting to find space", { spaceId, transaction: !!transaction });
+    const space = await this.spaceRepo.findOne(spaceId, undefined, transaction);
+    this.logger.debug("Found space", { spaceId, found: !!space });
 
-    if (!space) {
+    if (!space || space.ownerId !== userId) {
       throw new NotFoundException(t("errors.SPACE_NOT_FOUND"));
     }
 
@@ -41,19 +60,24 @@ export class DatabaseService {
       throw new ConflictException(t("errors.DATABASE_NAME_TAKEN"));
     }
 
-    return await this.databaseRepo.transaction(async (transaction) => {
+    const effectiveIcon = createDatabaseDto.icon ?? (await this.settingsService.getDefaultIcon(userId, SettingsCategory.DATABASE));
+
+    const lastPosition = await this.databaseRepo.findLastPosition(spaceId);
+    const position = lastPosition !== null ? lastPosition.position + 1 : 0;
+
+    const run = async (tx: Prisma.TransactionClient) => {
       const database = await this.databaseRepo.create(
         {
           name: createDatabaseDto.name,
           title: createDatabaseDto.title,
           type: createDatabaseDto.type,
-          icon: createDatabaseDto.icon,
+          icon: effectiveIcon,
           spaceId,
           sectionId: createDatabaseDto.sectionId,
-          recordLimit: createDatabaseDto.recordLimit ?? 10,
+          position,
           isPreset: createDatabaseDto.isPreset ?? false,
         },
-        transaction,
+        tx,
       );
 
       const propertiesToCreate = createDatabaseDto.properties ?? defaultInitializationConfig.defaultDatabaseProperties;
@@ -63,19 +87,36 @@ export class DatabaseService {
         const defaultConfig = handler.getDefaultConfig();
         const mergedConfig = propertyDef.config ? { ...defaultConfig, ...propertyDef.config } : defaultConfig;
 
-        await transaction.property.create({
+        await tx.property.create({
           data: {
             name: propertyDef.name,
             type: propertyDef.type,
             position: propertyDef.position,
             icon: propertyDef.icon,
-            isRequired: propertyDef.isRequired ?? false,
             isVisible: propertyDef.isVisible ?? true,
+            isProtected: propertyDef.name === "Name",
+            group: propertyDef.name === "Name" ? "General" : propertyDef.group,
             databaseId: database.id,
             config: mergedConfig as Prisma.InputJsonValue,
           },
         });
       }
+
+      await this.viewRepo.create(
+        {
+          databaseId: database.id,
+          name: "Table View",
+          isDefault: true,
+          pageSize: 50,
+          recordLimit: 10,
+          useDefaultTemplate: true,
+          filters: [],
+          sort: [],
+          hiddenColumns: [],
+          columnWidths: {},
+        },
+        tx,
+      );
 
       this.logger.log("Database created", {
         databaseId: database.id,
@@ -83,7 +124,13 @@ export class DatabaseService {
       });
 
       return toDatabaseResponseDto(database);
-    });
+    };
+
+    if (transaction) {
+      return run(transaction);
+    }
+
+    return this.databaseRepo.transaction(run);
   }
 
   async findAll(spaceId: string, userId: string): Promise<DatabaseResponseDto[]> {
@@ -126,15 +173,39 @@ export class DatabaseService {
         title: updateDatabaseDto.title,
         icon: updateDatabaseDto.icon,
         sectionId: updateDatabaseDto.sectionId,
-        useDefaultTemplate: updateDatabaseDto.useDefaultTemplate,
+        position: updateDatabaseDto.position,
+        isLocked: updateDatabaseDto.isLocked,
+        isPreset: updateDatabaseDto.isPreset,
       },
-      nullableFields: { recordLimit: updateDatabaseDto.recordLimit },
+      nullableFields: {},
     });
 
     const database = await this.databaseRepo.update(id, updateData);
 
     this.logger.log("Database updated", { id });
     return toDatabaseResponseDto(database);
+  }
+
+  async processDatabaseOperations(transaction: Prisma.TransactionClient, spaceId: string, operations: DatabaseOperationDto[]) {
+    for (const operation of operations) {
+      const database = await this.databaseRepo.findById(operation.id, transaction);
+
+      if (!database) {
+        throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id: operation.id }));
+      }
+
+      if (database.spaceId !== spaceId) {
+        throw new BadRequestException(t("errors.DATABASE_NOT_IN_SPACE"));
+      }
+
+      if (operation.update) {
+        const updateData = filterUndefined({
+          fields: { position: operation.update.position },
+        });
+
+        await this.databaseRepo.update(database.id, updateData, transaction);
+      }
+    }
   }
 
   async remove(id: string): Promise<DatabaseResponseDto> {
@@ -147,7 +218,7 @@ export class DatabaseService {
     }
 
     if (existingDatabase.isPreset) {
-      throw new BadRequestException(t("errors.CANNOT_DELETE_PRESET_DATABASE"));
+      throw new BadRequestException(t("errors.CANNOT_REMOVE_PRESET_DATABASE"));
     }
 
     const database = await this.databaseRepo.delete(id);

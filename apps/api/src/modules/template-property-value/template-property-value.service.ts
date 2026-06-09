@@ -1,9 +1,9 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
 import { CreateTemplatePropertyValueDto, TemplatePropertyValueResponseDto, UpdateTemplatePropertyValueDto } from "@fixspace/domain";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { filterUndefined } from "../../common/utils/filter-undefined";
-import { PropertyTypeRegistry } from "../property/types";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { PropertyTypeRegistry } from "@/modules/property/types";
 import { TemplatePropertyValueRepository } from "./repositories/template-property-value.repository";
 
 @Injectable()

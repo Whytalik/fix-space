@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
 import { TemplateResponseDto } from "@fixspace/domain";
-import { AppLogger } from "../../../common/logger/app-logger.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { t } from "@/common/utils/i18n.helper";
 import { TemplateRepository } from "../repositories/template.repository";
-import { generateUniqueName } from "../../../common/utils/generate-unique-name";
+import { generateUniqueName } from "@/common/utils/generate-unique-name";
 
 @Injectable()
 export class DuplicateTemplateUseCase {
@@ -20,7 +21,7 @@ export class DuplicateTemplateUseCase {
     const source = await this.templateRepo.findByIdWithValues(id);
 
     if (!source) {
-      throw new NotFoundException(`Template with id ${id} not found`);
+      throw new NotFoundException(t("errors.TEMPLATE_NOT_FOUND"));
     }
 
     const result = await this.templateRepo.transaction(async (transaction) => {

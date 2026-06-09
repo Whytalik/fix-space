@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
-import { BaseRepository } from "../../../common/utils/base.repository";
+import { BaseRepository } from "@/common/utils/base.repository";
 
 @Injectable()
 export class TemplateRepository extends BaseRepository {

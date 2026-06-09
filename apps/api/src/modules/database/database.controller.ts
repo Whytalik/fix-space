@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { HttpCode, HttpStatus } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { CreateDatabaseDto, DatabaseResponseDto, UpdateDatabaseDto } from "@fixspace/domain";
-import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
-import { RequireOwnership } from "../../core/auth/decorators/required-ownership.decorator";
-import { ResourceOwnerGuard } from "../../core/auth/guards/resource-owner.guard";
+import { CreateDatabaseDto, DatabaseResponseDto, DuplicateDatabaseDto, UpdateDatabaseDto } from "@fixspace/domain";
+import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
+import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
 import { DatabaseService } from "./database.service";
 import { DuplicateDatabaseUseCase } from "./providers/duplicate-database.usecase";
 
@@ -70,19 +70,20 @@ export class DatabaseController {
   }
 
   @Post(":id/duplicate")
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(ResourceOwnerGuard)
   @RequireOwnership({
     model: "database",
     ownerPath: ["space", "ownerId"],
   })
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: "Duplicate database with all structure (properties, records, templates)" })
+  @ApiOperation({ summary: "Duplicate database with selective options (properties, records, templates)" })
   @ApiParam({ name: "id", type: String })
+  @ApiBody({ type: DuplicateDatabaseDto })
   @ApiResponse({ status: 201, description: "Database duplicated.", type: DatabaseResponseDto })
   @ApiResponse({ status: 404, description: "Database not found." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
-  duplicate(@Param("id") id: string) {
-    return this.duplicateDatabaseUseCase.execute(id);
+  duplicate(@Param("id") id: string, @Body() duplicateDatabaseDto: DuplicateDatabaseDto) {
+    return this.duplicateDatabaseUseCase.execute(id, duplicateDatabaseDto);
   }
 
   @Delete(":id")

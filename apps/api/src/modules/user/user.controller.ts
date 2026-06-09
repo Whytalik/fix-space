@@ -13,9 +13,9 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
+import { ChangePasswordDto, DeleteAccountDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
 import { memoryStorage } from "multer";
-import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
+import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
 import { UserService } from "./user.service";
 
 @ApiTags("Users")
@@ -90,10 +90,13 @@ export class UserController {
   }
 
   @Delete("me")
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Delete current user account" })
-  @ApiResponse({ status: 200, description: "Account deleted successfully.", type: UserResponseDto })
-  @ApiResponse({ status: 401, description: "Unauthorized." })
-  removeCurrentUser(@CurrentUser("userId") userId: string) {
-    return this.userService.remove(userId);
+  @ApiBody({ type: DeleteAccountDto })
+  @ApiResponse({ status: 200, description: "Account deleted successfully." })
+  @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 401, description: "Incorrect password or unauthorized." })
+  removeCurrentUser(@CurrentUser("userId") userId: string, @Body() dto: DeleteAccountDto) {
+    return this.userService.remove(userId, dto);
   }
 }

@@ -2,7 +2,7 @@ import { NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { AppLogger } from "../../../common/logger/app-logger.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
 import { TemplateService } from "../template.service";
 import { TemplateRepository } from "../repositories/template.repository";
 
@@ -24,7 +24,7 @@ jest.mock("@fixspace/database", () => ({
       delete: jest.fn(),
     },
     templatePropertyValue: { create: jest.fn() },
-    $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
+    $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
 
@@ -56,7 +56,7 @@ describe("TemplateService", () => {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    transaction: jest.fn((cb) => cb(prisma)),
+    transaction: jest.fn((callback) => callback(prisma)),
   };
 
   beforeEach(async () => {

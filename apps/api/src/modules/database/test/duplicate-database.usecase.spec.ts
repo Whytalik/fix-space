@@ -2,7 +2,7 @@ import { NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { AppLogger } from "../../../common/logger/app-logger.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
 import { DuplicateDatabaseUseCase } from "../providers/duplicate-database.usecase";
 import { DatabaseRepository } from "../repositories/database.repository";
 
@@ -18,7 +18,7 @@ jest.mock("@fixspace/database", () => ({
     property: { create: jest.fn() },
     record: { create: jest.fn() },
     propertyValue: { create: jest.fn() },
-    $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
+    $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
 
@@ -37,7 +37,7 @@ describe("DuplicateDatabaseUseCase", () => {
 
   const mockDatabaseRepo = {
     findByIdForDuplicate: jest.fn(),
-    transaction: jest.fn((cb) => cb(prisma)),
+    transaction: jest.fn((callback) => callback(prisma)),
   };
 
   beforeEach(async () => {
@@ -76,7 +76,6 @@ describe("DuplicateDatabaseUseCase", () => {
             type: "TEXT",
             position: 0,
             icon: null,
-            isRequired: false,
             isVisible: true,
             databaseId: "db-1",
             config: {},
@@ -99,6 +98,9 @@ describe("DuplicateDatabaseUseCase", () => {
             ],
           },
         ],
+        templates: [],
+        automations: [],
+        views: [],
       };
 
       mockDatabaseRepo.findByIdForDuplicate.mockResolvedValue(sourceDb);
@@ -149,7 +151,6 @@ describe("DuplicateDatabaseUseCase", () => {
             type: "text",
             position: 0,
             icon: null,
-            isRequired: false,
             isVisible: true,
             databaseId: "db-1",
             config: {},
@@ -164,6 +165,9 @@ describe("DuplicateDatabaseUseCase", () => {
             values: [{ id: "val-1", recordId: "rec-1", propertyId: "prop-1", value: "value", computed: false }],
           },
         ],
+        templates: [],
+        automations: [],
+        views: [],
       };
 
       mockDatabaseRepo.findByIdForDuplicate.mockResolvedValue(sourceDb);
