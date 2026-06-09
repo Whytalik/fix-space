@@ -21,9 +21,8 @@ export function saveFilters(id: string, filters: RecordFilterDto[]): void {
     } else {
       localStorage.setItem(filtersKey(id), JSON.stringify(filters));
     }
-  } catch {
-    // ignore localStorage errors
-  }
+    // eslint-disable-next-line no-empty
+  } catch {}
 }
 
 export function loadSorts(id: string): RecordSortDto[] {
@@ -42,9 +41,8 @@ export function saveSorts(id: string, sorts: RecordSortDto[]): void {
     } else {
       localStorage.setItem(sortsKey(id), JSON.stringify(sorts));
     }
-  } catch {
-    // ignore localStorage errors
-  }
+    // eslint-disable-next-line no-empty
+  } catch {}
 }
 
 export function loadFilterLogic(id: string): FilterLogic {
@@ -63,9 +61,8 @@ export function saveFilterLogic(id: string, logic: FilterLogic): void {
     } else {
       localStorage.setItem(logicKey(id), logic);
     }
-  } catch {
-    // ignore localStorage errors
-  }
+    // eslint-disable-next-line no-empty
+  } catch {}
 }
 
 const wrapCellsKey = (id: string) => `db-wrap-cells:${id}`;
@@ -85,7 +82,6 @@ export function saveWrapCells(id: string, wrap: boolean): void {
     } else {
       localStorage.setItem(wrapCellsKey(id), "true");
     }
-  } catch {
-    // ignore localStorage errors
-  }
+    // eslint-disable-next-line no-empty
+  } catch {}
 }

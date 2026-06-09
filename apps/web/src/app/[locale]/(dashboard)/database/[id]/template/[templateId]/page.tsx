@@ -1,267 +1,189 @@
-// "use client";
+"use client";
 
-// import { RecordPropertiesSection } from "../../../../../record/[id]/_components/record-properties";
-// import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
-// import { useDatabaseContext } from "@/context/database-context";
-// import { useUIContext } from "@/context/ui-context";
-// import {
-//   deleteTemplate,
-//   duplicateTemplate,
-//   getTemplate,
-//   updateTemplate,
-//   updateTemplatePropertyValue,
-// } from "@/lib/api/template";
-// import type { PropertyResponseDto, RecordResponseDto, TemplateResponseDto } from "@fixspace/domain";
-// import { useTranslations } from "next-intl";
-// import { useParams, useRouter } from "next/navigation";
-// import { useEffect, useMemo, useRef, useState } from "react";
-// import { TemplateHeader } from "./_components/template-header";
+import { useDatabaseContext } from "@/context/database-context";
+import { useTemplateQuery } from "@/hooks/api/use-templates-query";
+import { useUpdateTemplate } from "@/hooks/api/use-template-mutations";
+import { useUpdateTemplateValue } from "@/hooks/api/use-template-value-mutations";
+import { PageLoader } from "@/components/ui/primitives/feedback/page-loader";
+import { IconDisplay } from "@/components/ui/icons/icon-display";
+import { Button } from "@/components/ui/primitives/actions/button";
+import { useRouter } from "@/i18n/navigation";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { ArrowLeft, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CellValue } from "../../_components/cell-value";
+import { PropertyIcon } from "../../_components/properties/ui/property-icon";
+import type { PropertyType } from "@fixspace/domain/enums";
+import { useUIContext } from "@/context/ui-context";
+import { parseApiError } from "@/lib/api/client";
 
-// type FormValues = Record<string, unknown>;
+export default function TemplateEditorPage() {
+  const params = useParams<{ id: string; templateId: string }>();
+  const databaseId = params.id;
+  const templateId = params.templateId;
+  const router = useRouter();
+  const t = useTranslations("TemplateEdit");
+  const { properties, isLoading: isDbContextLoading } = useDatabaseContext();
 
-// function initFormValues(template: TemplateResponseDto, properties: PropertyResponseDto[]): FormValues {
-//   const vals: FormValues = {};
-//   for (const prop of properties) {
-//     const tpv = template.values?.find((v) => v.propertyId === prop.id);
-//     vals[prop.id] = tpv?.value ?? "";
-//   }
-//   return vals;
-// }
+  const { data: template, isLoading: isTemplateLoading } = useTemplateQuery(templateId);
+  const updateTemplateMutation = useUpdateTemplate(databaseId);
+  const updateValueMutation = useUpdateTemplateValue(templateId);
+  const { showToast } = useUIContext();
 
-// export default function TemplatePage() {
-//   const t = useTranslations("TemplatePageComp");
-//   const params = useParams<{ id: string; templateId: string }>();
-//   const { id: databaseId, templateId } = params;
+  const [localValues, setLocalValues] = useState<Record<string, { id: string; value: unknown }>>({});
+  const [namePattern, setNamePattern] = useState("");
 
-//   const { properties, relatedRecordsMap, isLoading } = useDatabaseContext();
-//   const { showError } = useUIContext();
-//   const router = useRouter();
+  useEffect(() => {
+    if (template) {
+      setNamePattern(template.namePattern ?? "");
+      if (template.values) {
+        const valueMap: Record<string, { id: string; value: unknown }> = {};
+        template.values.forEach((v) => {
+          valueMap[v.propertyId] = { id: v.id, value: v.value };
+        });
+        setLocalValues(valueMap);
+      }
+    }
+  }, [template]);
 
-//   const [template, setTemplate] = useState<TemplateResponseDto | null>(null);
-//   const [isTemplateLoading, setIsTemplateLoading] = useState(true);
-//   const [nameValue, setNameValue] = useState("");
-//   const [iconValue, setIconValue] = useState("");
-//   const [isDefault, setIsDefault] = useState(false);
-//   const [showIconPicker, setShowIconPicker] = useState(false);
-//   const iconButtonRef = useRef<HTMLButtonElement>(null);
-//   const [isSaving, setIsSaving] = useState(false);
-//   const [formValues, setFormValues] = useState<FormValues>({});
-//   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-//   const [isDeleting, setIsDeleting] = useState(false);
-//   const [isDefaultConfirmOpen, setIsDefaultConfirmOpen] = useState(false);
-//   const [isRemovingDefaultConfirmOpen, setIsRemovingDefaultConfirmOpen] = useState(false);
+  if (isTemplateLoading || isDbContextLoading) {
+    return <PageLoader />;
+  }
 
-//   useEffect(() => {
-//     setIsTemplateLoading(true);
-//     getTemplate(templateId)
-//       .then((t) => {
-//         setTemplate(t);
-//         setNameValue(t.name ?? "");
-//         setIconValue(t.icon ?? "");
-//         setIsDefault(t.isDefault ?? false);
-//       })
-//       .catch(showError)
-//       .finally(() => setIsTemplateLoading(false));
-//   }, [templateId, showError]);
+  if (!template) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4">
+        <p className="text-ink-muted">Template not found</p>
+        <Button onClick={() => router.back()}>Go Back</Button>
+      </div>
+    );
+  }
 
-//   useEffect(() => {
-//     if (template && properties.length > 0) {
-//       setFormValues(initFormValues(template, properties));
-//     }
-//   }, [template, properties]);
+  async function handleUpdateValue(propertyId: string, valueId: string, newValue: unknown) {
+    const current = localValues[propertyId];
+    if (!current) return;
 
-//   const sorted = useMemo(
-//     () => [...properties].filter((p) => p.position !== 0).sort((a, b) => a.position - b.position),
-//     [properties],
-//   );
+    setLocalValues((prev) => ({
+      ...prev,
+      [propertyId]: { ...current, value: newValue },
+    }));
 
-//   const { groupOrder, grouped } = useMemo(() => {
-//     const order: string[] = [];
-//     const map: Record<string, PropertyResponseDto[]> = {};
-//     for (const prop of sorted) {
-//       const g = prop.group ?? "";
-//       if (!map[g]) {
-//         map[g] = [];
-//         order.push(g);
-//       }
-//       map[g].push(prop);
-//     }
-//     return { groupOrder: order, grouped: map };
-//   }, [sorted]);
+    try {
+      await updateValueMutation.mutateAsync({
+        id: valueId,
+        data: { value: newValue },
+      });
+    } catch (error) {
+      showToast(parseApiError(error), "error");
+    }
+  }
 
-//   async function doSave() {
-//     if (!template) return;
-//     setIsSaving(true);
-//     try {
-//       const metaChanged =
-//         nameValue !== (template.name ?? "") ||
-//         iconValue !== (template.icon ?? "") ||
-//         isDefault !== (template.isDefault ?? false);
+  async function handleUpdateNamePattern(value: string) {
+    setNamePattern(value);
+    try {
+      await updateTemplateMutation.mutateAsync({ id: templateId, data: { namePattern: value } });
+    } catch (error) {
+      showToast(parseApiError(error), "error");
+    }
+  }
 
-//       if (metaChanged) {
-//         await updateTemplate(template.id, {
-//           name: nameValue,
-//           icon: iconValue || undefined,
-//           isDefault,
-//         });
-//       }
+  return (
+    <div className="flex-1 flex flex-col h-full bg-canvas animate-fade-up">
+      <header className="flex items-center justify-between px-6 h-16 border-b border-stroke shrink-0">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.back()}
+            className="p-2 -ml-2 rounded-full hover:bg-canvas-subtle transition-colors duration-150 text-ink-muted hover:text-ink"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface border border-stroke text-lg text-ink">
+              <IconDisplay value={template.icon || "📄"} size={18} />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold text-ink leading-tight">{template.name}</h1>
+              <p className="text-xs text-ink-muted uppercase tracking-wider font-semibold">{t("template")}</p>
+            </div>
+          </div>
+        </div>
 
-//       await Promise.all(
-//         (template.values ?? []).map(async (tpv) => {
-//           const newVal = formValues[tpv.propertyId];
-//           const oldVal = tpv.value;
-//           if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
-//             await updateTemplatePropertyValue(tpv.id, { value: newVal === "" ? null : newVal });
-//           }
-//         }),
-//       );
+        <div className="flex items-center gap-2">
+          {template.isDefault && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 text-accent text-xs font-bold uppercase tracking-wider mr-2">
+              <Star size={10} fill="currentColor" />
+              {t("defaultLabel")}
+            </span>
+          )}
+          <Button variant="secondary" size="sm" onClick={() => router.back()}>
+            Done
+          </Button>
+        </div>
+      </header>
 
-//       router.push(`/database/${databaseId}/edit?tab=templates`);
-//     } catch (err) {
-//       showError(err);
-//     } finally {
-//       setIsSaving(false);
-//     }
-//   }
+      <div className="flex-1 overflow-y-auto px-6 py-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="mb-10">
+            <h2 className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-4">Record Name Pattern</h2>
+            <div className="card p-6 space-y-4">
+              <div className="space-y-1.5">
+                <label className="type-field-label">Pattern</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={namePattern}
+                    onChange={(e) => handleUpdateNamePattern(e.target.value)}
+                    placeholder="e.g. {{today}} - {{count}}"
+                    className="field-input flex-1"
+                  />
+                </div>
+                <p className="text-xs text-ink-muted italic">
+                  Tokens like <code className="bg-surface px-1 rounded">{"{{today}}"}</code>,
+                  <code className="bg-surface px-1 rounded">{"{{year}}"}</code>,
+                  <code className="bg-surface px-1 rounded">{"{{count}}"}</code> will be replaced on record creation.
+                </p>
+              </div>
+            </div>
+          </div>
 
-//   function handleSave() {
-//     if (!template) return;
-//     const turningDefault = isDefault && !template.isDefault;
-//     const removingDefault = !isDefault && template.isDefault;
-//     if (turningDefault) {
-//       setIsDefaultConfirmOpen(true);
-//       return;
-//     }
-//     if (removingDefault) {
-//       setIsRemovingDefaultConfirmOpen(true);
-//       return;
-//     }
-//     doSave();
-//   }
+          <div className="mb-8">
+            <h2 className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-4">Default Field Values</h2>
+            <div className="bg-canvas border border-stroke rounded-2xl overflow-hidden divide-y divide-stroke-subtle">
+              {properties.map((property) => {
+                const valueData = localValues[property.id];
+                if (!valueData) return null;
 
-//   async function handleDuplicate() {
-//     if (!template) return;
-//     setIsSaving(true);
-//     try {
-//       const copy = await duplicateTemplate(template.id);
-//       router.push(`/database/${databaseId}/template/${copy.id}`);
-//     } catch (err) {
-//       showError(err);
-//     } finally {
-//       setIsSaving(false);
-//     }
-//   }
+                return (
+                  <div key={property.id} className="group flex items-start gap-4 p-4 hover:bg-canvas-subtle transition-colors duration-150">
+                    <div className="flex items-center gap-3 w-40 shrink-0 pt-1">
+                      <PropertyIcon type={property.type as PropertyType} size={14} className="text-ink-muted" />
+                      <span className="text-xs font-medium text-ink-secondary truncate">{property.name}</span>
+                    </div>
 
-//   async function handleConfirmDelete() {
-//     if (!template) return;
-//     setIsDeleting(true);
-//     try {
-//       await deleteTemplate(template.id);
-//       router.push(`/database/${databaseId}/edit?tab=templates`);
-//     } catch (err) {
-//       showError(err);
-//     } finally {
-//       setIsDeleting(false);
-//     }
-//   }
+                    <div className="flex-1 min-w-0">
+                      <CellValue
+                        type={property.type as PropertyType}
+                        config={property.config}
+                        value={valueData.value}
+                        readOnly={false}
+                        onChange={(value: unknown) => handleUpdateValue(property.id, valueData.id, value)}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-//   if (isLoading || isTemplateLoading) {
-//     return (
-//       <div className="flex items-center justify-center min-h-screen">
-//         <div className="w-5 h-5 rounded-full border-2 border-stroke border-t-accent animate-spin" />
-//       </div>
-//     );
-//   }
-
-//   if (!template) {
-//     return (
-//       <div className="flex items-center justify-center min-h-screen">
-//         <p className="text-ink-secondary text-sm">{t("templateNotFound")}</p>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-canvas">
-//       <div className="px-8 pt-10 pb-20">
-//         <TemplateHeader
-//           isSaving={isSaving}
-//           nameValue={nameValue}
-//           iconValue={iconValue}
-//           isDefault={isDefault}
-//           showIconPicker={showIconPicker}
-//           iconButtonRef={iconButtonRef}
-//           onBack={() => router.push(`/database/${databaseId}/edit?tab=templates`)}
-//           onSave={handleSave}
-//           onDuplicate={handleDuplicate}
-//           onOpenDelete={() => setIsDeleteDialogOpen(true)}
-//           onNameChange={setNameValue}
-//           onIconChange={setIconValue}
-//           onIsDefaultChange={setIsDefault}
-//           onIconPickerToggle={() => setShowIconPicker((v) => !v)}
-//           onIconPickerClose={() => setShowIconPicker(false)}
-//         />
-
-//         <div className="h-px mb-8 bg-stroke" />
-
-//         {sorted.length === 0 ? (
-//           <p className="text-sm text-ink-muted">{t("noPropertiesDefined")}</p>
-//         ) : (
-//           <RecordPropertiesSection
-//             isEditMode={true}
-//             propsOpen={true}
-//             groupOrder={groupOrder}
-//             grouped={grouped}
-//             formValues={formValues}
-//             record={{ id: template.id, values: template.values, name: template.name } as unknown as RecordResponseDto}
-//             relatedRecordsMap={relatedRecordsMap}
-//             onValueChange={(propId: string, val: unknown) => setFormValues((prev) => ({ ...prev, [propId]: val }))}
-//           />
-//         )}
-//       </div>
-
-//       {isDeleteDialogOpen && (
-//         <ConfirmDialog
-//           title={t("deleteTemplate")}
-//           description={t("deleteDescription", { name: template.name || "Untitled template" })}
-//           confirmLabel={isDeleting ? t("deleting") : t("delete")}
-//           variant="danger"
-//           onConfirm={handleConfirmDelete}
-//           onCancel={() => setIsDeleteDialogOpen(false)}
-//         />
-//       )}
-
-//       {isDefaultConfirmOpen && (
-//         <ConfirmDialog
-//           title={t("setDefaultTitle")}
-//           description={t("setDefaultDesc")}
-//           confirmLabel={t("setDefault")}
-//           variant="default"
-//           onConfirm={() => {
-//             setIsDefaultConfirmOpen(false);
-//             doSave();
-//           }}
-//           onCancel={() => setIsDefaultConfirmOpen(false)}
-//         />
-//       )}
-
-//       {isRemovingDefaultConfirmOpen && (
-//         <ConfirmDialog
-//           title={t("removeDefaultTitle")}
-//           description={t("removeDefaultDesc")}
-//           confirmLabel={t("removeDefault")}
-//           variant="default"
-//           onConfirm={() => {
-//             setIsRemovingDefaultConfirmOpen(false);
-//             doSave();
-//           }}
-//           onCancel={() => setIsRemovingDefaultConfirmOpen(false)}
-//         />
-//       )}
-//     </div>
-//   );
-// }
-
-export default function TemplatePage() {
-  return null;
+          <div className="rounded-2xl bg-surface/50 border border-stroke p-4 border-dashed text-center">
+            <p className="text-xs text-ink-muted italic">
+              These values will be automatically filled when you create a new record using this template. Fields left empty in the template
+              will remain empty in the new record.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

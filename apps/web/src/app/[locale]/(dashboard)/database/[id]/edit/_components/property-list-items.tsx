@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/property-icon";
+import { PropertyIcon } from "../../_components/properties/ui/property-icon";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { DatabaseResponseDto } from "@fixspace/domain";
@@ -8,6 +8,7 @@ import { Check, ChevronDown, ChevronRight, GripVertical, Pencil, Trash2, X } fro
 import { useEffect, useRef } from "react";
 import type { GroupItem, PropItem } from "./property-list.utils";
 import { getConfigSummary } from "./property-list.utils";
+import { PropertyHint } from "../../_components/properties/ui/property-hint";
 
 export type GroupHeaderProps = {
   item: GroupItem;
@@ -15,9 +16,10 @@ export type GroupHeaderProps = {
   isCollapsed: boolean;
   isEditing: boolean;
   editValue: string;
+  isLocked?: boolean;
   onToggleCollapse: () => void;
   onEditStart: () => void;
-  onEditChange: (v: string) => void;
+  onEditChange: (value: string) => void;
   onEditConfirm: () => void;
   onEditCancel: () => void;
   onDelete: () => void;
@@ -29,6 +31,7 @@ export function GroupHeader({
   isCollapsed,
   isEditing,
   editValue,
+  isLocked,
   onToggleCollapse,
   onEditStart,
   onEditChange,
@@ -36,7 +39,10 @@ export function GroupHeader({
   onEditCancel,
   onDelete,
 }: GroupHeaderProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+    disabled: isLocked,
+  });
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -50,11 +56,13 @@ export function GroupHeader({
       {...attributes}
       className={`flex items-center gap-2 px-3 py-2.5 bg-surface border-t border-stroke first:border-t-0 select-none ${isDragging ? "opacity-0" : ""}`}
     >
-      <button type="button" className="cursor-grab text-ink-muted shrink-0 hover:text-ink" {...listeners}>
-        <GripVertical size={14} />
-      </button>
+      {!isLocked && (
+        <button type="button" className="cursor-grab text-ink-muted shrink-0 hover:text-ink transition-colors duration-150" {...listeners}>
+          <GripVertical size={14} />
+        </button>
+      )}
 
-      <button type="button" onClick={onToggleCollapse} className="text-ink-muted shrink-0 hover:text-ink">
+      <button type="button" onClick={onToggleCollapse} className="text-ink-muted shrink-0 hover:text-ink transition-colors duration-150">
         {isCollapsed ? <ChevronRight size={15} /> : <ChevronDown size={15} />}
       </button>
 
@@ -71,10 +79,14 @@ export function GroupHeader({
             }}
             className="flex-1 text-xs font-semibold uppercase tracking-widest bg-transparent border-b border-accent outline-none text-ink"
           />
-          <button type="button" onClick={onEditConfirm} className="text-accent hover:text-accent/70 shrink-0">
+          <button
+            type="button"
+            onClick={onEditConfirm}
+            className="text-accent hover:text-accent/70 shrink-0 transition-colors duration-150"
+          >
             <Check size={14} />
           </button>
-          <button type="button" onClick={onEditCancel} className="text-ink-muted hover:text-ink shrink-0">
+          <button type="button" onClick={onEditCancel} className="text-ink-muted hover:text-ink shrink-0 transition-colors duration-150">
             <X size={14} />
           </button>
         </>
@@ -82,12 +94,16 @@ export function GroupHeader({
         <>
           <span className="flex-1 text-xs font-semibold uppercase tracking-widest text-ink-secondary">{item.name}</span>
           <span className="text-xs text-ink-muted tabular-nums">{count}</span>
-          <button type="button" onClick={onEditStart} className="text-ink-muted hover:text-ink shrink-0">
-            <Pencil size={14} />
-          </button>
-          <button type="button" onClick={onDelete} className="text-ink-muted hover:text-error shrink-0">
-            <Trash2 size={14} />
-          </button>
+          {!isLocked && (
+            <>
+              <button type="button" onClick={onEditStart} className="text-ink-muted hover:text-ink shrink-0 transition-colors duration-150">
+                <Pencil size={14} />
+              </button>
+              <button type="button" onClick={onDelete} className="text-ink-muted hover:text-error shrink-0 transition-colors duration-150">
+                <Trash2 size={14} />
+              </button>
+            </>
+          )}
         </>
       )}
     </div>
@@ -97,12 +113,17 @@ export function GroupHeader({
 export type PropertyRowProps = {
   item: PropItem;
   databases?: DatabaseResponseDto[];
+  isLocked?: boolean;
   onEdit: () => void;
   onDelete: () => void;
 };
 
-export function PropertyRow({ item, databases, onEdit, onDelete }: PropertyRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+export function PropertyRow({ item, databases, isLocked, onEdit, onDelete }: PropertyRowProps) {
+  const isProtected = item.prop.isProtected || item.prop.name === "Name";
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+    disabled: isLocked || isProtected,
+  });
   const { prop } = item;
   const summary = getConfigSummary(prop, databases);
 
@@ -113,15 +134,19 @@ export function PropertyRow({ item, databases, onEdit, onDelete }: PropertyRowPr
       {...attributes}
       className={`group flex items-center gap-2 px-3 py-2.5 border-t border-stroke first:border-t-0 transition-opacity duration-100 ${isDragging ? "opacity-0" : ""}`}
     >
-      <button type="button" className="cursor-grab text-ink-muted shrink-0 hover:text-ink" {...listeners}>
-        <GripVertical size={14} />
-      </button>
+      {!isLocked && !isProtected && (
+        <button type="button" className="cursor-grab text-ink-muted shrink-0 hover:text-ink transition-colors duration-150" {...listeners}>
+          <GripVertical size={14} />
+        </button>
+      )}
+      {isProtected && <div className="w-[14px] shrink-0" />}
 
       <PropertyIcon type={prop.type} size={14} className="text-ink-muted shrink-0 mt-0.5" />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className={`text-sm ${prop.isVisible === false ? "text-ink-muted" : "text-ink"}`}>{prop.name}</span>
+          {prop.hint && <PropertyHint hint={prop.hint} />}
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
           <span className="text-xs text-ink-muted font-mono">{prop.type}</span>
@@ -134,13 +159,21 @@ export function PropertyRow({ item, databases, onEdit, onDelete }: PropertyRowPr
         </div>
       </div>
 
-      <button type="button" onClick={onEdit} className="text-ink-muted hover:text-ink shrink-0 p-1">
-        <Pencil size={15} />
-      </button>
-      {!prop.isRequired && (
-        <button type="button" onClick={onDelete} className="text-ink-muted hover:text-error shrink-0 p-1">
-          <Trash2 size={15} />
-        </button>
+      {!isLocked && (
+        <>
+          <button type="button" onClick={onEdit} className="text-ink-muted hover:text-ink shrink-0 p-1 transition-colors duration-150">
+            <Pencil size={15} />
+          </button>
+          {!prop.isProtected && prop.name !== "Name" && (
+            <button
+              type="button"
+              onClick={onDelete}
+              className="text-ink-muted hover:text-error shrink-0 p-1 transition-colors duration-150"
+            >
+              <Trash2 size={15} />
+            </button>
+          )}
+        </>
       )}
     </div>
   );

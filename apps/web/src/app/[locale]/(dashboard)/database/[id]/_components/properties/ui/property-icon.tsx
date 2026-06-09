@@ -1,5 +1,5 @@
 import { PropertyType } from "@fixspace/domain/enums";
-import { Calendar, CheckSquare, Clock, FileText, Hash, Link2, List, MoreHorizontal, Sigma, Star, Tag, TrendingUp } from "lucide-react";
+import { Calendar, CheckSquare, Clock, FileText, Hash, Link2, List, Sigma, Star, Tag, TrendingUp } from "lucide-react";
 
 interface PropertyIconProps {
   type: PropertyType;
@@ -19,7 +19,6 @@ const ICONS: Record<PropertyType, React.ElementType> = {
   [PropertyType.FORMULA]: Sigma,
   [PropertyType.RATING]: Star,
   [PropertyType.PROGRESS]: TrendingUp,
-  [PropertyType.BUTTON]: MoreHorizontal,
 };
 
 export function PropertyIcon({ type, size = 13, className }: PropertyIconProps) {

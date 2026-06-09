@@ -1,11 +1,11 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/property-icon";
+import { PropertyIcon } from "../../_components/properties/ui/property-icon";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
-import { useEscape } from "@/hooks/useEscape";
+import { useEscape } from "@/hooks/ui/use-escape";
 import { useMutation } from "@tanstack/react-query";
 import { parseApiError } from "@/lib/api/client";
 import { createProperty, updateProperty } from "@/lib/api/property";
@@ -16,8 +16,9 @@ import { ArrowLeft, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { PropertyTypeConfig } from "./property-type-config";
-import { getDefaultConfig, TYPE_META, TYPE_ORDER } from "./property-type-meta";
+import { getDefaultConfig, getTypeMeta, TYPE_ORDER } from "@/utils/property/property-type-meta";
 import { useTranslations } from "next-intl";
+import { PropertyHint } from "../../_components/properties/ui/property-hint";
 
 type PropertyFormModalProps = {
   mode: "create" | "edit" | "view";
@@ -42,20 +43,23 @@ export function PropertyFormModal({
 }: PropertyFormModalProps) {
   const [mounted, setMounted] = useState(false);
   const [step, setStep] = useState<1 | 2>(mode === "create" ? 1 : 2);
-  const [selectedType, setSelectedType] = useState<PropertyType>(property?.type ?? PropertyType.TEXT);
+  const isProtected = property?.isProtected || property?.name === "Name";
   const [name, setName] = useState(property?.name ?? "");
   const [hint, setHint] = useState(property?.hint ?? "");
-  const [group, setGroup] = useState(property?.group ?? "");
+  const [group, setGroup] = useState(isProtected ? "General" : (property?.group ?? ""));
   const [icon, setIcon] = useState(property?.icon ?? "");
   const [showIconPicker, setShowIconPicker] = useState(false);
   const iconButtonRef = useRef<HTMLButtonElement>(null);
-  const [isRequired, setIsRequired] = useState(property?.isRequired ?? false);
   const [config, setConfig] = useState<Record<string, unknown>>(
     (property?.config as unknown as Record<string, unknown>) ?? getDefaultConfig(property?.type ?? PropertyType.TEXT),
   );
+  const [selectedType, setSelectedType] = useState<PropertyType>(property?.type ?? PropertyType.TEXT);
 
   const isViewMode = mode === "view";
+  const isEditingProtected = isProtected && mode === "edit";
   const t = useTranslations("PropertyForm");
+  const tMeta = useTranslations("PropertyMeta");
+  const typeMeta = getTypeMeta(tMeta);
 
   useEffect(() => setMounted(true), []);
 
@@ -85,7 +89,6 @@ export function PropertyFormModal({
         hint: hint.trim() || undefined,
         group: group.trim() || undefined,
         icon: icon || undefined,
-        isRequired,
         config,
       };
       if (mode === "create") {
@@ -118,27 +121,31 @@ export function PropertyFormModal({
   if (step === 1) {
     return createPortal(
       <div className={backdropClass} onClick={onClose}>
-        <div className="w-130 bg-elevated border border-stroke rounded-xl shadow-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="w-130 bg-elevated border border-stroke rounded-2xl shadow-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between px-5 py-4 border-b border-stroke">
             <h2 className="type-modal-title">
               {t("addProperty")} · {t("chooseType")}
             </h2>
-            <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink">
+            <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink transition-colors duration-150">
               <X size={16} />
             </button>
           </div>
 
           <div className="p-4 grid grid-cols-2 gap-2">
             {TYPE_ORDER.map((type) => {
-              const meta = TYPE_META[type];
+              const meta = typeMeta[type];
               return (
                 <button
                   key={type}
                   type="button"
                   onClick={() => handleSelectType(type)}
-                  className="flex items-start gap-3 p-3 rounded-lg border border-stroke hover:border-accent hover:bg-surface text-left transition-colors group"
+                  className="flex items-start gap-3 p-3 rounded-lg border border-stroke hover:border-accent hover:bg-surface text-left transition-colors duration-150 group"
                 >
-                  <PropertyIcon type={type} size={15} className="text-ink-muted group-hover:text-accent shrink-0 mt-0.5" />
+                  <PropertyIcon
+                    type={type}
+                    size={15}
+                    className="text-ink-muted group-hover:text-accent transition-colors duration-150 shrink-0 mt-0.5"
+                  />
                   <div>
                     <p className="text-sm font-medium text-ink">{meta.label}</p>
                     <p className="text-xs text-ink-muted mt-0.5 leading-snug">{meta.description}</p>
@@ -156,20 +163,24 @@ export function PropertyFormModal({
   return createPortal(
     <div className={backdropClass} onClick={onClose}>
       <div
-        className="w-130 max-h-[85vh] bg-elevated border border-stroke rounded-xl shadow-lg flex flex-col overflow-hidden"
+        className="w-130 max-h-[85vh] bg-elevated border border-stroke rounded-2xl shadow-lg flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 px-5 py-4 border-b border-stroke shrink-0">
           {mode === "create" && (
-            <button type="button" onClick={() => setStep(1)} className="text-ink-muted hover:text-ink shrink-0">
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="text-ink-muted hover:text-ink transition-colors duration-150 shrink-0"
+            >
               <ArrowLeft size={16} />
             </button>
           )}
           <PropertyIcon type={selectedType} size={15} className="text-ink-muted shrink-0" />
           <h2 className="type-modal-title flex-1">
-            {mode === "create" ? `Add ${TYPE_META[selectedType].label} property` : mode === "view" ? t("viewProperty") : t("editProperty")}
+            {mode === "create" ? `Add ${typeMeta[selectedType].label} property` : mode === "view" ? t("viewProperty") : t("editProperty")}
           </h2>
-          <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink shrink-0">
+          <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink transition-colors duration-150 shrink-0">
             <X size={16} />
           </button>
         </div>
@@ -186,9 +197,13 @@ export function PropertyFormModal({
                 <div className="flex items-center justify-between mt-1">
                   <div className="flex items-center gap-2 text-sm text-ink">
                     <PropertyIcon type={selectedType} size={14} className="text-ink-muted shrink-0" />
-                    <span>{TYPE_META[selectedType].label}</span>
+                    <span>{typeMeta[selectedType].label}</span>
                   </div>
-                  <button type="button" onClick={() => setStep(1)} className="text-xs text-accent hover:underline shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="text-xs text-accent hover:underline transition-colors duration-150 shrink-0"
+                  >
                     {t("change")}
                   </button>
                 </div>
@@ -202,7 +217,7 @@ export function PropertyFormModal({
                   ref={iconButtonRef}
                   type="button"
                   onClick={() => setShowIconPicker((value) => !value)}
-                  className="flex items-center gap-2 rounded-lg border border-stroke bg-canvas px-3 py-2 text-sm text-ink hover:border-accent transition-colors"
+                  className="flex items-center gap-2 rounded-lg border border-stroke bg-canvas px-3 py-2 text-sm text-ink hover:border-accent transition-colors duration-150"
                 >
                   {icon ? (
                     <>
@@ -228,8 +243,11 @@ export function PropertyFormModal({
             </div>
 
             <div>
-              <label className="type-field-label">
-                {t("name")} <span className="text-error">*</span>
+              <label className="type-field-label flex items-center gap-2">
+                <span>
+                  {t("name")} <span className="text-error">*</span>
+                </span>
+                {hint && <PropertyHint hint={hint} />}
               </label>
               <input
                 type="text"
@@ -252,8 +270,9 @@ export function PropertyFormModal({
                   value={group}
                   onChange={setGroup}
                   placeholder={t("groupPlaceholder")}
-                  freeText
-                  nullable
+                  freeText={!isEditingProtected}
+                  nullable={!isEditingProtected}
+                  disabled={isEditingProtected}
                 />
               </div>
             </div>
@@ -268,16 +287,11 @@ export function PropertyFormModal({
                 className="field-input w-full mt-1"
               />
             </div>
-
-            <label className="flex items-center justify-between gap-4">
-              <p className="text-sm text-ink">{t("required")}</p>
-              <Toggle value={isRequired} onChange={setIsRequired} />
-            </label>
           </div>
 
           <div className="flex flex-col gap-4">
             <p className="text-sm font-semibold text-ink border-b border-stroke pb-2 text-center">
-              {TYPE_META[selectedType].label} {t("settings")}
+              {typeMeta[selectedType].label} {t("settings")}
             </p>
             <PropertyTypeConfig type={selectedType} config={config} databases={databases} isViewMode={isViewMode} onPatch={patchConfig} />
           </div>

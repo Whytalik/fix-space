@@ -1,6 +1,7 @@
 "use client";
 
 import { TabSwitcher, type TabItem } from "@/components/ui/primitives/navigation/tab-switcher";
+import { PageLoader } from "@/components/ui/primitives/feedback/page-loader";
 import { useAppContext } from "@/context/app-context";
 import { useDatabaseContext } from "@/context/database-context";
 import { useUIContext } from "@/context/ui-context";
@@ -8,26 +9,26 @@ import { updateDatabase } from "@/lib/api/database";
 import { deleteProperty, updateProperty } from "@/lib/api/property";
 import type { PropertyResponseDto } from "@fixspace/domain";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { EditGeneralSection } from "./_components/edit-general-section";
 import { EditPropertiesSection } from "./_components/edit-properties-section";
-// import { EditTemplatesSection } from "./_components/edit-templates-section";
+import { EditTemplatesSection } from "./_components/edit-templates-section";
 import { PropertyFormModal } from "./_components/property-form-modal";
 import { useTranslations } from "next-intl";
 
-type EditTab = "general" | "properties";
+type EditTab = "general" | "properties" | "templates";
 
 const EDIT_TABS: TabItem<EditTab>[] = [
   { id: "general", label: "general" },
   { id: "properties", label: "properties" },
-  // { id: "templates", label: "templates" },
+  { id: "templates", label: "templates" },
 ];
 
 const DB_PREFIX = "[DB] ";
 
 export default function EditDatabasePage() {
   const searchParams = useSearchParams();
-  const { database, properties, applyDatabaseUpdate, applyPropertiesUpdate, wrapCells, setWrapCells } = useDatabaseContext();
+  const { database, properties, applyDatabaseUpdate, applyPropertiesUpdate } = useDatabaseContext();
   const { updateDatabaseInSpace, databases: allDatabases } = useAppContext();
   const { showError } = useUIContext();
   const t = useTranslations("DatabaseEdit");
@@ -38,33 +39,28 @@ export default function EditDatabasePage() {
   });
   const [icon, setIcon] = useState(() => database?.icon ?? "");
   const [title, setTitle] = useState(() => database?.title ?? "");
-  const [recordLimit, setRecordLimit] = useState<number | null>(() => database?.recordLimit ?? null);
-  const [useDefaultTemplate, setUseDefaultTemplate] = useState(() => database?.useDefaultTemplate ?? true);
+  const [isLocked, setIsLocked] = useState(() => database?.isLocked ?? false);
   const [propertyModal, setPropertyModal] = useState<{ mode: "create" } | { mode: "edit"; property: PropertyResponseDto } | null>(null);
 
   useEffect(() => {
     if (!database) return;
     setIcon(database.icon ?? "");
     setTitle(database.title ?? "");
-    setRecordLimit(database.recordLimit ?? null);
-    setUseDefaultTemplate(database.useDefaultTemplate ?? true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [database?.id]);
-
-  async function saveDatabase(patch: Partial<{ icon: string; title: string; recordLimit: number | null; useDefaultTemplate: boolean }>) {
+    setIsLocked(database.isLocked ?? false);
+  }, [database]);
+  async function saveDatabase(patch: Partial<{ icon: string; title: string; isLocked: boolean }>) {
     if (!database) return;
     try {
       const updated = await updateDatabase(database.spaceId, database.id, {
         icon: (patch.icon !== undefined ? patch.icon : icon) || undefined,
         title: patch.title !== undefined ? patch.title : title,
         name: `${DB_PREFIX}${patch.title !== undefined ? patch.title : title}`,
-        recordLimit: patch.recordLimit !== undefined ? patch.recordLimit : recordLimit,
-        useDefaultTemplate: patch.useDefaultTemplate !== undefined ? patch.useDefaultTemplate : useDefaultTemplate,
+        isLocked: patch.isLocked !== undefined ? patch.isLocked : isLocked,
       });
       applyDatabaseUpdate(updated);
       updateDatabaseInSpace(updated);
-    } catch (e) {
-      showError(e);
+    } catch (error) {
+      showError(error);
     }
   }
 
@@ -76,27 +72,22 @@ export default function EditDatabasePage() {
     saveDatabase({ title });
   }
 
-  function handleIconChange(val: string) {
-    setIcon(val);
-    saveDatabase({ icon: val });
+  function handleIconChange(value: string) {
+    setIcon(value);
+    saveDatabase({ icon: value });
   }
 
-  function handleRecordLimitChange(val: number | null) {
-    setRecordLimit(val);
-    saveDatabase({ recordLimit: val });
+  function handleIsLockedChange(value: boolean) {
+    setIsLocked(value);
+    saveDatabase({ isLocked: value });
   }
 
-  function handleUseDefaultTemplateChange(val: boolean) {
-    setUseDefaultTemplate(val);
-    saveDatabase({ useDefaultTemplate: val });
+  function handlePropertyUpdate(propertyId: string, data: Partial<{ position: number; group: string | null; isVisible: boolean }>) {
+    applyPropertiesUpdate(properties.map((property) => (property.id === propertyId ? { ...property, ...data } : property)));
+    updateProperty(propertyId, data).catch(showError);
   }
 
-  function handlePropertyUpdate(id: string, data: Partial<{ position: number; group: string | null; isVisible: boolean }>) {
-    applyPropertiesUpdate(properties.map((p) => (p.id === id ? { ...p, ...data } : p)));
-    updateProperty(id, data).catch(showError);
-  }
-
-  const existingGroups = useMemo(() => [...new Set(properties.map((p) => p.group).filter(Boolean) as string[])], [properties]);
+  const existingGroups = [...new Set(properties.map((property) => property.group).filter(Boolean) as string[])];
 
   function handleAddProperty() {
     setPropertyModal({ mode: "create" });
@@ -107,28 +98,24 @@ export default function EditDatabasePage() {
   }
 
   function handlePropertySaved(saved: PropertyResponseDto) {
-    const exists = properties.some((p) => p.id === saved.id);
+    const exists = properties.some((property) => property.id === saved.id);
     if (exists) {
-      applyPropertiesUpdate(properties.map((p) => (p.id === saved.id ? saved : p)));
+      applyPropertiesUpdate(properties.map((property) => (property.id === saved.id ? saved : property)));
     } else {
       applyPropertiesUpdate([...properties, saved]);
     }
   }
 
-  function handleDeleteProperty(propId: string) {
-    deleteProperty(propId).catch(showError);
+  function handleDeleteProperty(propertyId: string) {
+    deleteProperty(propertyId).catch(showError);
   }
 
   if (!database) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="w-5 h-5 rounded-full border-2 border-stroke border-t-accent animate-spin" />
-      </div>
-    );
+    return <PageLoader className="flex-1" />;
   }
 
   return (
-    <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-8 py-10">
+    <div className="flex-1 overflow-y-auto scrollbar px-8 py-10 animate-fade-up">
       <div className="text-center mb-6">
         <p className="text-sm text-ink-muted mb-1">{t("title")}</p>
         <h1 className="type-page-title">{database.title || database.name}</h1>
@@ -147,15 +134,11 @@ export default function EditDatabasePage() {
           <EditGeneralSection
             icon={icon}
             title={title}
-            recordLimit={recordLimit}
-            useDefaultTemplate={useDefaultTemplate}
-            wrapCells={wrapCells}
+            isLocked={isLocked}
             onIconChange={handleIconChange}
             onTitleChange={handleTitleChange}
             onTitleBlur={handleTitleBlur}
-            onRecordLimitChange={handleRecordLimitChange}
-            onUseDefaultTemplateChange={handleUseDefaultTemplateChange}
-            onWrapCellsChange={setWrapCells}
+            onIsLockedChange={handleIsLockedChange}
           />
         )}
 
@@ -163,6 +146,8 @@ export default function EditDatabasePage() {
           <EditPropertiesSection
             properties={properties}
             databases={allDatabases}
+            isLocked={isLocked}
+            isPreset={!!database.isPreset}
             onAddProperty={handleAddProperty}
             onEditProperty={handleEditProperty}
             onDeleteProperty={handleDeleteProperty}
@@ -171,7 +156,7 @@ export default function EditDatabasePage() {
           />
         )}
 
-        {/* {activeTab === "templates" && <EditTemplatesSection database={database} />} */}
+        {activeTab === "templates" && <EditTemplatesSection databaseId={database.id} isLocked={isLocked} />}
       </div>
 
       {propertyModal && database && (

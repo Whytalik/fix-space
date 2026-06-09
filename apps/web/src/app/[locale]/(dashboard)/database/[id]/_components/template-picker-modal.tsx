@@ -1,50 +1,53 @@
-// "use client";
+"use client";
 
-// import { IconDisplay } from "@/components/ui/icons/icon-display";
-// import { Badge } from "@/components/ui/primitives/display/badge";
-// import type { TemplateResponseDto } from "@fixspace/domain";
-// import { FileX, Layers } from "lucide-react";
+import { ModalShell } from "@/components/ui/overlays/modal-shell";
+import { Star } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { TemplateResponseDto } from "@fixspace/domain";
 
-// type TemplatePickerModalProps = {
-//   templates: TemplateResponseDto[];
-//   onSelect: (templateId: string | null) => void;
-//   onClose: () => void;
-// };
+interface TemplatePickerModalProps {
+  templates: TemplateResponseDto[];
+  onSelect: (templateId: string | null) => void;
+  onClose: () => void;
+}
 
-// export function TemplatePickerModal({ templates, onSelect, onClose }: TemplatePickerModalProps) {
-//   return (
-//     <div className="fixed inset-0 z-modal flex items-center justify-center">
-//       <div className="absolute inset-0 overlay-bg" onClick={onClose} />
-//       <div className="relative bg-elevated border border-stroke rounded-xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
-//         <div className="px-5 py-4 border-b border-stroke">
-//           <h2 className="type-panel-title">Choose a template</h2>
-//           <p className="text-sm text-ink-muted mt-0.5">Select a template to apply to the new record.</p>
-//         </div>
-//         <div className="divide-y divide-stroke max-h-80 overflow-y-auto">
-//           <button
-//             type="button"
-//             onClick={() => onSelect(null)}
-//             className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-surface transition-colors"
-//           >
-//             <FileX size={18} className="text-ink-muted shrink-0" />
-//             <span className="text-sm text-ink">No template</span>
-//           </button>
-//           {templates.map((t) => (
-//             <button
-//               key={t.id}
-//               type="button"
-//               onClick={() => onSelect(t.id)}
-//               className="w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-surface transition-colors"
-//             >
-//               {t.icon ? <IconDisplay value={t.icon} size={18} /> : <Layers size={18} className="text-ink-muted" />}
-//               <span className="flex-1 text-sm text-ink">{t.name}</span>
-//               {t.isDefault && <Badge variant="neutral">Default</Badge>}
-//             </button>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
+export function TemplatePickerModal({ templates, onSelect, onClose }: TemplatePickerModalProps) {
+  const t = useTranslations("TemplatePickerModal");
 
-export {};
+  return (
+    <ModalShell isOpen={true} onClose={onClose} title={t("chooseTemplate")} size="sm">
+      <div className="flex flex-col gap-1">
+        {templates.map((template) => (
+          <button
+            key={template.id}
+            onClick={() => onSelect(template.id)}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-ink hover:bg-canvas-subtle transition-colors duration-150 text-left"
+          >
+            <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface border border-stroke shrink-0 text-base">
+              {template.icon || "📄"}
+            </div>
+            <span className="flex-1 truncate font-medium">{template.name}</span>
+            {template.isDefault && (
+              <span className="flex items-center gap-1 text-xs font-semibold text-accent uppercase tracking-wider shrink-0">
+                <Star size={9} fill="currentColor" />
+                {t("default")}
+              </span>
+            )}
+          </button>
+        ))}
+
+        <div className="border-t border-stroke-subtle mt-1 pt-1">
+          <button
+            onClick={() => onSelect(null)}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-ink-secondary hover:bg-canvas-subtle transition-colors duration-150 text-left"
+          >
+            <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface border border-stroke shrink-0 text-base opacity-40">
+              📄
+            </div>
+            <span className="flex-1 truncate">{t("noTemplate")}</span>
+          </button>
+        </div>
+      </div>
+    </ModalShell>
+  );
+}

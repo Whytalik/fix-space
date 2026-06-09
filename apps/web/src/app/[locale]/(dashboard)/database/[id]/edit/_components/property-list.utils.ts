@@ -11,16 +11,20 @@ export function getConfigSummary(prop: PropertyResponseDto, databases?: Database
 
   switch (prop.type) {
     case PropertyType.TEXT: {
-      const parts: string[] = [];
-      if (config.isRichText) parts.push("Rich text");
-      if (config.urlHandling === "detect") parts.push("URL detect");
-      if (config.urlHandling === "preview") parts.push("URL preview");
-      return parts.join(" · ") || null;
+      return "Rich text";
     }
     case PropertyType.NUMBER: {
       const format = String(config.format ?? "float");
-      const parts: string[] = [format === "currency" && config.currencySymbol ? `${config.currencySymbol} currency` : format];
-      if ((format === "float" || format === "currency") && config.decimalPlaces !== undefined) parts.push(`${config.decimalPlaces} dec`);
+      const parts: string[] = [];
+      if (format === "currency" && config.currencySymbol) parts.push(`${config.currencySymbol} currency`);
+      else if (format === "percentage") parts.push("Percentage (%)");
+      else parts.push(format);
+
+      if ((format === "float" || format === "currency" || format === "percentage") && config.decimalPlaces !== undefined) {
+        parts.push(`${config.decimalPlaces} dec`);
+      }
+      if (config.prefix) parts.push(`Pre: ${config.prefix}`);
+      if (config.suffix) parts.push(`Suf: ${config.suffix}`);
       return parts.join(" · ");
     }
     case PropertyType.DATE: {
@@ -31,23 +35,23 @@ export function getConfigSummary(prop: PropertyResponseDto, databases?: Database
     case PropertyType.CHECKBOX:
       return config.defaultValue ? "Default: on" : null;
     case PropertyType.SELECT: {
-      const cats = config.categories as Array<{ options: string[] }> | undefined;
-      const count = cats?.flatMap((category) => category.options).length ?? 0;
+      const categories = config.categories as Array<{ options: string[] }> | undefined;
+      const count = categories?.flatMap((category) => category.options).length ?? 0;
       const parts: string[] = [];
       if (config.isMultiSelect) parts.push("Multi");
       parts.push(count > 0 ? `${count} option${count !== 1 ? "s" : ""}` : "No options");
       return parts.join(" · ");
     }
     case PropertyType.STATUS: {
-      const cats = config.categories as Array<{ options: unknown[] }> | undefined;
-      const count = cats?.flatMap((category) => category.options).length ?? 0;
+      const categories = config.categories as Array<{ options: unknown[] }> | undefined;
+      const count = categories?.flatMap((category) => category.options).length ?? 0;
       return count > 0 ? `${count} option${count !== 1 ? "s" : ""}` : "No options";
     }
     case PropertyType.RELATION: {
       const db = databases?.find((database) => database.id === config.relatedEntityId);
-      const dbName = db ? (db.title ?? db.name) : config.relatedEntityId ? "Unknown DB" : "No database";
+      const databaseName = db ? (db.title ?? db.name) : config.relatedEntityId ? "Unknown DB" : "No database";
       const mult = config.multiple !== false ? "multiple" : "single";
-      return `→ ${dbName} · ${mult}`;
+      return `→ ${databaseName} · ${mult}`;
     }
     default:
       return null;
@@ -83,14 +87,16 @@ export function buildFlatItems(properties: PropertyResponseDto[]): FlatItem[] {
 
 export function moveGroupBlock(items: FlatItem[], groupId: string, overId: string): FlatItem[] {
   const groupName = groupId.slice("group:".length);
-  const block = items.filter((i) => i.id === groupId || (i.kind === "property" && ((i as PropItem).prop.group ?? "") === groupName));
-  const rest = items.filter((i) => !block.some((b) => b.id === i.id));
+  const block = items.filter(
+    (item) => item.id === groupId || (item.kind === "property" && ((item as PropItem).prop.group ?? "") === groupName),
+  );
+  const rest = items.filter((item) => !block.some((blockItem) => blockItem.id === item.id));
 
-  let insertIdx = rest.findIndex((i) => i.id === overId);
+  let insertIdx = rest.findIndex((item) => item.id === overId);
   if (insertIdx === -1) return items;
 
-  const activeOrigIdx = items.findIndex((i) => i.id === groupId);
-  const overOrigIdx = items.findIndex((i) => i.id === overId);
+  const activeOrigIdx = items.findIndex((item) => item.id === groupId);
+  const overOrigIdx = items.findIndex((item) => item.id === overId);
   if (overOrigIdx > activeOrigIdx) {
     insertIdx++;
     if (overId.startsWith("group:")) {
@@ -111,7 +117,12 @@ export function flatItemsToProperties(items: FlatItem[]): PropertyResponseDto[] 
     if (item.kind === "group") {
       currentGroup = item.name;
     } else {
-      result.push({ ...item.prop, position: position++, group: currentGroup });
+      const isProtected = item.prop.isProtected || item.prop.name === "Name";
+      result.push({
+        ...item.prop,
+        position: position++,
+        group: isProtected ? "General" : currentGroup,
+      });
     }
   }
   return result;
