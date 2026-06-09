@@ -1,9 +1,8 @@
 "use client";
 
-import { hexFromHsv, hexToRgb, isValidHex, rgbToHsv } from "@/utils/color";
-import { useFloatingPanel } from "@/hooks/useFloatingPanel";
-import { getPopoverStyle } from "@/utils/popover";
-import { PALETTE_COLOR_VALUES } from "@fixspace/domain/enums";
+import { hexFromHsv, hexToRgb, isValidHex, rgbToHsv } from "@/utils/ui/color";
+import { useFloatingPanel } from "@/hooks/ui/use-floating-panel";
+import { getPopoverStyle } from "@/utils/ui/popover";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -23,6 +22,25 @@ interface ColorPickerProps {
   onClose: () => void;
   anchorEl?: HTMLElement | null;
 }
+
+const DEFAULT_COLORS = [
+  "#6B7280",
+  "#92400E",
+  "#D97706",
+  "#CA8A04",
+  "#16A34A",
+  "#2563EB",
+  "#7C3AED",
+  "#DB2777",
+  "#DC2626",
+  "#F97316",
+  "#FBBF24",
+  "#10B981",
+  "#3B82F6",
+  "#6366F1",
+  "#8B5CF6",
+  "#EC4899",
+];
 
 export function ColorPicker({ value: initialValue, onChange, onClose, anchorEl }: ColorPickerProps) {
   const t = useTranslations("ColorPicker");
@@ -185,19 +203,35 @@ export function ColorPicker({ value: initialValue, onChange, onClose, anchorEl }
         {hexError && <p className="type-hint text-error px-0.5">{t("invalidHex")}</p>}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
-        {PALETTE_COLOR_VALUES.map((swatch) => (
-          <button
-            key={swatch}
-            type="button"
-            onClick={() => {
-              onChange(swatch);
-              onClose();
-            }}
-            className="w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform"
-            style={{ backgroundColor: swatch, borderColor: initialValue === swatch ? "white" : "transparent" }}
-          />
-        ))}
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-8 gap-1.5">
+          {DEFAULT_COLORS.map((swatch) => (
+            <button
+              key={swatch}
+              type="button"
+              onClick={() => {
+                onChange(swatch);
+                onClose();
+              }}
+              className="w-5 h-5 rounded-full border-2 hover:scale-110 transition-transform"
+              style={{ backgroundColor: swatch, borderColor: initialValue === swatch ? "white" : "transparent" }}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            onChange("");
+            onClose();
+          }}
+          className="flex items-center gap-2 w-full px-2 py-1.5 rounded-lg hover:bg-surface transition-colors duration-150 border border-stroke-subtle"
+        >
+          <div className="w-4 h-4 rounded-full border border-stroke-subtle relative overflow-hidden bg-white shrink-0">
+            <div className="absolute top-1/2 left-0 w-full h-px bg-red-500 -rotate-45 translate-y-[-50%]" />
+          </div>
+          <span className="text-xs text-ink-secondary">{t("noColor")}</span>
+        </button>
       </div>
 
       <div className="flex items-center gap-2">

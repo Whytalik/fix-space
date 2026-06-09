@@ -5,10 +5,10 @@ import { Badge } from "@/components/ui/primitives/display/badge";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { useAppContext } from "@/context/app-context";
 import { useUIContext } from "@/context/ui-context";
-import { useEscape } from "@/hooks/useEscape";
+import { useEscape } from "@/hooks/ui/use-escape";
 import { Check, ChevronDown, Globe, Settings, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 

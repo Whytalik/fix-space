@@ -1,48 +1,41 @@
 "use client";
 
-import { getDatabaseSettings, updateDatabaseSettings } from "@/lib/api/settings";
+import { updateDatabaseSettings } from "@/lib/api/settings";
 import { parseApiError } from "@/lib/api/client";
-import { Button } from "@/components/ui/primitives/actions/button";
 import { Spinner } from "@/components/ui/primitives/feedback/spinner";
-import { Toast } from "@/components/ui/primitives/feedback/toast";
 import { getAllIcons, IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
+import { useDatabaseSettingsQuery } from "@/hooks/api/use-database-settings-query";
+import { useUIContext } from "@/context/ui-context";
 import type { DatabaseSettings as DatabaseSettingsDto } from "@fixspace/domain";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
-type ToastState = { message: string; variant: "success" | "error" } | null;
-
 export function DatabaseSettings() {
   const t = useTranslations("DatabaseSettingsComp");
+  const { data: settings = null, isLoading } = useDatabaseSettingsQuery();
   const [form, setForm] = useState<DatabaseSettingsDto | null>(null);
-  const [isFetching, setIsFetching] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [toast, setToast] = useState<ToastState>(null);
+  const { showToast } = useUIContext();
   const [showIconPicker, setShowIconPicker] = useState(false);
   const iconButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    getDatabaseSettings()
-      .then(setForm)
-      .finally(() => setIsFetching(false));
-  }, []);
+    if (settings) setForm(settings);
+  }, [settings]);
 
-  async function handleSave() {
-    if (!form) return;
-    setIsSaving(true);
-    try {
-      const updated = await updateDatabaseSettings(form);
+  const { mutate: handleSave } = useMutation({
+    mutationFn: (data: Partial<DatabaseSettingsDto>) => updateDatabaseSettings(data),
+    onSuccess: (updated) => {
       setForm(updated);
-      setToast({ message: t("settingsSaved"), variant: "success" });
-    } catch (err) {
-      setToast({ message: parseApiError(err), variant: "error" });
-    } finally {
-      setIsSaving(false);
-    }
-  }
+      showToast(t("settingsSaved"), "success");
+    },
+    onError: (error) => {
+      showToast(parseApiError(error), "error");
+    },
+  });
 
-  if (isFetching || !form) {
+  if (isLoading || !form) {
     return <Spinner size="sm" className="mx-auto mt-4" />;
   }
 
@@ -55,14 +48,14 @@ export function DatabaseSettings() {
             <button
               ref={iconButtonRef}
               type="button"
-              onClick={() => setShowIconPicker((v) => !v)}
+              onClick={() => setShowIconPicker((prev) => !prev)}
               className="flex items-center gap-2.5 rounded-lg border border-stroke bg-surface px-3 py-2 text-sm text-ink hover:border-accent transition-colors duration-150"
             >
               {form.defaultDatabaseIcon ? (
                 <span className="flex items-center gap-2">
                   <IconDisplay value={form.defaultDatabaseIcon} size={16} />
                   <span className="text-xs text-ink-secondary">
-                    {getAllIcons().find((i) => `icon:${i.name}` === form.defaultDatabaseIcon)?.displayName}
+                    {getAllIcons().find((icon) => `icon:${icon.name}` === form.defaultDatabaseIcon)?.displayName}
                   </span>
                 </span>
               ) : (
@@ -72,8 +65,9 @@ export function DatabaseSettings() {
             {showIconPicker && (
               <IconPicker
                 value={form.defaultDatabaseIcon}
-                onChange={(v) => {
-                  setForm((p) => (p ? { ...p, defaultDatabaseIcon: v } : p));
+                onChange={(value) => {
+                  setForm((prev) => (prev ? { ...prev, defaultDatabaseIcon: value } : prev));
+                  handleSave({ defaultDatabaseIcon: value });
                   setShowIconPicker(false);
                 }}
                 onClose={() => setShowIconPicker(false)}
@@ -82,13 +76,6 @@ export function DatabaseSettings() {
             )}
           </div>
         </div>
-      </div>
-
-      {toast && <Toast message={toast.message} variant={toast.variant} onDismiss={() => setToast(null)} />}
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? t("saving") : t("saveChanges")}
-        </Button>
       </div>
     </div>
   );

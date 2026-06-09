@@ -99,35 +99,48 @@ export function useSidebarDnd() {
 
     const sourceSectionId = activeData.sectionId ?? null;
 
+    function getTargetDatabases(sectionId: string | null) {
+      return sectionId === null ? unsectioned : (sections.find((s) => s.id === sectionId)?.databases ?? []);
+    }
+
     if (overData?.type === "database") {
       const targetSectionId = overData.sectionId ?? null;
 
       if (sourceSectionId === targetSectionId) {
-        const databases =
-          sourceSectionId === null ? unsectioned : (sections.find((section) => section.id === sourceSectionId)?.databases ?? []);
+        const databases = getTargetDatabases(sourceSectionId);
         const oldIndex = databases.findIndex((database) => database.id === active.id);
         const newIndex = databases.findIndex((database) => database.id === over.id);
         if (oldIndex !== newIndex) {
-          reorderDatabasesInSection(sourceSectionId, arrayMove(databases, oldIndex, newIndex));
+          const reordered = arrayMove(databases, oldIndex, newIndex);
+          reorderDatabasesInSection(sourceSectionId, reordered);
+          updateSpace(space.id, {
+            databaseOperations: reordered.map((database, index) => ({
+              id: database.id,
+              update: { position: index },
+            })),
+          }).catch(() => reorderDatabasesInSection(sourceSectionId, databases));
         }
       } else {
+        const targetPosition = getTargetDatabases(targetSectionId).length;
         moveDatabaseToSection(active.id as string, targetSectionId);
-        updateDatabase(space.id, active.id as string, { sectionId: targetSectionId }).catch(() =>
+        updateDatabase(space.id, active.id as string, { sectionId: targetSectionId, position: targetPosition }).catch(() =>
           moveDatabaseToSection(active.id as string, sourceSectionId),
         );
       }
     } else if (overData?.type === "section") {
       const targetSectionId = over.id as string;
       if (targetSectionId !== sourceSectionId) {
+        const targetPosition = getTargetDatabases(targetSectionId).length;
         moveDatabaseToSection(active.id as string, targetSectionId);
-        updateDatabase(space.id, active.id as string, { sectionId: targetSectionId }).catch(() =>
+        updateDatabase(space.id, active.id as string, { sectionId: targetSectionId, position: targetPosition }).catch(() =>
           moveDatabaseToSection(active.id as string, sourceSectionId),
         );
       }
     } else if (overData?.type === "unsectioned") {
       if (sourceSectionId !== null) {
+        const targetPosition = unsectioned.length;
         moveDatabaseToSection(active.id as string, null);
-        updateDatabase(space.id, active.id as string, { sectionId: null }).catch(() =>
+        updateDatabase(space.id, active.id as string, { sectionId: null, position: targetPosition }).catch(() =>
           moveDatabaseToSection(active.id as string, sourceSectionId),
         );
       }

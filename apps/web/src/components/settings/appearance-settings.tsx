@@ -3,7 +3,7 @@
 import type { Theme } from "@/context/theme-context";
 import { useTheme } from "@/context/theme-context";
 import { LanguageSwitcher } from "@/components/layout/header/landing/language-switcher";
-import { Moon, Sun, type LucideIcon } from "lucide-react";
+import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export function AppearanceSettings() {
@@ -13,6 +13,7 @@ export function AppearanceSettings() {
   const themeOptions: { id: Theme; label: string; icon: LucideIcon }[] = [
     { id: "light", label: t("appearance.theme.light"), icon: Sun },
     { id: "dark", label: t("appearance.theme.dark"), icon: Moon },
+    { id: "system", label: t("appearance.theme.system"), icon: Monitor },
   ];
 
   return (

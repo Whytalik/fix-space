@@ -7,7 +7,6 @@ import { useCallback } from "react";
 export function useLogout() {
   return useCallback(async () => {
     await logout().catch(() => {});
-    storage.clearAuth();
     storage.clearLastSpaceId();
     window.location.href = "/login";
   }, []);

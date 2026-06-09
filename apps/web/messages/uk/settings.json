@@ -5,7 +5,8 @@
         "title": "Тема",
         "description": "Налаштуйте зовнішній вигляд вашого робочого простору.",
         "light": "Світла",
-        "dark": "Темна"
+        "dark": "Темна",
+        "system": "Системна"
       },
       "language": {
         "title": "Мова",
@@ -21,8 +22,10 @@
     "database": "База даних",
     "section": "Секція",
     "record": "Запис",
+    "view": "Подання",
     "manageSettings": "Керування налаштуваннями",
-    "settings": "Налаштування"
+    "settings": "Налаштування",
+    "integration": "Інтеграції"
   },
   "ProfileSettingsComp": {
     "general": "Загальні",
@@ -41,8 +44,38 @@
     "passwordChanged": "Пароль успішно змінено.",
     "allFieldsRequired": "Всі поля обов'язкові.",
     "passwordsNotMatch": "Нові паролі не збігаються.",
+    "changeAvatar": "Змінити аватар",
+    "removePhoto": "Видалити фото",
     "changePassword": "Змінити пароль",
-    "changing": "Зміна…"
+    "changing": "Зміна…",
+    "dangerZone": "Небезпечна зона",
+    "deleteAccount": "Видалити акаунт",
+    "deleteAccountDesc": "Безповоротно видалити ваш акаунт та всі пов'язані дані. Цю дію не можна скасувати.",
+    "deleteAccountModalTitle": "Видалення акаунту",
+    "deleteAccountWarning": "Це безповоротно видалить ваш акаунт та всі ваші дані — простори, бази даних, записи та налаштування. Цю дію не можна скасувати.",
+    "deleteAccountPasswordLabel": "Підтвердіть пароль",
+    "deleteAccountPasswordPlaceholder": "Введіть пароль",
+    "deleteAccountPasswordHint": "Якщо ви реєструвались через Google і не маєте пароля, залиште поле порожнім.",
+    "confirmDelete": "Видалити мій акаунт",
+    "deleting": "Видалення…",
+    "cancel": "Скасувати",
+    "datetime": "Дата та час",
+    "timeFormat": "Формат часу",
+    "timeFormat12h": "12h",
+    "timeFormat24h": "24h",
+    "startOfWeek": "Початок тижня",
+    "monday": "Понеділок",
+    "sunday": "Неділя",
+    "dateFormat": "Формат дати",
+    "placeholderDateFormat": "напр. DD/MM/YYYY",
+    "timezone": "Часовий пояс",
+    "placeholderTimezone": "Пошук часового поясу…"
+  },
+  "IntegrationSettingsComp": {
+    "title": "Інтеграції",
+    "description": "Під'єднуйте зовнішні сервіси для розширення можливостей вашого простору.",
+    "emptyTitle": "Ще немає підключень",
+    "emptyDescription": "Додайте інтеграцію, щоб під'єднати зовнішні сервіси."
   },
   "SpaceSettingsComp": {
     "sidebar": "Сайдбар",
@@ -52,6 +85,7 @@
     "monday": "Понеділок",
     "sunday": "Неділя",
     "defaultUpdated": "Простір за замовчуванням оновлено.",
+    "spaceCreated": "Простір створено.",
     "spaceDuplicated": "Простір дубльовано.",
     "spaceDeleted": "Простір видалено.",
     "settingsSaved": "Налаштування збережено.",
@@ -63,17 +97,25 @@
     "default": "За замовчуванням",
     "defaultIcon": "Іконка за замовчуванням",
     "chooseIcon": "Вибрати іконку…",
+    "showPresetIndicators": "Показувати індикатори пресетів",
+    "showPresetIndicatorsDesc": "Відображати спеціальні іконки для системних баз даних.",
     "saveChanges": "Зберегти зміни",
     "timeFormat": "Формат часу",
     "startOfWeek": "Початок тижня",
     "dateFormat": "Формат дати",
+    "timezone": "Часовий пояс",
+    "placeholderTimezone": "Пошук часового поясу…",
     "placeholderDateFormat": "напр. DD/MM/YYYY",
     "deleteSpace": "Видалити простір",
     "deleteSpaceDesc": "Всі бази даних та записи всередині будуть видалені назавжди. Цю дію не можна скасувати.",
     "delete": "Видалити",
     "edit": "Редагувати",
     "duplicate": "Дублювати",
-    "cannotDeleteDefault": "Не можна видалити простір за замовчуванням"
+    "cannotDeleteDefault": "Не можна видалити простір за замовчуванням",
+    "addSpace": "Додати простір",
+    "create": "Створити",
+    "placeholderSpaceName": "Назва простору…",
+    "maxSpacesReached": "Максимум {max} просторів на акаунт"
   },
   "SectionSettingsComp": {
     "settingsSaved": "Налаштування збережено.",
@@ -91,6 +133,13 @@
     "saveChanges": "Зберегти зміни"
   },
   "RecordSettingsComp": {
+    "settingsSaved": "Налаштування збережено.",
+    "defaultIcon": "Іконка за замовчуванням",
+    "chooseIcon": "Вибрати іконку…",
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни"
+  },
+  "ViewSettingsComp": {
     "settingsSaved": "Налаштування збережено.",
     "defaultIcon": "Іконка за замовчуванням",
     "chooseIcon": "Вибрати іконку…",

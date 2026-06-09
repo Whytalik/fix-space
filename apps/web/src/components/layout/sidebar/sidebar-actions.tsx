@@ -1,9 +1,9 @@
 "use client";
 
 import { AddSectionModal } from "./components/add-section-modal";
-import { AddDatabaseModal } from "@/features/database/add-database-modal";
+import { AddDatabaseModal } from "@/components/database/add-database-modal";
 import { useAppContext } from "@/context/app-context";
-import { useModal } from "@/hooks/useModal";
+import { useModal } from "@/hooks/ui/use-modal";
 import { FolderPlus, LayoutGrid } from "lucide-react";
 
 export function SidebarActions() {

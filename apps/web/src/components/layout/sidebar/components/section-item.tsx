@@ -5,18 +5,19 @@ import { SectionEditModal } from "./section-edit-modal";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
 import { DropdownMenu } from "@/components/ui/overlays/dropdown-menu";
+import { DuplicationModal, type DuplicationOptions } from "@/components/ui/overlays/duplication-modal";
 import { useAppContext } from "@/context/app-context";
 import { useMutation } from "@tanstack/react-query";
-import { updateSpace } from "@/lib/api/space";
+import { duplicateSection, updateSpace } from "@/lib/api/space";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { SectionResponseDto } from "@fixspace/domain";
 import { Button } from "@/components/ui/primitives/actions/button";
-import { ChevronRight, LayoutGrid, MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { ChevronRight, Copy, LayoutGrid, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
-import { AddDatabaseModal } from "@/features/database/add-database-modal";
-import { useModal } from "@/hooks/useModal";
+import { useEffect, useRef, useState } from "react";
+import { AddDatabaseModal } from "@/components/database/add-database-modal";
+import { useModal } from "@/hooks/ui/use-modal";
 
 interface SectionItemProps {
   section: SectionResponseDto;
@@ -28,6 +29,9 @@ interface SectionItemProps {
 export function SectionItem({ section, collapsed, isCollapsed, onToggle }: SectionItemProps) {
   const t = useTranslations("SectionItem");
   const { space, updateSpaceInList } = useAppContext();
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
+
   const { setNodeRef, listeners, transform, transition, isDragging } = useSortable({
     id: section.id,
     data: { type: "section" },
@@ -42,8 +46,25 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
   const [showMenu, setShowMenu] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const editModal = useModal();
   const addDatabase = useModal();
+
+  const { mutate: duplicateSectionAction } = useMutation({
+    mutationFn: (options: DuplicationOptions) => {
+      if (!space) return Promise.reject();
+      return duplicateSection(space.id, section.id, options);
+    },
+    onSuccess: (newSection) => {
+      if (newSection && space) {
+        updateSpaceInList({
+          ...space,
+          sections: [...(space.sections ?? []), newSection].sort((a, b) => a.position - b.position),
+        });
+        setShowDuplicateModal(false);
+      }
+    },
+  });
 
   const { mutate: deleteSection, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
@@ -93,7 +114,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
         >
           <ChevronRight
             size={12}
-            className={`text-ink-muted shrink-0 transition-transform duration-150 ${isCollapsed ? "" : "rotate-90"}`}
+            className={`text-ink-muted shrink-0 ${isMounted ? "transition-transform duration-150" : ""} ${isCollapsed ? "" : "rotate-90"}`}
           />
           {section.icon && (
             <span className="shrink-0 text-ink-secondary flex items-center">
@@ -128,6 +149,14 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
               },
             },
             { label: t("edit"), icon: <Pencil size={14} />, onClick: editModal.open },
+            {
+              label: t("duplicate"),
+              icon: <Copy size={14} />,
+              onClick: () => {
+                setShowDuplicateModal(true);
+                setShowMenu(false);
+              },
+            },
             {
               label: t("delete"),
               icon: <Trash size={14} />,
@@ -164,6 +193,17 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
           variant="danger"
           onConfirm={() => deleteSection()}
           onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
+
+      {showDuplicateModal && (
+        <DuplicationModal
+          target="section"
+          initialName={`${section.name} (Copy)`}
+          onConfirm={async (options) => {
+            duplicateSectionAction(options);
+          }}
+          onCancel={() => setShowDuplicateModal(false)}
         />
       )}
 

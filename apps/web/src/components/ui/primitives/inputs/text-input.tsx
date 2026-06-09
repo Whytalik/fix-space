@@ -10,9 +10,21 @@ type TextInputProps = {
   size?: "md" | "sm";
   error?: string;
   hint?: string;
+  type?: string;
 };
 
-export function TextInput({ value, onChange, placeholder, multiline, rows = 3, disabled, size = "md", error, hint }: TextInputProps) {
+export function TextInput({
+  value,
+  onChange,
+  placeholder,
+  multiline,
+  rows = 3,
+  disabled,
+  size = "md",
+  error,
+  hint,
+  type = "text",
+}: TextInputProps) {
   const base = size === "sm" ? "field-input !py-1 !text-xs" : "field-input";
   const className = `${base}${error ? " !border-error" : ""}`;
 
@@ -27,7 +39,7 @@ export function TextInput({ value, onChange, placeholder, multiline, rows = 3, d
     />
   ) : (
     <input
-      type="text"
+      type={type}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
@@ -40,9 +52,9 @@ export function TextInput({ value, onChange, placeholder, multiline, rows = 3, d
 
   return (
     <div className="flex flex-col gap-1">
+      {hint && <p className="type-hint">{hint}</p>}
       {input}
       {error && <p className="text-xs text-error">{error}</p>}
-      {!error && hint && <p className="type-hint">{hint}</p>}
     </div>
   );
 }

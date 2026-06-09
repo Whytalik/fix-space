@@ -34,7 +34,7 @@ export function ConfirmDialog({
 
   return createPortal(
     <div className="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-[3px] bg-canvas/50" onClick={onCancel}>
-      <div className="w-80 bg-elevated border border-stroke rounded-xl shadow-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="w-80 bg-elevated border border-stroke rounded-2xl shadow-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="px-5 pt-5 pb-4">
           <p className="text-sm font-semibold text-ink">{title}</p>
           {description && <p className="mt-1.5 text-sm text-ink-secondary leading-relaxed">{description}</p>}

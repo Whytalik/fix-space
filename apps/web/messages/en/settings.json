@@ -5,7 +5,8 @@
         "title": "Theme",
         "description": "Customize the appearance of your workspace.",
         "light": "Light",
-        "dark": "Dark"
+        "dark": "Dark",
+        "system": "System"
       },
       "language": {
         "title": "Language",
@@ -21,8 +22,16 @@
     "database": "Database",
     "section": "Section",
     "record": "Record",
+    "view": "View",
     "manageSettings": "Manage your",
-    "settings": "Settings"
+    "settings": "Settings",
+    "integration": "Integrations"
+  },
+  "IntegrationSettingsComp": {
+    "title": "Integrations",
+    "description": "Connect external services to extend your workspace capabilities.",
+    "emptyTitle": "No connections yet",
+    "emptyDescription": "Add an integration to connect external services."
   },
   "SpaceSettingsComp": {
     "sidebar": "Sidebar",
@@ -32,6 +41,7 @@
     "monday": "Monday",
     "sunday": "Sunday",
     "defaultUpdated": "Default space updated.",
+    "spaceCreated": "Space created.",
     "spaceDuplicated": "Space duplicated.",
     "spaceDeleted": "Space deleted.",
     "settingsSaved": "Settings saved.",
@@ -43,17 +53,25 @@
     "default": "Default",
     "defaultIcon": "Default icon",
     "chooseIcon": "Choose an icon…",
+    "showPresetIndicators": "Show preset indicators",
+    "showPresetIndicatorsDesc": "Display special icons for system-provided databases.",
     "saveChanges": "Save changes",
     "timeFormat": "Time format",
     "startOfWeek": "Start of week",
     "dateFormat": "Date format",
+    "timezone": "Timezone",
+    "placeholderTimezone": "Search timezone…",
     "placeholderDateFormat": "e.g. DD/MM/YYYY",
     "deleteSpace": "Delete space",
     "deleteSpaceDesc": "All databases and records inside will be permanently deleted. This action cannot be undone.",
     "delete": "Delete",
     "edit": "Edit",
     "duplicate": "Duplicate",
-    "cannotDeleteDefault": "Cannot delete default space"
+    "cannotDeleteDefault": "Cannot delete default space",
+    "addSpace": "Add space",
+    "create": "Create",
+    "placeholderSpaceName": "Space name…",
+    "maxSpacesReached": "Maximum {max} spaces per account"
   },
   "DatabaseSettingsComp": {
     "settingsSaved": "Settings saved.",
@@ -77,6 +95,13 @@
     "saving": "Saving…",
     "saveChanges": "Save changes"
   },
+  "ViewSettingsComp": {
+    "settingsSaved": "Settings saved.",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "saving": "Saving…",
+    "saveChanges": "Save changes"
+  },
   "ProfileSettingsComp": {
     "general": "General",
     "security": "Security",
@@ -94,7 +119,31 @@
     "passwordChanged": "Password changed successfully.",
     "allFieldsRequired": "All fields are required.",
     "passwordsNotMatch": "New passwords do not match.",
+    "changeAvatar": "Change avatar",
+    "removePhoto": "Remove photo",
     "changePassword": "Change password",
-    "changing": "Changing…"
+    "changing": "Changing…",
+    "dangerZone": "Danger zone",
+    "deleteAccount": "Delete account",
+    "deleteAccountDesc": "Permanently delete your account and all associated data. This action cannot be undone.",
+    "deleteAccountModalTitle": "Delete account",
+    "deleteAccountWarning": "This will permanently delete your account and all your data — spaces, databases, records, and settings. This action cannot be undone.",
+    "deleteAccountPasswordLabel": "Confirm your password",
+    "deleteAccountPasswordPlaceholder": "Enter your password",
+    "deleteAccountPasswordHint": "If you signed up with Google and have no password, leave this field empty.",
+    "confirmDelete": "Delete my account",
+    "deleting": "Deleting…",
+    "cancel": "Cancel",
+    "datetime": "Date & Time",
+    "timeFormat": "Time format",
+    "timeFormat12h": "12h",
+    "timeFormat24h": "24h",
+    "startOfWeek": "Start of week",
+    "monday": "Monday",
+    "sunday": "Sunday",
+    "dateFormat": "Date format",
+    "placeholderDateFormat": "e.g. DD/MM/YYYY",
+    "timezone": "Timezone",
+    "placeholderTimezone": "Search timezone…"
   }
 }

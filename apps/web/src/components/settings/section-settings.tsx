@@ -1,51 +1,44 @@
 "use client";
 
-import { getSectionSettings, updateSectionSettings } from "@/lib/api/settings";
+import { updateSectionSettings } from "@/lib/api/settings";
 import { parseApiError } from "@/lib/api/client";
-import { Button } from "@/components/ui/primitives/actions/button";
 import { Spinner } from "@/components/ui/primitives/feedback/spinner";
-import { Toast } from "@/components/ui/primitives/feedback/toast";
 import { ColorPicker } from "@/components/ui/color-picker/color-picker";
 import { getAllIcons, IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
+import { useSectionSettingsQuery } from "@/hooks/api/use-section-settings-query";
+import { useUIContext } from "@/context/ui-context";
 import type { SectionSettings as SectionSettingsDto } from "@fixspace/domain";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
-type ToastState = { message: string; variant: "success" | "error" } | null;
-
 export function SectionSettings() {
   const t = useTranslations("SectionSettingsComp");
+  const { data: settings = null, isLoading } = useSectionSettingsQuery();
   const [form, setForm] = useState<SectionSettingsDto | null>(null);
-  const [isFetching, setIsFetching] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [toast, setToast] = useState<ToastState>(null);
+  const { showToast } = useUIContext();
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const swatchRef = useRef<HTMLButtonElement>(null);
   const iconButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    getSectionSettings()
-      .then(setForm)
-      .finally(() => setIsFetching(false));
-  }, []);
+    if (settings) setForm(settings);
+  }, [settings]);
 
-  async function handleSave() {
-    if (!form) return;
-    setIsSaving(true);
-    try {
-      const updated = await updateSectionSettings(form);
+  const { mutate: handleSave } = useMutation({
+    mutationFn: (data: Partial<SectionSettingsDto>) => updateSectionSettings(data),
+    onSuccess: (updated) => {
       setForm(updated);
-      setToast({ message: t("settingsSaved"), variant: "success" });
-    } catch (err) {
-      setToast({ message: parseApiError(err), variant: "error" });
-    } finally {
-      setIsSaving(false);
-    }
-  }
+      showToast(t("settingsSaved"), "success");
+    },
+    onError: (error) => {
+      showToast(parseApiError(error), "error");
+    },
+  });
 
-  if (isFetching || !form) {
+  if (isLoading || !form) {
     return <Spinner size="sm" className="mx-auto mt-4" />;
   }
 
@@ -58,14 +51,14 @@ export function SectionSettings() {
             <button
               ref={iconButtonRef}
               type="button"
-              onClick={() => setShowIconPicker((v) => !v)}
+              onClick={() => setShowIconPicker((prev) => !prev)}
               className="flex items-center gap-2.5 rounded-lg border border-stroke bg-surface px-3 py-2 text-sm text-ink hover:border-accent transition-colors duration-150"
             >
               {form.defaultSectionIcon ? (
                 <span className="flex items-center gap-2">
                   <IconDisplay value={form.defaultSectionIcon} size={16} />
                   <span className="text-xs text-ink-secondary">
-                    {getAllIcons().find((i) => `icon:${i.name}` === form.defaultSectionIcon)?.displayName}
+                    {getAllIcons().find((icon) => `icon:${icon.name}` === form.defaultSectionIcon)?.displayName}
                   </span>
                 </span>
               ) : (
@@ -75,8 +68,9 @@ export function SectionSettings() {
             {showIconPicker && (
               <IconPicker
                 value={form.defaultSectionIcon}
-                onChange={(v) => {
-                  setForm((p) => (p ? { ...p, defaultSectionIcon: v } : p));
+                onChange={(value) => {
+                  setForm((prev) => (prev ? { ...prev, defaultSectionIcon: value } : prev));
+                  handleSave({ defaultSectionIcon: value });
                   setShowIconPicker(false);
                 }}
                 onClose={() => setShowIconPicker(false)}
@@ -90,8 +84,8 @@ export function SectionSettings() {
           <button
             ref={swatchRef}
             type="button"
-            onClick={() => setColorPickerOpen((o) => !o)}
-            className="flex items-center gap-2 w-fit rounded-lg border border-stroke bg-surface px-3 py-2 text-sm text-ink hover:bg-elevated transition-colors"
+            onClick={() => setColorPickerOpen((prev) => !prev)}
+            className="flex items-center gap-2 w-fit rounded-lg border border-stroke bg-surface px-3 py-2 text-sm text-ink hover:bg-elevated transition-colors duration-150"
           >
             <span
               className="w-4 h-4 rounded-sm border border-stroke/50 shrink-0"
@@ -102,19 +96,15 @@ export function SectionSettings() {
           {colorPickerOpen && (
             <ColorPicker
               value={form.defaultSectionColor}
-              onChange={(v) => setForm((p) => (p ? { ...p, defaultSectionColor: v } : p))}
+              onChange={(value) => {
+                setForm((prev) => (prev ? { ...prev, defaultSectionColor: value } : prev));
+                handleSave({ defaultSectionColor: value });
+              }}
               onClose={() => setColorPickerOpen(false)}
               anchorEl={swatchRef.current}
             />
           )}
         </div>
-      </div>
-
-      {toast && <Toast message={toast.message} variant={toast.variant} onDismiss={() => setToast(null)} />}
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? t("saving") : t("saveChanges")}
-        </Button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEscape } from "@/hooks/useEscape";
+import { useEscape } from "@/hooks/ui/use-escape";
 import { X } from "lucide-react";
 import { type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -18,9 +18,11 @@ interface ModalShellProps {
   size?: "sm" | "md" | "lg";
   children: ReactNode;
   footer?: ReactNode;
+  headerPrefix?: ReactNode;
+  headerSuffix?: ReactNode;
 }
 
-export function ModalShell({ isOpen, onClose, title, size = "md", children, footer }: ModalShellProps) {
+export function ModalShell({ isOpen, onClose, title, size = "md", children, footer, headerPrefix, headerSuffix }: ModalShellProps) {
   useEscape(onClose);
 
   if (!isOpen) return null;
@@ -32,13 +34,19 @@ export function ModalShell({ isOpen, onClose, title, size = "md", children, foot
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-stroke shrink-0">
-          <h2 className="type-modal-title">{title}</h2>
-          <button
-            onClick={onClose}
-            className="text-ink-muted hover:text-ink transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas rounded p-0.5"
-          >
-            <X size={15} />
-          </button>
+          <div className="flex items-center gap-2">
+            {headerPrefix}
+            <h2 className="type-modal-title">{title}</h2>
+          </div>
+          <div className="flex items-center gap-3">
+            {headerSuffix}
+            <button
+              onClick={onClose}
+              className="text-ink-muted hover:text-ink transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas rounded p-0.5"
+            >
+              <X size={15} />
+            </button>
+          </div>
         </div>
 
         <div className="px-6 py-5 overflow-y-auto scrollbar flex-1">{children}</div>

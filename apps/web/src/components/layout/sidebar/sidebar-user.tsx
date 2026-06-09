@@ -3,12 +3,10 @@
 import { Avatar } from "@/components/ui/primitives/display/avatar";
 import { Skeleton } from "@/components/ui/primitives/display/skeleton";
 import { useAppContext } from "@/context/app-context";
-import { useUIContext } from "@/context/ui-context";
-import { useEscape } from "@/hooks/useEscape";
-import { useLogout } from "@/hooks/useLogout";
+import { useEscape } from "@/hooks/ui/use-escape";
+import { useLogout } from "@/hooks/auth/use-logout";
 import { API_BASE_URL } from "@/utils/constants";
-import { LogOut, Settings, User as UserIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -19,8 +17,6 @@ interface SidebarUserProps {
 export function SidebarUser({ collapsed }: SidebarUserProps) {
   const t = useTranslations("Sidebar");
   const { user, clearSession, isLoading } = useAppContext();
-  const { openSettings } = useUIContext();
-  const router = useRouter();
   const logout = useLogout();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -64,32 +60,6 @@ export function SidebarUser({ collapsed }: SidebarUserProps) {
                 <p className="text-sm font-semibold text-ink truncate">{user.username}</p>
                 <p className="text-xs text-ink-muted truncate">{user.email}</p>
               </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false);
-                  router.push("/profile");
-                }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium text-ink-secondary hover:bg-surface hover:text-ink transition-colors duration-150 cursor-pointer"
-              >
-                <UserIcon size={14} />
-                {t("profile")}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setIsOpen(false);
-                  openSettings();
-                }}
-                className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-sm font-medium text-ink-secondary hover:bg-surface hover:text-ink transition-colors duration-150 cursor-pointer"
-              >
-                <Settings size={14} />
-                {t("settings")}
-              </button>
-
-              <div className="my-1 border-t border-stroke" />
 
               <button
                 type="button"

@@ -18,15 +18,12 @@ type ComboboxProps =
       value: string;
       onChange: (value: string) => void;
       placeholder?: string;
-      /** Allow typing any value not in the list */
       freeText?: boolean;
-      /** Clicking the active option deselects it (sets to "") */
       nullable?: boolean;
-      /** Which direction the dropdown opens; defaults to "bottom" */
       placement?: "top" | "bottom";
-      /** Input height variant; "md" is default, "sm" is more compact */
       size?: "md" | "sm";
       multiple?: false;
+      disabled?: boolean;
     }
   | {
       options: ComboboxOption[];
@@ -34,9 +31,9 @@ type ComboboxProps =
       onChange: (value: string[]) => void;
       placeholder?: string;
       placement?: "top" | "bottom";
-      /** Input height variant; "md" is default, "sm" is more compact */
       size?: "md" | "sm";
       multiple: true;
+      disabled?: boolean;
     };
 
 export function Combobox(props: ComboboxProps) {
@@ -45,7 +42,7 @@ export function Combobox(props: ComboboxProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   if (props.multiple) {
-    const { placement = "bottom", size = "md" } = props;
+    const { placement = "bottom", size = "md", disabled } = props;
     const inputCls = size === "sm" ? "field-input w-full !py-1 !text-xs" : "field-input w-full";
     const selected = props.options.filter((option) => (props.value as string[]).includes(option.value));
     const available = props.options.filter(
@@ -53,13 +50,15 @@ export function Combobox(props: ComboboxProps) {
     );
 
     function handleAdd(value: string) {
+      if (disabled) return;
       (props.onChange as (value: string[]) => void)([...(props.value as string[]), value]);
       setQuery("");
       inputRef.current?.focus();
     }
 
     function handleRemove(value: string) {
-      (props.onChange as (value: string[]) => void)((props.value as string[]).filter((v) => v !== value));
+      if (disabled) return;
+      (props.onChange as (value: string[]) => void)((props.value as string[]).filter((item) => item !== value));
     }
 
     return (
@@ -78,7 +77,12 @@ export function Combobox(props: ComboboxProps) {
               >
                 {option.icon && <IconDisplay value={option.icon} size={12} />}
                 {option.label}
-                <button type="button" onClick={() => handleRemove(option.value)} className="text-ink-muted hover:text-ink">
+                <button
+                  type="button"
+                  onClick={() => handleRemove(option.value)}
+                  className="text-ink-muted hover:text-ink disabled:opacity-50"
+                  disabled={disabled}
+                >
                   <X size={10} />
                 </button>
               </span>
@@ -94,12 +98,13 @@ export function Combobox(props: ComboboxProps) {
               setQuery(e.target.value);
               setOpen(true);
             }}
-            onFocus={() => setOpen(true)}
+            onFocus={() => !disabled && setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 150)}
             placeholder={selected.length === 0 ? (props.placeholder ?? "Search…") : "Add more…"}
             className={inputCls}
+            disabled={disabled}
           />
-          {open && available.length > 0 && (
+          {open && !disabled && available.length > 0 && (
             <ComboboxDropdown options={available} onSelect={(value) => handleAdd(value)} placement={placement} />
           )}
         </div>
@@ -112,18 +117,21 @@ export function Combobox(props: ComboboxProps) {
     nullable = false,
     placement = "bottom",
     size = "md",
-  } = props as { freeText?: boolean; nullable?: boolean; placement?: "top" | "bottom"; size?: "md" | "sm" };
+    disabled,
+  } = props as { freeText?: boolean; nullable?: boolean; placement?: "top" | "bottom"; size?: "md" | "sm"; disabled?: boolean };
   const inputCls = size === "sm" ? "field-input w-full !py-1 !text-xs" : "field-input w-full";
   const currentLabel = freeText ? (props.value as string) : (props.options.find((option) => option.value === props.value)?.label ?? "");
 
   const filtered = props.options.filter((option) => query === currentLabel || option.label.toLowerCase().includes(query.toLowerCase()));
 
   function handleFocus() {
+    if (disabled) return;
     setQuery(currentLabel);
     setOpen(true);
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (disabled) return;
     setQuery(e.target.value);
     setOpen(true);
     if (freeText) (props.onChange as (value: string) => void)(e.target.value);
@@ -137,6 +145,7 @@ export function Combobox(props: ComboboxProps) {
   }
 
   function handleSelect(value: string) {
+    if (disabled) return;
     const isSame = value === props.value;
     (props.onChange as (value: string) => void)(nullable && isSame ? "" : value);
     setQuery("");
@@ -154,8 +163,9 @@ export function Combobox(props: ComboboxProps) {
         onBlur={handleBlur}
         placeholder={props.placeholder}
         className={inputCls}
+        disabled={disabled}
       />
-      {open && filtered.length > 0 && (
+      {open && !disabled && filtered.length > 0 && (
         <ComboboxDropdown options={filtered} onSelect={handleSelect} selectedValue={props.value as string} placement={placement} />
       )}
     </div>

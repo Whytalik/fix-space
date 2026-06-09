@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-export type Theme = "dark" | "light";
+export type Theme = "dark" | "light" | "system";
 
 type ThemeContextValue = {
   theme: Theme;
@@ -13,6 +13,18 @@ const ThemeContext = createContext<ThemeContextValue>({
   theme: "dark",
   setTheme: () => {},
 });
+
+function resolveSystemTheme(): "dark" | "light" {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function applyTheme(theme: Theme) {
+  const root = window.document.documentElement;
+  const resolved = theme === "system" ? resolveSystemTheme() : theme;
+  root.classList.remove("light", "dark");
+  root.classList.add(resolved);
+  root.setAttribute("data-theme", resolved);
+}
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
@@ -30,10 +42,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-    root.classList.add(theme);
-    root.setAttribute("data-theme", theme);
+    applyTheme(theme);
+
+    if (theme !== "system") return;
+
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => applyTheme("system");
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, [theme]);
 
   return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;

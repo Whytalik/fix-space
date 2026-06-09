@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-@source "../**/*.{ts,tsx}";
-
-/* UI layers */
 @import "../styles/tokens.css";
 @import "../styles/base.css";
 @import "../styles/components.css";

@@ -19,13 +19,13 @@ export function IconPickerField({ value, onChange, placeholder = "Choose an icon
       <button
         ref={buttonRef}
         type="button"
-        onClick={() => setShowPicker((v) => !v)}
+        onClick={() => setShowPicker((prev) => !prev)}
         className="flex items-center gap-2.5 rounded-lg border border-stroke bg-surface px-3 py-2 text-sm text-ink hover:border-accent transition-colors duration-150"
       >
         {value ? (
           <span className="flex items-center gap-2">
             <IconDisplay value={value} size={16} />
-            <span className="text-xs text-ink-secondary">{getAllIcons().find((i) => `icon:${i.name}` === value)?.displayName}</span>
+            <span className="text-xs text-ink-secondary">{getAllIcons().find((icon) => `icon:${icon.name}` === value)?.displayName}</span>
           </span>
         ) : (
           <span className="text-ink-muted">{placeholder}</span>
@@ -34,8 +34,8 @@ export function IconPickerField({ value, onChange, placeholder = "Choose an icon
       {showPicker && (
         <IconPicker
           value={value ?? ""}
-          onChange={(v) => {
-            onChange(v);
+          onChange={(value) => {
+            onChange(value);
             setShowPicker(false);
           }}
           onClose={() => setShowPicker(false)}

@@ -1,10 +1,11 @@
 "use client";
 
-import { useDatabaseMutations } from "@/hooks/useDatabaseMutations";
-import { useSectionMutations } from "@/hooks/useSectionMutations";
+import { createDatabaseMutations } from "@/utils/db/db-mutations";
+import { createSectionMutations } from "@/utils/db/section-mutations";
+import { API_BASE_URL } from "@/utils/constants";
 import { storage } from "@/lib/storage";
-import { useUserQuery } from "@/hooks/useUserQuery";
-import { useSpacesQuery } from "@/hooks/useSpacesQuery";
+import { useUserQuery } from "@/hooks/api/use-user-query";
+import { useSpacesQuery } from "@/hooks/api/use-spaces-query";
 import { queryKeys } from "@/lib/api/query-keys";
 import { useQueryClient } from "@tanstack/react-query";
 import type { DatabaseResponseDto, SectionResponseDto, SpaceResponseDto, UserResponseDto } from "@fixspace/domain";
@@ -22,7 +23,7 @@ interface AppContextValue {
   updateDatabaseInSpace: (updated: DatabaseResponseDto) => void;
   reorderSections: (reordered: SectionResponseDto[]) => void;
   reorderDatabasesInSection: (sectionId: string | null, reordered: DatabaseResponseDto[]) => void;
-  moveDatabaseToSection: (dbId: string, targetSectionId: string | null) => void;
+  moveDatabaseToSection: (databaseId: string, targetSectionId: string | null) => void;
   removeSectionFromSpace: (sectionId: string) => void;
   renameSectionInSpace: (sectionId: string, name: string) => void;
   removeDatabaseFromSpace: (databaseId: string) => string | null;
@@ -63,29 +64,57 @@ function resolveInitialSpaceId(list: SpaceResponseDto[]): string | null {
   return (lastId && list.some((space) => space.id === lastId) ? lastId : null) ?? list[0]?.id ?? null;
 }
 
-export function AppProvider({ children, initialUser = null }: { children: React.ReactNode; initialUser?: UserResponseDto | null }) {
+export function AppProvider({
+  children,
+  initialUser = null,
+  initialSpaces = [],
+  initialSpaceId = null,
+}: {
+  children: React.ReactNode;
+  initialUser?: UserResponseDto | null;
+  initialSpaces?: SpaceResponseDto[];
+  initialSpaceId?: string | null;
+}) {
   const queryClient = useQueryClient();
-  const token = typeof window !== "undefined" ? storage.getToken() : null;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (!token) return;
+    params.delete("token");
+    const newUrl = params.toString() ? `${window.location.pathname}?${params}` : window.location.pathname;
+    window.history.replaceState({}, "", newUrl);
+    fetch(`${API_BASE_URL}/auth/set-session`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accessToken: token }),
+    }).then((res) => {
+      if (res.ok) queryClient.invalidateQueries({ queryKey: queryKeys.user.me() });
+    });
+  }, [queryClient]);
 
   const { data: user = null, isLoading: isUserLoading } = useUserQuery({
-    initialData: initialUser,
-    enabled: !!token || !!initialUser,
+    initialData: initialUser || undefined,
+    enabled: !!initialUser || typeof window !== "undefined",
   });
 
-  const { data: spaces = [], isLoading: isSpacesLoading } = useSpacesQuery({
+  const { data: spaces = initialSpaces, isLoading: isSpacesLoading } = useSpacesQuery({
+    initialData: initialSpaces && initialSpaces.length > 0 ? initialSpaces : undefined,
     enabled: !!user,
   });
 
-  const [currentSpaceId, setCurrentSpaceId] = useState<string | null>(null);
+  const [currentSpaceId, setCurrentSpaceId] = useState<string | null>(initialSpaceId);
   const [currentDatabaseId, setCurrentDatabaseId] = useState<string | null>(null);
 
-  const space = useMemo(() => spaces.find((space) => space.id === currentSpaceId) ?? null, [spaces, currentSpaceId]);
+  const space = useMemo(() => spaces.find((s) => s.id === currentSpaceId) ?? null, [spaces, currentSpaceId]);
   const databases = useMemo(
     () => [...(space?.databases ?? []), ...(space?.sections ?? []).flatMap((section) => section.databases ?? [])],
     [space],
   );
 
-  const isLoading = !!token || !!initialUser ? isUserLoading || isSpacesLoading : false;
+  const isLoading = isUserLoading || (!!user && isSpacesLoading && spaces.length === 0);
 
   useEffect(() => {
     if (spaces.length > 0) {
@@ -104,11 +133,11 @@ export function AppProvider({ children, initialUser = null }: { children: React.
     });
   }
 
-  const { updateDatabaseInSpace, reorderDatabasesInSection, moveDatabaseToSection, removeDatabaseFromSpace } = useDatabaseMutations(
+  const { updateDatabaseInSpace, reorderDatabasesInSection, moveDatabaseToSection, removeDatabaseFromSpace } = createDatabaseMutations(
     applyPatch,
     space,
   );
-  const { reorderSections, removeSectionFromSpace, renameSectionInSpace } = useSectionMutations(applyPatch);
+  const { reorderSections, removeSectionFromSpace, renameSectionInSpace } = createSectionMutations(applyPatch);
 
   function setSpace(space: SpaceResponseDto) {
     storage.setLastSpaceId(space.id);
@@ -164,7 +193,6 @@ export function AppProvider({ children, initialUser = null }: { children: React.
   }
 
   function clearSession() {
-    storage.clearAuth();
     storage.clearLastSpaceId();
     queryClient.clear();
     setCurrentSpaceId(null);

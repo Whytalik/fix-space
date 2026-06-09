@@ -1,7 +1,7 @@
 "use client";
 
-import { useEscape } from "@/hooks/useEscape";
-import { getPopoverStyle } from "@/utils/popover";
+import { useEscape } from "@/hooks/ui/use-escape";
+import { getPopoverStyle } from "@/utils/ui/popover";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
@@ -45,7 +45,7 @@ export function DropdownMenu({ items, onClose, anchorEl }: DropdownMenuProps) {
             item.onClick();
             onClose();
           }}
-          className={`flex items-center gap-2 w-full px-3 py-1.5 text-xs transition-colors hover:bg-surface ${
+          className={`flex items-center gap-2 w-full px-3 py-1.5 text-xs transition-colors duration-150 hover:bg-surface ${
             item.variant === "danger" ? "text-error hover:text-error" : "text-ink"
           }`}
         >

@@ -29,6 +29,15 @@
     background-color: var(--color-ink-muted);
   }
 
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   .animate-fade-up {
     animation: fade-up 0.45s ease both;
   }

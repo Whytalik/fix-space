@@ -47,7 +47,7 @@ export function Toast({ message, variant = "info", onDismiss }: ToastProps) {
   return createPortal(
     <div
       onTransitionEnd={handleTransitionEnd}
-      className={`fixed bottom-6 right-6 z-[200] flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium shadow-lg transition-all duration-300 ${
+      className={`fixed bottom-6 right-6 z-[200] flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium shadow-lg transition-all duration-300 ${
         visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
       } ${VARIANT_STYLES[variant]}`}
     >

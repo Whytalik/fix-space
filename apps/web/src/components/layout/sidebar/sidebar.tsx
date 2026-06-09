@@ -6,19 +6,22 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useTranslations } from "next-intl";
 import { DatabaseItem } from "./components/database-item";
 import { SectionItem } from "./components/section-item";
-import { useSidebarDnd } from "./hooks/use-sidebar-dnd";
-import { useSidebarState } from "./hooks/use-sidebar-state";
+import { useSidebarDnd } from "@/hooks/layout/use-sidebar-dnd";
+import { useSidebarState } from "@/hooks/layout/use-sidebar-state";
 import { SidebarActions } from "./sidebar-actions";
 import { SidebarDragOverlay } from "./sidebar-drag-overlay";
 import { UnsectionedDropZone } from "./unsectioned-drop-zone";
-import { SpaceSwitcher } from "@/components/navigation/switcher/space-switcher";
+import { SpaceSwitcher } from "@/components/navigation/space-switcher";
 import { SidebarSkeleton } from "./skeletons/sidebar-skeleton";
-import { SidebarTrash } from "./sidebar-trash";
+interface SidebarProps {
+  initialCollapsed?: boolean;
+  initialCollapsedSections?: string[];
+}
 
-export function Sidebar() {
+export function Sidebar({ initialCollapsed = false, initialCollapsedSections = [] }: SidebarProps) {
   const t = useTranslations("Sidebar");
   const { space, isLoading } = useAppContext();
-  const { collapsed, toggle, collapsedSections, toggleSection } = useSidebarState();
+  const { collapsed, toggle, collapsedSections, toggleSection, isMounted } = useSidebarState(initialCollapsed, initialCollapsedSections);
   const { contentRef, sensors, verticalOnly, collisionDetection, activeDrag, handleDragStart, handleDragCancel, handleDragEnd } =
     useSidebarDnd();
 
@@ -31,7 +34,7 @@ export function Sidebar() {
   return (
     <div className="relative shrink-0 h-full">
       <aside
-        className={`${collapsed ? "w-14" : "w-60"} border-r border-stroke px-3 pt-3 pb-6 flex flex-col gap-4 overflow-hidden transition-[width] duration-150 h-full`}
+        className={`${collapsed ? "w-14" : "w-[250px]"} border-r border-stroke px-3 pt-3 pb-6 flex flex-col gap-4 overflow-hidden ${isMounted ? "transition-[width] duration-150" : ""} h-full`}
       >
         {collapsed ? (
           <div className="flex justify-center pb-3 -mx-3 border-b border-stroke">
@@ -102,8 +105,6 @@ export function Sidebar() {
             </DndContext>
           )}
         </div>
-
-        <SidebarTrash collapsed={collapsed} count={3} />
       </aside>
 
       <div

@@ -9,5 +9,6 @@ export function useUserQuery(options?: { enabled?: boolean; initialData?: UserRe
     queryFn: getMe,
     enabled: options?.enabled,
     initialData: options?.initialData ?? undefined,
+    retry: false,
   });
 }

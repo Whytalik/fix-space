@@ -1,5 +1,6 @@
 "use client";
 
+import type { UserResponseDto } from "@fixspace/domain";
 import { parseApiError } from "@/lib/api/client";
 import { deleteAvatar, uploadAvatar } from "@/lib/api/user";
 import { API_BASE_URL } from "@/utils/constants";
@@ -11,15 +12,17 @@ type AvatarUploadProps = {
   username: string;
   icon: string | null;
   size?: "md" | "lg";
-  onUpdate: (icon: string | null) => void;
+  onUpdate: (updated: UserResponseDto) => void;
+  changeLabel?: string;
+  removeLabel?: string;
 };
 
-export function AvatarUpload({ username, icon, size = "md", onUpdate }: AvatarUploadProps) {
+export function AvatarUpload({ username, icon, size = "md", onUpdate, changeLabel, removeLabel }: AvatarUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const avatarUrl = icon ? `${API_BASE_URL}${icon}` : null;
+  const avatarUrl = icon ? (icon.startsWith("http") ? icon : `${API_BASE_URL}${icon}`) : null;
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -28,9 +31,9 @@ export function AvatarUpload({ username, icon, size = "md", onUpdate }: AvatarUp
     setIsUploading(true);
     try {
       const updated = await uploadAvatar(file);
-      onUpdate(updated.icon);
-    } catch (err) {
-      setError(parseApiError(err));
+      onUpdate(updated);
+    } catch (error) {
+      setError(parseApiError(error));
     } finally {
       setIsUploading(false);
       e.target.value = "";
@@ -42,9 +45,9 @@ export function AvatarUpload({ username, icon, size = "md", onUpdate }: AvatarUp
     setIsUploading(true);
     try {
       const updated = await deleteAvatar();
-      onUpdate(updated.icon);
-    } catch (err) {
-      setError(parseApiError(err));
+      onUpdate(updated);
+    } catch (error) {
+      setError(parseApiError(error));
     } finally {
       setIsUploading(false);
     }
@@ -58,7 +61,7 @@ export function AvatarUpload({ username, icon, size = "md", onUpdate }: AvatarUp
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
           className="relative rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer"
-          aria-label="Change avatar"
+          aria-label={changeLabel ?? "Change avatar"}
         >
           <Avatar initial={username[0] ?? ""} image={avatarUrl} size={size} />
           <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -97,9 +100,9 @@ export function AvatarUpload({ username, icon, size = "md", onUpdate }: AvatarUp
           type="button"
           onClick={handleRemove}
           disabled={isUploading}
-          className="text-xs text-ink-secondary hover:text-error transition-colors"
+          className="text-xs text-ink-secondary hover:text-error transition-colors duration-150"
         >
-          Remove photo
+          {removeLabel ?? "Remove photo"}
         </button>
       )}
 
