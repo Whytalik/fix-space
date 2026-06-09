@@ -72,7 +72,7 @@ export class FormulaHandler implements PropertyConfigHandler, PropertyValueHandl
     return value === null || value === undefined;
   }
 
-  convertFrom(_value: unknown, _fromType: PropertyType, _fromConfig: Record<string, unknown>, _toConfig: Record<string, unknown>): unknown {
+  convertFrom(): unknown {
     return null;
   }
 

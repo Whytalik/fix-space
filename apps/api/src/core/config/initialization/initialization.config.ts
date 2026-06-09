@@ -114,7 +114,6 @@ const defaultDatabaseProperties: InitPropertyDef[] = [
     name: "Name",
     type: PropertyType.TEXT,
     position: 0,
-    isRequired: true,
   },
 ];
 

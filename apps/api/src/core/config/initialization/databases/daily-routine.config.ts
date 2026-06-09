@@ -6,7 +6,6 @@ export const dailyRoutineProperties: InitPropertyDef[] = [
   {
     name: "Name",
     type: PropertyType.TEXT,
-    isRequired: true,
     position: 0,
     hint: "Назва торгової сесії або дня для зручної навігації.",
     group: "General",

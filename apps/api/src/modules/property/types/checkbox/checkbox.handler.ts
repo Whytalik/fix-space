@@ -1,16 +1,31 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_CHECKBOX_PROPERTY, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, PropertyType } from "@fixspace/domain";
+import {
+  CheckboxPropertyConfig,
+  DEFAULT_CHECKBOX_PROPERTY,
+  FilterOperator,
+  isCheckboxPropertyConfig,
+  OPERATORS_BY_PROPERTY_TYPE,
+  PropertyType,
+} from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
 export class CheckboxHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.CHECKBOX;
 
+  private parseConfig(config: Record<string, unknown>): CheckboxPropertyConfig {
+    if (!isCheckboxPropertyConfig(config)) {
+      throw new Error(`Invariant: expected CheckboxPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
+  }
+
   getDefaultConfig(): Record<string, unknown> {
     return {
       ...DEFAULT_CHECKBOX_PROPERTY,
     };
   }
+
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
@@ -22,8 +37,10 @@ export class CheckboxHandler implements PropertyConfigHandler, PropertyValueHand
   }
 
   validateValue(value: unknown): string[] | null {
-    if (value !== null && typeof value !== "boolean") {
-      return ["Checkbox value must be a boolean or null"];
+    if (value === null || value === undefined) return null;
+
+    if (typeof value !== "boolean") {
+      return ["Checkbox value must be a boolean"];
     }
 
     return null;
@@ -35,19 +52,14 @@ export class CheckboxHandler implements PropertyConfigHandler, PropertyValueHand
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (config.defaultValue as boolean | undefined) ?? false;
+    return this.parseConfig(config).defaultValue ?? false;
   }
 
-  isEmpty(value: unknown): boolean {
-    return value === null || value === undefined;
+  isEmpty(): boolean {
+    return false;
   }
 
-  convertFrom(
-    value: unknown,
-    _fromType: PropertyType,
-    _fromConfig: Record<string, unknown>,
-    targetConfig: Record<string, unknown>,
-  ): unknown {
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
     if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
     if (typeof value === "boolean") return value;
     if (typeof value === "number") return value !== 0;

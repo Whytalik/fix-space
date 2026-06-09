@@ -1,9 +1,19 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
-import { CreatePropertyDto, PropertyResponseDto, PropertyType, UpdatePropertyDto } from "@fixspace/domain";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { t } from "../../common/utils/i18n.helper";
+import {
+  CreatePropertyDto,
+  isRelationPropertyConfig,
+  isStatusPropertyConfig,
+  PropertyResponseDto,
+  PropertyType,
+  UpdatePropertyDto,
+} from "@fixspace/domain";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
 import { PropertyRepository } from "./repositories/property.repository";
+import { ViewRepository } from "@/modules/view/repositories/view.repository";
+import { DatabaseRepository } from "@/modules/database/repositories/database.repository";
 import { PropertyTypeRegistry } from "./types";
 import { toPropertyResponseDto } from "./utils/to-property-response.dto";
 
@@ -13,8 +23,53 @@ export class PropertyService {
     private readonly logger: AppLogger,
     private readonly typeRegistry: PropertyTypeRegistry,
     private readonly propertyRepo: PropertyRepository,
+    private readonly viewRepo: ViewRepository,
+    private readonly databaseRepo: DatabaseRepository,
   ) {
     this.logger.setContext(PropertyService.name);
+  }
+
+  private isProtectedProperty(property: { isProtected: boolean }): boolean {
+    return property.isProtected === true;
+  }
+
+  private isNameProperty(property: { name: string }): boolean {
+    return property.name === "Name";
+  }
+
+  private async checkBrokenRelation(property: { type: string; config: unknown }): Promise<boolean> {
+    if (property.type !== PropertyType.RELATION) return false;
+    if (!isRelationPropertyConfig(property.config)) return false;
+    if (!property.config.relatedEntityId) return false;
+
+    const targetExists = await this.databaseRepo.exists(property.config.relatedEntityId);
+    return !targetExists;
+  }
+
+  private async checkPropertyDependencies(databaseId: string, propertyId: string) {
+    const views = await this.viewRepo.findAllByDatabase(databaseId);
+    const dependentViews = views.filter((view) => {
+      if (view.groupBy === propertyId) return true;
+
+      if (view.filters) {
+        const filters = view.filters as any;
+        if (Array.isArray(filters)) {
+          if (filters.some((f: any) => f.propertyId === propertyId)) return true;
+        } else if (filters.propertyId === propertyId) return true;
+      }
+
+      if (view.sort) {
+        const sort = view.sort as any;
+        if (Array.isArray(sort)) {
+          if (sort.some((s: any) => s.propertyId === propertyId)) return true;
+        } else if (sort.propertyId === propertyId) return true;
+      }
+      return false;
+    });
+
+    if (dependentViews.length > 0) {
+      throw new ConflictException(t("errors.PROPERTY_HAS_DEPENDENCIES", { views: dependentViews.map((v) => v.name).join(", ") }));
+    }
   }
 
   async create(databaseId: string, createPropertyDto: CreatePropertyDto, userId: string): Promise<PropertyResponseDto> {
@@ -27,6 +82,10 @@ export class PropertyService {
 
     if (!database) {
       throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
+    }
+
+    if (database.isLocked) {
+      throw new ForbiddenException(t("errors.DATABASE_STRUCTURE_LOCKED"));
     }
 
     const isPropertyNameTaken = await this.propertyRepo.findByNameInDatabase(createPropertyDto.name, databaseId);
@@ -44,7 +103,7 @@ export class PropertyService {
     const mergedConfig = createPropertyDto.config
       ? {
           ...defaultConfig,
-          ...createPropertyDto.config,
+          ...(createPropertyDto.config as unknown as Record<string, unknown>),
         }
       : defaultConfig;
 
@@ -53,7 +112,7 @@ export class PropertyService {
       throw new BadRequestException(t("errors.INVALID_CONFIG", { type: createPropertyDto.type, errors: configErrors.join("; ") }));
     }
 
-    const [property] = await this.propertyRepo.transaction(async (tx) => {
+    const [property] = await this.propertyRepo.transaction(async (transaction) => {
       const created = await this.propertyRepo.create(
         {
           name: createPropertyDto.name,
@@ -62,15 +121,14 @@ export class PropertyService {
           icon: createPropertyDto.icon,
           hint: createPropertyDto.hint,
           group: createPropertyDto.group,
-          isRequired: createPropertyDto.isRequired ?? false,
           isVisible: createPropertyDto.isVisible ?? true,
           databaseId,
           config: mergedConfig as Prisma.InputJsonValue,
         } as Prisma.PropertyUncheckedCreateInput,
-        tx,
+        transaction,
       );
 
-      const existingRecords = await tx.record.findMany({
+      const existingRecords = await transaction.record.findMany({
         where: {
           databaseId,
         },
@@ -80,12 +138,31 @@ export class PropertyService {
       });
 
       if (existingRecords.length > 0) {
-        await tx.propertyValue.createMany({
+        await transaction.propertyValue.createMany({
           data: existingRecords.map((record) => ({
             recordId: record.id,
             propertyId: created.id,
             value: Prisma.DbNull,
             computed: false,
+          })),
+        });
+      }
+
+      const existingTemplates = await transaction.template.findMany({
+        where: {
+          databaseId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (existingTemplates.length > 0) {
+        await transaction.templatePropertyValue.createMany({
+          data: existingTemplates.map((template) => ({
+            templateId: template.id,
+            propertyId: created.id,
+            value: Prisma.DbNull,
           })),
         });
       }
@@ -103,7 +180,16 @@ export class PropertyService {
   async findAll(databaseId: string, userId: string): Promise<PropertyResponseDto[]> {
     this.logger.debug("Finding all properties", { databaseId });
     const properties = await this.propertyRepo.findAllByDatabase(databaseId, userId);
-    return properties.map(toPropertyResponseDto);
+
+    return Promise.all(
+      properties.map(async (p) => {
+        const isBroken = await this.checkBrokenRelation(p);
+        if (isBroken) {
+          (p.config as any) = { ...(p.config as any), isBroken: true };
+        }
+        return toPropertyResponseDto(p);
+      }),
+    );
   }
 
   async findOne(id: string, userId: string): Promise<PropertyResponseDto> {
@@ -127,7 +213,17 @@ export class PropertyService {
       throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id }));
     }
 
+    const database = await this.propertyRepo.findDatabaseByOwner(existingProperty.databaseId, userId);
+    if (database?.isLocked) {
+      throw new ForbiddenException(t("errors.DATABASE_STRUCTURE_LOCKED"));
+    }
+
+    const isProtected = this.isProtectedProperty(existingProperty) || this.isNameProperty(existingProperty);
+
     if (updatePropertyDto.name && updatePropertyDto.name !== existingProperty.name) {
+      if (isProtected) {
+        throw new ForbiddenException(t("errors.CANNOT_RENAME_NAME_PROPERTY"));
+      }
       const isPropertyNameTaken = await this.propertyRepo.findByNameExcluding(updatePropertyDto.name, existingProperty.databaseId, id);
 
       if (isPropertyNameTaken) {
@@ -136,6 +232,24 @@ export class PropertyService {
           name: updatePropertyDto.name,
         });
         throw new ConflictException(t("errors.PROPERTY_NAME_TAKEN"));
+      }
+    }
+
+    if (updatePropertyDto.position !== undefined && updatePropertyDto.position !== existingProperty.position) {
+      if (isProtected) {
+        throw new ForbiddenException(t("errors.CANNOT_CHANGE_POSITION_NAME_PROPERTY"));
+      }
+    }
+
+    if (updatePropertyDto.type && updatePropertyDto.type !== existingProperty.type) {
+      if (isProtected) {
+        throw new ForbiddenException(t("errors.CANNOT_CHANGE_TYPE_NAME_PROPERTY"));
+      }
+    }
+
+    if (updatePropertyDto.group !== undefined && updatePropertyDto.group !== existingProperty.group) {
+      if (isProtected && updatePropertyDto.group !== "General") {
+        throw new ForbiddenException(t("errors.CANNOT_CHANGE_GROUP_NAME_PROPERTY"));
       }
     }
 
@@ -151,7 +265,7 @@ export class PropertyService {
       const handler = this.typeRegistry.getConfigHandler(effectiveType);
       const merged = {
         ...configToSave,
-        ...updatePropertyDto.config,
+        ...(updatePropertyDto.config as unknown as Record<string, unknown>),
       };
       const configErrors = handler.validateConfig(merged);
       if (configErrors) {
@@ -162,37 +276,95 @@ export class PropertyService {
 
     const typeChanged = updatePropertyDto.type !== undefined && updatePropertyDto.type !== existingProperty.type;
 
-    const property = await this.propertyRepo.transaction(async (tx) => {
+    const updateData = filterUndefined({
+      fields: {
+        name: updatePropertyDto.name,
+        type: updatePropertyDto.type,
+        position: updatePropertyDto.position,
+        icon: updatePropertyDto.icon,
+        hint: updatePropertyDto.hint,
+        isVisible: updatePropertyDto.isVisible,
+      },
+      jsonFields: { config: configToSave },
+      nullableFields: { group: updatePropertyDto.group },
+    });
+
+    const property = await this.propertyRepo.transaction(async (transaction) => {
       if (typeChanged) {
-        await tx.propertyValue.updateMany({
-          where: { propertyId: id },
-          data: { value: Prisma.DbNull },
-        });
+        const fromType = existingProperty.type as PropertyType;
+        const fromConfig = (existingProperty.config as Record<string, unknown>) ?? {};
+        const toConfig = configToSave ?? {};
+        const valueHandler = this.typeRegistry.getValueHandler(updatePropertyDto.type!);
+
+        const [propertyValues, templatePropertyValues] = await Promise.all([
+          transaction.propertyValue.findMany({ where: { propertyId: id }, select: { id: true, value: true } }),
+          transaction.templatePropertyValue.findMany({ where: { propertyId: id }, select: { id: true, value: true } }),
+        ]);
+
+        await Promise.all([
+          ...propertyValues.map((propertyValue) => {
+            const converted = valueHandler.convertFrom(propertyValue.value, fromType, fromConfig, toConfig);
+            return transaction.propertyValue.update({
+              where: { id: propertyValue.id },
+              data: { value: converted !== null && converted !== undefined ? (converted as Prisma.InputJsonValue) : Prisma.DbNull },
+            });
+          }),
+          ...templatePropertyValues.map((templatePropertyValue) => {
+            const converted = valueHandler.convertFrom(templatePropertyValue.value, fromType, fromConfig, toConfig);
+            return transaction.templatePropertyValue.update({
+              where: { id: templatePropertyValue.id },
+              data: { value: converted !== null && converted !== undefined ? (converted as Prisma.InputJsonValue) : Prisma.DbNull },
+            });
+          }),
+        ]);
+      } else if (existingProperty.type === PropertyType.STATUS && updatePropertyDto.config) {
+        const oldConfig = existingProperty.config as Record<string, unknown>;
+        const newConfig = configToSave as Record<string, unknown>;
+
+        if (isStatusPropertyConfig(oldConfig) && isStatusPropertyConfig(newConfig)) {
+          const oldOptions = new Set(oldConfig.categories.flatMap((category) => category.options.map((option) => option.name)));
+          const newOptions = new Set(newConfig.categories.flatMap((category) => category.options.map((option) => option.name)));
+          const deletedOptions = [...oldOptions].filter((option) => !newOptions.has(option));
+
+          for (const deletedOption of deletedOptions) {
+            const oldCategory = oldConfig.categories.find((category) => category.options.some((option) => option.name === deletedOption));
+            const newCategoryDefault = newConfig.categories.find((category) => category.category === oldCategory?.category)?.defaultOption;
+
+            if (newCategoryDefault) {
+              await transaction.propertyValue.updateMany({
+                where: { propertyId: id, value: { equals: deletedOption as Prisma.InputJsonValue } },
+                data: { value: newCategoryDefault as Prisma.InputJsonValue },
+              });
+            }
+          }
+        }
       }
 
-      return this.propertyRepo.update(
-        id,
-        {
-          ...(updatePropertyDto.name !== undefined && { name: updatePropertyDto.name }),
-          ...(updatePropertyDto.type !== undefined && { type: updatePropertyDto.type }),
-          ...(updatePropertyDto.position !== undefined && { position: updatePropertyDto.position }),
-          ...(updatePropertyDto.icon !== undefined && { icon: updatePropertyDto.icon }),
-          ...(updatePropertyDto.hint !== undefined && { hint: updatePropertyDto.hint }),
-          ...(updatePropertyDto.group !== undefined && { group: updatePropertyDto.group }),
-          ...(updatePropertyDto.isRequired !== undefined && { isRequired: updatePropertyDto.isRequired }),
-          ...(updatePropertyDto.isVisible !== undefined && { isVisible: updatePropertyDto.isVisible }),
-          ...(configToSave !== undefined && { config: configToSave as Prisma.InputJsonValue }),
-        },
-        tx,
-      );
+      return this.propertyRepo.update(id, updateData, transaction);
     });
 
     this.logger.log("Property updated", { id });
     return toPropertyResponseDto(property);
   }
 
-  async remove(id: string, userId: string): Promise<PropertyResponseDto> {
+  async remove(id: string, userId: string): Promise<void> {
     this.logger.debug("Removing property", { id });
+
+    const property = await this.propertyRepo.findByIdWithOwner(id, userId);
+    if (!property) {
+      throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id }));
+    }
+
+    if (this.isProtectedProperty(property) || this.isNameProperty(property)) {
+      throw new ForbiddenException(t("errors.CANNOT_DELETE_NAME_PROPERTY"));
+    }
+
+    await this.propertyRepo.delete(id);
+    this.logger.log("Property removed", { id });
+  }
+
+  async duplicate(id: string, userId: string): Promise<PropertyResponseDto> {
+    this.logger.debug("Duplicating property", { id });
 
     const existingProperty = await this.propertyRepo.findByIdWithOwner(id, userId);
 
@@ -200,9 +372,33 @@ export class PropertyService {
       throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id }));
     }
 
-    const property = await this.propertyRepo.delete(id);
+    const database = await this.propertyRepo.findDatabaseByOwner(existingProperty.databaseId, userId);
+    if (database?.isLocked) {
+      throw new ForbiddenException(t("errors.DATABASE_STRUCTURE_LOCKED"));
+    }
 
-    this.logger.log("Property removed", { id });
-    return toPropertyResponseDto(property);
+    const newName = `${existingProperty.name} (copy)`;
+
+    const duplicatedProperty = await this.propertyRepo.transaction(async (transaction) => {
+      const created = await this.propertyRepo.create(
+        {
+          name: newName,
+          type: existingProperty.type,
+          position: existingProperty.position + 1,
+          icon: existingProperty.icon,
+          hint: existingProperty.hint,
+          group: existingProperty.group,
+          isVisible: existingProperty.isVisible,
+          databaseId: existingProperty.databaseId,
+          config: existingProperty.config as Prisma.InputJsonValue,
+          groupId: existingProperty.groupId,
+        } as Prisma.PropertyUncheckedCreateInput,
+        transaction,
+      );
+      return created;
+    });
+
+    this.logger.log("Property duplicated", { id, newPropertyId: duplicatedProperty.id });
+    return toPropertyResponseDto(duplicatedProperty);
   }
 }

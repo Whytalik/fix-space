@@ -6,7 +6,6 @@ export const accountsProperties: InitPropertyDef[] = [
   {
     name: "Name",
     type: PropertyType.TEXT,
-    isRequired: true,
     position: 0,
     hint: "Унікальне ім'я рахунку для розділення капіталів.",
     group: "General Info",

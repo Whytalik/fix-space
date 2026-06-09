@@ -2,11 +2,12 @@ import { Injectable } from "@nestjs/common";
 import {
   DEFAULT_SELECT_PROPERTY,
   FilterOperator,
+  isSelectPropertyConfig,
   OPERATORS_BY_PROPERTY_TYPE,
   PropertyType,
   SelectCategory,
   SelectOption,
-  SelectProperty,
+  SelectPropertyConfig,
 } from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
@@ -14,8 +15,11 @@ import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } fro
 export class SelectHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.SELECT;
 
-  private parseConfig(config: Record<string, unknown>): SelectProperty {
-    return config as unknown as SelectProperty;
+  private parseConfig(config: Record<string, unknown>): SelectPropertyConfig {
+    if (!isSelectPropertyConfig(config)) {
+      throw new Error(`Invariant: expected SelectPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
   }
 
   getDefaultConfig(): Record<string, unknown> {
@@ -42,7 +46,7 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
             errors.push("each category must have an options array");
           } else {
             for (const rawOption of category.options as unknown[]) {
-              if (typeof rawOption === "string") continue; // backward compat
+              if (typeof rawOption === "string") continue;
               if (typeof rawOption !== "object" || rawOption === null || typeof (rawOption as SelectOption).value !== "string") {
                 errors.push("each option must be an object with a string value");
               } else {
@@ -85,8 +89,8 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
       }
 
       const labels: string[] = [];
-      for (const val of value as unknown[]) {
-        const label = extractLabel(val);
+      for (const item of value as unknown[]) {
+        const label = extractLabel(item);
         if (label === null) {
           return ["Multi-select values must be strings or { label, color? } objects"];
         }
@@ -128,12 +132,7 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
     return value === null || value === undefined || (Array.isArray(value) && value.length === 0);
   }
 
-  convertFrom(
-    value: unknown,
-    _fromType: PropertyType,
-    _fromConfig: Record<string, unknown>,
-    targetConfig: Record<string, unknown>,
-  ): unknown {
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
     const { isMultiSelect, categories } = this.parseConfig(targetConfig);
     const allOptions = categories
       ? categories.flatMap((category) => category.options.map((option) => (typeof option === "string" ? option : option.value)))

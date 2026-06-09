@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CreatePropertyValueDto, PropertyValueResponseDto, UpdatePropertyValueDto } from "@fixspace/domain";
-import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
-import { RequireOwnership } from "../../core/auth/decorators/required-ownership.decorator";
-import { ResourceOwnerGuard } from "../../core/auth/guards/resource-owner.guard";
+import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
+import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
 import { PropertyValueService } from "./property-value.service";
 
 @ApiTags("Property Values")

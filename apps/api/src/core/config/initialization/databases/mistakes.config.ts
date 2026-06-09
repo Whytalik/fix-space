@@ -6,7 +6,6 @@ export const mistakesProperties: InitPropertyDef[] = [
   {
     name: "Name",
     type: PropertyType.TEXT,
-    isRequired: true,
     position: 0,
     hint: "Чітка назва помилки. Допомагає визнати проблему.",
     group: "General",

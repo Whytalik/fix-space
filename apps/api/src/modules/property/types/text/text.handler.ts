@@ -1,13 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_TEXT_PROPERTY, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, PropertyType, TextProperty } from "@fixspace/domain";
+import {
+  DEFAULT_TEXT_PROPERTY,
+  FilterOperator,
+  isTextPropertyConfig,
+  OPERATORS_BY_PROPERTY_TYPE,
+  PropertyType,
+  TextPropertyConfig,
+} from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
 export class TextHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.TEXT;
 
-  private parseConfig(config: Record<string, unknown>): TextProperty {
-    return config as unknown as TextProperty;
+  private parseConfig(config: Record<string, unknown>): TextPropertyConfig {
+    if (!isTextPropertyConfig(config)) {
+      throw new Error(`Invariant: expected TextPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
   }
 
   getDefaultConfig(): Record<string, unknown> {
@@ -46,12 +56,7 @@ export class TextHandler implements PropertyConfigHandler, PropertyValueHandler,
     return value === null || value === undefined || value === "";
   }
 
-  convertFrom(
-    value: unknown,
-    _fromType: PropertyType,
-    _fromConfig: Record<string, unknown>,
-    targetConfig: Record<string, unknown>,
-  ): unknown {
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
     if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
     if (typeof value === "boolean") return value ? "true" : "false";
     if (typeof value === "number") return String(value);

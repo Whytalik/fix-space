@@ -1,10 +1,10 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
 import { CreatePropertyValueDto, PropertyValueResponseDto, UpdatePropertyValueDto } from "@fixspace/domain";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { filterUndefined } from "../../common/utils/filter-undefined";
-import { t } from "../../common/utils/i18n.helper";
-import { PropertyTypeRegistry } from "../property/types";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
+import { PropertyTypeRegistry } from "@/modules/property/types";
 import { PropertyValueRepository } from "./repositories/property-value.repository";
 
 @Injectable()
@@ -12,7 +12,7 @@ export class PropertyValueService {
   constructor(
     private readonly logger: AppLogger,
     private readonly typeRegistry: PropertyTypeRegistry,
-    private readonly pvRepo: PropertyValueRepository,
+    private readonly propertyValueRepo: PropertyValueRepository,
   ) {
     this.logger.setContext(PropertyValueService.name);
   }
@@ -23,13 +23,13 @@ export class PropertyValueService {
       propertyId: createPropertyValueDto.propertyId,
     });
 
-    const record = await this.pvRepo.findRecordByOwner(recordId, userId);
+    const record = await this.propertyValueRepo.findRecordByOwner(recordId, userId);
 
     if (!record) {
       throw new NotFoundException(t("errors.RECORD_NOT_FOUND_ID", { id: recordId }));
     }
 
-    const property = await this.pvRepo.findPropertyById(createPropertyValueDto.propertyId);
+    const property = await this.propertyValueRepo.findPropertyById(createPropertyValueDto.propertyId);
 
     if (!property) {
       throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id: createPropertyValueDto.propertyId }));
@@ -52,13 +52,9 @@ export class PropertyValueService {
       throw new BadRequestException(t("errors.INVALID_PROPERTY_VALUE", { type: property.type, errors: valueErrors.join("; ") }));
     }
 
-    if (property.isRequired && handler.isEmpty(rawValue)) {
-      throw new BadRequestException(t("errors.PROPERTY_VALUE_REQUIRED", { name: property.name }));
-    }
-
     const formattedValue = handler.formatValue(rawValue, config);
 
-    const propertyValue = await this.pvRepo.upsert(
+    const propertyValue = await this.propertyValueRepo.upsert(
       recordId,
       createPropertyValueDto.propertyId,
       formattedValue as Prisma.InputJsonValue,
@@ -74,14 +70,14 @@ export class PropertyValueService {
 
   async findAll(recordId: string, userId: string): Promise<PropertyValueResponseDto[]> {
     this.logger.debug("Finding all property values", { recordId });
-    const propertyValues = await this.pvRepo.findAllByRecord(recordId, userId);
+    const propertyValues = await this.propertyValueRepo.findAllByRecord(recordId, userId);
     return propertyValues.map((propertyValue) => new PropertyValueResponseDto(propertyValue));
   }
 
   async findOne(id: string): Promise<PropertyValueResponseDto> {
     this.logger.debug("Finding property value", { id });
 
-    const propertyValue = await this.pvRepo.findById(id);
+    const propertyValue = await this.propertyValueRepo.findById(id);
 
     if (!propertyValue) {
       throw new NotFoundException(t("errors.PROPERTY_VALUE_NOT_FOUND_ID", { id }));
@@ -93,7 +89,7 @@ export class PropertyValueService {
   async update(id: string, updatePropertyValueDto: UpdatePropertyValueDto): Promise<PropertyValueResponseDto> {
     this.logger.debug("Updating property value", { id });
 
-    const existingValue = await this.pvRepo.findById(id);
+    const existingValue = await this.propertyValueRepo.findById(id);
 
     if (!existingValue) {
       throw new NotFoundException(t("errors.PROPERTY_VALUE_NOT_FOUND_ID", { id }));
@@ -111,10 +107,6 @@ export class PropertyValueService {
         );
       }
 
-      if (existingValue.property.isRequired && handler.isEmpty(updatePropertyValueDto.value)) {
-        throw new BadRequestException(t("errors.PROPERTY_VALUE_REQUIRED", { name: existingValue.property.name }));
-      }
-
       formattedValue = handler.formatValue(updatePropertyValueDto.value, config);
     }
 
@@ -123,7 +115,7 @@ export class PropertyValueService {
       jsonFields: { value: formattedValue },
     });
 
-    const propertyValue = await this.pvRepo.update(id, updateData);
+    const propertyValue = await this.propertyValueRepo.update(id, updateData);
 
     this.logger.log("Property value updated", { id });
     return new PropertyValueResponseDto(propertyValue);
@@ -132,13 +124,13 @@ export class PropertyValueService {
   async remove(id: string): Promise<PropertyValueResponseDto> {
     this.logger.debug("Removing property value", { id });
 
-    const existingValue = await this.pvRepo.findById(id);
+    const existingValue = await this.propertyValueRepo.findById(id);
 
     if (!existingValue) {
       throw new NotFoundException(t("errors.PROPERTY_VALUE_NOT_FOUND_ID", { id }));
     }
 
-    const propertyValue = await this.pvRepo.delete(id);
+    const propertyValue = await this.propertyValueRepo.delete(id);
 
     this.logger.log("Property value removed", { id });
     return new PropertyValueResponseDto(propertyValue);

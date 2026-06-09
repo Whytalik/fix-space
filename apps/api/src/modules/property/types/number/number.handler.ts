@@ -2,9 +2,10 @@ import { Injectable } from "@nestjs/common";
 import {
   DEFAULT_NUMBER_PROPERTY,
   FilterOperator,
+  isNumberPropertyConfig,
   NUMBER_FORMAT_VALUES,
   NumberFormat,
-  NumberProperty,
+  NumberPropertyConfig,
   OPERATORS_BY_PROPERTY_TYPE,
   PropertyType,
 } from "@fixspace/domain";
@@ -14,8 +15,11 @@ import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } fro
 export class NumberHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.NUMBER;
 
-  private parseConfig(config: Record<string, unknown>): NumberProperty {
-    return config as unknown as NumberProperty;
+  private parseConfig(config: Record<string, unknown>): NumberPropertyConfig {
+    if (!isNumberPropertyConfig(config)) {
+      throw new Error(`Invariant: expected NumberPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
   }
 
   getDefaultConfig(): Record<string, unknown> {
@@ -45,19 +49,22 @@ export class NumberHandler implements PropertyConfigHandler, PropertyValueHandle
       errors.push("currencySymbol must be a string");
     }
 
+    if (config.prefix !== undefined && typeof config.prefix !== "string") {
+      errors.push("prefix must be a string");
+    }
+
+    if (config.suffix !== undefined && typeof config.suffix !== "string") {
+      errors.push("suffix must be a string");
+    }
+
     return errors.length > 0 ? errors : null;
   }
 
-  validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
+  validateValue(value: unknown): string[] | null {
     if (value === null) return null;
 
     if (typeof value !== "number" || Number.isNaN(value)) {
       return ["Number value must be a number or null"];
-    }
-
-    const { format } = this.parseConfig(config);
-    if ((format as NumberFormat | undefined) === "integer" && !Number.isInteger(value)) {
-      return ["Value must be an integer for integer format"];
     }
 
     return null;
@@ -85,12 +92,7 @@ export class NumberHandler implements PropertyConfigHandler, PropertyValueHandle
     return value === null || value === undefined;
   }
 
-  convertFrom(
-    value: unknown,
-    _fromType: PropertyType,
-    _fromConfig: Record<string, unknown>,
-    targetConfig: Record<string, unknown>,
-  ): unknown {
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
     if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
     if (typeof value === "number") return Number.isNaN(value) ? this.getDefaultValue(targetConfig) : value;
     if (typeof value === "boolean") return value ? 1 : 0;

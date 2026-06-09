@@ -6,7 +6,6 @@ export const routineLibraryProperties: InitPropertyDef[] = [
   {
     name: "Name",
     type: PropertyType.TEXT,
-    isRequired: true,
     position: 0,
     hint: "Назва вашого чеклиста або ритуалу.",
     group: "General",

@@ -1,7 +1,8 @@
 import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CreatePropertyDto, PropertyResponseDto, UpdatePropertyDto } from "@fixspace/domain";
-import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
+import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
+import { t } from "@/common/utils/i18n.helper";
 import { PropertyService } from "./property.service";
 
 @ApiTags("Properties")
@@ -24,7 +25,7 @@ export class PropertyController {
     createPropertyDto: CreatePropertyDto,
   ) {
     if (!createPropertyDto.databaseId) {
-      throw new BadRequestException("databaseId is required");
+      throw new BadRequestException(t("errors.DATABASE_ID_REQUIRED"));
     }
     return this.propertyService.create(createPropertyDto.databaseId, createPropertyDto, userId);
   }
@@ -70,6 +71,20 @@ export class PropertyController {
     updatePropertyDto: UpdatePropertyDto,
   ) {
     return this.propertyService.update(id, updatePropertyDto, userId);
+  }
+
+  @Post(":id/duplicate")
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Duplicate property" })
+  @ApiParam({ name: "id", type: String })
+  @ApiResponse({ status: 201, description: "Property duplicated.", type: PropertyResponseDto })
+  @ApiResponse({ status: 404, description: "Property not found." })
+  duplicate(
+    @Param("id") id: string,
+    @CurrentUser("userId")
+    userId: string,
+  ) {
+    return this.propertyService.duplicate(id, userId);
   }
 
   @Delete(":id")

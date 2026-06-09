@@ -6,7 +6,6 @@ export const notesProperties: InitPropertyDef[] = [
   {
     name: "Name",
     type: PropertyType.TEXT,
-    isRequired: true,
     position: 0,
     hint: "Короткий заголовок, що відображає суть інсайту або уроку.",
     group: "General",
