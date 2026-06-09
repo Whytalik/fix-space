@@ -9,13 +9,14 @@ const maxWidths = {
   sm: "max-w-[420px]",
   md: "max-w-[520px]",
   lg: "max-w-[640px]",
+  xl: "max-w-[860px]",
 };
 
 interface ModalShellProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   children: ReactNode;
   footer?: ReactNode;
   headerPrefix?: ReactNode;

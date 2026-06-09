@@ -285,7 +285,8 @@
   "DatabaseHeader": {
     "edit": "Редагувати",
     "addItem": "Додати запис",
-    "preset": "Пресет"
+    "preset": "Пресет",
+    "import": "Імпорт CSV"
   },
   "TemplatePickerModal": {
     "chooseTemplate": "Вибрати шаблон",
@@ -363,7 +364,7 @@
     },
     "formula": {
       "label": "Формула",
-      "description": "Обчислюване значення на основі виразу"
+      "description": "Обчисливуване значення на основі виразу"
     },
     "duration": {
       "label": "Тривалість",
@@ -377,5 +378,59 @@
       "label": "Прогрес",
       "description": "Процентна смуга прогресу"
     }
+  },
+  "ImportCsvModal": {
+    "titleUpload": "Імпорт CSV",
+    "titleMapping": "Зіставлення полів",
+    "titleSummary": "Підсумок імпорту",
+    "titleResult": "Імпорт завершено",
+    "dropHint": "Перетягніть CSV-файл або натисніть для вибору",
+    "dropMeta": "Макс. 25 МБ · UTF-8 · лише CSV",
+    "next": "Далі",
+    "back": "Назад",
+    "validate": "Перевірити",
+    "skippedDetails": "{count} рядк(ів) буде пропущено — натисніть для деталей",
+    "limitWarning": "Досягнуто ліміт записів. У базі {current}/{limit} записів. Можна імпортувати лише {willImport} рядків.",
+    "importFirst": "Імпортувати перші {count} валідних рядків",
+    "cancelImport": "Скасувати імпорт",
+    "importButton": "Імпортувати {count} запис(ів)",
+    "importing": "Імпортується…",
+    "done": "Готово",
+    "totalRows": "Всього рядків",
+    "validRows": "Валідних",
+    "skipped": "Пропущено",
+    "rowLabel": "Рядок",
+    "importedSuccess": "{count} запис(ів) імпортовано",
+    "skippedLabel": "{count} рядк(ів) пропущено",
+    "showSkipped": "Показати пропущені рядки ({count})",
+    "detected": "Виявлено {count} {count, plural, one {рядок} few {рядки} other {рядків}}. Зіставте колонки CSV з властивостями бази даних.",
+    "csvColumn": "Колонка CSV",
+    "sampleValues": "Приклади значень",
+    "mapToProperty": "Властивість бази",
+    "skip": "— пропустити —",
+    "recordName": "Назва запису",
+    "andMore": "…та ще {count}",
+    "errorReadFile": "Не вдалося прочитати файл",
+    "errorValidation": "Помилка перевірки",
+    "errorImport": "Помилка імпорту",
+    "loading": "Завантаження…"
+  },
+  "ExportCsvButton": {
+    "label": "Експорт CSV",
+    "title": "Експорт CSV",
+    "properties": "Властивості",
+    "allProperties": "Всі властивості",
+    "selectProperties": "Вибрати властивості",
+    "metaFields": "Мета-поля",
+    "metaFieldsLabel": "Включити Назву, Дату створення, Дату оновлення",
+    "records": "Записи",
+    "allRecords": "Всі записи",
+    "filteredOnly": "Тільки відфільтровані",
+    "activeFilters": "({count} активний {count, plural, one {фільтр} few {фільтри} other {фільтрів}})",
+    "cancel": "Скасувати",
+    "export": "Експортувати",
+    "exporting": "Експортується…",
+    "loading": "Завантаження…",
+    "errorExport": "Помилка експорту. Спробуйте ще раз."
   }
 }

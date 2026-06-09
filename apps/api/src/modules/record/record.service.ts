@@ -50,7 +50,9 @@ export class RecordService {
       }
     }
 
-    const effectiveIcon = createRecordDto.icon ?? (await this.settingsService.getDefaultIcon(userId, SettingsCategory.RECORD));
+    const { icon: effectiveIcon } = await this.settingsService.resolveDefaults(userId, SettingsCategory.RECORD, {
+      icon: createRecordDto.icon,
+    });
 
     const properties = await this.recordRepo.findPropertiesByDatabase(databaseId);
 

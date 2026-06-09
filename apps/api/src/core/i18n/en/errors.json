@@ -79,5 +79,8 @@
   "PROPERTY_HAS_DEPENDENCIES": "Property is used in views: {views}",
   "PROPERTY_GROUP_NOT_FOUND": "Property group not found",
   "TEMPLATE_NOT_FOUND": "Template not found",
-  "DATABASE_NOT_IN_SPACE": "Database does not belong to this space"
+  "DATABASE_NOT_IN_SPACE": "Database does not belong to this space",
+  "CSV_INVALID_FORMAT": "Invalid file format. Only CSV files are supported",
+  "CSV_EMPTY_FILE": "CSV file is empty or has no data rows",
+  "CSV_MISSING_COLUMNS": "CSV file has no column headers"
 }

@@ -49,8 +49,9 @@ describe("SectionService", () => {
   };
 
   const mockSettingsService = {
-    getSettings: jest.fn().mockResolvedValue({ defaultSectionIcon: "icon:FolderOpen", defaultSectionColor: "transparent" }),
+    getSettings: jest.fn().mockResolvedValue({ defaultSectionIcon: "icon:FolderOpen", defaultSectionColor: "" }),
     getDefaultIcon: jest.fn().mockResolvedValue("icon:FolderOpen"),
+    resolveDefaults: jest.fn().mockImplementation((userId, category, dto) => Promise.resolve(dto)),
   };
 
   beforeEach(async () => {

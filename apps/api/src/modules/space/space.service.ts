@@ -4,6 +4,8 @@ import { AppLogger } from "@/common/logger/app-logger.service";
 import { DatabaseService } from "@/modules/database/database.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
+import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
+import { SettingsService } from "@/modules/settings/settings.service";
 import { SectionService } from "./providers/section.service";
 import { SpaceRepository } from "./repositories/space.repository";
 import { sectionsInclude } from "./constants/space.constants";
@@ -14,6 +16,7 @@ export class SpaceService {
   constructor(
     private readonly logger: AppLogger,
     private readonly databaseService: DatabaseService,
+    private readonly settingsService: SettingsService,
     private readonly sectionService: SectionService,
     private readonly spaceRepo: SpaceRepository,
   ) {
@@ -26,10 +29,12 @@ export class SpaceService {
       name: dto.name,
     });
 
+    const { icon } = await this.settingsService.resolveDefaults(ownerId, SettingsCategory.SPACE, { icon: dto.icon });
+
     const space = await this.spaceRepo.create(
       {
         name: dto.name,
-        icon: dto.icon,
+        icon,
         isDefault: dto.isDefault ?? false,
         ownerId,
       },

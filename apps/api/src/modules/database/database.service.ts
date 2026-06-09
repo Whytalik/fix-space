@@ -60,7 +60,9 @@ export class DatabaseService {
       throw new ConflictException(t("errors.DATABASE_NAME_TAKEN"));
     }
 
-    const effectiveIcon = createDatabaseDto.icon ?? (await this.settingsService.getDefaultIcon(userId, SettingsCategory.DATABASE));
+    const { icon: effectiveIcon } = await this.settingsService.resolveDefaults(userId, SettingsCategory.DATABASE, {
+      icon: createDatabaseDto.icon,
+    });
 
     const lastPosition = await this.databaseRepo.findLastPosition(spaceId);
     const position = lastPosition !== null ? lastPosition.position + 1 : 0;

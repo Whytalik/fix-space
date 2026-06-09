@@ -285,7 +285,8 @@
   "DatabaseHeader": {
     "edit": "Edit",
     "addItem": "Add Item",
-    "preset": "Preset"
+    "preset": "Preset",
+    "import": "Import CSV"
   },
   "TemplatePickerModal": {
     "chooseTemplate": "Choose a template",
@@ -374,5 +375,59 @@
       "label": "Progress",
       "description": "Percentage progress bar"
     }
+  },
+  "ImportCsvModal": {
+    "titleUpload": "Import CSV",
+    "titleMapping": "Map columns",
+    "titleSummary": "Import summary",
+    "titleResult": "Import complete",
+    "dropHint": "Drop a CSV file here or click to browse",
+    "dropMeta": "Max 25 MB · UTF-8 · CSV only",
+    "next": "Next",
+    "back": "Back",
+    "validate": "Validate",
+    "skippedDetails": "{count} row(s) will be skipped — click to see reasons",
+    "limitWarning": "Record limit reached. Database has {current}/{limit} records. Only {willImport} rows can be imported.",
+    "importFirst": "Import first {count} valid rows",
+    "cancelImport": "Cancel import",
+    "importButton": "Import {count} record(s)",
+    "importing": "Importing…",
+    "done": "Done",
+    "totalRows": "Total rows",
+    "validRows": "Valid rows",
+    "skipped": "Skipped",
+    "rowLabel": "Row",
+    "importedSuccess": "{count} record(s) imported",
+    "skippedLabel": "{count} row(s) skipped",
+    "showSkipped": "Show skipped rows ({count})",
+    "detected": "{count} {count, plural, one {row} other {rows}} detected. Map CSV columns to database properties.",
+    "csvColumn": "CSV Column",
+    "sampleValues": "Sample values",
+    "mapToProperty": "Map to property",
+    "skip": "— skip —",
+    "recordName": "Record name",
+    "andMore": "…and {count} more",
+    "errorReadFile": "Failed to read file",
+    "errorValidation": "Validation failed",
+    "errorImport": "Import failed",
+    "loading": "Loading…"
+  },
+  "ExportCsvButton": {
+    "label": "Export CSV",
+    "title": "Export CSV",
+    "properties": "Properties",
+    "allProperties": "All properties",
+    "selectProperties": "Select properties",
+    "metaFields": "Meta fields",
+    "metaFieldsLabel": "Include Name, Created at, Updated at",
+    "records": "Records",
+    "allRecords": "All records",
+    "filteredOnly": "Filtered only",
+    "activeFilters": "({count} active {count, plural, one {filter} other {filters}})",
+    "cancel": "Cancel",
+    "export": "Export",
+    "exporting": "Exporting…",
+    "loading": "Loading…",
+    "errorExport": "Export failed. Please try again."
   }
 }

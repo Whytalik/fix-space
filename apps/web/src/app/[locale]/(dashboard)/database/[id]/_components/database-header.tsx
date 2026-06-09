@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { useDatabaseContext } from "@/context/database-context";
@@ -9,12 +10,15 @@ import { DatabaseViewTabs } from "./database-view-tabs";
 import { useTranslations } from "next-intl";
 import { useSpaceSettingsQuery } from "@/hooks/api/use-space-settings-query";
 import { DatabaseAddButton } from "./database-add-button";
+import { ImportCsvModal } from "@/components/database/import-csv-modal";
+import { ExportCsvButton } from "@/components/database/export-csv-button";
 
 export function DatabaseHeader() {
   const t = useTranslations("DatabaseHeader");
   const router = useRouter();
   const { data: settings } = useSpaceSettingsQuery();
-  const { database } = useDatabaseContext();
+  const { database, activeView, filters } = useDatabaseContext();
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   if (!database) return null;
 
@@ -37,6 +41,10 @@ export function DatabaseHeader() {
         </div>
 
         <div className="flex items-center gap-2 pt-5 shrink-0">
+          <ExportCsvButton databaseId={database.id} activeViewId={activeView?.id} activeFiltersCount={filters.length} />
+          <Button variant="secondary" size="sm" onClick={() => setIsImportOpen(true)} className="flex items-center gap-1.5">
+            {t("import")}
+          </Button>
           <Button variant="secondary" size="sm" onClick={handleEdit} className="flex items-center gap-1.5">
             <Pencil size={13} />
             {t("edit")}
@@ -46,6 +54,8 @@ export function DatabaseHeader() {
       </div>
 
       <DatabaseViewTabs />
+
+      <ImportCsvModal isOpen={isImportOpen} onClose={() => setIsImportOpen(false)} databaseId={database.id} />
     </div>
   );
 }

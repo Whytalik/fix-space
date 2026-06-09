@@ -32,6 +32,8 @@
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
+    "csv-parse": "^6.2.1",
+    "csv-stringify": "^6.7.0",
     "multer": "^2.1.1",
     "nestjs-i18n": "^10.7.5",
     "nodemailer": "^8.0.1",

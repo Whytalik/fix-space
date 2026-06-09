@@ -91,15 +91,19 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
     }
   }
 
-  function renderRecordRow(record: RecordResponseDto) {
+  function renderRecordRow(record: RecordResponseDto, groupColor?: string) {
+    const rowBgStyle = groupColor ? { backgroundColor: `${groupColor}0D` } : undefined;
+
     return (
       <tr
         key={record.id}
         onClick={() => router.push(`/record/${record.id}`)}
         className="border-b border-stroke-subtle last:border-b-0 transition-colors duration-150 hover:bg-hover cursor-pointer group"
+        style={rowBgStyle}
       >
         <td
           className="px-3 py-2 border-r border-b border-stroke-subtle bg-canvas group-hover:bg-hover transition-colors duration-150"
+          style={rowBgStyle}
           onClick={(e) => e.stopPropagation()}
         >
           <CheckboxInput checked={selectedIds.has(record.id)} onChange={(checked) => toggleOne(record.id, checked)} />
@@ -123,6 +127,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                 index === 0 &&
                   "sticky left-0 z-20 bg-canvas group-hover:bg-hover transition-colors duration-150 shadow-[inset_-1px_0_0_0_var(--color-stroke-subtle)] bg-opacity-100 group-hover:bg-opacity-100",
               )}
+              style={index === 0 ? rowBgStyle : undefined}
             >
               <div
                 className={cn(
@@ -252,7 +257,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                           </div>
                         </td>
                       </tr>,
-                      ...(!isCollapsed ? groupEntry.records.map(renderRecordRow) : []),
+                      ...(!isCollapsed ? groupEntry.records.map((r) => renderRecordRow(r, color)) : []),
                       ...(!isCollapsed
                         ? [
                             <tr key={`group-summary-${groupEntry.key}`} className="border-t border-stroke">
@@ -288,7 +293,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                   </td>
                 </tr>
               ) : (
-                records.map(renderRecordRow)
+                records.map((r) => renderRecordRow(r))
               )}
             </tbody>
             {!visibleGroups && totalVisibleRecords > 0 && (
