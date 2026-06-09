@@ -1,33 +1,45 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
-import { CreateSectionDto, SectionOperationDto, SectionOperationType, SectionResponseDto } from "@fixspace/domain";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import { filterUndefined } from "../../../common/utils/filter-undefined";
-import { t } from "../../../common/utils/i18n.helper";
+import {
+  CreateSectionDto,
+  DEFAULT_SECTION_SETTINGS,
+  SectionOperationDto,
+  SectionOperationType,
+  SectionResponseDto,
+} from "@fixspace/domain";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
+import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
+import { SettingsService } from "@/modules/settings/settings.service";
 import { SectionRepository } from "../repositories/section.repository";
 
 @Injectable()
 export class SectionService {
   constructor(
     private readonly logger: AppLogger,
+    private readonly settingsService: SettingsService,
     private readonly sectionRepo: SectionRepository,
   ) {
     this.logger.setContext(SectionService.name);
   }
 
-  async create(spaceId: string, dto: CreateSectionDto): Promise<SectionResponseDto> {
+  async create(spaceId: string, dto: CreateSectionDto, transaction?: Prisma.TransactionClient): Promise<SectionResponseDto> {
     this.logger.debug("Creating section", {
       spaceId,
       name: dto.name,
     });
 
-    const section = await this.sectionRepo.create({
-      name: dto.name,
-      position: dto.position,
-      icon: dto.icon,
-      color: dto.color,
-      spaceId,
-    });
+    const section = await this.sectionRepo.create(
+      {
+        name: dto.name,
+        position: dto.position,
+        icon: dto.icon,
+        color: dto.color,
+        spaceId,
+      },
+      transaction,
+    );
     this.logger.log("Section created", { sectionId: section.id, spaceId });
     return new SectionResponseDto(section);
   }
@@ -59,12 +71,24 @@ export class SectionService {
       position = last !== null ? last.position + 1 : 0;
     }
 
+    let effectiveIcon = operation.create.icon;
+    let effectiveColor = operation.create.color;
+
+    if (!effectiveIcon || effectiveColor === undefined) {
+      const space = await transaction.space.findUnique({ where: { id: spaceId }, select: { ownerId: true } });
+      if (space) {
+        const sectionDefaults = await this.settingsService.getSettings(space.ownerId, SettingsCategory.SECTION, DEFAULT_SECTION_SETTINGS);
+        effectiveIcon ??= sectionDefaults.defaultSectionIcon;
+        effectiveColor ??= sectionDefaults.defaultSectionColor;
+      }
+    }
+
     await this.sectionRepo.create(
       {
         name: operation.create.name,
         position,
-        icon: operation.create.icon,
-        color: operation.create.color,
+        icon: effectiveIcon,
+        color: effectiveColor,
         spaceId,
       },
       transaction,

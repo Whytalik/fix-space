@@ -1,6 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from "@nestjs/common";
 import { Request, Response } from "express";
 import { Prisma } from "@fixspace/database";
+import { I18nValidationException } from "nestjs-i18n";
 
 import { getRequestContext } from "../context/request-context";
 import { AppLogger } from "../logger/app-logger.service";
@@ -60,7 +61,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const httpCtx = host.switchToHttp();
     const request = httpCtx.getRequest<Request>();
     const response = httpCtx.getResponse<Response>();
-    const reqContext = getRequestContext();
+    const requestContext = getRequestContext();
 
     const { method, url } = request;
 
@@ -68,7 +69,23 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let message: string | string[];
     let errorType: string;
 
-    if (exception instanceof HttpException) {
+    if (exception instanceof I18nValidationException) {
+      status = exception.getStatus();
+      const rawMessages: string[] = [];
+      for (const err of exception.errors) {
+        if (err.constraints) {
+          for (const val of Object.values(err.constraints)) {
+            rawMessages.push(t(val));
+          }
+        }
+      }
+      message = rawMessages;
+      errorType = "VALIDATION";
+
+      this.logger.log(
+        `\x1b[33m✖\x1b[0m  [\x1b[33m${errorType}\x1b[0m] ${colorStatus(status)} | [${colorMethod(method)}] ${url} | ${rawMessages.join(", ")}`,
+      );
+    } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
       message =
@@ -145,7 +162,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       statusCode: status,
       message,
       error: errorType,
-      requestId: reqContext?.requestId,
+      requestId: requestContext?.requestId,
       timestamp: new Date().toISOString(),
       path: url,
     });

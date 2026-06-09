@@ -56,7 +56,6 @@ The generated client is output to `packages/database/generated/client/` and is
 | `PropertyValue`          | JSON values for individual record-property pairs      |
 | `RecordContent`          | Rich-text content (block JSON) attached to a record   |
 | `RecordContentSnapshot`  | Versioned snapshots of record content                 |
-| `ButtonExecution`        | Tracks the last execution of a button property        |
 | `Template`               | Pre-filled record template within a database          |
 | `TemplatePropertyValue`  | Default values for template properties                |
 | `View`                   | Saved view configurations (filters, sort, grouping)   |
@@ -65,13 +64,12 @@ The generated client is output to `packages/database/generated/client/` and is
 | `ImportMapping`          | Saved CSV field-mapping presets                       |
 | `ImportHistory`          | CSV import job history per database                   |
 | `ContentBlockLibrary`    | Reusable content blocks (system presets + user-saved) |
-| `OnboardingProgress`     | Per-user onboarding tour state and checklist          |
 
 ### Property types
 
 The `PropertyType` enum defines available column types for the `Property` model:
 
-`TEXT` · `NUMBER` · `DATE` · `CHECKBOX` · `DURATION` · `SELECT` · `STATUS` · `RELATION` · `FORMULA` · `RATING` · `PROGRESS` · `BUTTON`
+`TEXT` · `NUMBER` · `DATE` · `CHECKBOX` · `DURATION` · `SELECT` · `STATUS` · `RELATION` · `FORMULA` · `RATING` · `PROGRESS`
 
 ## Client
 

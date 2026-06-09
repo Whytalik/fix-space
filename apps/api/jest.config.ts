@@ -1,3 +1,9 @@
 import { nestConfig } from "@fixspace/jest-config";
 
-export default nestConfig;
+export default {
+  ...nestConfig,
+  moduleNameMapper: {
+    ...nestConfig.moduleNameMapper,
+    "^@/(.*)$": "<rootDir>/$1",
+  },
+};

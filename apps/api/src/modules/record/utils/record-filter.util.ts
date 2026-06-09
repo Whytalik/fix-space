@@ -43,7 +43,7 @@ function checkEmpty(rawValue: unknown): boolean {
 }
 
 export function getPropertyValue(record: RecordWithValues, propertyId: string): unknown {
-  const propertyValue = record.values.find((pv) => pv.propertyId === propertyId);
+  const propertyValue = record.values.find((entry) => entry.propertyId === propertyId);
   if (!propertyValue) return null;
   const value = propertyValue.value;
   const isBlank = value === null || value === "" || (typeof value === "string" && value.trim() === "");
@@ -54,7 +54,7 @@ export function getPropertyValue(record: RecordWithValues, propertyId: string): 
 }
 
 export function getPropertyType(record: RecordWithValues, propertyId: string): string | null {
-  const propertyValue = record.values.find((pv) => pv.propertyId === propertyId);
+  const propertyValue = record.values.find((entry) => entry.propertyId === propertyId);
   return propertyValue?.property.type ?? null;
 }
 
@@ -106,11 +106,14 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
         case FilterOperator.IS_NOT_EMPTY:
           return !isEmpty;
         default:
-          return true;
+          return false;
       }
     }
 
-    case PropertyType.NUMBER: {
+    case PropertyType.NUMBER:
+    case PropertyType.DURATION:
+    case PropertyType.RATING:
+    case PropertyType.PROGRESS: {
       const numericValue = rawValue !== null ? Number(rawValue) : null;
       const filterNumericValue = value !== null ? Number(value) : null;
       switch (operator) {
@@ -131,7 +134,7 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
         case FilterOperator.IS_NOT_EMPTY:
           return !isEmpty;
         default:
-          return true;
+          return false;
       }
     }
 
@@ -157,7 +160,7 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
         case FilterOperator.IS_UNCHECKED:
           return !isChecked;
         default:
-          return true;
+          return false;
       }
     }
 
@@ -169,44 +172,39 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
           : rawValue;
       const selectValue = resolvedRaw !== null ? String(resolvedRaw).toLowerCase() : "";
       const filterSelectValue = value !== null ? String(value).toLowerCase() : "";
-      const filterValues = (values ?? []).map((val) => val.toLowerCase());
+      const filterValueues = (values ?? []).map((item) => item.toLowerCase());
       switch (operator) {
         case FilterOperator.EQUALS:
           return selectValue === filterSelectValue;
         case FilterOperator.NOT_EQUALS:
           return selectValue !== filterSelectValue;
         case FilterOperator.IN:
-          return filterValues.length > 0 && filterValues.includes(selectValue);
+          return filterValueues.length > 0 && filterValueues.includes(selectValue);
         case FilterOperator.NOT_IN:
-          return filterValues.length === 0 || !filterValues.includes(selectValue);
+          return filterValueues.length === 0 || !filterValueues.includes(selectValue);
         case FilterOperator.IS_EMPTY:
           return isEmpty;
         case FilterOperator.IS_NOT_EMPTY:
           return !isEmpty;
         default:
-          return true;
+          return false;
       }
     }
 
     case PropertyType.RELATION: {
       const relationValues: string[] = Array.isArray(rawValue) ? (rawValue as string[]) : rawValue !== null ? [String(rawValue)] : [];
-      const filterRelationValue = value !== null ? String(value) : "";
-      const filterValues: string[] = (values as string[] | undefined) ?? [];
+      const filterValueues: string[] = (values as string[] | undefined) ?? [];
       switch (operator) {
-        case FilterOperator.CONTAINS:
-          return relationValues.includes(filterRelationValue);
-        case FilterOperator.NOT_CONTAINS:
-          return !relationValues.includes(filterRelationValue);
+        case FilterOperator.IN:
+          return filterValueues.length > 0 && filterValueues.some((filterValue) => relationValues.includes(filterValue));
+        case FilterOperator.NOT_IN:
+          return filterValueues.length === 0 || !filterValueues.some((filterValue) => relationValues.includes(filterValue));
         case FilterOperator.IS_EMPTY:
           return relationValues.length === 0;
         case FilterOperator.IS_NOT_EMPTY:
           return relationValues.length > 0;
-        case FilterOperator.IN:
-          return filterValues.length > 0 && filterValues.some((filterVal) => relationValues.includes(filterVal));
-        case FilterOperator.NOT_IN:
-          return filterValues.length === 0 || !filterValues.some((filterVal) => relationValues.includes(filterVal));
         default:
-          return true;
+          return false;
       }
     }
 

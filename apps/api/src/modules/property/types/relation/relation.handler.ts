@@ -1,13 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_RELATION_PROPERTY, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, PropertyType, RelationProperty } from "@fixspace/domain";
+import {
+  DEFAULT_RELATION_PROPERTY,
+  FilterOperator,
+  isRelationPropertyConfig,
+  OPERATORS_BY_PROPERTY_TYPE,
+  PropertyType,
+  RelationPropertyConfig,
+} from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
 export class RelationHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.RELATION;
 
-  private parseConfig(config: Record<string, unknown>): RelationProperty {
-    return config as unknown as RelationProperty;
+  private parseConfig(config: Record<string, unknown>): RelationPropertyConfig {
+    if (!isRelationPropertyConfig(config)) {
+      throw new Error(`Invariant: expected RelationPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
   }
 
   getDefaultConfig(): Record<string, unknown> {
@@ -67,12 +77,7 @@ export class RelationHandler implements PropertyConfigHandler, PropertyValueHand
     return value === null || value === undefined || (Array.isArray(value) && value.length === 0);
   }
 
-  convertFrom(
-    _value: unknown,
-    _fromType: PropertyType,
-    _fromConfig: Record<string, unknown>,
-    targetConfig: Record<string, unknown>,
-  ): unknown {
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
     return this.getDefaultValue(targetConfig);
   }
 

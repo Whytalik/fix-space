@@ -6,7 +6,6 @@ export const tradingJournalProperties: InitPropertyDef[] = [
   {
     name: "Name",
     type: PropertyType.TEXT,
-    isRequired: true,
     position: 0,
     hint: "Короткий ідентифікатор угоди для швидкого пошуку в списку.",
     group: "Execution",
@@ -342,5 +341,25 @@ export const tradingJournalProperties: InitPropertyDef[] = [
     config: { sourceDatabaseType: "mistakes", multiple: true },
     hint: "Помилки, які були допущені. Необхідно для розрахунку їхньої вартості.",
     group: "Relations",
+  },
+  {
+    name: "Outcome",
+    type: PropertyType.SELECT,
+    position: 36,
+    config: {
+      isMultiSelect: false,
+      categories: [
+        {
+          label: "Outcome",
+          options: [
+            { value: "Win", color: colors.green },
+            { value: "Loss", color: colors.red },
+            { value: "Breakeven", color: colors.gray },
+          ],
+        },
+      ],
+    },
+    hint: "Фінальний результат угоди. Використовується для розрахунку Win Rate.",
+    group: "Execution",
   },
 ];

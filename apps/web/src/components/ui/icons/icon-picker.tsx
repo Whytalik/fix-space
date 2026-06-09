@@ -1,7 +1,7 @@
 "use client";
 
-import { useFloatingPanel } from "@/hooks/useFloatingPanel";
-import { getPopoverStyle } from "@/utils/popover";
+import { useFloatingPanel } from "@/hooks/ui/use-floating-panel";
+import { getPopoverStyle } from "@/utils/ui/popover";
 import { CUSTOM_TRADING_ICONS, TRADING_LUCIDE_NAMES } from "./trading-icons";
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";

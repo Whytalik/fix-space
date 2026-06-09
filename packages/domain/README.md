@@ -15,13 +15,11 @@ The package compiles to `dist/` via `tsc` and exposes two export paths:
 packages/domain/src/
 ├── auth/                    # Login, register, verify, reset DTOs + session DTO
 ├── automation/              # Automation DTOs, entities, trigger/status enums
-├── button-execution/        # ButtonExecution response DTO and entity
 ├── content-block-library/   # ContentBlockLibrary DTOs and entity
 ├── database/                # Database DTOs and entity
 ├── import-mapping/          # ImportMapping and ImportHistory DTOs
 ├── integration-connection/  # IntegrationConnection DTOs + service/status enums
 ├── notification/            # Notification response DTO and entity
-├── onboarding/              # OnboardingProgress DTOs and entity
 ├── property/
 │   ├── dto/                 # CreatePropertyDto, UpdatePropertyDto, PropertyResponseDto
 │   ├── entities/            # Property entity
@@ -57,7 +55,6 @@ packages/domain/src/
 | `property-value`          | `CreatePropertyValueDto`, `UpdatePropertyValueDto`                                                                                   | `PropertyValueResponseDto`                                     |
 | `record`                  | `CreateRecordDto`, `UpdateRecordDto`, `MassUpdateRecordsDto`, `RecordFilterDto`, `RecordSortDto`, `RecordGroupDto`                   | `RecordResponseDto`                                            |
 | `record-content`          | `UpdateRecordContentDto`                                                                                                             | `RecordContentResponseDto`, `RecordContentSnapshotResponseDto` |
-| `button-execution`        | —                                                                                                                                    | `ButtonExecutionResponseDto`                                   |
 | `template`                | `CreateTemplateDto`, `UpdateTemplateDto`                                                                                             | `TemplateResponseDto`                                          |
 | `template-property-value` | `CreateTemplatePropertyValueDto`, `UpdateTemplatePropertyValueDto`                                                                   | `TemplatePropertyValueResponseDto`                             |
 | `view`                    | `CreateViewDto`, `UpdateViewDto`                                                                                                     | `ViewResponseDto`                                              |
@@ -67,7 +64,6 @@ packages/domain/src/
 | `import-mapping`          | `CreateImportMappingDto`                                                                                                             | `ImportMappingResponseDto`, `ImportHistoryResponseDto`         |
 | `settings`                | `CreateSettingsDto`, `UpdateSettingsDto`                                                                                             | `SettingsResponseDto`                                          |
 | `content-block-library`   | `CreateContentBlockDto`, `UpdateContentBlockDto`                                                                                     | `ContentBlockResponseDto`                                      |
-| `onboarding`              | `UpdateOnboardingProgressDto`                                                                                                        | `OnboardingProgressResponseDto`                                |
 
 ## Enums
 
@@ -75,7 +71,7 @@ Available from both `@fixspace/domain` and `@fixspace/domain/enums`:
 
 | Enum                   | Values                                                                                                                                                                      |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PropertyType`         | TEXT · NUMBER · DATE · CHECKBOX · DURATION · SELECT · STATUS · RELATION · FORMULA · RATING · PROGRESS · BUTTON                                                              |
+| `PropertyType`         | TEXT · NUMBER · DATE · CHECKBOX · DURATION · SELECT · STATUS · RELATION · FORMULA · RATING · PROGRESS                                                                       |
 | `BlockType`            | PARAGRAPH · HEADING1 · HEADING2 · HEADING3 · BULLETED_LIST · NUMBERED_LIST · QUOTE · CODE · DIVIDER · IMAGE · COLUMN_LAYOUT                                                 |
 | `FilterField`          | PROPERTY · CREATED_AT · UPDATED_AT                                                                                                                                          |
 | `FilterOperator`       | equals · notEquals · contains · notContains · startsWith · endsWith · isEmpty · isNotEmpty · greaterThan · lessThan · before · after · isChecked · isUnchecked · in · notIn |
@@ -99,7 +95,7 @@ Each property type has a typed `config` object used in `CreatePropertyDto` and
 
 | Type       | Interface          | Key config fields                                                                    |
 | ---------- | ------------------ | ------------------------------------------------------------------------------------ |
-| `TEXT`     | `TextProperty`     | `defaultValue`, `isRichText`, `urlHandling` (`none` · `link` · `preview`)            |
+| `TEXT`     | `TextProperty`     | `defaultValue`                                                                       |
 | `NUMBER`   | `NumberProperty`   | `defaultValue`, `format`, `decimalPlaces`, `currencySymbol`, `prefix`, `suffix`      |
 | `DATE`     | `DateProperty`     | `defaultValue`, `format`, `includeTime`, `timeFormat`                                |
 | `CHECKBOX` | `CheckboxProperty` | `defaultValue`                                                                       |
@@ -110,7 +106,6 @@ Each property type has a typed `config` object used in `CreatePropertyDto` and
 | `FORMULA`  | `FormulaProperty`  | `formula`, `output: { type: FormulaOutput }`                                         |
 | `RATING`   | `RatingProperty`   | `defaultValue`, `maxStars`, `allowHalf`                                              |
 | `PROGRESS` | `ProgressProperty` | `defaultValue`, `min`, `max`, `step`, `showLabel`, `thresholds: ProgressThreshold[]` |
-| `BUTTON`   | `ButtonProperty`   | `label`, `color`, `confirmDialog`, `actions: ButtonAction[]`                         |
 
 ## Constants exported from `enums.ts`
 
@@ -125,7 +120,6 @@ import {
   DEFAULT_TEXT_PROPERTY,
   DEFAULT_STATUS_PROPERTY,
   STATUS_CATEGORY_VALUES,
-  URL_HANDLING_VALUES,
   NUMBER_FORMAT_VALUES,
   DATA_FORMATS_VALUES,
   DEFAULT_SECTION_SETTINGS,

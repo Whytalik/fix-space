@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import { t } from "../../../common/utils/i18n.helper";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { t } from "@/common/utils/i18n.helper";
 
 @Injectable()
 export class DevOnlyGuard implements CanActivate {

@@ -1,4 +1,4 @@
-import type { SpaceResponseDto } from "@fixspace/domain";
+import type { DashboardResponseDto, DuplicateSpaceDto, SectionResponseDto, SpaceResponseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getSpaces() {
@@ -16,6 +16,10 @@ export function updateSpace(
       | { operation: "UPDATE"; id: string; update: { name?: string; icon?: string; color?: string; position?: number } }
       | { operation: "DELETE"; id: string }
     >;
+    databaseOperations?: Array<{
+      id: string;
+      update: { position: number };
+    }>;
   },
 ) {
   return apiFetch<SpaceResponseDto>(`/spaces/${spaceId}`, {
@@ -31,9 +35,17 @@ export function createSpace(data: { name: string; icon?: string }) {
   });
 }
 
-export function duplicateSpace(spaceId: string) {
+export function duplicateSpace(spaceId: string, options: DuplicateSpaceDto = {}) {
   return apiFetch<SpaceResponseDto>(`/spaces/${spaceId}/duplicate`, {
     method: "POST",
+    body: options,
+  });
+}
+
+export function duplicateSection(spaceId: string, sectionId: string, options: DuplicateSpaceDto = {}) {
+  return apiFetch<SectionResponseDto>(`/spaces/${spaceId}/sections/${sectionId}/duplicate`, {
+    method: "POST",
+    body: options,
   });
 }
 
@@ -41,4 +53,8 @@ export function deleteSpace(spaceId: string) {
   return apiFetch(`/spaces/${spaceId}`, {
     method: "DELETE",
   });
+}
+
+export function getDashboard(spaceId: string) {
+  return apiFetch<DashboardResponseDto>(`/spaces/${spaceId}/dashboard`);
 }

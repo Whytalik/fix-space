@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { SpaceSearchResultDto } from "@fixspace/domain";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import { t } from "../../../common/utils/i18n.helper";
-import { SpaceRepository } from "../../space/repositories/space.repository";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { t } from "@/common/utils/i18n.helper";
+import { SpaceRepository } from "@/modules/space/repositories/space.repository";
 import { RecordRepository } from "../repositories/record.repository";
 import { matchesSearch } from "../utils/record-search.util";
 
@@ -36,14 +36,16 @@ export class SearchRecordsUseCase {
           id: record.id,
           databaseId: record.databaseId,
           databaseTitle: record.database.title,
+          sectionName: (record.database as any).section?.name ?? null,
           name: record.name,
           icon: record.icon,
           createdAt: record.createdAt,
           updatedAt: record.updatedAt,
-          values: record.values.map(({ property, ...pv }) => ({
-            ...pv,
+          values: record.values.map(({ property, ...valueData }) => ({
+            ...valueData,
             propertyName: property.name,
           })) as SpaceSearchResultDto["values"],
+          content: (record as any).content?.content ?? null,
         }),
     );
   }

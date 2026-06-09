@@ -3,8 +3,9 @@ import {
   DEFAULT_DURATION_PROPERTY,
   DURATION_FORMAT_VALUES,
   DurationFormat,
-  DurationProperty,
+  DurationPropertyConfig,
   FilterOperator,
+  isDurationPropertyConfig,
   OPERATORS_BY_PROPERTY_TYPE,
   PropertyType,
 } from "@fixspace/domain";
@@ -14,8 +15,11 @@ import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } fro
 export class DurationHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.DURATION;
 
-  private parseConfig(config: Record<string, unknown>): DurationProperty {
-    return config as unknown as DurationProperty;
+  private parseConfig(config: Record<string, unknown>): DurationPropertyConfig {
+    if (!isDurationPropertyConfig(config)) {
+      throw new Error(`Invariant: expected DurationPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
   }
 
   getDefaultConfig(): Record<string, unknown> {
@@ -69,12 +73,7 @@ export class DurationHandler implements PropertyConfigHandler, PropertyValueHand
     return value === null || value === undefined;
   }
 
-  convertFrom(
-    value: unknown,
-    _fromType: PropertyType,
-    _fromConfig: Record<string, unknown>,
-    targetConfig: Record<string, unknown>,
-  ): unknown {
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
     if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
     if (typeof value === "number") return Number.isNaN(value) ? this.getDefaultValue(targetConfig) : Math.max(0, Math.floor(value));
     if (typeof value === "string") {

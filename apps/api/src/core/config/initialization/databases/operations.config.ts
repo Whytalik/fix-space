@@ -3,7 +3,6 @@ import { DATE_CONFIG } from "../constants";
 import type { InitPropertyDef } from "../types";
 
 export const operationsProperties: InitPropertyDef[] = [
-  { name: "Name", type: PropertyType.TEXT, isRequired: true, position: 0, hint: "Operation name or description" },
   {
     name: "Type",
     type: PropertyType.SELECT,

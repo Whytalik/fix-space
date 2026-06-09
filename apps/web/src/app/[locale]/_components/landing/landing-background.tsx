@@ -18,8 +18,8 @@ export function LandingBackground() {
             linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
           `,
           backgroundSize: "60px 60px",
-          maskImage: "radial-gradient(ellipse 80% 80% at 50% 0%, #000 20%, transparent 100%)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 0%, #000 20%, transparent 100%)",
+          maskImage: "radial-gradient(ellipse 80% 80% at 50% 0%, black 20%, transparent 100%)",
+          WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 0%, black 20%, transparent 100%)",
           transform: "perspective(800px) rotateX(45deg) translateY(-5%) scale(1.8)",
           transformOrigin: "top",
           willChange: "transform",

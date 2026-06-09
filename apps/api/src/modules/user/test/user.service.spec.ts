@@ -2,10 +2,10 @@ import { UnauthorizedException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import * as passwordUtils from "../../../common/utils/password";
-import { MailService } from "../../../core/mail/mail.service";
-import { TokenService } from "../../../core/auth/token.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import * as passwordUtils from "@/common/utils/password";
+import { MailService } from "@/core/mail/mail.service";
+import { TokenService } from "@/core/auth/token.service";
 import { UserService } from "../user.service";
 import { UserRepository } from "../repositories/user.repository";
 import { StorageService } from "../providers/storage.service";
@@ -55,6 +55,7 @@ describe("UserService", () => {
 
   const mockMailService = {
     sendPasswordChangeNotification: jest.fn(),
+    sendAccountDeletionNotification: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -240,23 +241,49 @@ describe("UserService", () => {
     });
   });
 
-  describe("remove", () => {
-    it("should remove user and clean up avatar files", async () => {
-      mockUserRepo.delete.mockResolvedValue({
-        id: "user-1",
-        email: "test@example.com",
-        username: "testuser",
-        icon: null,
-        isVerified: true,
-        passwordHash: "hashed",
-        createdAt: new Date(),
-      });
+  describe("remove — TC-AUTH-U-008", () => {
+    const mockUser = {
+      id: "user-1",
+      email: "test@example.com",
+      username: "testuser",
+      icon: null,
+      isVerified: true,
+      passwordHash: "hashed_password",
+      createdAt: new Date(),
+    };
 
-      const result = await service.remove("user-1");
+    it("should throw UnauthorizedException when password is incorrect", async () => {
+      mockUserRepo.findByIdOrThrow.mockResolvedValue(mockUser);
+      jest.spyOn(passwordUtils, "verifyPassword").mockResolvedValue(false);
 
-      expect(result).toBeDefined();
+      await expect(service.remove("user-1", { password: "WrongPassword!" })).rejects.toThrow(UnauthorizedException);
+
+      expect(userRepo.delete).not.toHaveBeenCalled();
+      expect(storageService.removeAvatarFiles).not.toHaveBeenCalled();
+    });
+
+    it("should delete account and send notification when password is correct", async () => {
+      mockUserRepo.findByIdOrThrow.mockResolvedValue(mockUser);
+      jest.spyOn(passwordUtils, "verifyPassword").mockResolvedValue(true);
+      mockUserRepo.delete.mockResolvedValue(mockUser);
+
+      const result = await service.remove("user-1", { password: "CorrectPassword!" });
+
+      expect(result).toHaveProperty("message");
       expect(storageService.removeAvatarFiles).toHaveBeenCalledWith("user-1");
       expect(userRepo.delete).toHaveBeenCalledWith("user-1");
+      expect(mailService.sendAccountDeletionNotification).toHaveBeenCalledWith("test@example.com");
+    });
+
+    it("should delete account without password check for Google-only users", async () => {
+      mockUserRepo.findByIdOrThrow.mockResolvedValue({ ...mockUser, passwordHash: null });
+      mockUserRepo.delete.mockResolvedValue({ ...mockUser, passwordHash: null });
+
+      const result = await service.remove("user-1", {});
+
+      expect(result).toHaveProperty("message");
+      expect(userRepo.delete).toHaveBeenCalledWith("user-1");
+      expect(mailService.sendAccountDeletionNotification).toHaveBeenCalledWith("test@example.com");
     });
   });
 });

@@ -25,6 +25,10 @@ export const envSchema = z.object({
   APP_URL: z.string().default("http://localhost:3001"),
 
   CORS_ORIGIN: z.string().default("http://localhost:3001"),
+
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
+  GOOGLE_CALLBACK_URL: z.string().default("http://localhost:3000/auth/google/callback"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

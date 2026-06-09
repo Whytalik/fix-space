@@ -14,8 +14,8 @@ export function compareRecords(recordA: RecordWithValues, recordB: RecordWithVal
       valueA = recordA.updatedAt;
       valueB = recordB.updatedAt;
     } else if (sort.field === SortField.PROPERTY && sort.propertyId) {
-      valueA = recordA.values.find((pv) => pv.propertyId === sort.propertyId)?.value ?? null;
-      valueB = recordB.values.find((pv) => pv.propertyId === sort.propertyId)?.value ?? null;
+      valueA = recordA.values.find((entry) => entry.propertyId === sort.propertyId)?.value ?? null;
+      valueB = recordB.values.find((entry) => entry.propertyId === sort.propertyId)?.value ?? null;
     } else {
       continue;
     }

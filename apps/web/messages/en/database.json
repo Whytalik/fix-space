@@ -11,7 +11,156 @@
     "searchPlaceholder": "Search records…",
     "sort": "Sort",
     "filter": "Filter",
-    "group": "Group"
+    "group": "Group",
+    "properties": "Properties",
+    "wrap": "Wrap",
+    "wrapCells": "Toggle text wrap in cells",
+    "viewSettings": "Settings",
+    "manageSettingsDesc": "Manage your {label} settings",
+    "general": "General",
+    "name": "Name",
+    "viewNamePlaceholder": "View name…",
+    "logic": "Filter logic",
+    "logicDesc": "Choose how multiple filters should be combined.",
+    "and": "AND (all filters must match)",
+    "or": "OR (any filter can match)",
+    "viewIcon": "View icon",
+    "viewIconDesc": "Icon displayed on the view tab.",
+    "chooseIcon": "Choose an icon…",
+    "display": "Display",
+    "limits": "Limits",
+    "recordLimit": "Record limit",
+    "recordLimitDesc": "Maximum number of records in this view (leave empty for no limit).",
+    "defaultTemplate": "Default template",
+    "defaultTemplateDesc": "Automatically apply this template to new records in this view.",
+    "noTemplate": "No template",
+    "unlimited": "Unlimited"
+  },
+  "DatabaseViewTabs": {
+    "addView": "Add view",
+    "newView": "New View",
+    "rename": "Rename",
+    "duplicate": "Duplicate",
+    "lock": "Lock",
+    "unlock": "Unlock",
+    "setDefault": "Set as default",
+    "delete": "Delete",
+    "deleteViewTitle": "Delete view?",
+    "deleteViewMessage": "This will permanently delete this view and all its settings. This action cannot be undone."
+  },
+  "PropertyVisibilityPanel": {
+    "title": "Properties",
+    "locked": "Locked",
+    "showAll": "Show all",
+    "hideAll": "Hide all",
+    "relativeDates": "Use relative dates",
+    "columns": "Columns"
+  },
+  "FilterPanel": {
+    "title": "Filter",
+    "locked": "Locked",
+    "clearAll": "Clear all",
+    "noRules": "No filter rules defined.",
+    "addFilter": "Add filter",
+    "selectProperty": "Select property…",
+    "pickValues": "Pick values…",
+    "pickStatus": "Pick status…",
+    "pickOption": "Pick option…",
+    "value": "Value…",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
+    "operators": {
+      "equals": "is",
+      "notEquals": "is not",
+      "contains": "contains",
+      "notContains": "does not contain",
+      "startsWith": "starts with",
+      "endsWith": "ends with",
+      "greaterThan": "is greater than",
+      "lessThan": "is less than",
+      "greaterThanOrEquals": "is greater than or equal",
+      "lessThanOrEquals": "is less than or equal",
+      "isEmpty": "is empty",
+      "isNotEmpty": "is not empty",
+      "isChecked": "is checked",
+      "isUnchecked": "is unchecked",
+      "in": "is one of",
+      "notIn": "is not one of",
+      "on": "is on"
+    }
+  },
+  "SortPanel": {
+    "title": "Sort",
+    "locked": "Locked",
+    "clearAll": "Clear all",
+    "noRules": "No sort rules defined.",
+    "addSort": "Add sort",
+    "selectField": "Select field…",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "asc": "Asc",
+    "desc": "Desc",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
+    "operators": {
+      "equals": "is",
+      "notEquals": "is not",
+      "contains": "contains",
+      "notContains": "does not contain",
+      "startsWith": "starts with",
+      "endsWith": "ends with",
+      "greaterThan": "is greater than",
+      "lessThan": "is less than",
+      "greaterThanOrEquals": "is greater than or equal",
+      "lessThanOrEquals": "is less than or equal",
+      "isEmpty": "is empty",
+      "isNotEmpty": "is not empty",
+      "isChecked": "is checked",
+      "isUnchecked": "is unchecked",
+      "in": "is one of",
+      "notIn": "is not one of",
+      "on": "is on"
+    }
+  },
+  "GroupPanel": {
+    "groupBy": "Group by",
+    "noGrouping": "No grouping",
+    "property": "Property",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
+    "selectField": "Select field…",
+    "selectProperty": "Select property…",
+    "selectGranularity": "Select granularity…",
+    "groups": "Groups",
+    "changeColor": "Change color",
+    "showGroup": "Show group",
+    "hideGroup": "Hide group",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "year": "Year"
+  },
+  "SummaryMetrics": {
+    "calculate": "Calculate",
+    "none": "None",
+    "metrics": {
+      "COUNT": "Count all",
+      "COUNT_FILLED": "Count filled",
+      "COUNT_EMPTY": "Count empty",
+      "SUM": "Sum",
+      "AVERAGE": "Average",
+      "MEDIAN": "Median",
+      "MIN": "Min",
+      "MAX": "Max",
+      "RANGE": "Range",
+      "CHECKED": "Checked",
+      "UNCHECKED": "Unchecked",
+      "PERCENT_CHECKED": "Percent checked",
+      "UNIQUE": "Unique",
+      "EARLIEST": "Earliest",
+      "LATEST": "Latest",
+      "DATE_RANGE": "Date range"
+    }
   },
   "DatabaseTable": {
     "noProperties": "No properties defined for this database.",
@@ -21,7 +170,13 @@
     "rowsPerPage": "Rows per page:",
     "refresh": "Refresh database",
     "previousPage": "Previous page",
-    "nextPage": "Next page"
+    "nextPage": "Next page",
+    "selected": "{count} selected",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "deleteRecords": "Delete records?",
+    "deleteRecordsDesc": "This will permanently delete {count, plural, one {# record} other {# records}}. This action cannot be undone."
   },
   "DatabaseEdit": {
     "title": "Edit Database",
@@ -35,6 +190,8 @@
     "noLimit": "No limit",
     "useDefaultTemplate": "Use default template",
     "useDefaultTemplateDesc": "Automatically apply the default template when creating new records.",
+    "isLocked": "Lock database structure",
+    "isLockedDesc": "Prevents adding, editing, or deleting properties. Adding data to records remains available.",
     "wrapCells": "Wrap cell content",
     "wrapCellsDesc": "Allow text in cells to wrap onto multiple lines instead of clipping.",
     "internalName": "Internal name",
@@ -53,22 +210,41 @@
     "noProperties": "No properties yet.",
     "deleteProperty": "Delete property?",
     "deletePropertyDesc": "This will permanently delete the property and all its values. This action cannot be undone.",
+    "deletePresetPropertyDesc": "This is a system property. Formulas and automations that reference it will stop working. This action cannot be undone.",
+    "deleteGroup": "Delete group?",
+    "deleteGroupDesc": "The group will be removed and all its properties will become ungrouped. Properties themselves will not be deleted.",
     "delete": "Delete"
   },
   "TemplateEdit": {
-    "untitledTemplate": "Untitled template",
-    "noTemplates": "No templates yet",
-    "template": "template",
-    "templates": "templates",
-    "templatesDesc": "Templates allow pre-filling field values when creating new records.",
-    "creating": "Creating…",
+    "title": "Templates",
     "addTemplate": "Add template",
-    "default": "Default",
-    "editTemplate": "Edit template",
-    "deleteTemplate": "Delete template",
-    "deleteDescription": "\"{name}\" will be permanently deleted.",
-    "deleting": "Deleting…",
-    "delete": "Delete"
+    "noTemplates": "No templates created yet.",
+    "createFirst": "Create first template",
+    "defaultLabel": "Default",
+    "defaultForView": "Default for view:",
+    "editMeta": "Edit info",
+    "duplicate": "Duplicate",
+    "reset": "Reset to standard",
+    "resetTemplate": "Reset template?",
+    "resetTemplateDesc": "This will clear all default field values and content in this template. This action cannot be undone.",
+    "setDefault": "Set as default",
+    "delete": "Delete",
+    "deleteTemplate": "Delete template?",
+    "deleteTemplateDesc": "This will permanently delete the template and all its default values. Records created from this template will not be affected.",
+    "createTitle": "New Template",
+    "editTitle": "Edit Template",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. London Session",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "What is this template for?",
+    "namePatternLabel": "Auto-name Pattern",
+    "namePatternPlaceholder": "e.g. {{today}} - {{count}}",
+    "tokensTitle": "Available Tokens",
+    "setDefaultLabel": "Set as default for this database",
+    "setDefaultHint": "This template will be automatically applied to all new records.",
+    "cancel": "Cancel",
+    "create": "Create",
+    "save": "Save"
   },
   "PropertyForm": {
     "newProperty": "New property",
@@ -151,7 +327,52 @@
     "delete": "Delete",
     "deleteDatabase": "Delete database",
     "deleteDatabaseDesc": "This database and all its records will be permanently deleted.",
+    "deletePresetDatabase": "Delete system database?",
+    "deletePresetDatabaseDesc": "This is a system database. Other databases, formulas, and automations may depend on it. All records will be permanently deleted.",
     "deleting": "Deleting…",
     "preset": "Preset"
+  },
+  "PropertyMeta": {
+    "text": {
+      "label": "Text",
+      "description": "Short or long text, URLs, rich content"
+    },
+    "number": {
+      "label": "Number",
+      "description": "Integer, decimal, currency or %"
+    },
+    "date": {
+      "label": "Date",
+      "description": "Date with optional time component"
+    },
+    "checkbox": {
+      "label": "Checkbox",
+      "description": "Boolean true / false value"
+    },
+    "select": {
+      "label": "Select",
+      "description": "Pick from predefined options"
+    },
+    "status": {
+      "label": "Status",
+      "description": "Workflow status with colour coding"
+    },
+    "relation": {
+      "label": "Relation",
+      "description": "Link records to another database"
+    },
+    "formula": {
+      "label": "Formula",
+      "description": "Computed value from an expression"
+    },
+    "duration": {
+      "label": "Duration",
+      "description": "Time duration in hours and minutes"
+    },
+    "rating": { "label": "Rating", "description": "Star rating from 1 to 5" },
+    "progress": {
+      "label": "Progress",
+      "description": "Percentage progress bar"
+    }
   }
 }

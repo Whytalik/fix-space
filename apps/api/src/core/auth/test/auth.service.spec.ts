@@ -4,10 +4,10 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import * as passwordUtils from "../../../common/utils/password";
-import { UserService } from "../../../modules/user/user.service";
-import { InitializeUserSpaceUseCase } from "../../../modules/space/providers/initialize-user-space.usecase";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import * as passwordUtils from "@/common/utils/password";
+import { UserService } from "@/modules/user/user.service";
+import { InitializeUserSpaceUseCase } from "@/modules/space/providers/initialize-user-space.usecase";
 import { MailService } from "../../mail/mail.service";
 import { AuthService } from "../auth.service";
 import { TokenService } from "../token.service";
@@ -16,6 +16,7 @@ jest.mock("@fixspace/database", () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
+      create: jest.fn(),
       update: jest.fn(),
     },
     emailVerificationToken: {
@@ -28,7 +29,12 @@ jest.mock("@fixspace/database", () => ({
     space: {
       findFirst: jest.fn(),
     },
-    $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
+    googleAccount: {
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+    },
+    $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
 
@@ -318,6 +324,83 @@ describe("AuthService", () => {
       mockTokenService.validatePasswordResetToken.mockResolvedValue(null);
 
       await expect(service.resetPassword(token, newPassword)).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe("loginWithGoogle — TC-AUTH-U-004", () => {
+    const mockGoogleUser = {
+      googleId: "google-123",
+      email: "googleuser@example.com",
+      displayName: "Google User",
+      accessToken: "google-access-token",
+    };
+
+    const mockCreatedUser = {
+      id: "user-456",
+      username: "Google_User",
+      isVerified: true,
+    };
+
+    it("should create new user and GoogleAccount when email is new", async () => {
+      (prisma.googleAccount.findUnique as jest.Mock<any>).mockResolvedValue(null);
+      (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(null);
+      (prisma.user.create as jest.Mock<any>).mockResolvedValue(mockCreatedUser);
+      (prisma.googleAccount.create as jest.Mock<any>).mockResolvedValue({});
+      (prisma.space.findFirst as jest.Mock<any>).mockResolvedValue(null);
+      mockTokenService.generateAccessToken.mockReturnValue("access_token");
+      mockTokenService.createRefreshToken.mockResolvedValue("refresh_token");
+
+      const result = await service.loginWithGoogle(mockGoogleUser);
+
+      expect(prisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            email: mockGoogleUser.email,
+            passwordHash: null,
+            isVerified: true,
+          }),
+        }),
+      );
+      expect(mockInitializeUserSpaceUseCase.initialize).toHaveBeenCalledWith(mockCreatedUser.id, mockCreatedUser.username);
+      expect(result).toHaveProperty("accessToken", "access_token");
+      expect(result).toHaveProperty("refreshToken", "refresh_token");
+    });
+
+    it("should link GoogleAccount to existing user with matching email", async () => {
+      const existingUser = { id: "user-789", username: "existing_user", isVerified: true };
+      (prisma.googleAccount.findUnique as jest.Mock<any>).mockResolvedValue(null);
+      (prisma.user.findUnique as jest.Mock<any>).mockResolvedValue(existingUser);
+      (prisma.googleAccount.create as jest.Mock<any>).mockResolvedValue({});
+      (prisma.space.findFirst as jest.Mock<any>).mockResolvedValue({ id: "space-1" });
+      mockTokenService.generateAccessToken.mockReturnValue("access_token");
+      mockTokenService.createRefreshToken.mockResolvedValue("refresh_token");
+
+      const result = await service.loginWithGoogle(mockGoogleUser);
+
+      expect(prisma.googleAccount.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            userId: existingUser.id,
+            googleId: mockGoogleUser.googleId,
+          }),
+        }),
+      );
+      expect(prisma.user.create).not.toHaveBeenCalled();
+      expect(result).toHaveProperty("accessToken", "access_token");
+    });
+
+    it("should return session for returning Google user and update stored tokens", async () => {
+      const googleAccount = { googleId: "google-123", user: mockCreatedUser };
+      (prisma.googleAccount.findUnique as jest.Mock<any>).mockResolvedValue(googleAccount);
+      (prisma.space.findFirst as jest.Mock<any>).mockResolvedValue({ id: "space-1" });
+      mockTokenService.generateAccessToken.mockReturnValue("access_token");
+      mockTokenService.createRefreshToken.mockResolvedValue("refresh_token");
+
+      const result = await service.loginWithGoogle(mockGoogleUser);
+
+      expect(prisma.googleAccount.update).toHaveBeenCalledWith(expect.objectContaining({ where: { googleId: mockGoogleUser.googleId } }));
+      expect(prisma.user.create).not.toHaveBeenCalled();
+      expect(result).toHaveProperty("accessToken", "access_token");
     });
   });
 });

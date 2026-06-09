@@ -2,46 +2,29 @@
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import { Combobox, type ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
 import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { PropertyHint } from "../../_components/properties/ui/property-hint";
 
 type EditGeneralSectionProps = {
   icon: string;
   title: string;
-  recordLimit: number | null;
-  useDefaultTemplate: boolean;
-  wrapCells: boolean;
+  isLocked: boolean;
   onIconChange: (value: string) => void;
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onTitleBlur: () => void;
-  onRecordLimitChange: (value: number | null) => void;
-  onUseDefaultTemplateChange: (value: boolean) => void;
-  onWrapCellsChange: (value: boolean) => void;
+  onIsLockedChange: (value: boolean) => void;
 };
-
-const RECORD_LIMIT_OPTIONS: ComboboxOption[] = [
-  { value: "", label: "No limit" },
-  { value: "10", label: "10" },
-  { value: "25", label: "25" },
-  { value: "50", label: "50" },
-  { value: "75", label: "75" },
-  { value: "100", label: "100" },
-];
 
 export function EditGeneralSection({
   icon,
   title,
-  recordLimit,
-  useDefaultTemplate,
-  wrapCells,
+  isLocked,
   onIconChange,
   onTitleChange,
   onTitleBlur,
-  onRecordLimitChange,
-  onUseDefaultTemplateChange,
-  onWrapCellsChange,
+  onIsLockedChange,
 }: EditGeneralSectionProps) {
   const [showIconPicker, setShowIconPicker] = useState(false);
   const iconButtonRef = useRef<HTMLButtonElement>(null);
@@ -62,7 +45,7 @@ export function EditGeneralSection({
 
   return (
     <section>
-      <div className="rounded-xl border border-stroke bg-elevated overflow-visible">
+      <div className="rounded-2xl border border-stroke bg-elevated overflow-visible">
         <div className="px-5 py-3 border-b border-stroke">
           <h2 className="type-panel-title">{t("general")}</h2>
         </div>
@@ -91,7 +74,10 @@ export function EditGeneralSection({
           </div>
 
           <div className="flex-1 min-w-0">
-            <label className="block mb-1.5 type-field-label">{t("title")}</label>
+            <div className="flex items-center gap-2 mb-1.5">
+              <label className="type-field-label">{t("title")}</label>
+              <PropertyHint hint="Name of the database as it appears in the sidebar and header" />
+            </div>
             <input
               type="text"
               className="field-input"
@@ -100,56 +86,20 @@ export function EditGeneralSection({
               onBlur={onTitleBlur}
               placeholder={t("placeholderTitle")}
             />
-            <p className="mt-1.5 type-hint">
-              {t("internalName")}: <span className="font-mono text-ink-secondary">[DB] {title || "Trading Journal"}</span>
-            </p>
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl border border-stroke bg-elevated overflow-visible mt-4">
+      <div className="rounded-2xl border border-stroke bg-elevated overflow-visible mt-4">
         <div className="px-5 py-3 border-b border-stroke">
-          <h2 className="type-panel-title">{t("limits")}</h2>
-        </div>
-        <div className="px-5 py-4">
-          <label className="block mb-1.5 type-field-label">{t("recordLimit")}</label>
-          <Combobox
-            options={RECORD_LIMIT_OPTIONS.map((option) => ({
-              ...option,
-              label: option.value === "" ? t("noLimit") : option.label,
-            }))}
-            value={recordLimit === null ? "" : String(recordLimit)}
-            onChange={(value) => onRecordLimitChange(value === "" ? null : Number(value))}
-            placeholder={t("noLimit")}
-            nullable
-          />
-          <p className="mt-1.5 type-hint">{t("recordLimitDesc")}</p>
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-stroke bg-elevated overflow-visible mt-4">
-        <div className="px-5 py-3 border-b border-stroke">
-          <h2 className="type-panel-title">{t("templates")}</h2>
+          <h2 className="type-panel-title">{t("isLocked")}</h2>
         </div>
         <div className="px-5 py-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm text-ink">{t("useDefaultTemplate")}</p>
-            <p className="mt-0.5 type-hint">{t("useDefaultTemplateDesc")}</p>
+            <p className="text-sm text-ink">{t("isLocked")}</p>
+            <p className="mt-0.5 type-hint">{t("isLockedDesc")}</p>
           </div>
-          <Toggle value={useDefaultTemplate} onChange={onUseDefaultTemplateChange} />
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-stroke bg-elevated overflow-visible mt-4">
-        <div className="px-5 py-3 border-b border-stroke">
-          <h2 className="type-panel-title">{t("view")}</h2>
-        </div>
-        <div className="px-5 py-4 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-sm text-ink">{t("wrapCells")}</p>
-            <p className="mt-0.5 type-hint">{t("wrapCellsDesc")}</p>
-          </div>
-          <Toggle value={wrapCells} onChange={onWrapCellsChange} />
+          <Toggle value={isLocked} onChange={onIsLockedChange} />
         </div>
       </div>
     </section>

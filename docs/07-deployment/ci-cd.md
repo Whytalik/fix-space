@@ -54,7 +54,7 @@
 Виконується після успішного проходження модульних тестів.
 
 - **Інструмент**: Supertest + NestJS TestingModule (in-process, без реального HTTP-порту).
-- **Валідація бізнес-логіки**: запуск набору E2E тестів API через `pnpm --filter @fixspace/api test:e2e`. MailService та InitializeUserSpaceUseCase замінені на mocks.
+- **Валідація бізнес-логіки**: запуск Integration тестів API через `pnpm --filter @fixspace/api test:integration`. MailService та InitializeUserSpaceUseCase замінені на mocks.
 
 #### 4b. Web E2E (`test-web-e2e`)
 
@@ -85,7 +85,7 @@
 Призначене для автоматичної перевірки гілки спільної розробки `develop`.
 
 - **Автоматизація розгортання**: процес запускається автоматично після пушу або злиття PR у гілку `develop`.
-- **Поточний статус**: на етапі CI виконується генерація та вивантаження деплой-маніфесту Staging у форматі артефакту (`deployment-manifest`), що є **симульованим кроком** (`SIMULATED SUCCESSFULLY`) для валідації працездатності конвеєра без фактичного завантаження у хмару.
+- **Безперебійне оновлення**: розгортання виконується автоматично за допомогою Railway CLI (`railway up --ci --service fix-space-api-staging`), використовуючи секрет `RAILWAY_TOKEN_STAGING` або `RAILWAY_TOKEN`.
 
 ### Продуктове середовище Production (Гілка `main`)
 

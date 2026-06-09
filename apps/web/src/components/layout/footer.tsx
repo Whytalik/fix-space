@@ -12,7 +12,7 @@ export function Footer() {
   if (user) return null;
 
   return (
-    <footer className="px-6 py-12 border-t border-stroke bg-canvas">
+    <footer className="px-6 py-8 border-t border-stroke bg-canvas">
       <div className="flex flex-col md:flex-row items-start justify-between gap-8 mx-auto max-w-180">
         <div className="flex flex-col gap-4">
           <Logo size={24} />
@@ -20,7 +20,7 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <h4 className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">{t("legal")}</h4>
+          <h4 className="type-nav-label">{t("legal")}</h4>
           <nav className="flex flex-col gap-2">
             <Link href="/privacy" className="text-sm text-ink-secondary hover:text-ink transition-colors duration-150">
               {t("privacy")}

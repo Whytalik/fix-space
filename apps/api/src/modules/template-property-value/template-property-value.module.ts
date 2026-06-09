@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { PropertyModule } from "../property/property.module";
+import { PropertyModule } from "@/modules/property/property.module";
 import { TemplatePropertyValueController } from "./template-property-value.controller";
 import { TemplatePropertyValueRepository } from "./repositories/template-property-value.repository";
 import { TemplatePropertyValueService } from "./template-property-value.service";

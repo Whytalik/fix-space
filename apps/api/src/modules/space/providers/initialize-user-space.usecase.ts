@@ -1,16 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
 import { CreateSectionDto, CreateSpaceDto, PropertyConfig, PropertyType, SpaceResponseDto } from "@fixspace/domain";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import { InitializationConfigService } from "../../../core/config/initialization/initialization-config.service";
-import type { DatabaseTemplate, InitPropertyDef } from "../../../core/config/initialization/types";
-import type { SeedRecord, SeedRelation } from "../../../core/config/initialization/seeds";
-import { DatabaseService } from "../../database/database.service";
-import { PropertyRepository } from "../../property/repositories/property.repository";
-import { PropertyService } from "../../property/property.service";
-import { PropertyValueRepository } from "../../property-value/repositories/property-value.repository";
-import { RecordRepository } from "../../record/repositories/record.repository";
-import { TemplateService } from "../../template/template.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { InitializationConfigService } from "@/core/config/initialization/initialization-config.service";
+import type { DatabaseTemplate, InitPropertyDef } from "@/core/config/initialization/types";
+import type { SeedRecord, SeedRelation } from "@/core/config/initialization/seeds";
+import { DatabaseService } from "@/modules/database/database.service";
+import { PropertyRepository } from "@/modules/property/repositories/property.repository";
+import { PropertyService } from "@/modules/property/property.service";
+import { PropertyValueRepository } from "@/modules/property-value/repositories/property-value.repository";
+import { RecordRepository } from "@/modules/record/repositories/record.repository";
+import { TemplateService } from "@/modules/template/template.service";
 import { SpaceRepository } from "../repositories/space.repository";
 import { SpaceService } from "../space.service";
 import { SectionService } from "./section.service";
@@ -41,6 +41,7 @@ export class InitializeUserSpaceUseCase {
   async seedContent(spaceId: string, userId: string): Promise<void> {
     const config = this.initConfig.getConfig();
 
+    this.logger.debug("Seed content start", { spaceId });
     const sectionByKey = await this.seedSections(spaceId, config.sections);
 
     const databaseByType = await this.seedDatabases(spaceId, userId, config.databases, sectionByKey);
@@ -64,19 +65,17 @@ export class InitializeUserSpaceUseCase {
     const sectionByKey = new Map<string, string>();
     const sortedSections = [...sections].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
-    await Promise.all(
-      sortedSections.map(async (sectionTemplate) => {
-        const section = await this.sectionService.create(spaceId, {
-          name: sectionTemplate.name,
-          position: sectionTemplate.position,
-          icon: sectionTemplate.icon,
-          color: sectionTemplate.color,
-        });
-        if (sectionTemplate.key) {
-          sectionByKey.set(sectionTemplate.key, section.id);
-        }
-      }),
-    );
+    for (const sectionTemplate of sortedSections) {
+      const section = await this.sectionService.create(spaceId, {
+        name: sectionTemplate.name,
+        position: sectionTemplate.position,
+        icon: sectionTemplate.icon,
+        color: sectionTemplate.color,
+      });
+      if (sectionTemplate.key) {
+        sectionByKey.set(sectionTemplate.key, section.id);
+      }
+    }
 
     return sectionByKey;
   }
@@ -266,11 +265,11 @@ export class InitializeUserSpaceUseCase {
   async createAndSeed(userId: string, dto: CreateSpaceDto): Promise<SpaceResponseDto> {
     this.logger.debug("Creating and seeding space from DTO", { userId, name: dto.name });
     const space = await this.spaceService.create(userId, dto);
+
     try {
       await this.seedContent(space.id, userId);
     } catch (error) {
-      this.logger.error("Seed failed, removing partially-initialized space", { spaceId: space.id, userId });
-      await this.spaceRepo.delete(space.id).catch(() => undefined);
+      this.logger.error("Seed failed", { error: (error as Error).message, stack: (error as Error).stack, spaceId: space.id, userId });
       throw error;
     }
     this.logger.log("Space created and seeded", { userId, spaceId: space.id });
@@ -281,22 +280,24 @@ export class InitializeUserSpaceUseCase {
     this.logger.log("Initializing user space", { userId, username });
 
     const config = this.initConfig.getConfig();
+
     const space = await this.spaceService.create(userId, {
       name: `${username}'s Space`,
       isDefault: true,
       icon: config.spaceIcon,
     });
 
+    this.logger.debug("Space created", { spaceId: space.id });
+
     try {
       await this.seedContent(space.id, userId);
     } catch (error) {
-      this.logger.error("Seed failed, removing partially-initialized space", { spaceId: space.id, userId });
-      await this.spaceRepo.delete(space.id).catch(() => undefined);
+      this.logger.error("Seed failed", { error: (error as Error).message, stack: (error as Error).stack, spaceId: space.id, userId });
+      await this.spaceRepo.delete(space.id);
       throw error;
     }
 
     this.logger.log("User space initialized", { userId, spaceId: space.id });
-
     return this.spaceService.findOne(space.id);
   }
 }

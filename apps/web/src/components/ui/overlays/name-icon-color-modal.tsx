@@ -5,7 +5,7 @@ import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { ModalShell } from "@/components/ui/overlays/modal-shell";
-import { useEscape } from "@/hooks/useEscape";
+import { useEscape } from "@/hooks/ui/use-escape";
 import { Smile } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";
@@ -66,70 +66,73 @@ export function NameIconColorModal({
   return (
     <ModalShell isOpen onClose={onClose} title={title} size="sm">
       <div className="flex flex-col gap-3">
-        <div className="flex gap-2">
-          <div>
-            <button
-              ref={iconButtonRef}
-              type="button"
-              title={t("chooseIcon")}
-              onClick={() => {
-                setShowIconPicker((prev) => !prev);
-                setShowColorPicker(false);
-              }}
-              className="w-9.5 h-9.5 bg-surface border border-stroke rounded-lg flex items-center justify-center text-ink-secondary hover:border-accent focus:outline-none focus:border-accent transition-colors duration-150"
-            >
-              {icon ? <IconDisplay value={icon} size={18} /> : <Smile size={14} />}
-            </button>
-            {showIconPicker && (
-              <IconPicker
-                value={icon}
-                onChange={(val) => {
-                  setIcon(val);
-                  setShowIconPicker(false);
-                }}
-                onClose={() => setShowIconPicker(false)}
-                anchorEl={iconButtonRef.current}
-              />
-            )}
-          </div>
-          {!hideColor && (
+        {hint && <p className="type-hint">{hint}</p>}
+        <div className="flex flex-col gap-1.5">
+          <label className="type-field-label">{t("nameLabel") || "Name"}</label>
+          <div className="flex gap-2">
             <div>
               <button
-                ref={colorButtonRef}
+                ref={iconButtonRef}
                 type="button"
-                title={t("chooseColor")}
+                title={t("chooseIcon")}
                 onClick={() => {
-                  setShowColorPicker((prev) => !prev);
-                  setShowIconPicker(false);
+                  setShowIconPicker((prev) => !prev);
+                  setShowColorPicker(false);
                 }}
-                className="w-9.5 h-9.5 bg-surface border border-stroke rounded-lg flex items-center justify-center hover:border-accent focus:outline-none focus:border-accent transition-colors duration-150 overflow-hidden"
+                className="w-9.5 h-9.5 bg-surface border border-stroke rounded-lg flex items-center justify-center text-ink-secondary hover:border-accent focus:outline-none focus:border-accent transition-colors duration-150"
               >
-                {color ? (
-                  <span className="w-full h-full rounded-lg" style={{ backgroundColor: color }} />
-                ) : (
-                  <span className="w-4 h-4 rounded-sm border-2 border-dashed border-ink-muted" />
-                )}
+                {icon ? <IconDisplay value={icon} size={18} /> : <Smile size={14} />}
               </button>
-              {showColorPicker && (
-                <ColorPicker
-                  value={color}
-                  onChange={setColor}
-                  onClose={() => setShowColorPicker(false)}
-                  anchorEl={colorButtonRef.current}
+              {showIconPicker && (
+                <IconPicker
+                  value={icon}
+                  onChange={(value) => {
+                    setIcon(value);
+                    setShowIconPicker(false);
+                  }}
+                  onClose={() => setShowIconPicker(false)}
+                  anchorEl={iconButtonRef.current}
                 />
               )}
             </div>
-          )}
-          <input
-            autoFocus
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            placeholder={placeholder}
-            className="field-input flex-1"
-          />
+            {!hideColor && (
+              <div>
+                <button
+                  ref={colorButtonRef}
+                  type="button"
+                  title={t("chooseColor")}
+                  onClick={() => {
+                    setShowColorPicker((prev) => !prev);
+                    setShowIconPicker(false);
+                  }}
+                  className="w-9.5 h-9.5 bg-surface border border-stroke rounded-lg flex items-center justify-center hover:border-accent focus:outline-none focus:border-accent transition-colors duration-150 overflow-hidden"
+                >
+                  {color ? (
+                    <span className="w-full h-full rounded-lg" style={{ backgroundColor: color }} />
+                  ) : (
+                    <span className="w-4 h-4 rounded-sm border-2 border-dashed border-ink-muted" />
+                  )}
+                </button>
+                {showColorPicker && (
+                  <ColorPicker
+                    value={color}
+                    onChange={setColor}
+                    onClose={() => setShowColorPicker(false)}
+                    anchorEl={colorButtonRef.current}
+                  />
+                )}
+              </div>
+            )}
+            <input
+              autoFocus
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              placeholder={placeholder}
+              className="field-input flex-1"
+            />
+          </div>
         </div>
-        {hint && <p className="type-hint">{hint}</p>}
         {error && <p className="text-sm text-error">{error}</p>}
         <Button className="w-full" loading={isSubmitting} disabled={!name.trim() || isSubmitting} onClick={handleSubmit}>
           {submitLabel}

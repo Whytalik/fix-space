@@ -22,10 +22,9 @@
 - [3.12 Інтеграція із зовнішніми сервісами](./functional/3.12-integrations.md)
 - [3.13 Формули](./functional/3.13-formulas.md)
 - [3.14 Автоматизації](./functional/3.14-automations.md)
-- [3.15 Кнопка](./functional/3.15-button.md)
 - [3.16 Статистика](./functional/3.16-statistics.md)
 - [3.17 Налаштування](./functional/3.17-settings.md)
-- [3.18 Онбординг](./functional/3.18-onboarding.md)
+- [3.18 Домашня сторінка](./functional/3.18-home-page.md)
 - [3.19 Сповіщення](./functional/3.19-notifications.md)
 
 ### ⚙️ Типи властивостей
@@ -43,4 +42,3 @@
 | RATING   | Числова оцінка у форматі зірок                                                   | [3.28](./functional/property-types/3.28-rating.md)   |
 | PROGRESS | Числовий прогрес у діапазоні, відображається як бар                              | [3.29](./functional/property-types/3.29-progress.md) |
 | FORMULA  | Автоматично обчислюване поле лише для читання                                    | [3.13](./functional/3.13-formulas.md)                |
-| BUTTON   | Тип дії без збереження значення; запускає операції над записом                   | [3.15](./functional/3.15-button.md)                  |

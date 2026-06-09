@@ -2,7 +2,8 @@ import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { AppLogger } from "../../../common/logger/app-logger.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { DatabaseService } from "@/modules/database/database.service";
 import { SectionService } from "../providers/section.service";
 import { SpaceRepository } from "../repositories/space.repository";
 import { SpaceService } from "../space.service";
@@ -17,7 +18,7 @@ jest.mock("@fixspace/database", () => ({
       updateMany: jest.fn(),
       delete: jest.fn(),
     },
-    $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
+    $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
 
@@ -43,7 +44,7 @@ describe("SpaceService", () => {
     update: jest.fn(),
     updateMany: jest.fn(),
     delete: jest.fn(),
-    transaction: jest.fn((cb) => cb(prisma)),
+    transaction: jest.fn((callback) => callback(prisma)),
   };
 
   const mockSectionService = {
@@ -51,10 +52,15 @@ describe("SpaceService", () => {
     processOperations: jest.fn(),
   };
 
+  const mockDatabaseService = {
+    processDatabaseOperations: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SpaceService,
+        { provide: DatabaseService, useValue: mockDatabaseService },
         { provide: SpaceRepository, useValue: mockSpaceRepo },
         { provide: SectionService, useValue: mockSectionService },
         { provide: AppLogger, useValue: mockLogger },

@@ -1,4 +1,3 @@
-export { ButtonHandler } from "./button/button.handler";
 export { CheckboxHandler } from "./checkbox/checkbox.handler";
 export { DateHandler } from "./date/date.handler";
 export { DurationHandler } from "./duration/duration.handler";

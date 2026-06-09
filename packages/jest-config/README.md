@@ -62,8 +62,7 @@ Used by: `apps/web/jest.config.ts`
 
 ### `e2e` — E2E API tests
 
-For end-to-end tests with Supertest in `apps/api/test/`. Coverage is always
-disabled here — e2e tests exist to verify integration paths, not coverage numbers.
+For end-to-end tests with Supertest. Coverage is always disabled here — e2e tests exist to verify integration paths, not coverage numbers.
 
 | Option            | Value             |
 | ----------------- | ----------------- |
@@ -71,7 +70,9 @@ disabled here — e2e tests exist to verify integration paths, not coverage numb
 | `testRegex`       | `".e2e-spec.ts$"` |
 | `collectCoverage` | `false`           |
 
-Used by: `apps/api/test/jest-e2e.json`
+**Note:** The API (`@fixspace/api`) no longer uses this shared config. It has its own
+`jest-integration.json` with `testRegex: ".integration-spec.ts$"`. This preset is
+kept for reference or future use.
 
 ---
 

@@ -7,7 +7,8 @@
   },
   "NameIconColorModal": {
     "chooseIcon": "Choose icon",
-    "chooseColor": "Choose color"
+    "chooseColor": "Choose color",
+    "nameLabel": "Name"
   },
   "AddSection": {
     "title": "New Section",
@@ -39,6 +40,7 @@
   },
   "SortPanel": {
     "title": "Sort",
+    "locked": "Locked",
     "clearAll": "Clear all",
     "noRules": "No sort rules. Add one below.",
     "selectField": "Select field…",
@@ -52,6 +54,7 @@
   },
   "FilterPanel": {
     "title": "Filter",
+    "locked": "Locked",
     "clearAll": "Clear all",
     "noRules": "No filter rules. Add one below.",
     "selectProperty": "Select property…",
@@ -90,6 +93,7 @@
   },
   "GroupPanel": {
     "groupBy": "Group by",
+    "locked": "Locked",
     "noGrouping": "No grouping",
     "selectField": "Select field…",
     "selectProperty": "Select property…",
@@ -118,11 +122,13 @@
   "ColorPicker": {
     "hexPlaceholder": "rrggbb",
     "invalidHex": "Invalid hex color",
-    "save": "Save"
+    "save": "Save",
+    "noColor": "No color"
   },
   "PropertyInput": {
     "enterText": "Enter text…",
     "checked": "Checked",
+    "select": "Select…",
     "none": "— None —"
   },
   "Combobox": {
@@ -141,11 +147,15 @@
     "searchFailed": "Search failed. Please try again.",
     "searchRecords": "Search records...",
     "startTyping": "Start typing to search across your space",
-    "noResults": "No results for"
+    "noResults": "No results for",
+    "recentSearches": "Recent searches",
+    "minChars": "Enter at least 2 characters",
+    "showAllResults": "Show all results in {database}"
   },
   "SectionItem": {
     "addDatabase": "Add database",
     "edit": "Edit",
+    "duplicate": "Duplicate",
     "delete": "Delete",
     "editSection": "Edit Section",
     "chooseIcon": "Choose icon",
@@ -203,5 +213,23 @@
     "description": "We use cookies to enhance your browsing experience and analyze our traffic. By clicking \"Accept\", you consent to our use of cookies.",
     "accept": "Accept",
     "decline": "Decline"
+  },
+  "DuplicationModal": {
+    "title": "Duplicate {type}",
+    "newName": "New name",
+    "includeSections": "Include sections",
+    "includeDatabases": "Include databases",
+    "includeProperties": "Include properties",
+    "includeTemplates": "Include templates",
+    "includeAutomations": "Include automations",
+    "includeRecords": "Include records",
+    "duplicate": "Duplicate",
+    "duplicating": "Duplicating...",
+    "cancel": "Cancel",
+    "types": {
+      "workspace": "Workspace",
+      "database": "Database",
+      "section": "Section"
+    }
   }
 }

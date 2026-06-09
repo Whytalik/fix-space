@@ -7,7 +7,8 @@
   },
   "NameIconColorModal": {
     "chooseIcon": "Вибрати іконку",
-    "chooseColor": "Вибрати колір"
+    "chooseColor": "Вибрати колір",
+    "nameLabel": "Назва"
   },
   "AddSection": {
     "title": "Нова секція",
@@ -39,6 +40,7 @@
   },
   "SortPanel": {
     "title": "Сортування",
+    "locked": "Заблоковано",
     "clearAll": "Очистити все",
     "noRules": "Немає правил сортування. Додайте одне нижче.",
     "selectField": "Вибрати поле…",
@@ -52,6 +54,7 @@
   },
   "FilterPanel": {
     "title": "Фільтр",
+    "locked": "Заблоковано",
     "clearAll": "Очистити все",
     "noRules": "Немає правил фільтрації. Додайте одне нижче.",
     "selectProperty": "Вибрати властивість…",
@@ -73,23 +76,24 @@
       "isNotEmpty": "не порожнє",
       "greaterThan": ">",
       "lessThan": "<",
-      "greaterThanOrEqual": ">=",
-      "lessThanOrEqual": "<=",
-      "on": "в дату",
+      "greaterThanOrEqual": "більше або дорівнює",
+      "lessThanOrEqual": "менше або дорівнює",
+      "on": "на дату",
       "before": "до",
       "after": "після",
-      "onOrBefore": "в дату або раніше",
-      "onOrAfter": "в дату або пізніше",
-      "isChecked": "відмічено",
-      "isUnchecked": "не відмічено",
-      "isExactly": "точно",
-      "isNotExactly": "не точно",
+      "onOrBefore": "на дату або раніше",
+      "onOrAfter": "на дату або пізніше",
+      "isChecked": "вибрано",
+      "isUnchecked": "не вибрано",
+      "isExactly": "точно це",
+      "isNotExactly": "це не",
       "isOneOf": "один з",
       "isNotOneOf": "не один з"
     }
   },
   "GroupPanel": {
     "groupBy": "Групувати за",
+    "locked": "Заблоковано",
     "noGrouping": "Без групування",
     "selectField": "Вибрати поле…",
     "selectProperty": "Вибрати властивість…",
@@ -118,11 +122,13 @@
   "ColorPicker": {
     "hexPlaceholder": "rrggbb",
     "invalidHex": "Недійсний hex колір",
-    "save": "Зберегти"
+    "save": "Зберегти",
+    "noColor": "Без кольору"
   },
   "PropertyInput": {
     "enterText": "Введіть текст…",
     "checked": "Відмічено",
+    "select": "Вибрати…",
     "none": "— Немає —"
   },
   "Combobox": {
@@ -141,11 +147,15 @@
     "searchFailed": "Пошук не вдався. Спробуйте ще раз.",
     "searchRecords": "Пошук записів...",
     "startTyping": "Почніть вводити текст для пошуку по всьому простору",
-    "noResults": "Немає результатів для"
+    "noResults": "Немає результатів для",
+    "recentSearches": "Нещодавні пошуки",
+    "minChars": "Введіть щонайменше 2 символи",
+    "showAllResults": "Показати всі результати в {database}"
   },
   "SectionItem": {
-    "addDatabase": "Додати базу",
+    "addDatabase": "Add database",
     "edit": "Редагувати",
+    "duplicate": "Дублювати",
     "delete": "Видалити",
     "editSection": "Редагувати секцію",
     "chooseIcon": "Вибрати іконку",
@@ -203,5 +213,23 @@
     "description": "Ми використовуємо файли cookie для покращення вашого досвіду перегляду та аналізу нашого трафіку. Натискаючи «Прийняти», ви погоджуєтеся на використання нами файлів cookie.",
     "accept": "Прийняти",
     "decline": "Відхилити"
+  },
+  "DuplicationModal": {
+    "title": "Дублювати {type}",
+    "newName": "Нова назва",
+    "includeSections": "Включити секції",
+    "includeDatabases": "Включити бази даних",
+    "includeProperties": "Включити властивості",
+    "includeTemplates": "Включити шаблони",
+    "includeAutomations": "Включити автоматизації",
+    "includeRecords": "Включити записи",
+    "duplicate": "Дублювати",
+    "duplicating": "Дублювання...",
+    "cancel": "Скасувати",
+    "types": {
+      "workspace": "робочий простір",
+      "database": "базу даних",
+      "section": "секцію"
+    }
   }
 }

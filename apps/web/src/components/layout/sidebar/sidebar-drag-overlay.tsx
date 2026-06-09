@@ -17,7 +17,7 @@ export function SidebarDragOverlay({ activeDrag, sections, unsectioned, collapse
     <DragOverlay dropAnimation={null}>
       {activeDrag?.type === "section" &&
         (() => {
-          const section = sections.find((sec) => sec.id === activeDrag.id);
+          const section = sections.find((sectionItem) => sectionItem.id === activeDrag.id);
           if (!section) return null;
           const isCollapsed = collapsedSections.has(section.id);
           return (

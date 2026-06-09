@@ -28,6 +28,7 @@
   "SPACE_NOT_FOUND": "Простір не знайдено",
   "DATABASE_NOT_FOUND": "Базу даних не знайдено",
   "DATABASE_NOT_FOUND_ID": "Базу даних з id {id} не знайдено",
+  "DATABASE_STRUCTURE_LOCKED": "Структура бази даних заблокована або це системна база, її неможливо змінити",
   "CANNOT_DELETE_PRESET_DATABASE": "Неможливо видалити системну базу даних",
   "SECTION_NOT_FOUND": "Секцію не знайдено в цьому просторі",
   "PROPERTY_NOT_FOUND": "Властивість не знайдено",
@@ -65,5 +66,19 @@
   "SECTION_CREATE_REQUIRES_DATA": "Операція CREATE вимагає поле \"create\" з даними секції",
   "SECTION_OPERATION_REQUIRES_ID": "Операція вимагає поле \"id\"",
   "PROPERTY_TYPE_NOT_REGISTERED": "Обробник для типу властивості {type} не зареєстровано",
-  "PROPERTY_VALUE_REQUIRED": "Властивість \"{name}\" є обов'язковою і не може бути порожньою"
+  "PROPERTY_VALUE_REQUIRED": "Властивість \"{name}\" є обов'язковою і не може бути порожньою",
+  "VIEW_NOT_FOUND": "Подання не знайдено",
+  "VIEW_LIMIT_REACHED": "Досягнуто ліміт подань (5) для цієї бази даних",
+  "VIEW_LOCKED": "Це подання заблоковане і не може бути змінене",
+  "CANNOT_DELETE_LAST_VIEW": "Неможливо видалити єдине подання бази даних",
+  "CANNOT_RENAME_NAME_PROPERTY": "Неможливо перейменувати властивість Name",
+  "CANNOT_CHANGE_POSITION_NAME_PROPERTY": "Неможливо змінити позицію властивості Name",
+  "CANNOT_DELETE_NAME_PROPERTY": "Неможливо видалити властивість Name",
+  "CANNOT_CHANGE_GROUP_NAME_PROPERTY": "Властивість Name повинна завжди залишатися в групі General",
+  "CANNOT_CHANGE_TYPE_NAME_PROPERTY": "Неможливо змінити тип властивості Name",
+  "CANNOT_DELETE_PROTECTED_PROPERTY": "Неможливо видалити захищену властивість",
+  "PROPERTY_HAS_DEPENDENCIES": "Властивість використовується у поданнях: {views}",
+  "PROPERTY_GROUP_NOT_FOUND": "Групу властивостей не знайдено",
+  "TEMPLATE_NOT_FOUND": "Шаблон не знайдено",
+  "DATABASE_NOT_IN_SPACE": "База даних не належить до цього простору"
 }

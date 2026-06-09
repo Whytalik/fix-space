@@ -17,30 +17,30 @@ export function ComboboxDropdown({ options, onSelect, selectedValue, placement =
     <div
       className={`absolute ${positionClass} left-0 right-0 z-10 max-h-48 overflow-y-auto scrollbar rounded-lg border border-stroke bg-elevated shadow-md`}
     >
-      {options.map((opt, index) => {
-        const isSelected = opt.value === selectedValue;
+      {options.map((option, index) => {
+        const isSelected = option.value === selectedValue;
         return (
           <button
-            key={`${index}-${opt.value}`}
+            key={`${index}-${option.value}`}
             type="button"
-            onMouseDown={() => onSelect(opt.value)}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface transition-colors text-left"
+            onMouseDown={() => onSelect(option.value)}
+            className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface transition-colors duration-150 text-left"
           >
             <span className="flex-1">
-              {opt.color ? (
+              {option.color ? (
                 <span
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
-                  style={{ backgroundColor: `${opt.color}20`, color: opt.color }}
+                  style={{ backgroundColor: `${option.color}20`, color: option.color }}
                 >
-                  {opt.label}
+                  {option.label}
                 </span>
-              ) : opt.icon ? (
+              ) : option.icon ? (
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-elevated text-ink-secondary">
-                  <IconDisplay value={opt.icon} size={12} />
-                  {opt.label}
+                  <IconDisplay value={option.icon} size={12} />
+                  {option.label}
                 </span>
               ) : (
-                <span className={isSelected ? "text-accent" : "text-ink"}>{opt.label}</span>
+                <span className={isSelected ? "text-accent" : "text-ink"}>{option.label}</span>
               )}
             </span>
             {isSelected && <Check size={12} className="shrink-0 text-accent" />}

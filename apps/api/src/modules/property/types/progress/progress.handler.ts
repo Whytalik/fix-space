@@ -1,13 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_PROGRESS_PROPERTY, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, ProgressProperty, PropertyType } from "@fixspace/domain";
+import {
+  DEFAULT_PROGRESS_PROPERTY,
+  FilterOperator,
+  isProgressPropertyConfig,
+  OPERATORS_BY_PROPERTY_TYPE,
+  ProgressPropertyConfig,
+  PropertyType,
+} from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
 export class ProgressHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.PROGRESS;
 
-  private parseConfig(config: Record<string, unknown>): ProgressProperty {
-    return config as unknown as ProgressProperty;
+  private parseConfig(config: Record<string, unknown>): ProgressPropertyConfig {
+    if (!isProgressPropertyConfig(config)) {
+      throw new Error(`Invariant: expected ProgressPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
   }
 
   getDefaultConfig(): Record<string, unknown> {
@@ -85,12 +95,7 @@ export class ProgressHandler implements PropertyConfigHandler, PropertyValueHand
     return value === null || value === undefined;
   }
 
-  convertFrom(
-    value: unknown,
-    _fromType: PropertyType,
-    _fromConfig: Record<string, unknown>,
-    targetConfig: Record<string, unknown>,
-  ): unknown {
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
     if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
     const { minValue, maxValue } = this.parseConfig(targetConfig);
     let numericValue: number;

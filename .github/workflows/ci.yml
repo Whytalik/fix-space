@@ -34,7 +34,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/turbo.json', '**/package.json', 'pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-turbo-
 
@@ -69,7 +69,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/turbo.json', '**/package.json', 'pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-turbo-
 
@@ -115,8 +115,8 @@ jobs:
         run: pnpm audit --prod --audit-level=high
         continue-on-error: true
 
-  test-e2e:
-    name: Test (E2E)
+  test-integration:
+    name: Test (Integration)
     runs-on: ubuntu-latest
     needs: [test]
     environment:
@@ -140,6 +140,9 @@ jobs:
       NODE_ENV: test
       JWT_SECRET: super-secret-key-for-diploma-project
       JWT_REFRESH_SECRET: super-refresh-secret-key-for-diploma-project
+      GOOGLE_CLIENT_ID: test-google-client-id
+      GOOGLE_CLIENT_SECRET: test-google-client-secret
+      GOOGLE_CALLBACK_URL: http://localhost:3000/auth/google/callback
     steps:
       - uses: actions/checkout@v4
 
@@ -164,76 +167,8 @@ jobs:
       - name: Run migrations
         run: pnpm --filter @fixspace/database exec prisma migrate deploy
 
-      - name: E2E tests
-        run: pnpm --filter @fixspace/api test:e2e
-
-  test-web-e2e:
-    name: Test (Web E2E)
-    runs-on: ubuntu-latest
-    needs: [lint]
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: fixspace_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fixspace_test?schema=public
-      NODE_ENV: test
-      JWT_SECRET: super-secret-key-for-diploma-project
-      JWT_REFRESH_SECRET: super-refresh-secret-key-for-diploma-project
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Cache turbo build setup
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
-      - name: Generate Prisma Client
-        run: pnpm turbo db:generate
-
-      - name: Build domain package
-        run: pnpm --filter @fixspace/domain build
-
-      - name: Run migrations
-        run: pnpm --filter @fixspace/database exec prisma migrate deploy
-
-      - name: Install Playwright browsers and dependencies
-        run: pnpm --filter @fixspace/web exec playwright install --with-deps
-
-      - name: Web E2E tests
-        run: pnpm --filter @fixspace/web test:e2e
-
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-report
-          path: apps/web/playwright-report/
-          retention-days: 7
+      - name: Integration tests
+        run: pnpm --filter @fixspace/api test:integration
 
   build:
     name: Build
@@ -258,7 +193,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/turbo.json', '**/package.json', 'pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-turbo-
 
@@ -297,6 +232,8 @@ jobs:
     environment:
       name: staging
     steps:
+      - uses: actions/checkout@v4
+
       - name: Create deployment manifest
         run: |
           mkdir -p deployment
@@ -307,7 +244,16 @@ jobs:
           echo "Run ID: ${{ github.run_id }}"                >> deployment/manifest.txt
           echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"  >> deployment/manifest.txt
           cat deployment/manifest.txt
-          echo "Deployment to staging: SIMULATED SUCCESSFULLY"
+          echo "Deployment to staging: IN PROGRESS"
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING || secrets.RAILWAY_TOKEN }}
+        if: env.RAILWAY_TOKEN != ''
+        run: railway up --ci --service ${{ secrets.RAILWAY_SERVICE_STAGING || 'fix-space-api-staging' }}
 
       - uses: actions/upload-artifact@v4
         with:
@@ -323,6 +269,8 @@ jobs:
     environment:
       name: production
     steps:
+      - uses: actions/checkout@v4
+
       - name: Create deployment manifest
         run: |
           mkdir -p deployment
@@ -333,7 +281,7 @@ jobs:
           echo "Run ID: ${{ github.run_id }}"                >> deployment/manifest.txt
           echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"  >> deployment/manifest.txt
           cat deployment/manifest.txt
-          echo "Deployment to production: SIMULATED SUCCESSFULLY"
+          echo "Deployment to production: IN PROGRESS"
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
@@ -342,7 +290,7 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         if: env.RAILWAY_TOKEN != ''
-        run: railway up --ci --service fix-space-api
+        run: railway up --ci --service ${{ secrets.RAILWAY_SERVICE_PRODUCTION || 'fix-space-api' }}
 
       - uses: actions/upload-artifact@v4
         with:

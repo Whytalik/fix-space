@@ -3,8 +3,9 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { ConflictException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import * as passwordUtils from "../../../common/utils/password";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import * as passwordUtils from "@/common/utils/password";
+import { SettingsService } from "@/modules/settings/settings.service";
 import { MailService } from "../../mail/mail.service";
 import { RegisterUserUseCase } from "../providers/register-user.usecase";
 import { TokenService } from "../token.service";
@@ -28,6 +29,10 @@ describe("RegisterUserUseCase", () => {
   const mockMailService = {
     sendVerificationEmail: jest.fn(),
   };
+
+  const mockSettingsService = {
+    updateSettings: jest.fn().mockResolvedValue({} as never),
+  } as unknown as SettingsService;
 
   const mockLogger = {
     setContext: jest.fn(),
@@ -55,6 +60,7 @@ describe("RegisterUserUseCase", () => {
         RegisterUserUseCase,
         { provide: TokenService, useValue: mockTokenService },
         { provide: MailService, useValue: mockMailService },
+        { provide: SettingsService, useValue: mockSettingsService },
         { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();

@@ -12,7 +12,7 @@ export class ProgressThreshold {
   color: string;
 }
 
-export class ProgressProperty {
+export class ProgressPropertyConfig {
   @IsOptional()
   @IsNumber({}, { message: i18nValidationMessage<I18nTranslations>("validation.IS_NUMBER") })
   defaultValue: number | null;

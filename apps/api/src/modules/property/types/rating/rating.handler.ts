@@ -1,13 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { DEFAULT_RATING_PROPERTY, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, PropertyType, RatingProperty } from "@fixspace/domain";
+import {
+  DEFAULT_RATING_PROPERTY,
+  FilterOperator,
+  isRatingPropertyConfig,
+  OPERATORS_BY_PROPERTY_TYPE,
+  PropertyType,
+  RatingPropertyConfig,
+} from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
 @Injectable()
 export class RatingHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.RATING;
 
-  private parseConfig(config: Record<string, unknown>): RatingProperty {
-    return config as unknown as RatingProperty;
+  private parseConfig(config: Record<string, unknown>): RatingPropertyConfig {
+    if (!isRatingPropertyConfig(config)) {
+      throw new Error(`Invariant: expected RatingPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
   }
 
   getDefaultConfig(): Record<string, unknown> {
@@ -71,12 +81,7 @@ export class RatingHandler implements PropertyConfigHandler, PropertyValueHandle
     return value === null || value === undefined;
   }
 
-  convertFrom(
-    value: unknown,
-    _fromType: PropertyType,
-    _fromConfig: Record<string, unknown>,
-    targetConfig: Record<string, unknown>,
-  ): unknown {
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
     if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
     const { maxStars, allowHalf } = this.parseConfig(targetConfig);
     let numericValue: number;

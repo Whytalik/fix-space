@@ -9,7 +9,7 @@ export async function getMeServer(): Promise<UserResponseDto | null> {
 
   const cookieString = cookieStore
     .getAll()
-    .map((c) => `${c.name}=${c.value}`)
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
     .join("; ");
 
   try {

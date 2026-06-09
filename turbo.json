@@ -21,6 +21,11 @@
     "COOKIE_SECURE",
     "INTERNAL_API_URL",
     "MAIL_FROM",
+    "RESEND_API_KEY",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASS",
     "SPACE_NAME_TEMPLATE",
     "VERIFICATION_TOKEN_EXPIRATION_HOURS",
     "POSTGRES_USER",
@@ -38,7 +43,8 @@
     "CLOUDINARY_CLOUD_NAME",
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_API_SECRET",
-    "CLOUDINARY_AVATAR_FOLDER"
+    "CLOUDINARY_AVATAR_FOLDER",
+    "NEXT_PUBLIC_API_URL"
   ],
 
   "tasks": {
@@ -58,6 +64,10 @@
       "inputs": ["$TURBO_DEFAULT$", ".eslintrc*", "eslint.config.*"],
       "outputs": []
     },
+    "check-types": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
     "format": {
       "inputs": ["$TURBO_DEFAULT$", ".prettierrc*"],
       "cache": false,
@@ -65,6 +75,11 @@
     },
     "test": {
       "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "cache": false,
       "outputs": []
     },
     "test:e2e": {

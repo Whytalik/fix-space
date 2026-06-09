@@ -1,0 +1,10 @@
+{
+  "RecordPage": {
+    "contentPlaceholder": "Content editor placeholder",
+    "created": "Created",
+    "updated": "Updated",
+    "untitled": "Untitled",
+    "hideMetadata": "Hide metadata",
+    "showMetadata": "Show metadata"
+  }
+}

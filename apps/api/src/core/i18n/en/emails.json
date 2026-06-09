@@ -25,5 +25,12 @@
     "htmlTitle": "Password changed",
     "htmlSubtitle": "Security alert: Your password has been successfully updated.",
     "htmlIgnore": "If you did not perform this action, your account may be compromised. Please contact us immediately."
+  },
+  "accountDeleted": {
+    "subject": "Your FIX Space account has been deleted",
+    "body": "Your account has been permanently deleted. All your data has been removed. If you did not initiate this action, please contact support immediately.",
+    "htmlTitle": "Account deleted",
+    "htmlSubtitle": "Your account and all associated data have been permanently removed.",
+    "htmlIgnore": "If you did not initiate this deletion, please contact us immediately at support@fixspace.app."
   }
 }

@@ -432,6 +432,190 @@
       ]
     },
     {
+      "name": "Records",
+      "item": [
+        {
+          "name": "Create Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Has id\", () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.have.property(\"id\");",
+                  "    pm.collectionVariables.set(\"record_id\", res.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"databaseId\": \"{{database_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/records",
+              "host": ["{{base_url}}"],
+              "path": ["records"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Records",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/records?databaseId={{database_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["records"],
+              "query": [
+                {
+                  "key": "databaseId",
+                  "value": "{{database_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/records/{{record_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["records", "{{record_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Record\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/records/{{record_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["records", "{{record_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Duplicate Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Has id different from source\", () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.have.property(\"id\");",
+                  "    pm.expect(res.id).to.not.equal(pm.collectionVariables.get(\"record_id\"));",
+                  "    pm.collectionVariables.set(\"duplicated_record_id\", res.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/records/{{record_id}}/duplicate",
+              "host": ["{{base_url}}"],
+              "path": ["records", "{{record_id}}", "duplicate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/records/{{record_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["records", "{{record_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Workspace Initialization Check",
       "item": [
         {

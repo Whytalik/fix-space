@@ -2,8 +2,8 @@
 
 import { Avatar } from "@/components/ui/primitives/display/avatar";
 import { useAppContext } from "@/context/app-context";
-import { useEscape } from "@/hooks/useEscape";
-import { useLogout } from "@/hooks/useLogout";
+import { useEscape } from "@/hooks/ui/use-escape";
+import { useLogout } from "@/hooks/auth/use-logout";
 import { LogOut, User } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { usePathname } from "next/navigation";

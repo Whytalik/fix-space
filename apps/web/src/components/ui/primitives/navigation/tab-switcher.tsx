@@ -18,7 +18,7 @@ export function TabSwitcher<T extends string = string>({ items, active, onChange
 
   return (
     <div
-      className={`${isVertical ? "flex flex-col gap-0.5 p-1 rounded-xl border border-stroke bg-surface" : "inline-flex items-center gap-0.5 rounded-xl bg-surface p-1 border border-stroke"}`}
+      className={`${isVertical ? "flex flex-col gap-0.5 p-1 rounded-2xl border border-stroke bg-surface" : "inline-flex items-center gap-0.5 rounded-2xl bg-surface p-1 border border-stroke"}`}
     >
       {items.map((item) => {
         const Icon = item.icon;

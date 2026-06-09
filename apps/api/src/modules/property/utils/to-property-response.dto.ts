@@ -11,7 +11,6 @@ type PropertyWithDatabase =
       databaseId: string;
       config: unknown;
       position: number;
-      isRequired: boolean;
       isVisible: boolean;
       icon: string | null;
       hint: string | null;

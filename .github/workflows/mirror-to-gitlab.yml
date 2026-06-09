@@ -3,7 +3,6 @@ name: Mirror to GitLab
 on:
   push:
     branches: ["**"]
-  delete:
 
 jobs:
   mirror:
@@ -21,18 +20,5 @@ jobs:
         run: |
           git remote remove gitlab 2>/dev/null || true
           GITLAB_HOST=$(echo "${GITLAB_REPO}" | sed 's|^https\?://||' | sed 's|^git@||' | sed 's|:|/|')
-          echo "Resolved host: ${GITLAB_HOST}"
           git remote add gitlab https://oauth2:${GITLAB_TOKEN}@${GITLAB_HOST}
-          
-          if [ "${{ github.event_name }}" = "delete" ]; then
-            REF_NAME="${{ github.event.ref }}"
-            if [ "$REF_NAME" != "develop" ] && [ "$REF_NAME" != "main" ] && [ "$REF_NAME" != "master" ]; then
-              echo "Deleting ref $REF_NAME on GitLab..."
-              git push gitlab --delete "$REF_NAME" || true
-            else
-              echo "Skipping deletion of protected branch: $REF_NAME"
-            fi
-          else
-            echo "Pushing ref ${{ github.ref }} to GitLab..."
-            git push -f gitlab HEAD:${{ github.ref }}
-          fi
+          git push -f gitlab HEAD:${{ github.ref }}

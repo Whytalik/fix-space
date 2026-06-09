@@ -2,14 +2,17 @@ import { Type } from "class-transformer";
 import { IsNotEmpty, IsString, ValidateNested } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
+import { ApiProperty } from "@nestjs/swagger";
 import { I18nTranslations } from "../../generated/i18n.generated";
 import { DatabaseSettings, RecordSettings, SectionSettings, SpaceSettings } from "../types";
 
 export class CreateSettingsDto {
+  @ApiProperty({ description: "Setting key", example: "workspace.theme", required: true })
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   key: string;
 
+  @ApiProperty({ description: "Setting value object", example: {}, required: true })
   @ValidateNested()
   @Type(() => Object, {
     keepDiscriminatorProperty: true,
@@ -25,6 +28,7 @@ export class CreateSettingsDto {
   })
   value: SpaceSettings | SectionSettings | DatabaseSettings | RecordSettings | Record<string, unknown>;
 
+  @ApiProperty({ description: "Setting category", example: "workspace", required: true })
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   category: string;

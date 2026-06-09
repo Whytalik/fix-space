@@ -15,9 +15,8 @@ test.describe("Authentication E2E", () => {
       password: "Password123!",
     };
 
-    // Only log if something fails
-    page.on("console", (msg) => {
-      if (msg.type() === "error") console.log(`BROWSER ERROR: ${msg.text()}`);
+    page.on("console", (message) => {
+      if (message.type() === "error") console.log(`BROWSER ERROR: ${message.text()}`);
     });
   });
 
@@ -29,7 +28,6 @@ test.describe("Authentication E2E", () => {
 
     await page.getByRole("button", { name: /create account/i }).click();
 
-    // The successful registration screen should appear
     await expect(page.getByText(/check your email|перевірте вашу пошту/i)).toBeVisible({ timeout: 20000 });
 
     const verifyRes = await request.post("http://localhost:3000/auth/dev/verify-user", {
@@ -45,7 +43,7 @@ test.describe("Authentication E2E", () => {
     await page.goto("/en/login", { waitUntil: "networkidle" });
     await page.getByLabel(/email/i).fill(testUser.email);
     await page.getByLabel(/password/i).fill(testUser.password);
-    await page.getByRole("button", { name: /sign in|увійти/i }).click();
+    await page.getByRole("button", { name: /^sign in$|^увійти$/i }).click();
 
     await page.waitForURL(/\/en$/, { timeout: 15000 });
     await expect(page).toHaveURL(/\/en$/);
@@ -74,7 +72,7 @@ test.describe("Authentication E2E", () => {
     await page.goto("/en/login", { waitUntil: "networkidle" });
     await page.getByLabel(/email/i).fill("nonexistent@example.com");
     await page.getByLabel(/password/i).fill("WrongPassword123!");
-    await page.getByRole("button", { name: /sign in|увійти/i }).click();
+    await page.getByRole("button", { name: /^sign in$|^увійти$/i }).click();
 
     await expect(page.locator(".bg-error-bg")).toContainText(/invalid|credentials|невірні|unauthorized/i, { timeout: 10000 });
   });
@@ -92,13 +90,12 @@ test.describe("Authentication E2E", () => {
     await page.goto("/en/login", { waitUntil: "networkidle" });
     await page.getByLabel(/email/i).fill(testUser.email);
     await page.getByLabel(/password/i).fill(testUser.password);
-    await page.getByRole("button", { name: /sign in|увійти/i }).click();
+    await page.getByRole("button", { name: /^sign in$|^увійти$/i }).click();
 
     await page.waitForURL(/\/en$/, { timeout: 15000 });
 
     await page.reload({ waitUntil: "networkidle" });
     await expect(page).toHaveURL(/\/en$/);
-    // Wait for the main UI element to appear (sidebar/aside)
     await expect(page.locator("aside, nav, [role='navigation']").first()).toBeVisible({ timeout: 15000 });
 
     await page.getByRole("button", { name: testUser.username }).first().click();

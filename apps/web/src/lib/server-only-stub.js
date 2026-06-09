@@ -1,17 +1,56 @@
-/* eslint-disable no-undef */
-// Stub for server-only packages (NestJS, class-validator, etc.) in browser builds.
-// These packages use Node.js APIs and cannot run in the browser.
-// All their exports are replaced with no-ops since the web app only imports
-// domain DTOs for type checking, not for runtime NestJS behaviour.
-module.exports = new Proxy(
-  {},
-  {
-    get(_, key) {
-      if (key === "__esModule") return true;
-      if (key === "default") return module.exports;
-      const fn = () => fn;
-      fn.prototype = {};
-      return fn;
-    },
+function noopDecorator() {
+  return noopDecorator;
+}
+
+noopDecorator.prototype = {};
+
+const stub = new Proxy(noopDecorator, {
+  get(_, key) {
+    if (key === "__esModule") return true;
+    if (key === "default") return stub;
+    return noopDecorator;
   },
-);
+  apply() {
+    return noopDecorator;
+  },
+});
+
+export default stub;
+
+// @nestjs/swagger
+export const ApiProperty = stub;
+export const ApiPropertyOptional = stub;
+
+// class-validator
+export const ArrayMinSize = stub;
+export const IsArray = stub;
+export const IsBoolean = stub;
+export const IsEmail = stub;
+export const IsEnum = stub;
+export const IsIn = stub;
+export const IsInt = stub;
+export const IsNotEmpty = stub;
+export const IsNumber = stub;
+export const IsObject = stub;
+export const IsOptional = stub;
+export const IsString = stub;
+export const IsUUID = stub;
+export const Matches = stub;
+export const Max = stub;
+export const MaxLength = stub;
+export const Min = stub;
+export const MinLength = stub;
+export const ValidateIf = stub;
+export const ValidateNested = stub;
+export const validate = stub;
+
+// class-transformer
+export const Exclude = stub;
+export const Expose = stub;
+export const plainToInstance = stub;
+export const Transform = stub;
+export const TransformationType = stub;
+export const Type = stub;
+
+// nestjs-i18n
+export const i18nValidationMessage = stub;

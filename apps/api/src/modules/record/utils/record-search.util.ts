@@ -6,6 +6,7 @@ type SearchableRecord = {
     value: unknown;
     property: { type: string };
   }>;
+  content?: { content: any } | null;
 };
 
 export function matchesSearch(record: SearchableRecord, term: string): boolean {
@@ -35,5 +36,33 @@ export function matchesSearch(record: SearchableRecord, term: string): boolean {
     }
   }
 
+  if (record.content?.content) {
+    const contentText = extractTextFromJson(record.content.content);
+    if (contentText.toLowerCase().includes(lower)) return true;
+  }
+
   return false;
+}
+
+function extractTextFromJson(json: any): string {
+  if (typeof json === "string") return json;
+  if (!json || typeof json !== "object") return "";
+
+  let text = "";
+
+  if (Array.isArray(json)) {
+    for (const item of json) {
+      text += " " + extractTextFromJson(item);
+    }
+  } else {
+    if (typeof json.text === "string") text += " " + json.text;
+    if (typeof json.title === "string") text += " " + json.title;
+
+    for (const key in json) {
+      if (key === "text" || key === "title") continue;
+      text += " " + extractTextFromJson(json[key]);
+    }
+  }
+
+  return text.trim();
 }

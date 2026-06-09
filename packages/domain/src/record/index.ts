@@ -6,5 +6,6 @@ export * from "./dto/record-filter-operators.constants";
 export * from "./dto/record-group.dto";
 export * from "./dto/record-response.dto";
 export * from "./dto/record-sort.dto";
+export * from "./dto/record-summary.enums";
 export * from "./dto/update-record.dto";
 export * from "./entities/record.entity";

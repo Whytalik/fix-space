@@ -1,8 +1,8 @@
 export { PropertyType } from "./property/property-type.enum";
-export { BlockType } from "./record-content/enums/block-type.enum";
 export { FilterLogic, FilterField, FilterOperator } from "./record/dto/record-filter.enums";
 export { OPERATORS_BY_PROPERTY_TYPE } from "./record/dto/record-filter-operators.constants";
 export { SortDirection, SortField } from "./record/dto/record-sort.enums";
+export { SummaryMetric } from "./record/dto/record-summary.enums";
 export { GroupField, DateGroupGranularity } from "./record/dto/record-group.enums";
 export {
   STATUS_CATEGORY_VALUES,
@@ -13,8 +13,9 @@ export {
 } from "./property/types/status.constants";
 export { DEFAULT_SELECT_PROPERTY } from "./property/types/select.constants";
 export { DEFAULT_RELATION_PROPERTY } from "./property/types/relation.constants";
-export { URL_HANDLING_VALUES, type UrlHandling, DEFAULT_TEXT_PROPERTY } from "./property/types/text.constants";
+export { DEFAULT_TEXT_PROPERTY } from "./property/types/text.constants";
 export { NUMBER_FORMAT_VALUES, type NumberFormat, DEFAULT_NUMBER_PROPERTY } from "./property/types/number.constants";
+export { DURATION_FORMAT_VALUES, type DurationFormat, DEFAULT_DURATION_PROPERTY } from "./property/types/duration.types";
 export {
   DATA_FORMATS_VALUES,
   type DataFormat,

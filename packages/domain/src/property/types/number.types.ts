@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
@@ -6,7 +6,7 @@ import { I18nTranslations } from "../../generated/i18n.generated";
 import { NUMBER_FORMAT_VALUES, type NumberFormat } from "./number.constants";
 export { NUMBER_FORMAT_VALUES, type NumberFormat } from "./number.constants";
 
-export class NumberProperty {
+export class NumberPropertyConfig {
   @IsNumber({}, { message: i18nValidationMessage<I18nTranslations>("validation.IS_NUMBER") })
   defaultValue: number;
 
@@ -16,6 +16,7 @@ export class NumberProperty {
   @IsOptional()
   @IsInt({ message: i18nValidationMessage<I18nTranslations>("validation.IS_INT") })
   @Min(0, { message: i18nValidationMessage<I18nTranslations>("validation.MIN") })
+  @Max(10, { message: i18nValidationMessage<I18nTranslations>("validation.MAX") })
   decimalPlaces?: number;
 
   @IsOptional()

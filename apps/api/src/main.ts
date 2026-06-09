@@ -8,9 +8,8 @@ import * as path from "path";
 import "reflect-metadata";
 
 import { AppModule } from "./app.module";
-import { AuthModule } from "./core/auth/auth.module";
 import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
-import { I18nValidationExceptionFilter, I18nValidationPipe } from "nestjs-i18n";
+import { I18nValidationPipe } from "nestjs-i18n";
 import { LoggingInterceptor } from "./common/logger/logging.interceptor";
 import { AppLogger } from "./common/logger/app-logger.service";
 
@@ -37,7 +36,7 @@ async function bootstrap() {
     .addCookieAuth("access_token")
     .build();
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig, { include: [AuthModule] });
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup("api/docs", app, document);
 
   app.use(cookieParser());
@@ -57,7 +56,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)), new LoggingInterceptor(appLogger));
-  app.useGlobalFilters(new I18nValidationExceptionFilter({ detailedErrors: true }), new GlobalExceptionFilter(appLogger));
+  app.useGlobalFilters(new GlobalExceptionFilter(appLogger));
   await app.listen(port);
   Logger.log(`API running at http://localhost:${port}`, "Bootstrap");
   Logger.log(`Swagger docs at http://localhost:${port}/api/docs`, "Bootstrap");

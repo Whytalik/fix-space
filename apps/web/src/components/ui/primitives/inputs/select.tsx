@@ -9,9 +9,9 @@ type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
 export function Select({ options, className = "", ...rest }: SelectProps) {
   return (
     <select className={`field-input ${className}`} {...rest}>
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
         </option>
       ))}
     </select>

@@ -3,7 +3,7 @@ import { Prisma } from "@fixspace/database";
 
 export const REQUIRE_OWNERSHIP_KEY = Symbol("REQUIRE_OWNERSHIP");
 
-const toCamelCase = (str: string) => str.charAt(0).toLowerCase() + str.slice(1);
+const toCamelCase = (input: string) => input.charAt(0).toLowerCase() + input.slice(1);
 
 export const PRISMA_MODEL_NAMES = new Set<string>(Object.values(Prisma.ModelName).map(toCamelCase));
 

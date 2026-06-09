@@ -3,17 +3,18 @@
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
 import { DropdownMenu } from "@/components/ui/overlays/dropdown-menu";
+import { DuplicationModal, type DuplicationOptions } from "@/components/ui/overlays/duplication-modal";
 import { useAppContext } from "@/context/app-context";
 import { useMutation } from "@tanstack/react-query";
 import { deleteDatabase as deleteDatabaseApi, duplicateDatabase } from "@/lib/api/database";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { DatabaseResponseDto } from "@fixspace/domain";
+import { useSpaceSettingsQuery } from "@/hooks/api/use-space-settings-query";
 import { Button } from "@/components/ui/primitives/actions/button";
-import { Copy, Lock, MoreHorizontal, Pencil, Trash } from "lucide-react";
+import { Copy, MoreHorizontal, Pencil, Trash, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useRef, useState } from "react";
 
 interface DatabaseItemProps {
@@ -28,13 +29,15 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
   const t = useTranslations("DatabaseItem");
   const pathname = usePathname();
   const router = useRouter();
-  const isActive = pathname.startsWith(`/database/${database.id}`);
+  const { data: settings } = useSpaceSettingsQuery();
+  const { currentDatabaseId, removeDatabaseFromSpace, addDatabaseToSpace } = useAppContext();
+  const isActive = pathname.startsWith(`/database/${database.id}`) || currentDatabaseId === database.id;
+  const showPresetIcon = database.isPreset && settings?.showPresetIndicators === true;
   const [showMenu, setShowMenu] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-
-  const { removeDatabaseFromSpace, addDatabaseToSpace } = useAppContext();
 
   const { setNodeRef, listeners, transform, transition, isDragging } = useSortable({
     id: database.id,
@@ -47,10 +50,13 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
     transition,
   };
 
-  async function handleDatabaseDuplicate(): Promise<void> {
-    const duplicated = await duplicateDatabase(spaceId, database.id);
-    addDatabaseToSpace(duplicated);
-  }
+  const { mutate: duplicateDatabaseAction } = useMutation({
+    mutationFn: (options: DuplicationOptions) => duplicateDatabase(spaceId, database.id, options),
+    onSuccess: (duplicated) => {
+      addDatabaseToSpace(duplicated);
+      setShowDuplicateModal(false);
+    },
+  });
 
   const { mutate: deleteDatabase, isPending: isDeleting } = useMutation({
     mutationFn: () => deleteDatabaseApi(spaceId, database.id),
@@ -107,32 +113,31 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
               <span className={`text-sm truncate min-w-0 ${isActive ? "text-ink" : "text-ink-secondary"}`}>
                 {database.title || database.name}
               </span>
-              {database.isPreset && <Lock size={11} className="shrink-0 text-ink-muted" />}
+              {showPresetIcon && <Zap size={11} className="shrink-0 text-accent/80" />}
             </>
           )}
         </Link>
 
-        {!collapsed &&
-          (database.isPreset ? null : (
-            <Button
-              ref={menuButtonRef}
-              variant="ghost"
-              size="icon"
-              onClick={handleMenuToggle}
-              className={`mr-1 shrink-0 transition-opacity duration-150 ${showMenu ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-            >
-              <MoreHorizontal size={14} />
-            </Button>
-          ))}
+        {!collapsed && (
+          <Button
+            ref={menuButtonRef}
+            variant="ghost"
+            size="icon"
+            onClick={handleMenuToggle}
+            className={`mr-1 shrink-0 transition-opacity duration-150 ${showMenu ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+          >
+            <MoreHorizontal size={14} />
+          </Button>
+        )}
       </div>
 
-      {!database.isPreset && showMenu && (
+      {showMenu && (
         <DropdownMenu
           anchorEl={menuButtonRef.current}
           onClose={() => setShowMenu(false)}
           items={[
             { label: t("edit"), icon: <Pencil size={14} />, onClick: () => router.push(`/database/${database.id}/edit`) },
-            { label: t("duplicate"), icon: <Copy size={14} />, onClick: handleDatabaseDuplicate },
+            { label: t("duplicate"), icon: <Copy size={14} />, onClick: () => setShowDuplicateModal(true) },
             {
               label: t("delete"),
               icon: <Trash size={14} />,
@@ -142,14 +147,24 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
           ]}
         />
       )}
-      {!database.isPreset && showDeleteConfirm && (
+      {showDeleteConfirm && (
         <ConfirmDialog
-          title={t("deleteDatabase")}
-          description={t("deleteDatabaseDesc")}
+          title={database.isPreset ? t("deletePresetDatabase") : t("deleteDatabase")}
+          description={database.isPreset ? t("deletePresetDatabaseDesc") : t("deleteDatabaseDesc")}
           confirmLabel={isDeleting ? t("deleting") : t("delete")}
           variant="danger"
           onConfirm={() => deleteDatabase()}
           onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
+      {showDuplicateModal && (
+        <DuplicationModal
+          target="database"
+          initialName={`${database.title || database.name} (Copy)`}
+          onConfirm={async (options) => {
+            duplicateDatabaseAction(options);
+          }}
+          onCancel={() => setShowDuplicateModal(false)}
         />
       )}
     </div>

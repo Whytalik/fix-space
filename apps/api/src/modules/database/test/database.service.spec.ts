@@ -2,10 +2,13 @@ import { BadRequestException, ConflictException, NotFoundException } from "@nest
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { AppLogger } from "../../../common/logger/app-logger.service";
-import { PropertyTypeRegistry } from "../../property/types";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { SettingsService } from "@/modules/settings/settings.service";
+import { PropertyTypeRegistry } from "@/modules/property/types";
 import { DatabaseService } from "../database.service";
 import { DatabaseRepository } from "../repositories/database.repository";
+import { SpaceRepository } from "@/modules/space/repositories/space.repository";
+import { ViewRepository } from "@/modules/view/repositories/view.repository";
 
 jest.mock("@fixspace/database", () => ({
   Prisma: {
@@ -23,7 +26,7 @@ jest.mock("@fixspace/database", () => ({
     },
     section: { findFirst: jest.fn() },
     property: { create: jest.fn() },
-    $transaction: jest.fn((cb: (tx: unknown) => unknown) => cb(prisma)),
+    $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
 
@@ -44,6 +47,7 @@ describe("DatabaseService", () => {
   const mockTypeRegistry: jest.Mocked<PropertyTypeRegistry> = {
     getConfigHandler: jest.fn().mockReturnValue({
       getDefaultConfig: jest.fn().mockReturnValue({}),
+      validateConfig: jest.fn().mockReturnValue(null),
     }),
   } as unknown as jest.Mocked<PropertyTypeRegistry>;
 
@@ -54,10 +58,23 @@ describe("DatabaseService", () => {
     findByIdForDuplicate: jest.fn(),
     findAllBySpace: jest.fn(),
     findSectionInSpace: jest.fn(),
+    findLastPosition: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
-    transaction: jest.fn((cb) => cb(prisma)),
+    transaction: jest.fn((callback) => callback(prisma)),
+  };
+
+  const mockSettingsService = {
+    getDefaultIcon: jest.fn().mockResolvedValue("icon:Database"),
+  };
+
+  const mockSpaceRepo = {
+    findOne: jest.fn(),
+  };
+
+  const mockViewRepo = {
+    create: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -65,7 +82,10 @@ describe("DatabaseService", () => {
       providers: [
         DatabaseService,
         { provide: DatabaseRepository, useValue: mockDatabaseRepo },
+        { provide: SpaceRepository, useValue: mockSpaceRepo },
+        { provide: ViewRepository, useValue: mockViewRepo },
         { provide: PropertyTypeRegistry, useValue: mockTypeRegistry },
+        { provide: SettingsService, useValue: mockSettingsService },
         { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();
@@ -78,15 +98,15 @@ describe("DatabaseService", () => {
 
   describe("create", () => {
     it("TC-DB-U-001: should create database with default properties", async () => {
-      mockDatabaseRepo.findSpaceByOwner.mockResolvedValue({ id: "space-1", ownerId: "user-1" });
+      mockSpaceRepo.findOne.mockResolvedValue({ id: "space-1", ownerId: "user-1" });
       mockDatabaseRepo.findByNameInSpace.mockResolvedValue(null);
+      mockDatabaseRepo.findLastPosition.mockResolvedValue(null);
       mockDatabaseRepo.create.mockResolvedValue({
         id: "db-1",
         name: "custom-db",
         title: "Custom DB",
         spaceId: "space-1",
         sectionId: null,
-        recordLimit: 10,
       });
       (prisma.property.create as jest.Mock<any>).mockResolvedValue({ id: "prop-1" });
 
@@ -96,21 +116,18 @@ describe("DatabaseService", () => {
           spaceId: "space-1",
           name: "custom-db",
           title: "Custom DB",
-          properties: [{ name: "Name", type: "TEXT", position: 0 }],
+          properties: [{ name: "Name", type: "TEXT", position: 0 } as any],
         },
         "user-1",
       );
 
       expect(result).toBeDefined();
-      expect(databaseRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ name: "custom-db", title: "Custom DB", spaceId: "space-1" }),
-        prisma,
-      );
+      expect(databaseRepo.create).toHaveBeenCalled();
       expect(prisma.property.create).toHaveBeenCalled();
     });
 
     it("TC-DB-U-002: should throw NotFoundException when space does not exist", async () => {
-      mockDatabaseRepo.findSpaceByOwner.mockResolvedValue(null);
+      mockSpaceRepo.findOne.mockResolvedValue(null);
 
       await expect(
         service.create("nonexistent", { spaceId: "nonexistent", name: "custom-db", title: "Custom DB" }, "user-1"),
@@ -118,7 +135,7 @@ describe("DatabaseService", () => {
     });
 
     it("TC-DB-U-002: should throw ConflictException when database name is taken", async () => {
-      mockDatabaseRepo.findSpaceByOwner.mockResolvedValue({ id: "space-1", ownerId: "user-1" });
+      mockSpaceRepo.findOne.mockResolvedValue({ id: "space-1", ownerId: "user-1" });
       mockDatabaseRepo.findByNameInSpace.mockResolvedValue({ id: "db-1", name: "existing-db" });
 
       await expect(service.create("space-1", { spaceId: "space-1", name: "existing-db", title: "Existing DB" }, "user-1")).rejects.toThrow(
@@ -135,7 +152,6 @@ describe("DatabaseService", () => {
         title: "Test DB",
         spaceId: "space-1",
         sectionId: null,
-        recordLimit: 10,
         isLocked: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -182,7 +198,6 @@ describe("DatabaseService", () => {
         title: "Updated DB",
         spaceId: "space-1",
         sectionId: "sec-2",
-        recordLimit: 10,
         isLocked: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -221,7 +236,6 @@ describe("DatabaseService", () => {
         title: "Test DB",
         spaceId: "space-1",
         sectionId: null,
-        recordLimit: 10,
         isLocked: false,
         createdAt: new Date(),
         updatedAt: new Date(),

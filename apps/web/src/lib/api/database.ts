@@ -1,4 +1,4 @@
-import type { DatabaseResponseDto } from "@fixspace/domain";
+import type { DatabaseResponseDto, DuplicateDatabaseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function updateDatabase(
@@ -9,8 +9,10 @@ export function updateDatabase(
     title?: string;
     icon?: string;
     sectionId?: string | null;
+    position?: number;
     recordLimit?: number | null;
     useDefaultTemplate?: boolean;
+    isLocked?: boolean;
   },
 ) {
   return apiFetch<DatabaseResponseDto>(`/databases/${databaseId}`, {
@@ -30,8 +32,9 @@ export function deleteDatabase(spaceId: string, databaseId: string) {
   return apiFetch(`/databases/${databaseId}`, { method: "DELETE" });
 }
 
-export function duplicateDatabase(spaceId: string, databaseId: string) {
+export function duplicateDatabase(spaceId: string, databaseId: string, options: DuplicateDatabaseDto = {}) {
   return apiFetch<DatabaseResponseDto>(`/databases/${databaseId}/duplicate`, {
     method: "POST",
+    body: options,
   });
 }

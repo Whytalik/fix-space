@@ -3,6 +3,10 @@
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {
+      "@/common/*": ["src/common/*"],
+      "@/core/*": ["src/core/*"]
+    }
   }
 }

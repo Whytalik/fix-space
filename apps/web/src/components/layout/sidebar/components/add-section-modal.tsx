@@ -2,10 +2,10 @@
 
 import { NameIconColorModal } from "@/components/ui/overlays/name-icon-color-modal";
 import { useAppContext } from "@/context/app-context";
-import { getSectionSettings } from "@/lib/api/settings";
+import { useSectionSettingsQuery } from "@/hooks/api/use-section-settings-query";
 import { updateSpace } from "@/lib/api/space";
 import { DEFAULT_SECTION_SETTINGS } from "@fixspace/domain/enums";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 type AddSectionModalProps = {
@@ -16,11 +16,7 @@ export function AddSectionModal({ onClose }: AddSectionModalProps) {
   const t = useTranslations("AddSection");
   const { space, updateSpaceInList } = useAppContext();
 
-  const { data: settings } = useQuery({
-    queryKey: ["settings", "section"],
-    queryFn: getSectionSettings,
-    initialData: DEFAULT_SECTION_SETTINGS,
-  });
+  const { data: settings = DEFAULT_SECTION_SETTINGS } = useSectionSettingsQuery();
 
   const { mutate: createSection, isPending: isCreating } = useMutation({
     mutationFn: async (values: { name: string; icon: string; color: string }) => {

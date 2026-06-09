@@ -24,7 +24,6 @@ enum PropertyType {
   RATING
   PROGRESS
   DURATION
-  BUTTON
 }
 
 enum AutomationTrigger {
@@ -66,6 +65,11 @@ enum ImportStatus {
   FAILED
 }
 
+enum FilterLogic {
+  AND
+  OR
+}
+
 // -----------------------------------------------------------------------------
 // Auth Models
 // -----------------------------------------------------------------------------
@@ -74,7 +78,7 @@ model User {
   id           String   @id @default(uuid())
   email        String   @unique
   username     String   @unique
-  passwordHash String
+  passwordHash String?
   icon         String?
   isVerified   Boolean  @default(false)
   createdAt    DateTime @default(now())
@@ -88,7 +92,6 @@ model User {
   notifications          Notification[]
   integrationConnections IntegrationConnection[]
   contentBlockLibrary    ContentBlockLibrary[]
-  onboardingProgress     OnboardingProgress?
 
   @@index([email])
 }
@@ -142,8 +145,8 @@ model GoogleAccount {
   googleId       String   @unique
   email          String
   accessToken    String
-  refreshToken   String
-  tokenExpiresAt DateTime
+  refreshToken   String?
+  tokenExpiresAt DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -185,20 +188,20 @@ model Notification {
 }
 
 model IntegrationConnection {
-  id                    String             @id @default(uuid())
-  userId                String
-  service               IntegrationService
-  name                  String
-  credentials           Json
-  status                IntegrationStatus  @default(ACTIVE)
-  syncInterval          Int                @default(5)
-  marketType            String?
-  externalAccountId     String?
-  lastSyncAt            DateTime?
-  lastSyncError         String?
-  consecutiveFailures   Int                @default(0)
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  id                  String             @id @default(uuid())
+  userId              String
+  service             IntegrationService
+  name                String
+  credentials         Json
+  status              IntegrationStatus  @default(ACTIVE)
+  syncInterval        Int                @default(5)
+  marketType          String?
+  externalAccountId   String?
+  lastSyncAt          DateTime?
+  lastSyncError       String?
+  consecutiveFailures Int                @default(0)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -262,10 +265,9 @@ model Database {
   type               String?
   key                String?
   icon               String?
-  recordLimit        Int?
+  position           Int      @default(0)
   isPreset           Boolean  @default(false)
   isLocked           Boolean  @default(false)
-  useDefaultTemplate Boolean  @default(true)
   enableStats        Boolean  @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -284,16 +286,17 @@ model Database {
   @@unique([spaceId, name])
   @@index([spaceId])
   @@index([sectionId])
+  @@index([position])
 }
 
 model PropertyGroup {
-  id           String   @id @default(uuid())
-  databaseId   String
-  name         String
-  position     Int      @default(0)
-  visibility   Json?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id         String   @id @default(uuid())
+  databaseId String
+  name       String
+  position   Int      @default(0)
+  visibility Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   database   Database   @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   properties Property[]
@@ -312,7 +315,6 @@ model Property {
   icon        String?
   hint        String?
   group       String?
-  isRequired  Boolean      @default(false)
   isVisible   Boolean      @default(true)
   isProtected Boolean      @default(false)
   createdAt   DateTime     @default(now())
@@ -344,11 +346,10 @@ model Record {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  database       Database            @relation(fields: [databaseId], references: [id], onDelete: Cascade)
-  sourceTemplate Template?           @relation(fields: [templateId], references: [id], onDelete: SetNull)
-  values         PropertyValue[]
-  content        RecordContent?
-  buttonExecutions ButtonExecution[]
+  database         Database          @relation(fields: [databaseId], references: [id], onDelete: Cascade)
+  sourceTemplate   Template?         @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  values           PropertyValue[]
+  content          RecordContent?
 
   @@index([databaseId])
   @@index([templateId])
@@ -381,19 +382,6 @@ model RecordContent {
 
   record    Record                  @relation(fields: [recordId], references: [id], onDelete: Cascade)
   snapshots RecordContentSnapshot[]
-}
-
-model ButtonExecution {
-  id          String   @id @default(uuid())
-  recordId    String
-  propertyId  String
-  executedAt  DateTime @default(now())
-
-  record Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
-
-  @@index([recordId])
-  @@index([propertyId])
-  @@index([executedAt])
 }
 
 // -----------------------------------------------------------------------------
@@ -442,21 +430,27 @@ model TemplatePropertyValue {
 // -----------------------------------------------------------------------------
 
 model View {
-  id            String   @id @default(uuid())
-  databaseId    String
-  name          String
-  isDefault     Boolean  @default(false)
-  isLocked      Boolean  @default(false)
-  pageSize      Int      @default(50)
-  filters       Json?
-  sort          Json?
-  groupBy       String?
-  hiddenColumns String[]
-  columnWidths  Json?
-  textWrap      Boolean  @default(false)
-  searchQuery   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                 String   @id @default(uuid())
+  databaseId         String
+  name               String
+  icon               String?
+  isDefault          Boolean  @default(false)
+  isLocked           Boolean  @default(false)
+  pageSize           Int      @default(50)
+  recordLimit        Int?
+  useDefaultTemplate Boolean  @default(true)
+  defaultTemplateId  String?
+  filters            Json?
+  filterLogic        FilterLogic @default(AND)
+  sort               Json?
+  groupBy            String?
+  hiddenColumns      String[]
+  columnWidths       Json?
+  textWrap           Boolean  @default(false)
+  searchQuery        String?
+  config             Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
 
@@ -563,22 +557,3 @@ model ContentBlockLibrary {
   @@index([userId])
 }
 
-// -----------------------------------------------------------------------------
-// Onboarding Models
-// -----------------------------------------------------------------------------
-
-model OnboardingProgress {
-  id               String   @id @default(uuid())
-  userId           String
-  tourStep         Int      @default(0)
-  tourCompleted    Boolean  @default(false)
-  checklistItems   Json     @default("[]")
-  contextualTips   String[] @default([])
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId])
-  @@index([userId])
-}

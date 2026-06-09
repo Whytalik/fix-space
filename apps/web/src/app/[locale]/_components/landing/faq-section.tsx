@@ -26,20 +26,20 @@ export function FaqSection() {
       <SectionHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} mb="mb-20" />
 
       <div className="max-w-3xl mx-auto flex flex-col gap-8 relative z-10">
-        {categories.map((cat) => {
-          const isCatOpen = openCategoryId === cat.key;
-          const Icon = cat.icon;
+        {categories.map((category) => {
+          const isCatOpen = openCategoryId === category.key;
+          const Icon = category.icon;
 
           return (
-            <div key={cat.key} className="flex flex-col">
+            <div key={category.key} className="flex flex-col">
               <button
-                onClick={() => toggleCategory(cat.key)}
+                onClick={() => toggleCategory(category.key)}
                 aria-expanded={isCatOpen}
-                className="group flex items-center justify-between py-2 text-left transition-all duration-300"
+                className="group flex items-center justify-between py-2 text-left transition-colors duration-150"
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all duration-500 ${
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors duration-150 ${
                       isCatOpen
                         ? "bg-accent/10 border-accent/40 text-accent shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]"
                         : "bg-surface border-stroke text-ink-muted group-hover:border-ink-muted"
@@ -48,9 +48,9 @@ export function FaqSection() {
                     <Icon size={16} />
                   </div>
                   <h3
-                    className={`type-landing-eyebrow-lg transition-colors duration-300 ${isCatOpen ? "text-ink" : "group-hover:text-ink"}`}
+                    className={`type-landing-eyebrow-lg transition-colors duration-150 ${isCatOpen ? "text-ink" : "group-hover:text-ink"}`}
                   >
-                    {t(`categories.${cat.key}.title`)}
+                    {t(`categories.${category.key}.title`)}
                   </h3>
                 </div>
                 <div className={`text-ink-muted transition-transform duration-500 ${isCatOpen ? "rotate-180 text-accent" : ""}`}>
@@ -68,14 +68,14 @@ export function FaqSection() {
                     className="overflow-hidden"
                   >
                     <div className="flex flex-col gap-3 mt-6 mb-8 pl-12 border-l border-stroke/50 ml-4">
-                      {cat.items.map((itemIdx) => {
-                        const id = `${cat.key}-${itemIdx}`;
+                      {category.items.map((itemIdx) => {
+                        const id = `${category.key}-${itemIdx}`;
                         const isQuestionOpen = openQuestionId === id;
 
                         return (
                           <div
                             key={id}
-                            className={`group rounded-2xl border transition-all duration-300 ${
+                            className={`group rounded-2xl border transition-colors duration-150 ${
                               isQuestionOpen
                                 ? "border-accent/40 bg-surface/50 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.3)]"
                                 : "border-stroke/60 bg-surface/20 hover:border-stroke hover:bg-surface/30"
@@ -84,7 +84,7 @@ export function FaqSection() {
                             <button
                               onClick={() => setOpenQuestionId(isQuestionOpen ? null : id)}
                               aria-expanded={isQuestionOpen}
-                              className="w-full flex items-center justify-between px-6 py-4.5 text-left transition-colors"
+                              className="w-full flex items-center justify-between px-6 py-4.5 text-left transition-colors duration-150"
                             >
                               <div className="flex items-center gap-3">
                                 {isQuestionOpen && (
@@ -93,11 +93,11 @@ export function FaqSection() {
                                   </motion.div>
                                 )}
                                 <span
-                                  className={`type-landing-faq-q transition-colors duration-300 ${
+                                  className={`type-landing-faq-q transition-colors duration-150 ${
                                     isQuestionOpen ? "text-ink" : "group-hover:text-ink"
                                   }`}
                                 >
-                                  {t(`categories.${cat.key}.items.${itemIdx}.q`)}
+                                  {t(`categories.${category.key}.items.${itemIdx}.q`)}
                                 </span>
                               </div>
                               <div
@@ -118,7 +118,7 @@ export function FaqSection() {
                                 >
                                   <div className="px-6 pb-6 pt-0 type-landing-faq-a">
                                     <div className="h-px w-8 bg-accent/20 mb-4" />
-                                    {t(`categories.${cat.key}.items.${itemIdx}.a`)}
+                                    {t(`categories.${category.key}.items.${itemIdx}.a`)}
                                   </div>
                                 </motion.div>
                               )}

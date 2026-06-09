@@ -6,7 +6,6 @@ export const tradingSystemProperties: InitPropertyDef[] = [
   {
     name: "Name",
     type: PropertyType.TEXT,
-    isRequired: true,
     position: 0,
     hint: "Trading system or strategy name",
   },

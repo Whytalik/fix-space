@@ -12,7 +12,7 @@ interface PaginationProps {
   recordsOfLabel?: (from: number, to: number, total: number) => string;
 }
 
-const PAGE_SIZE_OPTIONS: ComboboxOption[] = [
+export const PAGE_SIZE_OPTIONS: ComboboxOption[] = [
   { value: "10", label: "10" },
   { value: "25", label: "25" },
   { value: "50", label: "50" },
@@ -47,7 +47,7 @@ export function Pagination({
               <Combobox
                 options={PAGE_SIZE_OPTIONS}
                 value={String(pageSize)}
-                onChange={(v) => onPageSizeChange(Number(v))}
+                onChange={(value) => onPageSizeChange(Number(value))}
                 placement="top"
               />
             </div>
@@ -58,7 +58,7 @@ export function Pagination({
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
-            className="p-1 rounded-md border border-stroke bg-canvas hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            className="p-1 rounded-md border border-stroke bg-canvas hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150 cursor-pointer"
           >
             <ChevronLeft size={14} className="text-ink-secondary" />
           </button>
@@ -68,7 +68,7 @@ export function Pagination({
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="p-1 rounded-md border border-stroke bg-canvas hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+            className="p-1 rounded-md border border-stroke bg-canvas hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors duration-150 cursor-pointer"
           >
             <ChevronRight size={14} className="text-ink-secondary" />
           </button>

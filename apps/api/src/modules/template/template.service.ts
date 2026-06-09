@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
 import { CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@fixspace/domain";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { filterUndefined } from "../../common/utils/filter-undefined";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
 import { TemplateRepository } from "./repositories/template.repository";
 
 @Injectable()
@@ -20,7 +21,7 @@ export class TemplateService {
     const database = await this.templateRepo.findDatabaseByOwner(databaseId, userId);
 
     if (!database) {
-      throw new NotFoundException(`Database with id ${databaseId} not found`);
+      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
     }
 
     const properties = await this.templateRepo.findPropertiesByDatabase(databaseId);
@@ -39,8 +40,11 @@ export class TemplateService {
           name: dto.name ?? "Untitled",
           description: dto.description,
           icon: dto.icon,
+          namePattern: dto.namePattern,
           isDefault,
           position: dto.position ?? 0,
+          content: (dto.content as any) ?? {},
+          config: (dto.config as any) ?? {},
         },
         transaction,
       );
@@ -78,7 +82,7 @@ export class TemplateService {
     const template = await this.templateRepo.findByIdWithValues(id);
 
     if (!template) {
-      throw new NotFoundException(`Template with id ${id} not found`);
+      throw new NotFoundException(t("errors.TEMPLATE_NOT_FOUND"));
     }
 
     return new TemplateResponseDto(template as unknown as Partial<TemplateResponseDto>);
@@ -90,7 +94,7 @@ export class TemplateService {
     const existing = await this.templateRepo.findById(id);
 
     if (!existing) {
-      throw new NotFoundException(`Template with id ${id} not found`);
+      throw new NotFoundException(t("errors.TEMPLATE_NOT_FOUND"));
     }
 
     const template = await this.templateRepo.transaction(async (transaction) => {
@@ -103,8 +107,13 @@ export class TemplateService {
           name: updateTemplateDto.name,
           description: updateTemplateDto.description,
           icon: updateTemplateDto.icon,
+          namePattern: updateTemplateDto.namePattern,
           isDefault: updateTemplateDto.isDefault,
           position: updateTemplateDto.position,
+        },
+        jsonFields: {
+          content: updateTemplateDto.content,
+          config: updateTemplateDto.config,
         },
       });
 
@@ -133,7 +142,7 @@ export class TemplateService {
     const existing = await this.templateRepo.findById(id);
 
     if (!existing) {
-      throw new NotFoundException(`Template with id ${id} not found`);
+      throw new NotFoundException(t("errors.TEMPLATE_NOT_FOUND"));
     }
 
     const template = await this.templateRepo.transaction(async (transaction) => {
@@ -151,5 +160,38 @@ export class TemplateService {
 
     this.logger.log("Template removed", { id });
     return new TemplateResponseDto(template as unknown as Partial<TemplateResponseDto>);
+  }
+
+  async reset(id: string): Promise<TemplateResponseDto> {
+    this.logger.debug("Resetting template", { id });
+    const existing = await this.templateRepo.findById(id);
+    if (!existing) {
+      throw new NotFoundException(t("errors.TEMPLATE_NOT_FOUND"));
+    }
+
+    return this.templateRepo.transaction(async (transaction) => {
+      await transaction.templatePropertyValue.deleteMany({
+        where: { templateId: id },
+      });
+
+      const properties = await transaction.property.findMany({
+        where: { databaseId: existing.databaseId },
+      });
+
+      if (properties.length > 0) {
+        await transaction.templatePropertyValue.createMany({
+          data: properties.map((p) => ({
+            templateId: id,
+            propertyId: p.id,
+            value: Prisma.DbNull,
+          })),
+        });
+      }
+
+      const updated = await this.templateRepo.update(id, { content: {}, config: {} }, undefined, transaction);
+
+      this.logger.log("Template reset", { id });
+      return new TemplateResponseDto(updated as unknown as Partial<TemplateResponseDto>);
+    });
   }
 }

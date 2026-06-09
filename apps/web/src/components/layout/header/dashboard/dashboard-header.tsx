@@ -2,16 +2,15 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs";
-import { Search, Bell, LogOut, User, MessageSquare, Settings } from "lucide-react";
+import { Search, Bell, LogOut, Settings } from "lucide-react";
 import { useAppContext } from "@/context/app-context";
 import { useUIContext } from "@/context/ui-context";
-import { useLogout } from "@/hooks/useLogout";
-import { useEscape } from "@/hooks/useEscape";
-import { useClickOutside } from "@/hooks/useClickOutside";
+import { useLogout } from "@/hooks/auth/use-logout";
+import { useEscape } from "@/hooks/ui/use-escape";
+import { useClickOutside } from "@/hooks/ui/use-click-outside";
 import { Avatar } from "@/components/ui/primitives/display/avatar";
 import { Logo } from "@/components/ui/brand/logo";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
 import { SearchModal } from "./search-modal";
 import { NotificationsModal } from "./notifications-modal";
 import { DashboardHeaderSkeleton } from "./skeletons/dashboard-header-skeleton";
@@ -88,7 +87,7 @@ export function DashboardHeader() {
               onClick={() => setUserMenuOpen((prev) => !prev)}
               className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-surface transition-colors duration-150 cursor-pointer shrink-0"
             >
-              <Avatar initial={user.username[0] ?? ""} size="sm" />
+              <Avatar initial={user.username[0] ?? ""} image={user.icon ?? null} size="sm" />
               <div className="text-left">
                 <span className="text-sm font-medium text-ink leading-tight block">{user.username}</span>
                 <span className="type-hint leading-tight block truncate">{user.email}</span>
@@ -97,15 +96,6 @@ export function DashboardHeader() {
 
             {userMenuOpen && (
               <div className="absolute left-0 right-0 mt-2 origin-top rounded-2xl border border-stroke bg-elevated py-1.5 z-40 animate-dropdown">
-                <Link
-                  href="/profile"
-                  onClick={() => setUserMenuOpen(false)}
-                  className="flex items-center gap-2 px-3.5 py-2 type-menu-item hover:text-ink hover:bg-surface transition-colors duration-150 cursor-pointer"
-                >
-                  <User size={14} />
-                  <span>{t("profile")}</span>
-                </Link>
-
                 <button
                   type="button"
                   onClick={() => {
@@ -117,19 +107,6 @@ export function DashboardHeader() {
                   <Settings size={14} />
                   <span>{t("settings")}</span>
                 </button>
-
-                <a
-                  href="https://github.com/Whytalik/fix-space/issues/new"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setUserMenuOpen(false)}
-                  className="flex items-center gap-2 px-3.5 py-2 type-menu-item hover:text-ink hover:bg-surface transition-colors duration-150 cursor-pointer"
-                >
-                  <MessageSquare size={14} />
-                  <span>{t("leaveFeedback")}</span>
-                </a>
-
-                <div className="h-px bg-stroke/50 my-1" />
 
                 <button
                   type="button"

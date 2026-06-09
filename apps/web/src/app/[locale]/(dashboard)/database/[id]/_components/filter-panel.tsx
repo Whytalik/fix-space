@@ -1,19 +1,22 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/property-icon";
-import { Button } from "@/components/ui/primitives/actions/button";
-import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
-import { Combobox } from "@/components/ui/primitives/inputs/combobox";
-import { useState } from "react";
-import { DateInput } from "@/components/ui/primitives/inputs/date-input";
-import { NumberInput } from "@/components/ui/primitives/inputs/number-input";
-import { TextInput } from "@/components/ui/primitives/inputs/text-input";
-import { StatusPropertyInput } from "@/features/property/inputs/status-property-input";
-import type { StatusPropertyOption } from "@/features/property/inputs/status-property-input";
+import { PropertyIcon } from "./properties/ui/property-icon";
+import { PropertyHint } from "./properties/ui/property-hint";
+import { StatusProperty } from "./properties/fields/status-property";
+import type { StatusPropertyOption } from "./properties/fields/status-property";
 import { useDatabaseContext } from "@/context/database-context";
+import { Combobox } from "@/components/ui/primitives/inputs/combobox";
+import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
+import { NumberInput } from "@/components/ui/primitives/inputs/number-input";
+import { DateInput } from "@/components/ui/primitives/inputs/date-input";
+import { TextInput } from "@/components/ui/primitives/inputs/text-input";
+import { Button } from "@/components/ui/primitives/actions/button";
 import type { RecordFilterDto } from "@fixspace/domain";
 import { FilterField, FilterLogic, FilterOperator, OPERATORS_BY_PROPERTY_TYPE, PropertyType } from "@fixspace/domain/enums";
 import { X } from "lucide-react";
+import { useState, useRef } from "react";
+import { createPortal } from "react-dom";
+import { useFloatingPanel } from "@/hooks/ui/use-floating-panel";
 import { useTranslations } from "next-intl";
 
 const NO_VALUE_OPERATORS = new Set([
@@ -136,137 +139,132 @@ function FilterRow({ filter, index, onUpdate, onRemove, filterLogic, onToggleLog
       : [];
 
   return (
-    <div className="flex items-center gap-1.5">
-      {index > 0 ? (
-        <button
-          type="button"
-          onClick={onToggleLogic}
-          className="w-9 shrink-0 px-1.5 py-0.5 rounded-md text-xs border transition-colors bg-surface border-stroke text-ink-secondary hover:border-ink-muted hover:text-ink text-center"
-        >
-          {filterLogic === FilterLogic.AND ? "AND" : "OR"}
-        </button>
-      ) : (
-        <span className="w-9 shrink-0" />
-      )}
-
-      <div className="flex items-center gap-1 w-40 shrink-0">
-        {property && (
-          <span className="text-ink-muted shrink-0">
-            <PropertyIcon type={property.type} size={13} />
-          </span>
-        )}
-        <div className="flex-1 min-w-0">
-          <Combobox options={allOptions} value={selectedOptionValue()} onChange={handleOptionChange} size="sm" />
+    <div className="group relative flex items-center gap-2 p-1.5 rounded-lg border border-stroke bg-canvas-subtle/50 hover:bg-canvas-subtle hover:border-stroke-strong transition-colors duration-150">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="w-10 shrink-0 flex justify-center">
+          {index > 0 ? (
+            <button
+              type="button"
+              onClick={onToggleLogic}
+              className="px-1.5 py-0.5 rounded-md text-xs font-bold border transition-all duration-150 bg-surface border-stroke text-ink-secondary hover:border-accent hover:text-accent shadow-sm"
+            >
+              {filterLogic === FilterLogic.AND ? "AND" : "OR"}
+            </button>
+          ) : (
+            <div className="h-6 w-px bg-stroke/50" />
+          )}
         </div>
-      </div>
 
-      <div className="w-32 shrink-0">
-        <Combobox
-          options={operators}
-          value={filter.operator}
-          size="sm"
-          onChange={(operator) => {
-            onUpdate(index, {
-              operator: operator as FilterOperator,
-              value: NO_VALUE_OPERATORS.has(operator as FilterOperator) ? undefined : filter.value,
-              values: MULTI_VALUE_OPERATORS.has(operator as FilterOperator) ? (filter.values ?? []) : undefined,
-            });
-          }}
-        />
-      </div>
+        <div className="flex items-center gap-2 w-44 shrink-0">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="text-ink-muted shrink-0">
+              <PropertyIcon type={propType} size={14} />
+            </span>
+            <div className="flex-1">
+              <Combobox options={allOptions} value={selectedOptionValue()} onChange={handleOptionChange} size="sm" />
+            </div>
+          </div>
+          {property?.hint && <PropertyHint hint={property.hint} />}
+        </div>
 
-      {!noValue && isMulti && (
-        <div className="flex-1 min-w-0">
+        <div className="w-48 shrink-0">
           <Combobox
-            options={selectOptions}
-            value={filter.values ?? []}
-            onChange={(value) => onUpdate(index, { values: value })}
-            multiple
+            options={operators}
+            value={filter.operator}
             size="sm"
-            placeholder={t("pickValues")}
+            onChange={(operator) => {
+              onUpdate(index, {
+                operator: operator as FilterOperator,
+                value: NO_VALUE_OPERATORS.has(operator as FilterOperator) ? undefined : filter.value,
+                values: MULTI_VALUE_OPERATORS.has(operator as FilterOperator) ? (filter.values ?? []) : undefined,
+              });
+            }}
           />
         </div>
-      )}
 
-      {!noValue && !isMulti && propType === PropertyType.STATUS && (
         <div className="flex-1 min-w-0">
-          <StatusPropertyInput
-            options={statusOptions}
-            value={
-              filter.value != null
-                ? statusOptions.find((option) => option.name === String(filter.value))
-                  ? {
-                      label: String(filter.value),
-                      color: statusOptions.find((option) => option.name === String(filter.value))!.color,
-                    }
+          {!noValue && isMulti && (
+            <Combobox
+              options={selectOptions}
+              value={filter.values ?? []}
+              onChange={(value) => onUpdate(index, { values: value })}
+              multiple
+              size="sm"
+              placeholder={t("pickValues")}
+            />
+          )}
+
+          {!noValue && !isMulti && propType === PropertyType.STATUS && (
+            <StatusProperty
+              options={statusOptions}
+              value={
+                filter.value != null
+                  ? statusOptions.find((option) => option.name === String(filter.value))
+                    ? {
+                        label: String(filter.value),
+                        color: statusOptions.find((option) => option.name === String(filter.value))!.color,
+                      }
+                    : null
                   : null
-                : null
-            }
-            onChange={(value) => onUpdate(index, { value: value?.label ?? undefined })}
-            placeholder={t("pickStatus")}
-            size="sm"
-          />
-        </div>
-      )}
+              }
+              onChange={(value) => onUpdate(index, { value: value?.label ?? undefined })}
+              placeholder={t("pickStatus")}
+              size="sm"
+            />
+          )}
 
-      {!noValue && !isMulti && propType === PropertyType.SELECT && (
-        <div className="flex-1 min-w-0">
-          <Combobox
-            options={selectOptions}
-            value={typeof filter.value === "string" ? filter.value : ""}
-            onChange={(value) => onUpdate(index, { value: value || undefined })}
-            nullable
-            size="sm"
-            placeholder={t("pickOption")}
-          />
-        </div>
-      )}
+          {!noValue && !isMulti && propType === PropertyType.SELECT && (
+            <Combobox
+              options={selectOptions}
+              value={typeof filter.value === "string" ? filter.value : ""}
+              onChange={(value) => onUpdate(index, { value: value || undefined })}
+              nullable
+              size="sm"
+              placeholder={t("pickOption")}
+            />
+          )}
 
-      {!noValue && !isMulti && propType === PropertyType.NUMBER && (
-        <div className="w-28">
-          <NumberInput
-            value={filter.value != null ? Number(filter.value) : null}
-            onChange={(value) => onUpdate(index, { value: value ?? undefined })}
-            placeholder={t("value")}
-            size="sm"
-          />
-        </div>
-      )}
+          {!noValue && !isMulti && propType === PropertyType.NUMBER && (
+            <NumberInput
+              value={filter.value != null ? Number(filter.value) : null}
+              onChange={(value) => onUpdate(index, { value: value ?? undefined })}
+              placeholder={t("value")}
+              size="sm"
+            />
+          )}
 
-      {!noValue && !isMulti && propType === PropertyType.DATE && (
-        <div className="flex-1 min-w-0">
-          <DateInput
-            value={typeof filter.value === "string" ? filter.value : ""}
-            onChange={(value) => onUpdate(index, { value: value || undefined })}
-            size="sm"
-          />
-        </div>
-      )}
+          {!noValue && !isMulti && propType === PropertyType.DATE && (
+            <DateInput
+              value={typeof filter.value === "string" ? filter.value : ""}
+              onChange={(value) => onUpdate(index, { value: value || undefined })}
+              size="sm"
+            />
+          )}
 
-      {!noValue && !isMulti && propType === PropertyType.TEXT && (
-        <div className="flex-1 min-w-0">
-          <TextInput
-            value={typeof filter.value === "string" ? filter.value : ""}
-            onChange={(v) => onUpdate(index, { value: v || undefined })}
-            placeholder={t("value")}
-            size="sm"
-          />
+          {!noValue && !isMulti && propType === PropertyType.TEXT && (
+            <TextInput
+              value={typeof filter.value === "string" ? filter.value : ""}
+              onChange={(value) => onUpdate(index, { value: value || undefined })}
+              placeholder={t("value")}
+              size="sm"
+            />
+          )}
         </div>
-      )}
+      </div>
 
       <button
         type="button"
         onClick={() => onRemove(index)}
-        className="p-1 rounded text-ink-muted hover:text-error hover:bg-error/10 transition-colors"
+        className="p-1.5 rounded-lg text-ink-muted hover:text-error hover:bg-error/10 opacity-0 group-hover:opacity-100 transition-all duration-150 shrink-0"
       >
-        <X size={13} />
+        <X size={14} />
       </button>
     </div>
   );
 }
 
-export function FilterPanel() {
-  const { properties, filters, setFilters, filterLogic, setFilterLogic } = useDatabaseContext();
+export function FilterPanelContent() {
+  const { properties, filters, setFilters, filterLogic, setFilterLogic, isViewLocked } = useDatabaseContext();
   const [hasPendingRow, setHasPendingRow] = useState(false);
   const t = useTranslations("FilterPanel");
 
@@ -277,7 +275,7 @@ export function FilterPanel() {
   ];
 
   function confirmPendingFilter(value: string) {
-    if (!value) return;
+    if (!value || isViewLocked) return;
     let newFilter: RecordFilterDto;
     if (value.startsWith("meta:")) {
       const field = value.slice(5) as FilterField;
@@ -305,34 +303,38 @@ export function FilterPanel() {
   }
 
   function updateFilter(index: number, patch: Partial<RecordFilterDto>) {
+    if (isViewLocked) return;
     setFilters(filters.map((filter, i) => (i === index ? { ...filter, ...patch } : filter)));
   }
 
   function removeFilter(index: number) {
-    setFilters(filters.filter((_, i) => i !== index));
+    if (isViewLocked) return;
+    setFilters(filters.filter((filter, filterIndex) => filterIndex !== index));
   }
 
   return (
-    <div className="absolute top-full right-0 mt-1 z-modal bg-elevated border border-stroke rounded-lg shadow-lg p-3 w-[680px] max-w-[calc(100vw-2rem)] flex flex-col gap-2">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-medium text-ink-secondary uppercase tracking-wide">{t("title")}</span>
-        {(filters.length > 0 || hasPendingRow) && (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between px-1">
+        <span className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">
+          {t("title")} {isViewLocked && <span className="text-ink-muted">({t("locked") || "Locked"})</span>}
+        </span>
+        {(filters.length > 0 || hasPendingRow) && !isViewLocked && (
           <button
             type="button"
             onClick={() => {
               setFilters([]);
               setHasPendingRow(false);
             }}
-            className="text-xs text-ink-muted hover:text-error transition-colors"
+            className="text-xs font-medium text-accent hover:text-accent-hover transition-colors duration-150"
           >
             {t("clearAll")}
           </button>
         )}
       </div>
 
-      {filters.length === 0 && !hasPendingRow && <p className="text-xs text-ink-muted py-1">{t("noRules")}</p>}
+      {filters.length === 0 && !hasPendingRow && <p className="text-xs text-ink-muted py-1 px-1">{t("noRules")}</p>}
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-2">
         {filters.map((filter, i) => (
           <FilterRow
             key={i}
@@ -341,12 +343,12 @@ export function FilterPanel() {
             onUpdate={updateFilter}
             onRemove={removeFilter}
             filterLogic={filterLogic}
-            onToggleLogic={() => setFilterLogic(filterLogic === FilterLogic.AND ? FilterLogic.OR : FilterLogic.AND)}
+            onToggleLogic={() => !isViewLocked && setFilterLogic(filterLogic === FilterLogic.AND ? FilterLogic.OR : FilterLogic.AND)}
           />
         ))}
 
         {hasPendingRow && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 px-1">
             <span className="w-9 shrink-0" />
             <div className="w-40 shrink-0">
               <Combobox options={allOptions} value="" size="sm" placeholder={t("selectProperty")} onChange={confirmPendingFilter} />
@@ -354,7 +356,7 @@ export function FilterPanel() {
             <button
               type="button"
               onClick={() => setHasPendingRow(false)}
-              className="p-1 rounded text-ink-muted hover:text-error hover:bg-error/10 transition-colors"
+              className="p-1 rounded text-ink-muted hover:text-error hover:bg-error/10 transition-colors duration-150"
             >
               <X size={13} />
             </button>
@@ -362,9 +364,42 @@ export function FilterPanel() {
         )}
       </div>
 
-      <Button variant="secondary" size="sm" onClick={() => setHasPendingRow(true)} disabled={hasPendingRow} className="mt-1 self-start">
-        + {t("addFilter")}
-      </Button>
+      {!isViewLocked && (
+        <Button variant="secondary" size="sm" onClick={() => setHasPendingRow(true)} disabled={hasPendingRow} className="self-start">
+          {t("addFilter")}
+        </Button>
+      )}
     </div>
+  );
+}
+
+interface FilterPanelProps {
+  anchorEl?: HTMLElement | null;
+  onClose: () => void;
+}
+
+export function FilterPanel({ anchorEl, onClose }: FilterPanelProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  useFloatingPanel(containerRef, onClose, anchorEl);
+
+  if (!anchorEl) return null;
+
+  const rect = anchorEl.getBoundingClientRect();
+  const panelStyle: React.CSSProperties = {
+    position: "fixed",
+    top: rect.bottom + 4,
+    right: window.innerWidth - rect.right,
+    zIndex: 9999,
+  };
+
+  return createPortal(
+    <div
+      ref={containerRef}
+      style={panelStyle}
+      className="bg-elevated border border-stroke rounded-lg shadow-lg p-3 w-[680px] max-w-[calc(100vw-2rem)] flex flex-col gap-2"
+    >
+      <FilterPanelContent />
+    </div>,
+    document.body,
   );
 }

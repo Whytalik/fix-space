@@ -1,9 +1,8 @@
 "use client";
 
-import { PropertyIcon } from "@/features/property/property-icon";
+import { PropertyIcon } from "../../_components/properties/ui/property-icon";
 import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
 import { Button } from "@/components/ui/primitives/actions/button";
-import { TabSwitcher, type TabItem } from "@/components/ui/primitives/navigation/tab-switcher";
 import {
   closestCenter,
   DndContext,
@@ -19,20 +18,15 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-ki
 import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain";
 import { Check, ChevronRight, GripVertical, Plus, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { GroupHeader, PropertyRow } from "./property-list-items";
 import { buildFlatItems, flatItemsToProperties, moveGroupBlock, type FlatItem, type GroupItem, type PropItem } from "./property-list.utils";
-import { EditTableView } from "./edit-table-view";
+import { GroupHeader, PropertyRow } from "./property-list-items";
 import { useTranslations } from "next-intl";
-
-type PropertiesSubTab = "record" | "table";
-const PROPERTIES_TABS: TabItem<PropertiesSubTab>[] = [
-  { id: "record", label: "record" },
-  { id: "table", label: "table" },
-];
 
 type EditPropertiesSectionProps = {
   properties: PropertyResponseDto[];
   databases?: DatabaseResponseDto[];
+  isLocked?: boolean;
+  isPreset?: boolean;
   onAddProperty: () => void;
   onEditProperty: (property: PropertyResponseDto) => void;
   onDeleteProperty: (propId: string) => void;
@@ -43,13 +37,14 @@ type EditPropertiesSectionProps = {
 export function EditPropertiesSection({
   properties,
   databases,
+  isLocked,
+  isPreset,
   onAddProperty,
   onEditProperty,
   onDeleteProperty,
   onPropertiesChange,
   onPropertyUpdate,
 }: EditPropertiesSectionProps) {
-  const [subTab, setSubTab] = useState<PropertiesSubTab>("record");
   const [flatItems, setFlatItems] = useState<FlatItem[]>(() => buildFlatItems(properties));
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -57,6 +52,7 @@ export function EditPropertiesSection({
   const [editGroupValue, setEditGroupValue] = useState("");
   const [addingGroup, setAddingGroup] = useState(false);
   const [pendingDeletePropId, setPendingDeletePropId] = useState<string | null>(null);
+  const [pendingDeleteGroupName, setPendingDeleteGroupName] = useState<string | null>(null);
   const [newGroupName, setNewGroupName] = useState("");
   const newGroupInputRef = useRef<HTMLInputElement>(null);
   const wasCollapsedRef = useRef(false);
@@ -74,7 +70,7 @@ export function EditPropertiesSection({
     if (addingGroup) newGroupInputRef.current?.focus();
   }, [addingGroup]);
 
-  const visibleItems = useMemo(() => {
+  const visibleItems: FlatItem[] = (() => {
     if (collapsedGroups.size === 0) return flatItems;
     const result: FlatItem[] = [];
     let collapsed = false;
@@ -87,7 +83,7 @@ export function EditPropertiesSection({
       }
     }
     return result;
-  }, [flatItems, collapsedGroups]);
+  })();
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -125,16 +121,16 @@ export function EditPropertiesSection({
 
     if (!over || active.id === over.id) return;
 
-    const activeStr = String(active.id);
-    const overStr = String(over.id);
+    const activeId = String(active.id);
+    const overId = String(over.id);
 
     let newItems: FlatItem[];
 
-    if (activeStr.startsWith("group:")) {
-      newItems = moveGroupBlock(flatItems, activeStr, overStr);
+    if (activeId.startsWith("group:")) {
+      newItems = moveGroupBlock(flatItems, activeId, overId);
     } else {
-      const oldIdx = flatItems.findIndex((i) => i.id === activeStr);
-      const newIdx = flatItems.findIndex((i) => i.id === overStr);
+      const oldIdx = flatItems.findIndex((item) => item.id === activeId);
+      const newIdx = flatItems.findIndex((item) => item.id === overId);
       newItems = arrayMove(flatItems, oldIdx, newIdx);
     }
 
@@ -173,10 +169,10 @@ export function EditPropertiesSection({
     const trimmed = editGroupValue.trim();
     setEditingGroupId(null);
     if (!trimmed || trimmed === oldName) return;
-    if (flatItems.some((i) => i.kind === "group" && (i as GroupItem).name === trimmed)) return;
+    if (flatItems.some((item) => item.kind === "group" && (item as GroupItem).name === trimmed)) return;
 
-    const newItems = flatItems.map((i) =>
-      i.id === `group:${oldName}` ? { kind: "group" as const, id: `group:${trimmed}`, name: trimmed } : i,
+    const newItems = flatItems.map((item) =>
+      item.id === `group:${oldName}` ? { kind: "group" as const, id: `group:${trimmed}`, name: trimmed } : item,
     );
     if (collapsedGroups.has(oldName)) {
       setCollapsedGroups((prev) => {
@@ -198,9 +194,11 @@ export function EditPropertiesSection({
   }
 
   function handleDeleteGroup(name: string) {
-    const orphans = flatItems.filter((i) => i.kind === "property" && ((i as PropItem).prop.group ?? "") === name);
+    const orphans = flatItems.filter((item) => item.kind === "property" && ((item as PropItem).prop.group ?? "") === name);
     const newItems = [
-      ...flatItems.filter((i) => i.id !== `group:${name}` && !(i.kind === "property" && ((i as PropItem).prop.group ?? "") === name)),
+      ...flatItems.filter(
+        (item) => item.id !== `group:${name}` && !(item.kind === "property" && ((item as PropItem).prop.group ?? "") === name),
+      ),
       ...orphans,
     ];
     setCollapsedGroups((prev) => {
@@ -222,7 +220,7 @@ export function EditPropertiesSection({
   function handleAddGroup() {
     const trimmed = newGroupName.trim();
     if (!trimmed) return;
-    if (flatItems.some((i) => i.kind === "group" && (i as GroupItem).name === trimmed)) {
+    if (flatItems.some((item) => item.kind === "group" && (item as GroupItem).name === trimmed)) {
       setNewGroupName("");
       setAddingGroup(false);
       return;
@@ -235,27 +233,24 @@ export function EditPropertiesSection({
   function handleDeleteProperty() {
     if (!pendingDeletePropId) return;
     const propId = pendingDeletePropId.slice("prop:".length);
-    const newItems = flatItems.filter((i) => i.id !== pendingDeletePropId);
+    const newItems = flatItems.filter((item) => item.id !== pendingDeletePropId);
     setPendingDeletePropId(null);
     setFlatItems(newItems);
     onPropertiesChange(flatItemsToProperties(newItems));
     onDeleteProperty(propId);
   }
 
-  const activeItem = flatItems.find((i) => i.id === activeId) ?? null;
+  const activeItem = flatItems.find((item) => item.id === activeId) ?? null;
 
-  const { groupCountMap, totalProps } = useMemo(() => {
-    const map = new Map<string, number>();
-    let total = 0;
-    for (const item of flatItems) {
-      if (item.kind === "property") {
-        const group = (item as PropItem).prop.group ?? "";
-        map.set(group, (map.get(group) ?? 0) + 1);
-        total++;
-      }
+  const groupCountMap = new Map<string, number>();
+  let totalProps = 0;
+  for (const item of flatItems) {
+    if (item.kind === "property") {
+      const group = (item as PropItem).prop.group ?? "";
+      groupCountMap.set(group, (groupCountMap.get(group) ?? 0) + 1);
+      totalProps++;
     }
-    return { groupCountMap: map, totalProps: total };
-  }, [flatItems]);
+  }
 
   return (
     <section>
@@ -265,31 +260,26 @@ export function EditPropertiesSection({
             {t("properties")}
             {totalProps > 0 && <span className="ml-2 text-ink-muted font-normal text-sm">({totalProps})</span>}
           </h2>
-          {subTab === "record" && (
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" className="flex items-center gap-1.5" onClick={() => setAddingGroup(true)}>
-                <Plus size={13} />
-                {t("addGroup")}
-              </Button>
-              <Button variant="secondary" size="sm" className="flex items-center gap-1.5" onClick={onAddProperty}>
-                <Plus size={13} />
-                {t("addProperty")}
-              </Button>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="flex items-center gap-1.5"
+              onClick={() => setAddingGroup(true)}
+              disabled={isLocked}
+            >
+              <Plus size={13} />
+              {t("addGroup")}
+            </Button>
+            <Button variant="secondary" size="sm" className="flex items-center gap-1.5" onClick={onAddProperty} disabled={isLocked}>
+              <Plus size={13} />
+              {t("addProperty")}
+            </Button>
+          </div>
         </div>
-        <TabSwitcher
-          items={PROPERTIES_TABS.map((tab) => ({ ...tab, label: t(tab.label as unknown as string) }))}
-          active={subTab}
-          onChange={setSubTab}
-        />
       </div>
 
-      {subTab === "table" && (
-        <EditTableView properties={properties} onPropertiesChange={onPropertiesChange} onPropertyUpdate={onPropertyUpdate} />
-      )}
-
-      {subTab === "record" && addingGroup && (
+      {addingGroup && (
         <div className="mb-3 flex items-center gap-2">
           <input
             ref={newGroupInputRef}
@@ -322,11 +312,11 @@ export function EditPropertiesSection({
         </div>
       )}
 
-      {subTab === "record" && flatItems.length === 0 ? (
+      {flatItems.length === 0 ? (
         <div className="rounded-lg border border-dashed border-stroke flex items-center justify-center py-8">
           <p className="text-sm text-ink-muted">{t("noProperties")}</p>
         </div>
-      ) : subTab === "record" ? (
+      ) : (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -335,10 +325,15 @@ export function EditPropertiesSection({
           onDragEnd={handleDragEnd}
         >
           <div className="rounded-lg border border-stroke overflow-hidden">
-            <SortableContext items={visibleItems.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+            <SortableContext items={visibleItems.map((item) => item.id)} strategy={verticalListSortingStrategy}>
               {visibleItems.map((item) => {
                 if (item.kind === "group") {
                   const groupItem = item as GroupItem;
+                  const isGeneral = groupItem.name === "General";
+                  const hasProtected = properties.some(
+                    (p) => (p.group === groupItem.name || (!p.group && isGeneral)) && (p.isProtected || p.name === "Name"),
+                  );
+
                   return (
                     <GroupHeader
                       key={groupItem.id}
@@ -347,12 +342,13 @@ export function EditPropertiesSection({
                       isCollapsed={collapsedGroups.has(groupItem.name)}
                       isEditing={editingGroupId === groupItem.id}
                       editValue={editGroupValue}
+                      isLocked={isLocked || (isGeneral && hasProtected)}
                       onToggleCollapse={() => handleToggleCollapse(groupItem.name)}
                       onEditStart={() => handleEditStart(groupItem.id, groupItem.name)}
                       onEditChange={setEditGroupValue}
                       onEditConfirm={() => handleRenameGroup(groupItem.name)}
                       onEditCancel={() => setEditingGroupId(null)}
-                      onDelete={() => handleDeleteGroup(groupItem.name)}
+                      onDelete={() => setPendingDeleteGroupName(groupItem.name)}
                     />
                   );
                 }
@@ -390,15 +386,28 @@ export function EditPropertiesSection({
             )}
           </DragOverlay>
         </DndContext>
-      ) : null}
+      )}
       {pendingDeletePropId && (
         <ConfirmDialog
           title={t("deleteProperty")}
-          description={t("deletePropertyDesc")}
+          description={isPreset ? t("deletePresetPropertyDesc") : t("deletePropertyDesc")}
           confirmLabel={t("delete")}
           variant="danger"
           onConfirm={handleDeleteProperty}
           onCancel={() => setPendingDeletePropId(null)}
+        />
+      )}
+      {pendingDeleteGroupName && (
+        <ConfirmDialog
+          title={t("deleteGroup")}
+          description={t("deleteGroupDesc")}
+          confirmLabel={t("delete")}
+          variant="danger"
+          onConfirm={() => {
+            handleDeleteGroup(pendingDeleteGroupName);
+            setPendingDeleteGroupName(null);
+          }}
+          onCancel={() => setPendingDeleteGroupName(null)}
         />
       )}
     </section>

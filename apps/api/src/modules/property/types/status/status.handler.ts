@@ -2,13 +2,12 @@ import { Injectable } from "@nestjs/common";
 import {
   DEFAULT_STATUS_PROPERTY,
   FilterOperator,
+  isStatusPropertyConfig,
   OPERATORS_BY_PROPERTY_TYPE,
   PropertyType,
   STATUS_CATEGORY_VALUES,
-  STATUS_OPTION_COLOR_VALUES,
   StatusCategory,
-  StatusOptionColor,
-  StatusProperty,
+  StatusPropertyConfig,
 } from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
 
@@ -16,8 +15,11 @@ import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } fro
 export class StatusHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.STATUS;
 
-  private parseConfig(config: Record<string, unknown>): StatusProperty {
-    return config as unknown as StatusProperty;
+  private parseConfig(config: Record<string, unknown>): StatusPropertyConfig {
+    if (!isStatusPropertyConfig(config)) {
+      throw new Error(`Invariant: expected StatusPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
   }
 
   getDefaultConfig(): Record<string, unknown> {
@@ -35,16 +37,20 @@ export class StatusHandler implements PropertyConfigHandler, PropertyValueHandle
       if (!Array.isArray(config.categories)) {
         errors.push("categories must be an array");
       } else {
-        (config.categories as unknown[]).forEach((cat, i) => {
-          if (typeof cat !== "object" || cat === null) {
+        (config.categories as unknown[]).forEach((rawCategory, i) => {
+          if (typeof rawCategory !== "object" || rawCategory === null) {
             errors.push(`categories[${i}] must be an object`);
             return;
           }
 
-          const category = cat as Record<string, unknown>;
+          const category = rawCategory as Record<string, unknown>;
 
           if (!STATUS_CATEGORY_VALUES.includes(category.category as StatusCategory)) {
             errors.push(`categories[${i}].category must be one of: ${STATUS_CATEGORY_VALUES.join(", ")}`);
+          }
+
+          if (category.label !== undefined && typeof category.label !== "string") {
+            errors.push(`categories[${i}].label must be a string`);
           }
 
           if (typeof category.defaultOption !== "string") {
@@ -54,23 +60,23 @@ export class StatusHandler implements PropertyConfigHandler, PropertyValueHandle
           if (!Array.isArray(category.options)) {
             errors.push(`categories[${i}].options must be an array`);
           } else {
-            (category.options as unknown[]).forEach((opt, j) => {
-              if (typeof opt !== "object" || opt === null) {
+            (category.options as unknown[]).forEach((option, j) => {
+              if (typeof option !== "object" || option === null) {
                 errors.push(`categories[${i}].options[${j}] must be an object`);
                 return;
               }
 
-              const option = opt as Record<string, unknown>;
+              const typedOption = option as Record<string, unknown>;
 
-              if (typeof option.name !== "string") {
+              if (typeof typedOption.name !== "string") {
                 errors.push(`categories[${i}].options[${j}].name must be a string`);
               }
 
-              if (!STATUS_OPTION_COLOR_VALUES.includes(option.color as StatusOptionColor)) {
-                errors.push(`categories[${i}].options[${j}].color must be a valid status color`);
+              if (typeof typedOption.color !== "string") {
+                errors.push(`categories[${i}].options[${j}].color must be a string`);
               }
 
-              if (option.icon !== undefined && typeof option.icon !== "string") {
+              if (typedOption.icon !== undefined && typeof typedOption.icon !== "string") {
                 errors.push(`categories[${i}].options[${j}].icon must be a string`);
               }
             });
@@ -113,12 +119,7 @@ export class StatusHandler implements PropertyConfigHandler, PropertyValueHandle
     return value === null || value === undefined || value === "";
   }
 
-  convertFrom(
-    value: unknown,
-    _fromType: PropertyType,
-    _fromConfig: Record<string, unknown>,
-    targetConfig: Record<string, unknown>,
-  ): unknown {
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
     if (value === null || value === undefined) return this.getDefaultValue(targetConfig);
     const stringValue = typeof value === "string" ? value : String(value);
     const { categories } = this.parseConfig(targetConfig);

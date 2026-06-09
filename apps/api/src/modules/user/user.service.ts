@@ -1,14 +1,14 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { Prisma, type User } from "@fixspace/database";
-import { ChangePasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { filterUndefined } from "../../common/utils/filter-undefined";
-import { t } from "../../common/utils/i18n.helper";
-import { verifyPassword, hashPassword } from "../../common/utils/password";
+import { ChangePasswordDto, DeleteAccountDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
+import { verifyPassword, hashPassword } from "@/common/utils/password";
 import { StorageService } from "./providers/storage.service";
 import { UserRepository } from "./repositories/user.repository";
-import { TokenService } from "../../core/auth/token.service";
-import { MailService } from "../../core/mail/mail.service";
+import { TokenService } from "@/core/auth/token.service";
+import { MailService } from "@/core/mail/mail.service";
 
 @Injectable()
 export class UserService {
@@ -53,6 +53,10 @@ export class UserService {
 
     const user = await this.userRepo.findByIdOrThrow(id);
 
+    if (!user.passwordHash) {
+      throw new UnauthorizedException(t("errors.CURRENT_PASSWORD_INCORRECT"));
+    }
+
     const isValid = await verifyPassword(dto.currentPassword, user.passwordHash);
     if (!isValid) {
       throw new UnauthorizedException(t("errors.CURRENT_PASSWORD_INCORRECT"));
@@ -88,14 +92,30 @@ export class UserService {
     return new UserResponseDto(user);
   }
 
-  async remove(id: string): Promise<UserResponseDto> {
+  async remove(id: string, dto: DeleteAccountDto): Promise<{ message: string }> {
     this.logger.debug("Removing user", { id });
 
-    await this.storageService.removeAvatarFiles(id);
+    const user = await this.userRepo.findByIdOrThrow(id);
 
-    const user = await this.userRepo.delete(id);
+    if (user.passwordHash) {
+      if (!dto.password) {
+        throw new UnauthorizedException(t("errors.INVALID_CREDENTIALS"));
+      }
+      const isValid = await verifyPassword(dto.password, user.passwordHash);
+      if (!isValid) {
+        throw new UnauthorizedException(t("errors.INVALID_CREDENTIALS"));
+      }
+    }
+
+    const email = user.email;
+
+    await this.storageService.removeAvatarFiles(id);
+    await this.userRepo.delete(id);
 
     this.logger.log("User removed", { id });
-    return new UserResponseDto(user);
+
+    await this.mailService.sendAccountDeletionNotification(email);
+
+    return { message: "Account deleted successfully" };
   }
 }

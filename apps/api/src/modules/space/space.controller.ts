@@ -1,20 +1,25 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { CreateSpaceDto, SpaceResponseDto, UpdateSpaceDto } from "@fixspace/domain";
-import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
-import { RequireOwnership } from "../../core/auth/decorators/required-ownership.decorator";
-import { ResourceOwnerGuard } from "../../core/auth/guards/resource-owner.guard";
+import { CreateSpaceDto, DuplicateSpaceDto, SectionResponseDto, SpaceResponseDto, UpdateSpaceDto } from "@fixspace/domain";
+import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
+import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
+import { DuplicateSectionUseCase } from "./providers/duplicate-section.usecase";
 import { DuplicateSpaceUseCase } from "./providers/duplicate-space.usecase";
+import { GetDashboardUseCase } from "./providers/get-dashboard.usecase";
 import { InitializeUserSpaceUseCase } from "./providers/initialize-user-space.usecase";
 import { SpaceService } from "./space.service";
 
 @ApiTags("Spaces")
+@ApiBearerAuth("access-token")
 @Controller("spaces")
 export class SpaceController {
   constructor(
     private readonly spaceService: SpaceService,
     private readonly duplicateSpaceUseCase: DuplicateSpaceUseCase,
+    private readonly duplicateSectionUseCase: DuplicateSectionUseCase,
     private readonly initializeUserSpaceUseCase: InitializeUserSpaceUseCase,
+    private readonly getDashboardUseCase: GetDashboardUseCase,
   ) {}
 
   @Post()
@@ -27,8 +32,22 @@ export class SpaceController {
     return this.initializeUserSpaceUseCase.createAndSeed(userId, createSpaceDto);
   }
 
+  @Get(":id/dashboard")
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "space",
+    ownerPath: ["ownerId"],
+  })
+  @ApiOperation({ summary: "Get workspace dashboard data" })
+  @ApiParam({ name: "id", type: String })
+  @ApiResponse({ status: 200, description: "Dashboard data retrieved." })
+  @ApiResponse({ status: 404, description: "Workspace not found." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  getDashboard(@Param("id") id: string) {
+    return this.getDashboardUseCase.execute(id);
+  }
+
   @Get()
-  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Get all workspaces for current user" })
   @ApiResponse({ status: 200, description: "List of workspaces.", type: [SpaceResponseDto] })
   findAll(@CurrentUser("userId") userId: string) {
@@ -41,7 +60,6 @@ export class SpaceController {
     model: "space",
     ownerPath: ["ownerId"],
   })
-  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Get workspace by ID" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Workspace found.", type: SpaceResponseDto })
@@ -57,7 +75,6 @@ export class SpaceController {
     model: "space",
     ownerPath: ["ownerId"],
   })
-  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Update workspace" })
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: UpdateSpaceDto })
@@ -69,19 +86,37 @@ export class SpaceController {
   }
 
   @Post(":id/duplicate")
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(ResourceOwnerGuard)
   @RequireOwnership({
     model: "space",
     ownerPath: ["ownerId"],
   })
-  @ApiBearerAuth("access-token")
-  @ApiOperation({ summary: "Duplicate workspace with all structure (databases, properties, templates, records)" })
+  @ApiOperation({ summary: "Duplicate workspace with selective options (structure, sections, databases, properties, templates)" })
   @ApiParam({ name: "id", type: String })
+  @ApiBody({ type: DuplicateSpaceDto })
   @ApiResponse({ status: 201, description: "Workspace duplicated.", type: SpaceResponseDto })
   @ApiResponse({ status: 404, description: "Workspace not found." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
-  duplicate(@Param("id") id: string, @CurrentUser("userId") userId: string) {
-    return this.duplicateSpaceUseCase.execute(id, userId);
+  duplicate(@Param("id") id: string, @CurrentUser("userId") userId: string, @Body() duplicateSpaceDto: DuplicateSpaceDto) {
+    return this.duplicateSpaceUseCase.execute(id, userId, duplicateSpaceDto);
+  }
+
+  @Post(":id/sections/:sectionId/duplicate")
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "space",
+    ownerPath: ["ownerId"],
+  })
+  @ApiOperation({ summary: "Duplicate section with all databases and structure" })
+  @ApiParam({ name: "id", type: String })
+  @ApiParam({ name: "sectionId", type: String })
+  @ApiResponse({ status: 201, description: "Section duplicated.", type: SectionResponseDto })
+  @ApiResponse({ status: 404, description: "Section not found." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  duplicateSection(@Param("sectionId") sectionId: string, @Body() options: DuplicateSpaceDto) {
+    return this.duplicateSectionUseCase.execute(sectionId, options);
   }
 
   @Delete(":id")
@@ -90,7 +125,6 @@ export class SpaceController {
     model: "space",
     ownerPath: ["ownerId"],
   })
-  @ApiBearerAuth("access-token")
   @ApiOperation({ summary: "Delete workspace" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Workspace deleted.", type: SpaceResponseDto })

@@ -28,6 +28,7 @@
   "SPACE_NOT_FOUND": "Space not found",
   "DATABASE_NOT_FOUND": "Database not found",
   "DATABASE_NOT_FOUND_ID": "Database with id {id} not found",
+  "DATABASE_STRUCTURE_LOCKED": "Database structure is locked or it is a preset database and cannot be modified",
   "CANNOT_DELETE_PRESET_DATABASE": "Cannot delete system database",
   "SECTION_NOT_FOUND": "Section not found in this space",
   "PROPERTY_NOT_FOUND": "Property not found",
@@ -64,5 +65,19 @@
   "SECTION_CREATE_REQUIRES_DATA": "CREATE operation requires \"create\" field with section data",
   "SECTION_OPERATION_REQUIRES_ID": "Operation requires \"id\" field",
   "PROPERTY_TYPE_NOT_REGISTERED": "No handler registered for property type: {type}",
-  "PROPERTY_VALUE_REQUIRED": "Property \"{name}\" is required and cannot be empty"
+  "PROPERTY_VALUE_REQUIRED": "Property \"{name}\" is required and cannot be empty",
+  "VIEW_NOT_FOUND": "View not found",
+  "VIEW_LIMIT_REACHED": "Maximum number of views (5) reached for this database",
+  "VIEW_LOCKED": "This view is locked and cannot be modified",
+  "CANNOT_DELETE_LAST_VIEW": "Cannot delete the last view of a database",
+  "CANNOT_RENAME_NAME_PROPERTY": "Cannot rename the Name property",
+  "CANNOT_CHANGE_POSITION_NAME_PROPERTY": "Cannot change the position of the Name property",
+  "CANNOT_DELETE_NAME_PROPERTY": "Cannot delete the Name property",
+  "CANNOT_CHANGE_GROUP_NAME_PROPERTY": "The Name property must always stay in the General group",
+  "CANNOT_CHANGE_TYPE_NAME_PROPERTY": "Cannot change the type of the Name property",
+  "CANNOT_DELETE_PROTECTED_PROPERTY": "Cannot delete a protected property",
+  "PROPERTY_HAS_DEPENDENCIES": "Property is used in views: {views}",
+  "PROPERTY_GROUP_NOT_FOUND": "Property group not found",
+  "TEMPLATE_NOT_FOUND": "Template not found",
+  "DATABASE_NOT_IN_SPACE": "Database does not belong to this space"
 }

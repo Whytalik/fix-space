@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { CreateSpaceDto, SpaceResponseDto, UpdateSpaceDto } from "@fixspace/domain";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { filterUndefined } from "../../common/utils/filter-undefined";
-import { t } from "../../common/utils/i18n.helper";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { DatabaseService } from "@/modules/database/database.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
 import { SectionService } from "./providers/section.service";
 import { SpaceRepository } from "./repositories/space.repository";
 import { sectionsInclude } from "./constants/space.constants";
@@ -12,6 +13,7 @@ import { toSpaceResponseDto } from "./utils/to-space-response.util";
 export class SpaceService {
   constructor(
     private readonly logger: AppLogger,
+    private readonly databaseService: DatabaseService,
     private readonly sectionService: SectionService,
     private readonly spaceRepo: SpaceRepository,
   ) {
@@ -58,7 +60,7 @@ export class SpaceService {
 
   async update(id: string, updateSpaceDto: UpdateSpaceDto): Promise<SpaceResponseDto> {
     this.logger.debug("Updating space", { id });
-    const { sectionOperations, ...spaceData } = updateSpaceDto;
+    const { sectionOperations, databaseOperations, ...spaceData } = updateSpaceDto;
 
     return this.spaceRepo.transaction(async (transaction) => {
       if (sectionOperations?.length) {
@@ -67,6 +69,14 @@ export class SpaceService {
           count: sectionOperations.length,
         });
         await this.sectionService.processOperations(transaction, id, sectionOperations);
+      }
+
+      if (databaseOperations?.length) {
+        this.logger.debug("Processing database operations", {
+          spaceId: id,
+          count: databaseOperations.length,
+        });
+        await this.databaseService.processDatabaseOperations(transaction, id, databaseOperations);
       }
 
       if (spaceData.isDefault === true) {

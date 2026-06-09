@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@fixspace/domain";
-import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
-import { RequireOwnership } from "../../core/auth/decorators/required-ownership.decorator";
-import { ResourceOwnerGuard } from "../../core/auth/guards/resource-owner.guard";
+import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
+import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
 import { DuplicateTemplateUseCase } from "./providers/duplicate-template.usecase";
 import { TemplateService } from "./template.service";
 
@@ -68,12 +68,12 @@ export class TemplateController {
   }
 
   @Post(":id/duplicate")
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(ResourceOwnerGuard)
   @RequireOwnership({
     model: "template",
     ownerPath: ["database", "space", "ownerId"],
   })
-  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Duplicate template with all property values" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 201, description: "Template duplicated.", type: TemplateResponseDto })
@@ -96,5 +96,19 @@ export class TemplateController {
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
   remove(@Param("id") id: string) {
     return this.templateService.remove(id);
+  }
+
+  @Post(":id/reset")
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "template",
+    ownerPath: ["database", "space", "ownerId"],
+  })
+  @ApiOperation({ summary: "Reset template to original state (clear values and content)" })
+  @ApiParam({ name: "id", type: String })
+  @ApiResponse({ status: 200, description: "Template reset successfully.", type: TemplateResponseDto })
+  @ApiResponse({ status: 404, description: "Template not found." })
+  reset(@Param("id") id: string) {
+    return this.templateService.reset(id);
   }
 }

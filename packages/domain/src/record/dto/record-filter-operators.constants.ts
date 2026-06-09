@@ -24,6 +24,7 @@ export const OPERATORS_BY_PROPERTY_TYPE: Record<PropertyType, FilterOperator[]> 
   ],
   [PropertyType.DATE]: [
     FilterOperator.EQUALS,
+    FilterOperator.NOT_EQUALS,
     FilterOperator.BEFORE,
     FilterOperator.AFTER,
     FilterOperator.ON_OR_BEFORE,
@@ -31,7 +32,7 @@ export const OPERATORS_BY_PROPERTY_TYPE: Record<PropertyType, FilterOperator[]> 
     FilterOperator.IS_EMPTY,
     FilterOperator.IS_NOT_EMPTY,
   ],
-  [PropertyType.CHECKBOX]: [FilterOperator.IS_CHECKED, FilterOperator.IS_UNCHECKED, FilterOperator.IS_EMPTY],
+  [PropertyType.CHECKBOX]: [FilterOperator.IS_CHECKED, FilterOperator.IS_UNCHECKED],
   [PropertyType.DURATION]: [
     FilterOperator.EQUALS,
     FilterOperator.NOT_EQUALS,
@@ -80,5 +81,4 @@ export const OPERATORS_BY_PROPERTY_TYPE: Record<PropertyType, FilterOperator[]> 
     FilterOperator.IS_NOT_EMPTY,
   ],
   [PropertyType.FORMULA]: [FilterOperator.EQUALS, FilterOperator.NOT_EQUALS, FilterOperator.IS_EMPTY, FilterOperator.IS_NOT_EMPTY],
-  [PropertyType.BUTTON]: [],
 };

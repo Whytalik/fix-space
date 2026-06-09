@@ -3,7 +3,9 @@ import {
   DATA_FORMATS_VALUES,
   DataFormat,
   DEFAULT_DATE_PROPERTY,
+  DatePropertyConfig,
   FilterOperator,
+  isDatePropertyConfig,
   OPERATORS_BY_PROPERTY_TYPE,
   PropertyType,
   TIME_FORMATS_VALUES,
@@ -15,6 +17,13 @@ import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } fro
 export class DateHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.DATE;
 
+  private parseConfig(config: Record<string, unknown>): DatePropertyConfig {
+    if (!isDatePropertyConfig(config)) {
+      throw new Error(`Invariant: expected DatePropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
+  }
+
   getDefaultConfig(): Record<string, unknown> {
     return {
       ...DEFAULT_DATE_PROPERTY,
@@ -24,10 +33,10 @@ export class DateHandler implements PropertyConfigHandler, PropertyValueHandler,
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (config.defaultValue !== undefined && config.defaultValue !== null) {
+    if (config.defaultValue !== undefined && config.defaultValue !== null && config.defaultValue !== "today") {
       const date = new Date(config.defaultValue as string);
       if (isNaN(date.getTime())) {
-        errors.push("defaultValue must be a valid date string or null");
+        errors.push("defaultValue must be a valid date string, 'today', or null");
       }
     }
 
@@ -71,14 +80,18 @@ export class DateHandler implements PropertyConfigHandler, PropertyValueHandler,
   }
 
   getDefaultValue(config: Record<string, unknown>): unknown {
-    return (config.defaultValue as string | null | undefined) ?? null;
+    const { defaultValue } = this.parseConfig(config);
+    if (defaultValue === "today") {
+      return new Date().toISOString();
+    }
+    return defaultValue ?? null;
   }
 
   isEmpty(value: unknown): boolean {
     return value === null || value === undefined;
   }
 
-  convertFrom(value: unknown, _fromType: PropertyType, _fromConfig: Record<string, unknown>, _toConfig: Record<string, unknown>): unknown {
+  convertFrom(value: unknown): unknown {
     if (value === null || value === undefined) return null;
     if (typeof value === "string" || typeof value === "number") {
       const parsedDate = new Date(value);

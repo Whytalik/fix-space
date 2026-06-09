@@ -29,7 +29,7 @@ export class SelectCategory {
   options: SelectOption[];
 }
 
-export class SelectProperty {
+export class SelectPropertyConfig {
   @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
   isMultiSelect: boolean;
 

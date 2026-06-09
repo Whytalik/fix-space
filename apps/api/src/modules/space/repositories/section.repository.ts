@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
-import { BaseRepository } from "../../../common/utils/base.repository";
+import { BaseRepository } from "@/common/utils/base.repository";
 
 @Injectable()
 export class SectionRepository extends BaseRepository {
@@ -10,6 +10,21 @@ export class SectionRepository extends BaseRepository {
 
   async findById(id: string, transaction?: Prisma.TransactionClient) {
     return (transaction ?? prisma).section.findUnique({ where: { id } });
+  }
+
+  async findByIdForDuplicate(id: string) {
+    return prisma.section.findUnique({
+      where: { id },
+      include: {
+        databases: {
+          include: {
+            properties: true,
+            templates: { include: { values: true } },
+            automations: true,
+          },
+        },
+      },
+    });
   }
 
   async findLastPosition(spaceId: string, transaction?: Prisma.TransactionClient) {

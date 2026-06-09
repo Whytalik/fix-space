@@ -7,11 +7,11 @@ export function CtaSection() {
   const t = useTranslations("Landing");
 
   return (
-    <div className="bg-surface border border-stroke rounded-[24px] px-8 py-12 max-w-270 mx-auto flex flex-col items-center gap-6 text-center relative overflow-hidden shadow-xl">
+    <div className="bg-surface border border-stroke rounded-2xl px-8 py-12 max-w-270 mx-auto flex flex-col items-center gap-6 text-center relative overflow-hidden shadow-xl">
       <div className="absolute -right-20 -top-20 w-64 h-64 bg-accent/5 rounded-full blur-[80px] pointer-events-none" />
       <div className="absolute -left-20 -bottom-20 w-64 h-64 bg-accent/5 rounded-full blur-[80px] pointer-events-none" />
 
-      <div className="bg-accent/10 w-16 h-16 rounded-xl flex items-center justify-center mb-1 relative z-10">
+      <div className="bg-accent/10 w-16 h-16 rounded-lg flex items-center justify-center mb-1 relative z-10">
         <LogoIcon size={36} />
       </div>
 

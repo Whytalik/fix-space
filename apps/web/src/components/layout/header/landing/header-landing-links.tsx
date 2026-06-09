@@ -28,8 +28,8 @@ export function HeaderLandingLinks() {
     );
 
     LINKS.forEach(({ href }) => {
-      const el = document.querySelector(href);
-      if (el) observer.observe(el);
+      const element = document.querySelector(href);
+      if (element) observer.observe(element);
     });
 
     return () => observer.disconnect();
@@ -42,7 +42,7 @@ export function HeaderLandingLinks() {
           key={href}
           type="button"
           onClick={() => scrollToSection(href)}
-          className={`text-[13.5px] font-semibold transition-colors cursor-pointer ${
+          className={`text-sm font-semibold transition-colors duration-150 cursor-pointer ${
             activeLink === href ? "text-accent" : "text-ink-secondary hover:text-ink"
           }`}
         >

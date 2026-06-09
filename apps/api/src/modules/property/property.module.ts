@@ -1,9 +1,10 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
+import { ViewModule } from "@/modules/view/view.module";
+import { DatabaseModule } from "@/modules/database/database.module";
 import { PropertyController } from "./property.controller";
 import { PropertyRepository } from "./repositories/property.repository";
 import { PropertyService } from "./property.service";
 import {
-  ButtonHandler,
   CheckboxHandler,
   DateHandler,
   DurationHandler,
@@ -31,10 +32,10 @@ const handlers = [
   FormulaHandler,
   RatingHandler,
   ProgressHandler,
-  ButtonHandler,
 ];
 
 @Module({
+  imports: [ViewModule, forwardRef(() => DatabaseModule)],
   controllers: [PropertyController],
   providers: [
     PropertyService,

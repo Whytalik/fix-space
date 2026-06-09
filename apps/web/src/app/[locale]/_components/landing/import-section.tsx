@@ -30,7 +30,7 @@ export function ImportSection() {
           {sources.map(({ icon: Icon, label }) => (
             <div
               key={label}
-              className="flex items-center gap-3 px-5 py-4 rounded-xl border border-stroke bg-surface hover:border-accent/30 transition-colors"
+              className="flex items-center gap-3 px-5 py-4 rounded-lg border border-stroke bg-surface hover:border-accent/30 transition-colors duration-150"
             >
               <div className="w-9 h-9 rounded-lg bg-elevated flex items-center justify-center shrink-0">
                 <Icon size={18} className="text-ink-secondary" />

@@ -1,7 +1,7 @@
+import { APP_URL } from "@/utils/app-url";
 import { getTranslations } from "next-intl/server";
 
 export async function LandingJsonLd({ locale }: { locale: string }) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://fixspace.app";
   const t = await getTranslations({ locale, namespace: "Landing" });
 
   const softwareSchema = {
@@ -11,7 +11,7 @@ export async function LandingJsonLd({ locale }: { locale: string }) {
     applicationCategory: "FinanceApplication",
     operatingSystem: "Web",
     description: t("hero.description"),
-    url: `${baseUrl}/${locale}`,
+    url: `${APP_URL}/${locale}`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   };
 
@@ -22,14 +22,14 @@ export async function LandingJsonLd({ locale }: { locale: string }) {
   ];
 
   const faqItems: { "@type": "Question"; name: string; acceptedAnswer: { "@type": "Answer"; text: string } }[] = [];
-  categories.forEach((cat) => {
-    cat.items.forEach((itemIdx) => {
+  categories.forEach((category) => {
+    category.items.forEach((itemIdx) => {
       faqItems.push({
         "@type": "Question",
-        name: t(`faq.categories.${cat.key}.items.${itemIdx}.q`),
+        name: t(`faq.categories.${category.key}.items.${itemIdx}.q`),
         acceptedAnswer: {
           "@type": "Answer",
-          text: t(`faq.categories.${cat.key}.items.${itemIdx}.a`),
+          text: t(`faq.categories.${category.key}.items.${itemIdx}.a`),
         },
       });
     });

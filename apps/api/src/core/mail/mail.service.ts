@@ -4,11 +4,11 @@ import * as nodemailer from "nodemailer";
 import { Transporter } from "nodemailer";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { Resend } from "resend";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { t } from "../../common/utils/i18n.helper";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { t } from "@/common/utils/i18n.helper";
 
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+function escapeHtml(input: string): string {
+  return input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 @Injectable()
@@ -68,10 +68,10 @@ export class MailService implements OnModuleInit {
       try {
         await this.transporter.verify();
         this.logger.log(`Mail service successfully connected to SMTP host: ${smtpHost}`);
-      } catch (err) {
+      } catch (error) {
         this.logger.error(`Mail service failed to connect to SMTP host: ${smtpHost}`, {
-          error: (err as Error).message,
-          code: (err as any).code,
+          error: (error as Error).message,
+          code: (error as any).code,
         });
       }
     }
@@ -228,8 +228,8 @@ export class MailService implements OnModuleInit {
           const previewUrl = nodemailer.getTestMessageUrl(info as SMTPTransport.SentMessageInfo);
           this.logger.log(`Ethereal email preview: ${previewUrl || "Preview URL not available"}`);
         }
-      } catch (err) {
-        this.logger.error(`Failed to send verification email to ${to} via SMTP`, { error: (err as Error).message });
+      } catch (error) {
+        this.logger.error(`Failed to send verification email to ${to} via SMTP`, { error: (error as Error).message });
       }
     }
   }
@@ -280,8 +280,8 @@ export class MailService implements OnModuleInit {
           const previewUrl = nodemailer.getTestMessageUrl(info as SMTPTransport.SentMessageInfo);
           this.logger.log(`Ethereal email preview: ${previewUrl || "Preview URL not available"}`);
         }
-      } catch (err) {
-        this.logger.error(`Failed to send password reset email to ${to} via SMTP`, { error: (err as Error).message });
+      } catch (error) {
+        this.logger.error(`Failed to send password reset email to ${to} via SMTP`, { error: (error as Error).message });
       }
     }
   }
@@ -319,9 +319,50 @@ export class MailService implements OnModuleInit {
       try {
         await this.transporter.sendMail({ from, to, subject, html, text });
         this.logger.log(`Password change notification sent to ${to} via SMTP`);
-      } catch (err) {
+      } catch (error) {
         this.logger.error(`Failed to send password change notification to ${to} via SMTP`, {
-          error: (err as Error).message,
+          error: (error as Error).message,
+        });
+      }
+    }
+  }
+
+  async sendAccountDeletionNotification(to: string): Promise<void> {
+    const from = this.configService.get<string>("MAIL_FROM", "noreply@fixspace.app");
+    const subject = t("emails.accountDeleted.subject");
+    const text = t("emails.accountDeleted.body");
+    const html = `
+          <body style="margin:0;padding:0;background-color:#0f0f11;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f0f11;">
+              <tr><td align="center" style="padding:48px 20px;">
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+                  <tr><td style="background-color:#18181d;border:1px solid #2a2a35;border-radius:12px;padding:36px 40px;">
+                    <h1 style="margin:0 0 8px 0;font-size:21px;font-weight:700;color:#e8e8f0;letter-spacing:-0.02em;">${t("emails.accountDeleted.htmlTitle")}</h1>
+                    <p style="margin:0 0 28px 0;font-size:14px;color:#888888;line-height:1.7;">${t("emails.accountDeleted.htmlSubtitle")}</p>
+                    <p style="margin:0;font-size:12px;color:#888888;">${t("emails.accountDeleted.htmlIgnore")}</p>
+                  </td></tr>
+                </table>
+              </td></tr>
+            </table>
+          </body>`;
+
+    if (this.resend) {
+      const { error } = await this.resend.emails.send({ from, to, subject, html, text });
+      if (error) {
+        this.logger.error(`Resend failed to send account deletion notification to ${to}`, { error: error.message });
+      } else {
+        this.logger.log(`Account deletion notification sent to ${to} via Resend`);
+      }
+      return;
+    }
+
+    if (this.transporter) {
+      try {
+        await this.transporter.sendMail({ from, to, subject, html, text });
+        this.logger.log(`Account deletion notification sent to ${to} via SMTP`);
+      } catch (error) {
+        this.logger.error(`Failed to send account deletion notification to ${to} via SMTP`, {
+          error: (error as Error).message,
         });
       }
     }

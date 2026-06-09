@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsOptional, IsString, MaxLength, Min, ValidateNested } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
+import { ApiProperty } from "@nestjs/swagger";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 import { IntegrationService } from "./create-integration-connection.dto";
@@ -13,15 +14,18 @@ export enum IntegrationStatus {
 }
 
 export class UpdateIntegrationConnectionDto {
+  @ApiProperty({ description: "Integration service provider", example: "BINANCE", required: false })
   @IsOptional()
   @IsEnum(IntegrationService, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   service?: IntegrationService;
 
+  @ApiProperty({ description: "Connection display name", example: "My Binance Account", required: false, maxLength: 255 })
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @MaxLength(255, { message: i18nValidationMessage<I18nTranslations>("validation.MAX_LENGTH") })
   name?: string;
 
+  @ApiProperty({ description: "Authentication credentials for the service", required: false })
   @IsOptional()
   @ValidateNested()
   @Type(() => Object, {
@@ -39,27 +43,33 @@ export class UpdateIntegrationConnectionDto {
   })
   credentials?: ExchangeCredentials | OkxCredentials | Mt5Credentials | CTraderCredentials;
 
+  @ApiProperty({ description: "Connection status", example: "ACTIVE", required: false })
   @IsOptional()
   @IsEnum(IntegrationStatus, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   status?: IntegrationStatus;
 
+  @ApiProperty({ description: "Synchronization interval in minutes", example: 60, required: false })
   @IsOptional()
   @IsInt({ message: i18nValidationMessage<I18nTranslations>("validation.IS_INT") })
   @Min(1)
   syncInterval?: number;
 
+  @ApiProperty({ description: "Market type (e.g. spot, futures)", example: "spot", required: false })
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   marketType?: string;
 
+  @ApiProperty({ description: "External platform account identifier", example: "123456", required: false })
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   externalAccountId?: string;
 
+  @ApiProperty({ description: "Last synchronization error message", example: "Connection refused", required: false })
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   lastSyncError?: string;
 
+  @ApiProperty({ description: "Number of consecutive failed sync attempts", example: 0, required: false })
   @IsOptional()
   @IsInt({ message: i18nValidationMessage<I18nTranslations>("validation.IS_INT") })
   @Min(0)

@@ -2,6 +2,7 @@ import { Type } from "class-transformer";
 import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
+import { ApiProperty } from "@nestjs/swagger";
 import { I18nTranslations } from "../../generated/i18n.generated";
 import {
   AutomationAction,
@@ -19,18 +20,22 @@ export enum AutomationTrigger {
 }
 
 export class CreateAutomationDto {
+  @ApiProperty({ description: "Database ID", example: "clx123...", required: true })
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   databaseId: string;
 
+  @ApiProperty({ description: "Automation name", example: "My Automation", required: true })
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   @MaxLength(255, { message: i18nValidationMessage<I18nTranslations>("validation.MAX_LENGTH") })
   name: string;
 
+  @ApiProperty({ description: "Trigger type", enum: AutomationTrigger, example: AutomationTrigger.ON_RECORD_CREATE, required: true })
   @IsEnum(AutomationTrigger, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   trigger: AutomationTrigger;
 
+  @ApiProperty({ description: "Condition for automation", required: false })
   @IsOptional()
   @ValidateNested()
   @Type(() => ConditionBase, {
@@ -45,6 +50,7 @@ export class CreateAutomationDto {
   })
   condition?: AutomationCondition;
 
+  @ApiProperty({ description: "List of actions", example: [], required: true })
   @ValidateNested({ each: true })
   @Type(() => AutomationActionBase, {
     keepDiscriminatorProperty: true,
@@ -59,6 +65,7 @@ export class CreateAutomationDto {
   })
   actions: AutomationAction[];
 
+  @ApiProperty({ description: "Whether automation is active", example: true, required: false })
   @IsOptional()
   @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
   active?: boolean;

@@ -16,18 +16,20 @@ import { JwtAuthGuard } from "./core/jwt/jwt-auth.guard";
 import { JwtModule } from "./core/jwt/jwt.module";
 import { PropertyValueModule } from "./modules/property-value/property-value.module";
 import { PropertyModule } from "./modules/property/property.module";
+import { PropertyGroupModule } from "./modules/property-group/property-group.module";
 import { RecordModule } from "./modules/record/record.module";
 import { SettingsModule } from "./modules/settings/settings.module";
 import { SpaceModule } from "./modules/space/space.module";
 import { TemplatePropertyValueModule } from "./modules/template-property-value/template-property-value.module";
 import { TemplateModule } from "./modules/template/template.module";
 import { UserModule } from "./modules/user/user.module";
+import { ViewModule } from "./modules/view/view.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [`../../.env.${process.env.NODE_ENV ?? "development"}`, "../../.env"],
+      envFilePath: ["../../.env"],
       validate,
     }),
     I18nModule.forRoot({
@@ -50,8 +52,10 @@ import { UserModule } from "./modules/user/user.module";
     JwtModule,
     SpaceModule,
     DatabaseModule,
+    ViewModule,
     HealthModule,
     PropertyModule,
+    PropertyGroupModule,
     RecordModule,
     PropertyValueModule,
     TemplateModule,

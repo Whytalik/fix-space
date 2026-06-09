@@ -6,7 +6,6 @@ export const performanceReviewProperties: InitPropertyDef[] = [
   {
     name: "Name",
     type: PropertyType.TEXT,
-    isRequired: true,
     position: 0,
     hint: "Заголовок огляду.",
     group: "General",
