@@ -83,5 +83,8 @@
   "CSV_INVALID_FORMAT": "Invalid file format. Only CSV files are supported",
   "CSV_EMPTY_FILE": "CSV file is empty or has no data rows",
   "CSV_MISSING_COLUMNS": "CSV file has no column headers",
-  "NOTIFICATION_NOT_FOUND": "Notification not found"
+  "NOTIFICATION_NOT_FOUND": "Notification not found",
+  "AUTOMATION_NOT_FOUND": "Automation not found",
+  "AUTOMATION_LIMIT_EXCEEDED": "Maximum number of automations (10) reached for this database",
+  "AUTOMATION_TRIGGER_ACTION_INCOMPATIBLE": "This action type is not compatible with the selected trigger"
 }

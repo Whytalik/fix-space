@@ -1,8 +1,8 @@
 import { Type } from "class-transformer";
-import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { I18nTranslations } from "../../generated/i18n.generated";
 import {
   AutomationAction,
@@ -11,7 +11,6 @@ import {
   LinkRecordsAction,
   SetFieldValueAction,
 } from "./automation-actions.dto";
-import { AutomationCondition, ConditionBase, ConditionGroup, ConditionRule } from "./automation-condition.dto";
 
 export enum AutomationTrigger {
   ON_RECORD_CREATE = "ON_RECORD_CREATE",
@@ -35,22 +34,17 @@ export class CreateAutomationDto {
   @IsEnum(AutomationTrigger, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   trigger: AutomationTrigger;
 
-  @ApiProperty({ description: "Condition for automation", required: false })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => ConditionBase, {
-    keepDiscriminatorProperty: true,
-    discriminator: {
-      property: "type",
-      subTypes: [
-        { value: ConditionRule, name: "RULE" },
-        { value: ConditionGroup, name: "GROUP" },
-      ],
-    },
+  @ApiPropertyOptional({
+    description:
+      "Trigger-specific configuration. For ON_FIELD_CHANGE: { propertyId, condition? }. For ON_SCHEDULE: { interval, time, dayOfWeek?, dayOfMonth? }.",
+    example: { propertyId: "clx123...", condition: { type: "equals", value: true } },
   })
-  condition?: AutomationCondition;
+  @IsOptional()
+  @IsObject({ message: i18nValidationMessage<I18nTranslations>("validation.IS_OBJECT") })
+  config?: Record<string, unknown>;
 
-  @ApiProperty({ description: "List of actions", example: [], required: true })
+  @ApiProperty({ description: "List of actions (max 5)", example: [], required: true })
+  @IsArray({ message: i18nValidationMessage<I18nTranslations>("validation.IS_ARRAY") })
   @ValidateNested({ each: true })
   @Type(() => AutomationActionBase, {
     keepDiscriminatorProperty: true,
@@ -65,7 +59,7 @@ export class CreateAutomationDto {
   })
   actions: AutomationAction[];
 
-  @ApiProperty({ description: "Whether automation is active", example: true, required: false })
+  @ApiPropertyOptional({ description: "Whether automation is active", example: true })
   @IsOptional()
   @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
   active?: boolean;
