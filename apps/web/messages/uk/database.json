@@ -286,7 +286,8 @@
     "edit": "Редагувати",
     "addItem": "Додати запис",
     "preset": "Пресет",
-    "import": "Імпорт CSV"
+    "import": "Імпорт CSV",
+    "export": "Експорт CSV"
   },
   "TemplatePickerModal": {
     "chooseTemplate": "Вибрати шаблон",

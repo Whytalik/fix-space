@@ -286,7 +286,8 @@
     "edit": "Edit",
     "addItem": "Add Item",
     "preset": "Preset",
-    "import": "Import CSV"
+    "import": "Import CSV",
+    "export": "Export CSV"
   },
   "TemplatePickerModal": {
     "chooseTemplate": "Choose a template",
