@@ -153,7 +153,7 @@
     "showAllResults": "Показати всі результати в {database}"
   },
   "SectionItem": {
-    "addDatabase": "Add database",
+    "addDatabase": "Додати базу даних",
     "edit": "Редагувати",
     "duplicate": "Дублювати",
     "delete": "Видалити",
@@ -165,7 +165,8 @@
     "saveChanges": "Зберегти зміни",
     "deleteSection": "Видалити секцію",
     "deleteSectionDesc": "Секцію буде видалено. Бази даних всередині стануть без секції.",
-    "deleting": "Видалення..."
+    "deleting": "Видалення...",
+    "sectionDuplicated": "Секцію успішно дубльовано."
   },
   "EditActions": {
     "saving": "Збереження…",

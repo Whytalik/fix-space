@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PropertyType } from "@fixspace/domain";
 import { ImportErrorRowDto, ImportResultResponseDto } from "@fixspace/domain";
-import { Prisma } from "@fixspace/database";
+import { Prisma, NotificationType } from "@fixspace/database";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
 import { PropertyTypeRegistry } from "@/modules/property/types";
+import { NotificationService } from "@/modules/notification/notification.service";
 import { parseCsvBuffer, validateCsvFile } from "../utils/csv-parser.util";
 import { convertCsvValue } from "../utils/csv-value-converter.util";
 import { ImportExportRepository } from "../repositories/import-export.repository";
@@ -12,7 +13,6 @@ import { ImportExportRepository } from "../repositories/import-export.repository
 const EXCLUDED_TYPES = new Set<PropertyType>([PropertyType.RELATION, PropertyType.FORMULA]);
 
 export interface ExecuteImportOptions {
-  /** When set, import only this many records (used when limit would be exceeded) */
   maxRows?: number;
 }
 
@@ -22,6 +22,7 @@ export class ExecuteImportUseCase {
     private readonly logger: AppLogger,
     private readonly repo: ImportExportRepository,
     private readonly typeRegistry: PropertyTypeRegistry,
+    private readonly notificationService: NotificationService,
   ) {
     this.logger.setContext(ExecuteImportUseCase.name);
   }
@@ -41,7 +42,7 @@ export class ExecuteImportUseCase {
     if (!database) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
 
     const properties = await this.repo.findPropertiesByDatabase(databaseId);
-    const propertyMap = new Map(properties.map((p) => [p.id, p]));
+    const propertyMap = new Map(properties.map((property) => [property.id, property]));
 
     const { rows } = parseCsvBuffer(file.buffer);
 
@@ -113,6 +114,12 @@ export class ExecuteImportUseCase {
     }
 
     this.logger.log("CSV import executed", { databaseId, imported: validData.length, skipped });
+
+    await this.notificationService.create(
+      userId,
+      NotificationType.INFO,
+      t("notifications.import_completed", { imported: validData.length, skipped }),
+    );
 
     return new ImportResultResponseDto({ imported: validData.length, skipped, errors });
   }

@@ -5,6 +5,7 @@ import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
 import { DropdownMenu } from "@/components/ui/overlays/dropdown-menu";
 import { DuplicationModal, type DuplicationOptions } from "@/components/ui/overlays/duplication-modal";
 import { useAppContext } from "@/context/app-context";
+import { useUIContext } from "@/context/ui-context";
 import { useMutation } from "@tanstack/react-query";
 import { deleteDatabase as deleteDatabaseApi, duplicateDatabase } from "@/lib/api/database";
 import { useSortable } from "@dnd-kit/sortable";
@@ -31,6 +32,7 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
   const router = useRouter();
   const { data: settings } = useSpaceSettingsQuery();
   const { currentDatabaseId, removeDatabaseFromSpace, addDatabaseToSpace } = useAppContext();
+  const { showToast } = useUIContext();
   const isActive = pathname.startsWith(`/database/${database.id}`) || currentDatabaseId === database.id;
   const showPresetIcon = database.isPreset && settings?.showPresetIndicators === true;
   const [showMenu, setShowMenu] = useState(false);
@@ -50,11 +52,12 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
     transition,
   };
 
-  const { mutate: duplicateDatabaseAction } = useMutation({
+  const { mutateAsync: duplicateDatabaseAction } = useMutation({
     mutationFn: (options: DuplicationOptions) => duplicateDatabase(spaceId, database.id, options),
     onSuccess: (duplicated) => {
       addDatabaseToSpace(duplicated);
       setShowDuplicateModal(false);
+      showToast(t("databaseDuplicated"), "success");
     },
   });
 
@@ -162,7 +165,7 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
           target="database"
           initialName={`${database.title || database.name} (Copy)`}
           onConfirm={async (options) => {
-            duplicateDatabaseAction(options);
+            await duplicateDatabaseAction(options);
           }}
           onCancel={() => setShowDuplicateModal(false)}
         />

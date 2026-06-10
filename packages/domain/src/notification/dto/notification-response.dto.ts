@@ -2,8 +2,9 @@ import { Exclude, Expose } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 
 export enum NotificationType {
-  SYSTEM = "SYSTEM",
-  ALERT = "ALERT",
+  INFO = "INFO",
+  ERROR = "ERROR",
+  AUTOMATION = "AUTOMATION",
   INTEGRATION = "INTEGRATION",
 }
 
@@ -17,7 +18,7 @@ export class NotificationResponseDto {
   @Expose()
   userId: string;
 
-  @ApiProperty({ description: "Notification type", example: "SYSTEM", required: true })
+  @ApiProperty({ description: "Notification type", example: "INFO", required: true })
   @Expose()
   type: NotificationType;
 

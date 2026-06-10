@@ -82,8 +82,8 @@ export class DatabaseController {
   @ApiResponse({ status: 201, description: "Database duplicated.", type: DatabaseResponseDto })
   @ApiResponse({ status: 404, description: "Database not found." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
-  duplicate(@Param("id") id: string, @Body() duplicateDatabaseDto: DuplicateDatabaseDto) {
-    return this.duplicateDatabaseUseCase.execute(id, duplicateDatabaseDto);
+  duplicate(@CurrentUser("userId") userId: string, @Param("id") id: string, @Body() duplicateDatabaseDto: DuplicateDatabaseDto) {
+    return this.duplicateDatabaseUseCase.execute(id, userId, duplicateDatabaseDto);
   }
 
   @Delete(":id")

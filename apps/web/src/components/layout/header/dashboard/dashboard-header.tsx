@@ -14,10 +14,12 @@ import { useTranslations } from "next-intl";
 import { SearchModal } from "./search-modal";
 import { NotificationsModal } from "./notifications-modal";
 import { DashboardHeaderSkeleton } from "./skeletons/dashboard-header-skeleton";
+import { useUnreadCountQuery } from "@/hooks/api/use-notifications-query";
 
 export function DashboardHeader() {
   const t = useTranslations("Header");
   const { user, isLoading } = useAppContext();
+  const { data: unreadData } = useUnreadCountQuery();
   const { openSettings } = useUIContext();
   const logout = useLogout();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -49,6 +51,8 @@ export function DashboardHeader() {
   if (isLoading) return <DashboardHeaderSkeleton />;
   if (!user) return null;
 
+  const unreadCount = unreadData?.count ?? 0;
+
   return (
     <header className="sticky top-0 z-50 flex h-14 w-full shrink-0 items-center border-b border-stroke bg-canvas/85 backdrop-blur-md select-none">
       <div className="w-60 shrink-0 flex items-center gap-2 px-4 h-full">
@@ -76,7 +80,11 @@ export function DashboardHeader() {
             className="relative p-2 rounded-lg text-ink-muted hover:text-ink hover:bg-surface transition-colors duration-150 cursor-pointer"
           >
             <Bell size={18} />
-            <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-accent" />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-white shadow-sm">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
 
           <span className="h-4 w-px bg-stroke" />

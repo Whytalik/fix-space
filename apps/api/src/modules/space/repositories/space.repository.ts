@@ -32,6 +32,34 @@ export class SpaceRepository extends BaseRepository {
     });
   }
 
+  async findUniqueSpaceName(baseName: string, ownerId: string, transaction?: Prisma.TransactionClient): Promise<string> {
+    let name = `${baseName} (Copy)`;
+    let exists = await (transaction ?? prisma).space.findFirst({ where: { name, ownerId } });
+    let counter = 1;
+
+    while (exists) {
+      name = `${baseName} (Copy ${counter})`;
+      exists = await (transaction ?? prisma).space.findFirst({ where: { name, ownerId } });
+      counter++;
+    }
+
+    return name;
+  }
+
+  async findUniqueSectionName(baseName: string, spaceId: string, transaction?: Prisma.TransactionClient): Promise<string> {
+    let name = `${baseName} (Copy)`;
+    let exists = await (transaction ?? prisma).section.findFirst({ where: { name, spaceId } });
+    let counter = 1;
+
+    while (exists) {
+      name = `${baseName} (Copy ${counter})`;
+      exists = await (transaction ?? prisma).section.findFirst({ where: { name, spaceId } });
+      counter++;
+    }
+
+    return name;
+  }
+
   async findOwner(id: string, transaction?: Prisma.TransactionClient) {
     return (transaction ?? prisma).space.findUnique({
       where: { id },

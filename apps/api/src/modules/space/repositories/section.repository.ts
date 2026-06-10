@@ -41,6 +41,20 @@ export class SectionRepository extends BaseRepository {
     });
   }
 
+  async findUniqueSectionName(baseName: string, spaceId: string, transaction?: Prisma.TransactionClient): Promise<string> {
+    let name = `${baseName} (Copy)`;
+    let exists = await (transaction ?? prisma).section.findFirst({ where: { name, spaceId } });
+    let counter = 1;
+
+    while (exists) {
+      name = `${baseName} (Copy ${counter})`;
+      exists = await (transaction ?? prisma).section.findFirst({ where: { name, spaceId } });
+      counter++;
+    }
+
+    return name;
+  }
+
   async update(id: string, data: Prisma.SectionUpdateInput, transaction?: Prisma.TransactionClient) {
     return (transaction ?? prisma).section.update({ where: { id }, data });
   }

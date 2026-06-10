@@ -1,0 +1,4 @@
+{
+  "import_completed": "Import completed: {imported} records added, {skipped} skipped",
+  "export_completed": "Export completed: {count} records exported"
+}

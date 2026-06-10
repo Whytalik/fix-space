@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
 import { DropdownMenu } from "@/components/ui/overlays/dropdown-menu";
 import { DuplicationModal, type DuplicationOptions } from "@/components/ui/overlays/duplication-modal";
 import { useAppContext } from "@/context/app-context";
+import { useUIContext } from "@/context/ui-context";
 import { useMutation } from "@tanstack/react-query";
 import { duplicateSection, updateSpace } from "@/lib/api/space";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -29,6 +30,7 @@ interface SectionItemProps {
 export function SectionItem({ section, collapsed, isCollapsed, onToggle }: SectionItemProps) {
   const t = useTranslations("SectionItem");
   const { space, updateSpaceInList } = useAppContext();
+  const { showToast } = useUIContext();
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
 
@@ -50,7 +52,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
   const editModal = useModal();
   const addDatabase = useModal();
 
-  const { mutate: duplicateSectionAction } = useMutation({
+  const { mutateAsync: duplicateSectionAction } = useMutation({
     mutationFn: (options: DuplicationOptions) => {
       if (!space) return Promise.reject();
       return duplicateSection(space.id, section.id, options);
@@ -62,6 +64,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
           sections: [...(space.sections ?? []), newSection].sort((a, b) => a.position - b.position),
         });
         setShowDuplicateModal(false);
+        showToast(t("sectionDuplicated"), "success");
       }
     },
   });
@@ -201,7 +204,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
           target="section"
           initialName={`${section.name} (Copy)`}
           onConfirm={async (options) => {
-            duplicateSectionAction(options);
+            await duplicateSectionAction(options);
           }}
           onCancel={() => setShowDuplicateModal(false)}
         />

@@ -18,6 +18,10 @@ jest.mock("@fixspace/database", () => ({
     property: { create: jest.fn() },
     record: { create: jest.fn() },
     propertyValue: { create: jest.fn() },
+    view: { create: jest.fn() },
+    automation: { create: jest.fn() },
+    template: { create: jest.fn() },
+    templatePropertyValue: { create: jest.fn() },
     $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
@@ -38,6 +42,8 @@ describe("DuplicateDatabaseUseCase", () => {
   const mockDatabaseRepo = {
     findByIdForDuplicate: jest.fn(),
     transaction: jest.fn((callback) => callback(prisma)),
+    findUniqueSlug: jest.fn((baseSlug: string) => Promise.resolve(`${baseSlug}_copy`)),
+    findUniqueTitle: jest.fn((baseTitle: string) => Promise.resolve(`${baseTitle} (Copy)`)),
   };
 
   beforeEach(async () => {
@@ -121,7 +127,7 @@ describe("DuplicateDatabaseUseCase", () => {
       (prisma.record.create as jest.Mock<any>).mockResolvedValue(newRecord);
       (prisma.propertyValue.create as jest.Mock<any>).mockResolvedValue({ id: "val-2" });
 
-      const result = await useCase.execute("db-1", { includeRecords: true });
+      const result = await useCase.execute("db-1", "user-1", { includeRecords: true });
 
       expect(result).toBeDefined();
       expect(prisma.database.create).toHaveBeenCalledWith({
@@ -181,7 +187,7 @@ describe("DuplicateDatabaseUseCase", () => {
       (prisma.record.create as jest.Mock<any>).mockResolvedValue(newRecord);
       (prisma.propertyValue.create as jest.Mock<any>).mockResolvedValue({ id: "val-2" });
 
-      await useCase.execute("db-1", { includeRecords: true });
+      await useCase.execute("db-1", "user-1", { includeRecords: true });
 
       expect(prisma.propertyValue.create).toHaveBeenCalledWith({
         data: expect.objectContaining({

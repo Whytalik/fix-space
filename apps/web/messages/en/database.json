@@ -331,7 +331,8 @@
     "deletePresetDatabase": "Delete system database?",
     "deletePresetDatabaseDesc": "This is a system database. Other databases, formulas, and automations may depend on it. All records will be permanently deleted.",
     "deleting": "Deleting…",
-    "preset": "Preset"
+    "preset": "Preset",
+    "databaseDuplicated": "Database duplicated successfully."
   },
   "PropertyMeta": {
     "text": {

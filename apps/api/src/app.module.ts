@@ -23,6 +23,7 @@ import { SpaceModule } from "./modules/space/space.module";
 import { TemplatePropertyValueModule } from "./modules/template-property-value/template-property-value.module";
 import { TemplateModule } from "./modules/template/template.module";
 import { ImportExportModule } from "./modules/import-export/import-export.module";
+import { NotificationModule } from "./modules/notification/notification.module";
 import { UserModule } from "./modules/user/user.module";
 import { ViewModule } from "./modules/view/view.module";
 
@@ -63,6 +64,7 @@ import { ViewModule } from "./modules/view/view.module";
     TemplatePropertyValueModule,
     SettingsModule,
     ImportExportModule,
+    NotificationModule,
   ],
   providers: [
     {

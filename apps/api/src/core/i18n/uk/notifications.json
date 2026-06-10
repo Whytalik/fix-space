@@ -1,0 +1,4 @@
+{
+  "import_completed": "Імпорт завершено: додано {imported} записів, пропущено {skipped}",
+  "export_completed": "Експорт завершено: експортовано {count} записів"
+}

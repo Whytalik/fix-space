@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { stringify } from "csv-stringify/sync";
 import { FilterLogic, PropertyType, RecordFilterDto } from "@fixspace/domain";
+import { NotificationType } from "@fixspace/database";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
 import { matchesFilter } from "@/modules/record/utils/record-filter.util";
+import { NotificationService } from "@/modules/notification/notification.service";
 import { formatValueForCsv } from "../utils/csv-value-converter.util";
 import { ImportExportRepository } from "../repositories/import-export.repository";
 
@@ -20,6 +22,7 @@ export class ExportCsvUseCase {
   constructor(
     private readonly logger: AppLogger,
     private readonly repo: ImportExportRepository,
+    private readonly notificationService: NotificationService,
   ) {
     this.logger.setContext(ExportCsvUseCase.name);
   }
@@ -31,9 +34,9 @@ export class ExportCsvUseCase {
     if (!database) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
 
     const allProperties = await this.repo.findPropertiesByDatabase(databaseId);
-    const exportableProperties = allProperties.filter((p) => {
-      if (EXCLUDED_EXPORT_TYPES.has(p.type as PropertyType)) return false;
-      if (options.propertyIds?.length) return options.propertyIds.includes(p.id);
+    const exportableProperties = allProperties.filter((property) => {
+      if (EXCLUDED_EXPORT_TYPES.has(property.type as PropertyType)) return false;
+      if (options.propertyIds?.length) return options.propertyIds.includes(property.id);
       return true;
     });
 
@@ -47,9 +50,9 @@ export class ExportCsvUseCase {
         if (filters.length > 0) {
           records = records.filter((record) => {
             if (filterLogic === FilterLogic.OR) {
-              return filters.some((f) => matchesFilter(record, f));
+              return filters.some((filter) => matchesFilter(record, filter));
             }
-            return filters.every((f) => matchesFilter(record, f));
+            return filters.every((filter) => matchesFilter(record, filter));
           });
         }
       }
@@ -58,7 +61,7 @@ export class ExportCsvUseCase {
     const includeMetaFields = options.includeMetaFields !== false;
 
     const filteredProperties = includeMetaFields
-      ? exportableProperties.filter((p) => p.name.toLowerCase() !== "name")
+      ? exportableProperties.filter((property) => property.name.toLowerCase() !== "name")
       : exportableProperties;
 
     const header: string[] = [];
@@ -86,7 +89,7 @@ export class ExportCsvUseCase {
     const csvString = stringify([header, ...rows], {
       bom: true,
       cast: {
-        boolean: (v) => (v ? "true" : "false"),
+        boolean: (value) => (value ? "true" : "false"),
       },
     });
 
@@ -95,6 +98,8 @@ export class ExportCsvUseCase {
     const filename = `${safeName}_export_${new Date().toISOString().slice(0, 10)}.csv`;
 
     this.logger.log("CSV exported", { databaseId, records: records.length });
+
+    await this.notificationService.create(userId, NotificationType.INFO, t("notifications.export_completed", { count: records.length }));
 
     return { csv, filename };
   }
