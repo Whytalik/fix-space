@@ -1,23 +1,32 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Prisma } from "@fixspace/database";
 import { CreatePropertyValueDto, PropertyValueResponseDto, UpdatePropertyValueDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
 import { PropertyTypeRegistry } from "@/modules/property/types";
+import { FormulaRecalculator } from "@/modules/property/types/formula/formula-recalculator.service";
 import { PropertyValueRepository } from "./repositories/property-value.repository";
 
 @Injectable()
 export class PropertyValueService {
   constructor(
     private readonly logger: AppLogger,
+    private readonly eventEmitter: EventEmitter2,
     private readonly typeRegistry: PropertyTypeRegistry,
+    private readonly formulaRecalculator: FormulaRecalculator,
     private readonly propertyValueRepo: PropertyValueRepository,
   ) {
     this.logger.setContext(PropertyValueService.name);
   }
 
-  async create(recordId: string, createPropertyValueDto: CreatePropertyValueDto, userId: string): Promise<PropertyValueResponseDto> {
+  async create(
+    recordId: string,
+    createPropertyValueDto: CreatePropertyValueDto,
+    userId: string,
+    options?: { skipAutomations?: boolean },
+  ): Promise<PropertyValueResponseDto> {
     this.logger.debug("Creating property value", {
       recordId,
       propertyId: createPropertyValueDto.propertyId,
@@ -54,17 +63,37 @@ export class PropertyValueService {
 
     const formattedValue = handler.formatValue(rawValue, config);
 
-    const propertyValue = await this.propertyValueRepo.upsert(
-      recordId,
-      createPropertyValueDto.propertyId,
-      formattedValue as Prisma.InputJsonValue,
-      createPropertyValueDto.computed ?? false,
-    );
+    const existingPv = await this.propertyValueRepo.findByRecordAndProperty(recordId, createPropertyValueDto.propertyId);
+    const oldValue = existingPv?.value ?? null;
+
+    const propertyValue = await this.propertyValueRepo.transaction(async (tx) => {
+      const pv = await this.propertyValueRepo.upsert(
+        recordId,
+        createPropertyValueDto.propertyId,
+        formattedValue as Prisma.InputJsonValue,
+        createPropertyValueDto.computed ?? false,
+        tx,
+      );
+      await this.formulaRecalculator.recalculate(recordId, record.databaseId, tx);
+      return pv;
+    });
 
     this.logger.log("Property value created", {
       propertyValueId: propertyValue.id,
       recordId,
     });
+
+    if (!options?.skipAutomations) {
+      await this.eventEmitter.emitAsync("automation.fieldChanged", {
+        recordId,
+        databaseId: record.databaseId,
+        propertyId: createPropertyValueDto.propertyId,
+        oldValue,
+        newValue: propertyValue.value,
+        userId,
+      });
+    }
+
     return new PropertyValueResponseDto(propertyValue);
   }
 
@@ -86,7 +115,7 @@ export class PropertyValueService {
     return new PropertyValueResponseDto(propertyValue);
   }
 
-  async update(id: string, updatePropertyValueDto: UpdatePropertyValueDto): Promise<PropertyValueResponseDto> {
+  async update(id: string, updatePropertyValueDto: UpdatePropertyValueDto, userId?: string): Promise<PropertyValueResponseDto> {
     this.logger.debug("Updating property value", { id });
 
     const existingValue = await this.propertyValueRepo.findById(id);
@@ -115,9 +144,27 @@ export class PropertyValueService {
       jsonFields: { value: formattedValue },
     });
 
-    const propertyValue = await this.propertyValueRepo.update(id, updateData);
+    const oldValue = existingValue.value;
+
+    const propertyValue = await this.propertyValueRepo.transaction(async (tx) => {
+      const pv = await this.propertyValueRepo.update(id, updateData, tx);
+      await this.formulaRecalculator.recalculate(existingValue.recordId, existingValue.property.databaseId, tx);
+      return pv;
+    });
 
     this.logger.log("Property value updated", { id });
+
+    if (userId) {
+      await this.eventEmitter.emitAsync("automation.fieldChanged", {
+        recordId: existingValue.recordId,
+        databaseId: existingValue.property.databaseId,
+        propertyId: existingValue.propertyId,
+        oldValue,
+        newValue: propertyValue.value,
+        userId,
+      });
+    }
+
     return new PropertyValueResponseDto(propertyValue);
   }
 
@@ -130,7 +177,11 @@ export class PropertyValueService {
       throw new NotFoundException(t("errors.PROPERTY_VALUE_NOT_FOUND_ID", { id }));
     }
 
-    const propertyValue = await this.propertyValueRepo.delete(id);
+    const propertyValue = await this.propertyValueRepo.transaction(async (tx) => {
+      const pv = await this.propertyValueRepo.delete(id, tx);
+      await this.formulaRecalculator.recalculate(existingValue.recordId, existingValue.property.databaseId, tx);
+      return pv;
+    });
 
     this.logger.log("Property value removed", { id });
     return new PropertyValueResponseDto(propertyValue);

@@ -1,79 +1,56 @@
-import { Type } from "class-transformer";
-import { IsBoolean, IsEnum, IsNotEmpty, IsString, IsUUID, ValidateNested } from "class-validator";
+import { IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
 import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
+import { PropertyType } from "../property-type.enum";
 
-export const FORMULA_OUTPUT_TYPE_VALUES = ["text", "number", "checkbox", "date", "relation", "array"] as const;
-export type FormulaOutputType = (typeof FORMULA_OUTPUT_TYPE_VALUES)[number];
-
-export abstract class FormulaOutputBase {
-  @IsEnum(FORMULA_OUTPUT_TYPE_VALUES, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
-  type: FormulaOutputType;
+export enum FormulaType {
+  PRESET = "PRESET",
+  CUSTOM = "CUSTOM",
 }
 
-export class FormulaOutputText extends FormulaOutputBase {
-  type = "text" as const;
+export enum FormulaPresetName {
+  CONDITIONAL_TEXT = "CONDITIONAL_TEXT",
+  DATE_DIFF = "DATE_DIFF",
+  PERCENTAGE = "PERCENTAGE",
+  RELATED_RECORDS = "RELATED_RECORDS",
+  AVG_SCORE = "AVG_SCORE",
+  CATEGORY_THRESHOLD = "CATEGORY_THRESHOLD",
+  R_MULTIPLE = "R_MULTIPLE",
+  PLANNED_RR = "PLANNED_RR",
+  RISK_PCT_BALANCE = "RISK_PCT_BALANCE",
+  RULE_COMPLIANCE = "RULE_COMPLIANCE",
 }
-
-export class FormulaOutputNumber extends FormulaOutputBase {
-  type = "number" as const;
-}
-
-export class FormulaOutputCheckbox extends FormulaOutputBase {
-  type = "checkbox" as const;
-}
-
-export class FormulaOutputDate extends FormulaOutputBase {
-  type = "date" as const;
-}
-
-export class FormulaOutputRelation extends FormulaOutputBase {
-  type = "relation" as const;
-
-  @IsUUID("4", { message: i18nValidationMessage<I18nTranslations>("validation.IS_UUID") })
-  @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
-  relatedEntityId: string;
-
-  @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
-  multiple: boolean;
-}
-
-export class FormulaOutputArray extends FormulaOutputBase {
-  type = "array" as const;
-
-  @IsEnum(FORMULA_OUTPUT_TYPE_VALUES, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
-  itemType: FormulaOutputType;
-}
-
-export type FormulaOutput =
-  | FormulaOutputText
-  | FormulaOutputNumber
-  | FormulaOutputCheckbox
-  | FormulaOutputDate
-  | FormulaOutputRelation
-  | FormulaOutputArray;
 
 export class FormulaPropertyConfig {
-  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
-  formula: string;
+  @IsEnum(FormulaType, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
+  type: FormulaType;
 
-  @ValidateNested()
-  @Type(() => FormulaOutputBase, {
-    keepDiscriminatorProperty: true,
-    discriminator: {
-      property: "type",
-      subTypes: [
-        { value: FormulaOutputText, name: "text" },
-        { value: FormulaOutputNumber, name: "number" },
-        { value: FormulaOutputCheckbox, name: "checkbox" },
-        { value: FormulaOutputDate, name: "date" },
-        { value: FormulaOutputRelation, name: "relation" },
-        { value: FormulaOutputArray, name: "array" },
-      ],
-    },
-  })
-  output: FormulaOutput;
+  @IsOptional()
+  @IsEnum(FormulaPresetName, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
+  presetName?: FormulaPresetName;
+
+  /**
+   * The compiled string expression to be evaluated by the backend.
+   * E.g. "SUM(MAP(field_123, 'price'))"
+   */
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
+  expression: string;
+
+  /**
+   * The expected output type of the formula.
+   */
+  @IsEnum(PropertyType, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
+  resultType: PropertyType;
+
+  /**
+   * Used to store raw dropdown selections from the UI builder.
+   * The backend does not use this for evaluation; it's purely for reconstructing the UI state.
+   */
+  @IsOptional()
+  @IsObject({ message: i18nValidationMessage<I18nTranslations>("validation.IS_OBJECT") })
+  uiState?: Record<string, unknown>;
 }
 
 export { DEFAULT_FORMULA_PROPERTY } from "./formula.constants";

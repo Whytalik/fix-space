@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Prisma } from "@fixspace/database";
 import { CreateRecordDto, RecordResponseDto, UpdateRecordDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
@@ -7,6 +8,7 @@ import { t } from "@/common/utils/i18n.helper";
 import { generateUniqueName } from "@/common/utils/generate-unique-name";
 import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
 import { SettingsService } from "@/modules/settings/settings.service";
+import { FormulaRecalculator } from "@/modules/property/types/formula/formula-recalculator.service";
 import { RecordRepository } from "./repositories/record.repository";
 import { toRecordResponseDto } from "./utils/to-record-response.util";
 import { parseNamePattern } from "./utils/name-pattern-parser.util";
@@ -15,13 +17,20 @@ import { parseNamePattern } from "./utils/name-pattern-parser.util";
 export class RecordService {
   constructor(
     private readonly logger: AppLogger,
+    private readonly eventEmitter: EventEmitter2,
     private readonly settingsService: SettingsService,
+    private readonly formulaRecalculator: FormulaRecalculator,
     private readonly recordRepo: RecordRepository,
   ) {
     this.logger.setContext(RecordService.name);
   }
 
-  async create(databaseId: string, createRecordDto: CreateRecordDto, userId: string): Promise<RecordResponseDto> {
+  async create(
+    databaseId: string,
+    createRecordDto: CreateRecordDto,
+    userId: string,
+    options?: { skipAutomations?: boolean },
+  ): Promise<RecordResponseDto> {
     this.logger.debug("Creating record", { databaseId, viewId: createRecordDto.viewId });
 
     const database = await this.recordRepo.findDatabaseByOwner(databaseId, userId);
@@ -56,7 +65,7 @@ export class RecordService {
 
     const properties = await this.recordRepo.findPropertiesByDatabase(databaseId);
 
-    return await this.recordRepo.transaction(async (transaction) => {
+    const result = await this.recordRepo.transaction(async (transaction) => {
       let templateId = createRecordDto.templateId;
 
       if (!templateId) {
@@ -123,6 +132,8 @@ export class RecordService {
         });
       }
 
+      await this.formulaRecalculator.recalculate(record.id, databaseId, transaction);
+
       this.logger.log("Record created", {
         recordId: record.id,
         databaseId,
@@ -132,6 +143,12 @@ export class RecordService {
       const createdRecord = await this.recordRepo.findUniqueOrThrowWithValues(record.id, transaction);
       return toRecordResponseDto(createdRecord);
     });
+
+    if (!options?.skipAutomations) {
+      await this.eventEmitter.emitAsync("automation.recordCreated", { record: result, userId });
+    }
+
+    return result;
   }
 
   async findAll(databaseId: string, userId: string): Promise<RecordResponseDto[]> {
@@ -255,6 +272,8 @@ export class RecordService {
         data: { templateId },
       });
 
+      await this.formulaRecalculator.recalculate(id, record.databaseId, transaction);
+
       this.logger.log("Template applied", { recordId: id, templateId });
       const updated = await this.recordRepo.findUniqueOrThrowWithValues(id, transaction);
       return toRecordResponseDto(updated);
@@ -280,16 +299,18 @@ export class RecordService {
         transaction,
       );
 
-      for (const value of source.values) {
+      for (const propertyValue of source.values) {
         await transaction.propertyValue.create({
           data: {
             recordId: newRecord.id,
-            propertyId: value.propertyId,
-            value: value.value as Prisma.InputJsonValue,
-            computed: value.computed,
+            propertyId: propertyValue.propertyId,
+            value: propertyValue.value as Prisma.InputJsonValue,
+            computed: propertyValue.computed,
           },
         });
       }
+
+      await this.formulaRecalculator.recalculate(newRecord.id, source.databaseId, transaction);
 
       this.logger.log("Record duplicated", { sourceId: id, newId: newRecord.id });
 

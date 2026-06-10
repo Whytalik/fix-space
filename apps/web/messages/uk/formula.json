@@ -1,0 +1,124 @@
+{
+  "Formula": {
+    "presets": {
+      "CONDITIONAL_TEXT": {
+        "name": "Умовний текст",
+        "description": "Показує одну з двох міток залежно від значення поля"
+      },
+      "DATE_DIFF": {
+        "name": "Різниця між датами",
+        "description": "Тривалість між двома датами: дні, години або тижні"
+      },
+      "PERCENTAGE": {
+        "name": "Відсоток",
+        "description": "Ділить одне числове поле на інше та множить на 100"
+      },
+      "RELATED_RECORDS": {
+        "name": "По пов'язаних записах",
+        "description": "Агрегує або перелічує значення полів з пов'язаної бази"
+      },
+      "AVG_SCORE": {
+        "name": "Середній бал",
+        "description": "Середнє арифметичне від 2 до 5 числових або рейтингових полів"
+      },
+      "CATEGORY_THRESHOLD": {
+        "name": "Категорія за порогом",
+        "description": "Присвоює текстову мітку залежно від числового діапазону (A/B/C)"
+      },
+      "R_MULTIPLE": {
+        "name": "R-Multiple",
+        "description": "Скільки R повернула угода: P&L / Ризик"
+      },
+      "PLANNED_RR": {
+        "name": "Запланований RR",
+        "description": "Ризик/дохід до входу: (Ціль − Вхід) / (Вхід − Стоп)"
+      },
+      "RISK_PCT_BALANCE": {
+        "name": "Ризик % від балансу",
+        "description": "(Сума ризику / Баланс) × 100 — для prop firm трейдерів"
+      },
+      "RULE_COMPLIANCE": {
+        "name": "Дотримання правил",
+        "description": "Відсоток виконаних правил із обраних чекбоксів"
+      }
+    },
+    "gallery": {
+      "customFormula": "Свій розрахунок",
+      "customFormulaDesc": "Побудуй довільну формулу за допомогою конструктора",
+      "backToGallery": "Назад до галереї",
+      "preview": "Приклад",
+      "previewSample": "Приклад (тестові дані)"
+    },
+    "wizard": {
+      "fieldPickerPlaceholder": "Оберіть поле",
+      "rMultiplePnL": "P&L",
+      "rMultipleRisk": "Ризик",
+      "plannedRrEntry": "Ціна входу",
+      "plannedRrTarget": "Ціль",
+      "plannedRrStop": "Стоп-лос",
+      "riskPctBalanceRisk": "Ризик ($)",
+      "riskPctBalanceBalance": "Баланс",
+      "percentageNumerator": "Чисельник",
+      "percentageDenominator": "Знаменник",
+      "conditionalTextField": "Поле",
+      "categoryThresholdField": "Числове поле",
+      "dateDiffDate1": "Дата 1",
+      "dateDiffDate2": "Дата 2",
+      "conditionLabel": "Умова",
+      "valueLabel": "Значення",
+      "thenLabel": "Так → мітка",
+      "elseLabel": "Ні → мітка",
+      "thresholdsLabel": "Пороги (до 3)",
+      "elseLabelCategory": "Інакше → мітка",
+      "addThreshold": "Додати поріг",
+      "fieldsLabel": "Поля (2–5)",
+      "rulesLabel": "Правила (чекбокси)",
+      "selectFields": "Оберіть поля",
+      "selectCheckboxes": "Оберіть чекбокси",
+      "shortPosition": "Коротка позиція",
+      "count": "Кількість записів",
+      "sum": "Сума",
+      "avg": "Середнє",
+      "min": "Мінімум",
+      "max": "Максимум",
+      "earliest": "Найраніша дата",
+      "latest": "Найпізніша дата",
+      "list": "Список значень",
+      "format": "Формат",
+      "days": "Дні",
+      "hours": "Години",
+      "weeks": "Тижні",
+      "relationField": "Поле зв'язку",
+      "operation": "Операція",
+      "relatedField": "Поле з пов'язаної бази",
+      "expression": "Вираз"
+    },
+    "customBuilder": {
+      "calculate": "Обчислення",
+      "conditional": "Умовний",
+      "leftOperand": "Ліва частина",
+      "rightOperand": "Права частина",
+      "operation": "Операція",
+      "field": "Поле",
+      "number": "Число",
+      "checkField": "Поле для перевірки",
+      "condition": "Умова",
+      "value": "Значення",
+      "equals": "дорівнює",
+      "notEquals": "не дорівнює",
+      "greaterThan": "більше",
+      "lessThan": "менше",
+      "greaterThanEquals": "більше або рівне",
+      "lessThanEquals": "менше або рівне",
+      "add": "Додати",
+      "subtract": "Відняти",
+      "multiply": "Множити",
+      "divide": "Ділити",
+      "fieldPlaceholder": "Оберіть поле",
+      "valuePlaceholder": "напр. WON або 100",
+      "thenPlaceholder": "напр. Виконано",
+      "elsePlaceholder": "напр. Ні",
+      "expression": "Вираз"
+    }
+  }
+}

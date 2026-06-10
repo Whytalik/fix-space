@@ -23,6 +23,7 @@ type PropertyFormModalProps = {
   mode: "create" | "edit" | "view";
   databaseId: string;
   property?: PropertyResponseDto;
+  properties: PropertyResponseDto[];
   existingGroups: string[];
   databases: DatabaseResponseDto[];
   onClose: () => void;
@@ -34,6 +35,7 @@ export function PropertyFormModal({
   mode,
   databaseId,
   property,
+  properties,
   existingGroups,
   databases,
   onClose,
@@ -292,7 +294,14 @@ export function PropertyFormModal({
             <p className="text-sm font-semibold text-ink border-b border-stroke pb-2 text-center">
               {typeMeta[selectedType].label} {t("settings")}
             </p>
-            <PropertyTypeConfig type={selectedType} config={config} databases={databases} isViewMode={isViewMode} onPatch={patchConfig} />
+            <PropertyTypeConfig
+              type={selectedType}
+              config={config}
+              properties={properties}
+              databases={databases}
+              isViewMode={isViewMode}
+              onPatch={patchConfig}
+            />
           </div>
         </div>
 

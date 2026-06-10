@@ -1,0 +1,124 @@
+{
+  "Formula": {
+    "presets": {
+      "CONDITIONAL_TEXT": {
+        "name": "Conditional Text",
+        "description": "Shows one of two labels based on a field's value"
+      },
+      "DATE_DIFF": {
+        "name": "Date Difference",
+        "description": "Duration between two dates: days, hours, or weeks"
+      },
+      "PERCENTAGE": {
+        "name": "Percentage",
+        "description": "Divides one number field by another and multiplies by 100"
+      },
+      "RELATED_RECORDS": {
+        "name": "Related Records",
+        "description": "Aggregates or lists field values from a related database"
+      },
+      "AVG_SCORE": {
+        "name": "Average Score",
+        "description": "Average of 2 to 5 number or rating fields"
+      },
+      "CATEGORY_THRESHOLD": {
+        "name": "Category Threshold",
+        "description": "Assigns a text label based on a numeric range (A/B/C)"
+      },
+      "R_MULTIPLE": {
+        "name": "R-Multiple",
+        "description": "How many R the trade returned: P&L / Risk"
+      },
+      "PLANNED_RR": {
+        "name": "Planned RR",
+        "description": "Risk/reward before entry: (Target − Entry) / (Entry − Stop)"
+      },
+      "RISK_PCT_BALANCE": {
+        "name": "Risk % of Balance",
+        "description": "(Risk amount / Balance) × 100 — for prop firm traders"
+      },
+      "RULE_COMPLIANCE": {
+        "name": "Rule Compliance",
+        "description": "Percentage of selected checkboxes that are checked"
+      }
+    },
+    "gallery": {
+      "customFormula": "Custom Formula",
+      "customFormulaDesc": "Build any formula using the builder",
+      "backToGallery": "Back to gallery",
+      "preview": "Preview",
+      "previewSample": "Preview (sample data)"
+    },
+    "wizard": {
+      "fieldPickerPlaceholder": "Select a field",
+      "rMultiplePnL": "P&L",
+      "rMultipleRisk": "Risk",
+      "plannedRrEntry": "Entry price",
+      "plannedRrTarget": "Target",
+      "plannedRrStop": "Stop-loss",
+      "riskPctBalanceRisk": "Risk ($)",
+      "riskPctBalanceBalance": "Balance",
+      "percentageNumerator": "Numerator",
+      "percentageDenominator": "Denominator",
+      "conditionalTextField": "Field",
+      "categoryThresholdField": "Number field",
+      "dateDiffDate1": "Date 1",
+      "dateDiffDate2": "Date 2",
+      "conditionLabel": "Condition",
+      "valueLabel": "Value",
+      "thenLabel": "Then → label",
+      "elseLabel": "Else → label",
+      "thresholdsLabel": "Thresholds (up to 3)",
+      "elseLabelCategory": "Otherwise → label",
+      "addThreshold": "Add threshold",
+      "fieldsLabel": "Fields (2–5)",
+      "rulesLabel": "Rules (checkboxes)",
+      "selectFields": "Select fields",
+      "selectCheckboxes": "Select checkboxes",
+      "shortPosition": "Short position",
+      "count": "Record count",
+      "sum": "Sum",
+      "avg": "Average",
+      "min": "Minimum",
+      "max": "Maximum",
+      "earliest": "Earliest date",
+      "latest": "Latest date",
+      "list": "List of values",
+      "format": "Format",
+      "days": "Days",
+      "hours": "Hours",
+      "weeks": "Weeks",
+      "relationField": "Relation field",
+      "operation": "Operation",
+      "relatedField": "Field from related database",
+      "expression": "Expression"
+    },
+    "customBuilder": {
+      "calculate": "Calculate",
+      "conditional": "Conditional",
+      "leftOperand": "Left operand",
+      "rightOperand": "Right operand",
+      "operation": "Operation",
+      "field": "Field",
+      "number": "Number",
+      "checkField": "Check field",
+      "condition": "Condition",
+      "value": "Value",
+      "equals": "equals",
+      "notEquals": "not equals",
+      "greaterThan": "greater than",
+      "lessThan": "less than",
+      "greaterThanEquals": "greater or equal",
+      "lessThanEquals": "less or equal",
+      "add": "Add",
+      "subtract": "Subtract",
+      "multiply": "Multiply",
+      "divide": "Divide",
+      "fieldPlaceholder": "Select a field",
+      "valuePlaceholder": "e.g. WON or 100",
+      "thenPlaceholder": "e.g. Done",
+      "elsePlaceholder": "e.g. Not done",
+      "expression": "Expression"
+    }
+  }
+}

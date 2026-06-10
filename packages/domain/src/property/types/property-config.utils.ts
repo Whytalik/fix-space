@@ -62,11 +62,11 @@ export function isStatusPropertyConfig(config: unknown): config is StatusPropert
 }
 
 export function isRelationPropertyConfig(config: unknown): config is RelationPropertyConfig {
-  return typeof config === "object" && config !== null && "relatedEntityId" in config && "multiple" in config && !("formula" in config);
+  return typeof config === "object" && config !== null && "relatedEntityId" in config && "multiple" in config;
 }
 
 export function isFormulaPropertyConfig(config: unknown): config is FormulaPropertyConfig {
-  return typeof config === "object" && config !== null && "formula" in config && "output" in config;
+  return typeof config === "object" && config !== null && "expression" in config && "resultType" in config;
 }
 
 export function isRatingPropertyConfig(config: unknown): config is RatingPropertyConfig {

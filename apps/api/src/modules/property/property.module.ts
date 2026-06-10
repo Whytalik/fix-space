@@ -19,6 +19,8 @@ import {
   StatusHandler,
   TextHandler,
 } from "./types";
+import { FormulaEngine } from "./types/formula/formula-engine.service";
+import { FormulaRecalculator } from "./types/formula/formula-recalculator.service";
 
 const handlers = [
   TextHandler,
@@ -41,6 +43,8 @@ const handlers = [
     PropertyService,
     PropertyRepository,
     PropertyTypeRegistry,
+    FormulaEngine,
+    FormulaRecalculator,
     ...handlers,
     {
       provide: PROPERTY_TYPE_HANDLERS,
@@ -48,6 +52,6 @@ const handlers = [
       inject: handlers,
     },
   ],
-  exports: [PropertyService, PropertyRepository, PropertyTypeRegistry],
+  exports: [PropertyService, PropertyRepository, PropertyTypeRegistry, FormulaEngine, FormulaRecalculator],
 })
 export class PropertyModule {}

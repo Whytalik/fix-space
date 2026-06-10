@@ -28,16 +28,22 @@ export class PropertyValueRepository extends BaseRepository {
     });
   }
 
-  async upsert(recordId: string, propertyId: string, value: Prisma.InputJsonValue, computed: boolean) {
-    return prisma.propertyValue.upsert({
+  async findByRecordAndProperty(recordId: string, propertyId: string) {
+    return prisma.propertyValue.findUnique({
+      where: { recordId_propertyId: { recordId, propertyId } },
+    });
+  }
+
+  async upsert(recordId: string, propertyId: string, value: Prisma.InputJsonValue, computed: boolean, tx?: Prisma.TransactionClient) {
+    return (tx ?? prisma).propertyValue.upsert({
       where: { recordId_propertyId: { recordId, propertyId } },
       update: { value, computed },
       create: { recordId, propertyId, value, computed },
     });
   }
 
-  async update(id: string, data: Prisma.PropertyValueUpdateInput) {
-    return prisma.propertyValue.update({ where: { id }, data });
+  async update(id: string, data: Prisma.PropertyValueUpdateInput, tx?: Prisma.TransactionClient) {
+    return (tx ?? prisma).propertyValue.update({ where: { id }, data });
   }
 
   async updateByCompositeKey(recordId: string, propertyId: string, data: Prisma.PropertyValueUpdateInput) {
@@ -51,7 +57,7 @@ export class PropertyValueRepository extends BaseRepository {
     return prisma.propertyValue.createMany({ data });
   }
 
-  async delete(id: string) {
-    return prisma.propertyValue.delete({ where: { id } });
+  async delete(id: string, tx?: Prisma.TransactionClient) {
+    return (tx ?? prisma).propertyValue.delete({ where: { id } });
   }
 }

@@ -164,6 +164,7 @@ export default function EditDatabasePage() {
           mode={propertyModal.mode}
           databaseId={database.id}
           property={propertyModal.mode === "edit" ? propertyModal.property : undefined}
+          properties={properties}
           existingGroups={existingGroups}
           databases={allDatabases}
           onClose={() => setPropertyModal(null)}
