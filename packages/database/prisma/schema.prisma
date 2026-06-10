@@ -39,8 +39,9 @@ enum AutomationStatus {
 }
 
 enum NotificationType {
-  SYSTEM
-  ALERT
+  INFO
+  ERROR
+  AUTOMATION
   INTEGRATION
 }
 

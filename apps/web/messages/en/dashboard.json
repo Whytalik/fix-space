@@ -179,6 +179,12 @@
     "markAllAsRead": "Mark all as read",
     "noNotifications": "No new notifications",
     "clearAll": "Clear all",
-    "unread": "Unread"
+    "unread": "Unread",
+    "types": {
+      "info": "Information",
+      "error": "Error",
+      "automation": "Automation",
+      "integration": "Integration"
+    }
   }
 }
