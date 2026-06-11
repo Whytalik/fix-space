@@ -1,12 +1,12 @@
 import type { ContentSchema } from "../types/content-schema.types";
 
-export class RecordContentSnapshot {
+export class RecordContent {
   id: string;
-  recordContentId: string;
+  recordId: string;
   content: ContentSchema;
-  createdAt: Date;
+  lastEditedAt: Date;
 
-  constructor(partial: Partial<RecordContentSnapshot>) {
+  constructor(partial: Partial<RecordContent>) {
     Object.assign(this, partial);
   }
 }

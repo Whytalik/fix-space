@@ -4,3 +4,4 @@ export * from "./section-settings.interface";
 export * from "./space-settings.interface";
 export * from "./user-settings.interface";
 export * from "./view-settings.interface";
+export * from "./template-settings.interface";

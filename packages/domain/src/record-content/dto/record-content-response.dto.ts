@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
+import { ContentSchema } from "../types/content-schema.types";
 
 @Exclude()
 export class RecordContentResponseDto {
@@ -11,9 +12,9 @@ export class RecordContentResponseDto {
   @Expose()
   recordId: string;
 
-  @ApiProperty({ description: "Record content data", example: {} })
+  @ApiProperty({ description: "Record content data", example: { rows: [] } })
   @Expose()
-  content: Record<string, unknown>;
+  content: ContentSchema;
 
   @ApiProperty({ description: "Last edit timestamp", example: "2024-01-01T00:00:00.000Z" })
   @Expose()
