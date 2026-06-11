@@ -1,14 +1,18 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
+
 import { Prisma, type User } from "@fixspace/database";
 import { ChangePasswordDto, DeleteAccountDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
+
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
 import { verifyPassword, hashPassword } from "@/common/utils/password";
-import { StorageService } from "./providers/storage.service";
-import { UserRepository } from "./repositories/user.repository";
-import { TokenService } from "@/core/auth/token.service";
+
 import { MailService } from "@/core/mail/mail.service";
+import { StorageService } from "@/core/storage/storage.service";
+import { TokenService } from "@/core/auth/token.service";
+
+import { UserRepository } from "./repositories/user.repository";
 
 @Injectable()
 export class UserService {

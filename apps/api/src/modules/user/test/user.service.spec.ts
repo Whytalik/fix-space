@@ -8,7 +8,7 @@ import { MailService } from "@/core/mail/mail.service";
 import { TokenService } from "@/core/auth/token.service";
 import { UserService } from "../user.service";
 import { UserRepository } from "../repositories/user.repository";
-import { StorageService } from "../providers/storage.service";
+import { StorageService } from "@/core/storage/storage.service";
 
 jest.mock("@fixspace/database", () => ({
   Prisma: {},

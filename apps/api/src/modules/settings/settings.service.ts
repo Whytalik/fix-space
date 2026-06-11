@@ -4,6 +4,7 @@ import {
   DEFAULT_RECORD_SETTINGS,
   DEFAULT_SECTION_SETTINGS,
   DEFAULT_SPACE_SETTINGS,
+  DEFAULT_TEMPLATE_SETTINGS,
   DEFAULT_VIEW_SETTINGS,
 } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
@@ -15,6 +16,7 @@ type IconCategory =
   | SettingsCategory.RECORD
   | SettingsCategory.SECTION
   | SettingsCategory.SPACE
+  | SettingsCategory.TEMPLATE
   | SettingsCategory.VIEW;
 
 @Injectable()
@@ -80,6 +82,8 @@ export class SettingsService {
         return (await this.getSettings(userId, category, DEFAULT_SECTION_SETTINGS)).defaultSectionIcon;
       case SettingsCategory.SPACE:
         return (await this.getSettings(userId, category, DEFAULT_SPACE_SETTINGS)).defaultSpaceIcon;
+      case SettingsCategory.TEMPLATE:
+        return (await this.getSettings(userId, category, DEFAULT_TEMPLATE_SETTINGS)).defaultTemplateIcon;
       case SettingsCategory.VIEW:
         return (await this.getSettings(userId, category, DEFAULT_VIEW_SETTINGS)).defaultViewIcon;
     }

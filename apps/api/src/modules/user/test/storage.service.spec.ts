@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import { AppLogger } from "@/common/logger/app-logger.service";
-import { StorageService } from "../providers/storage.service";
+import { StorageService } from "@/core/storage/storage.service";
 
 jest.mock("cloudinary", () => ({
   v2: {
