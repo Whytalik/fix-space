@@ -187,7 +187,7 @@ export function PropertyFormModal({
         </div>
 
         <div
-          className={`flex-1 overflow-y-auto scrollbar px-5 py-5 flex flex-col gap-6${isViewMode ? " pointer-events-none opacity-70" : ""}`}
+          className={`flex-1 overflow-y-auto no-scrollbar px-5 py-5 flex flex-col gap-6${isViewMode ? " pointer-events-none opacity-70" : ""}`}
         >
           <div className="flex flex-col gap-4">
             <p className="text-sm font-semibold text-ink border-b border-stroke pb-2 text-center">{t("general")}</p>

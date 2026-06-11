@@ -12,12 +12,12 @@ export const metadata: Metadata = {
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const collapsed = cookieStore.get("sidebar-collapsed")?.value === "true";
-  const collapsedSectionsValue = cookieStore.get("sidebar-collapsed-sections")?.value;
-  let collapsedSections: string[] = [];
+  const expandedSectionsValue = cookieStore.get("sidebar-expanded-sections")?.value;
+  let expandedSections: string[] = [];
 
-  if (collapsedSectionsValue) {
+  if (expandedSectionsValue) {
     try {
-      collapsedSections = JSON.parse(decodeURIComponent(collapsedSectionsValue));
+      expandedSections = JSON.parse(decodeURIComponent(expandedSectionsValue));
     } catch (e) {
       console.error(e);
     }
@@ -27,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="flex flex-col h-screen bg-canvas overflow-hidden">
       <DashboardHeader />
       <div className="flex flex-1 min-h-0">
-        <Sidebar initialCollapsed={collapsed} initialCollapsedSections={collapsedSections} />
+        <Sidebar initialCollapsed={collapsed} initialExpandedSections={expandedSections} />
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">{children}</div>
       </div>
     </div>

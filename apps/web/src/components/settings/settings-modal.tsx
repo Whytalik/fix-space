@@ -8,10 +8,12 @@ import { ProfileSettings } from "./profile-settings";
 import { SpaceSettings } from "./space-settings";
 import { AppearanceSettings } from "./appearance-settings";
 import { DatabaseSettings } from "./database-settings";
+import { TemplateSettings } from "./template-settings";
+import { RecordSettings } from "./record-settings";
 import { SectionSettings } from "./section-settings";
 import { IntegrationSettings } from "./integration-settings";
 import { ViewSettings } from "./view-settings";
-import { Database, FolderOpen, LayoutDashboard, Table2, User, Palette, Puzzle, X } from "lucide-react";
+import { Database, FolderOpen, LayoutDashboard, Table2, FileText, User, Palette, Puzzle, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
@@ -38,6 +40,8 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     { id: "space", label: t("space"), icon: LayoutDashboard },
     { id: "appearance", label: t("appearance"), icon: Palette },
     { id: "database", label: t("database"), icon: Database },
+    { id: "template", label: t("template"), icon: Table2 },
+    { id: "record", label: t("record"), icon: FileText },
     { id: "section", label: t("section"), icon: FolderOpen },
     { id: "view", label: t("view"), icon: Table2 },
     { id: "integration", label: t("integration"), icon: Puzzle },
@@ -89,6 +93,8 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
             {activeCategory === "space" && <SpaceSettings />}
             {activeCategory === "appearance" && <AppearanceSettings />}
             {activeCategory === "database" && <DatabaseSettings />}
+            {activeCategory === "template" && <TemplateSettings />}
+            {activeCategory === "record" && <RecordSettings />}
             {activeCategory === "section" && <SectionSettings />}
             {activeCategory === "view" && <ViewSettings />}
             {activeCategory === "integration" && <IntegrationSettings />}

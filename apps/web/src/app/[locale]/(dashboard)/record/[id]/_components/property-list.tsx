@@ -52,7 +52,7 @@ function PropertyRows({ items, record }: { items: PropertyResponseDto[]; record:
 export function RecordPropertyList({ properties, record }: RecordPropertyListProps) {
   const visible = properties.filter((p) => !(p.position === 0 && p.type === PropertyType.TEXT));
   const groups = groupProperties(visible);
-  const hasGroups = groups.some((g) => g.name !== null);
+  const hasGroups = groups.some((group) => group.name !== null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
   function toggle(name: string) {

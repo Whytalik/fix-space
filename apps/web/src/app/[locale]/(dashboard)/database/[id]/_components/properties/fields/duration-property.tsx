@@ -36,21 +36,21 @@ function parseDuration(input: string, format: DurationFormat): number | null | u
   if (trimmed.includes(":")) {
     const parts = trimmed.split(":");
     if (parts.length === 2) {
-      const [p0, p1] = parts as [string, string];
-      if (p0 === "" || p1 === "") return undefined;
-      const h = parseInt(p0, 10);
-      const m = parseInt(p1, 10);
-      if (isNaN(h) || isNaN(m)) return undefined;
-      return h * 3600 + m * 60;
+      const [hoursStr, minutesStr] = parts as [string, string];
+      if (hoursStr === "" || minutesStr === "") return undefined;
+      const hours = parseInt(hoursStr, 10);
+      const minutes = parseInt(minutesStr, 10);
+      if (isNaN(hours) || isNaN(minutes)) return undefined;
+      return hours * 3600 + minutes * 60;
     }
     if (parts.length === 3) {
-      const [p0, p1, p2] = parts as [string, string, string];
-      if (p0 === "" || p1 === "" || p2 === "") return undefined;
-      const h = parseInt(p0, 10);
-      const m = parseInt(p1, 10);
-      const s = parseInt(p2, 10);
-      if (isNaN(h) || isNaN(m) || isNaN(s)) return undefined;
-      return h * 3600 + m * 60 + s;
+      const [hoursStr, minutesStr, secondsStr] = parts as [string, string, string];
+      if (hoursStr === "" || minutesStr === "" || secondsStr === "") return undefined;
+      const hours = parseInt(hoursStr, 10);
+      const minutes = parseInt(minutesStr, 10);
+      const s = parseInt(secondsStr, 10);
+      if (isNaN(hours) || isNaN(minutes) || isNaN(s)) return undefined;
+      return hours * 3600 + minutes * 60 + s;
     }
     return undefined;
   }

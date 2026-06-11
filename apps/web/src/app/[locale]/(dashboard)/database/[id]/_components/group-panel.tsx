@@ -213,7 +213,7 @@ export function GroupPanel({ grouping, onChange, anchorEl, onClose }: GroupPanel
     <div
       ref={containerRef}
       style={panelStyle}
-      className="bg-elevated border border-stroke rounded-lg shadow-lg p-3 min-w-[240px] flex flex-col gap-2 max-h-[70vh] overflow-y-auto scrollbar"
+      className="bg-elevated border border-stroke rounded-lg shadow-lg p-3 min-w-[240px] flex flex-col gap-2 max-h-[70vh] overflow-y-auto no-scrollbar"
     >
       <GroupPanelContent grouping={grouping} onChange={onChange} />
     </div>,

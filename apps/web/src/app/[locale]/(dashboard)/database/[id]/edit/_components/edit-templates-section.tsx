@@ -2,19 +2,13 @@
 
 import { Button } from "@/components/ui/primitives/actions/button";
 import { useTemplatesQuery } from "@/hooks/api/use-templates-query";
-import {
-  useCreateTemplate,
-  useDeleteTemplate,
-  useDuplicateTemplate,
-  useUpdateTemplate,
-  useResetTemplate,
-} from "@/hooks/api/use-template-mutations";
+import { useCreateTemplate, useDeleteTemplate, useDuplicateTemplate, useResetTemplate } from "@/hooks/api/use-template-mutations";
 import { useUIContext } from "@/context/ui-context";
 import { useDatabaseContext } from "@/context/database-context";
-import { Copy, MoreHorizontal, Pencil, Plus, Star, Trash2, RotateCcw } from "lucide-react";
+import { Copy, Pencil, Plus, Star, Trash2, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { TemplateFormModal } from "./template-form-modal";
 import type { TemplateResponseDto } from "@fixspace/domain";
@@ -32,38 +26,15 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
   const { views } = useDatabaseContext();
 
   useCreateTemplate(databaseId);
-  const updateTemplateMutation = useUpdateTemplate(databaseId);
   const deleteTemplateMutation = useDeleteTemplate(databaseId);
   const duplicateTemplateMutation = useDuplicateTemplate(databaseId);
   const resetTemplateMutation = useResetTemplate(databaseId);
 
   const [modal, setModal] = useState<{ mode: "create" } | { mode: "edit"; template: TemplateResponseDto } | null>(null);
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpenId(null);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  async function handleSetDefault(id: string) {
-    try {
-      await updateTemplateMutation.mutateAsync({ id, data: { isDefault: true } });
-      setMenuOpenId(null);
-    } catch (error) {
-      showError(error);
-    }
-  }
 
   async function handleDuplicate(id: string) {
     try {
       await duplicateTemplateMutation.mutateAsync(id);
-      setMenuOpenId(null);
     } catch (error) {
       showError(error);
     }
@@ -81,7 +52,6 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
         }
       },
     });
-    setMenuOpenId(null);
   }
 
   async function handleDelete(id: string) {
@@ -96,7 +66,6 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
         }
       },
     });
-    setMenuOpenId(null);
   }
 
   if (isLoading) {
@@ -136,7 +105,7 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
           {templates.map((template) => (
             <div
               key={template.id}
@@ -144,7 +113,7 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
               onClick={() => router.push(`/database/${databaseId}/template/${template.id}`)}
             >
               <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-surface border border-stroke shadow-sm">
-                <IconDisplay value={template.icon || "📄"} size={20} />
+                <IconDisplay value={template.icon || "icon:LayoutGrid"} size={20} />
               </div>
 
               <div className="flex-1 min-w-0">
@@ -170,66 +139,47 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
                 })()}
               </div>
 
-              <div className="relative flex items-center gap-1">
+              <div className="flex items-center gap-1 transition-opacity">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setMenuOpenId(menuOpenId === template.id ? null : template.id);
+                    setModal({ mode: "edit", template });
                   }}
-                  className="p-1.5 rounded-lg hover:bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="p-2 rounded-lg text-ink-muted hover:text-ink hover:bg-surface-hover transition-colors duration-150"
+                  title={t("editMeta")}
                 >
-                  <MoreHorizontal size={14} />
+                  <Pencil size={14} />
                 </button>
-
-                {menuOpenId === template.id && (
-                  <div
-                    ref={menuRef}
-                    className="absolute right-0 top-full mt-1 w-48 bg-canvas border border-stroke rounded-lg shadow-elevated z-50 py-1 animate-fade-up"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      onClick={() => {
-                        setModal({ mode: "edit", template });
-                        setMenuOpenId(null);
-                      }}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-ink hover:bg-canvas-subtle transition-colors duration-150"
-                    >
-                      <Pencil size={14} className="text-ink-muted" />
-                      {t("editMeta")}
-                    </button>
-                    <button
-                      onClick={() => handleDuplicate(template.id)}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-ink hover:bg-canvas-subtle transition-colors duration-150"
-                    >
-                      <Copy size={14} className="text-ink-muted" />
-                      {t("duplicate")}
-                    </button>
-                    <button
-                      onClick={() => handleReset(template.id)}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-ink hover:bg-canvas-subtle transition-colors duration-150"
-                    >
-                      <RotateCcw size={14} className="text-ink-muted" />
-                      {t("reset")}
-                    </button>
-                    {!template.isDefault && (
-                      <button
-                        onClick={() => handleSetDefault(template.id)}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-ink hover:bg-canvas-subtle transition-colors duration-150"
-                      >
-                        <Star size={14} className="text-ink-muted" />
-                        {t("setDefault")}
-                      </button>
-                    )}
-                    <div className="h-px bg-stroke my-1" />
-                    <button
-                      onClick={() => handleDelete(template.id)}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-error hover:bg-error/5 transition-colors duration-150"
-                    >
-                      <Trash2 size={14} />
-                      {t("delete")}
-                    </button>
-                  </div>
-                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDuplicate(template.id);
+                  }}
+                  className="p-2 rounded-lg text-ink-muted hover:text-ink hover:bg-surface-hover transition-colors duration-150"
+                  title={t("duplicate")}
+                >
+                  <Copy size={14} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleReset(template.id);
+                  }}
+                  className="p-2 rounded-lg text-ink-muted hover:text-ink hover:bg-surface-hover transition-colors duration-150"
+                  title={t("reset")}
+                >
+                  <RotateCcw size={14} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(template.id);
+                  }}
+                  className="p-2 rounded-lg text-ink-muted hover:text-error hover:bg-error/5 transition-colors duration-150"
+                  title={t("delete")}
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
             </div>
           ))}

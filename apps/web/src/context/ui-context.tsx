@@ -3,7 +3,7 @@
 import { parseApiErrors } from "@/lib/api/client";
 import { createContext, useCallback, useContext, useState } from "react";
 
-export type SettingsCategory = "profile" | "space" | "database" | "section" | "appearance" | "integration" | "view";
+export type SettingsCategory = "profile" | "space" | "database" | "template" | "record" | "section" | "appearance" | "integration" | "view";
 export type ToastVariant = "success" | "error" | "info";
 
 export interface ToastState {
@@ -14,6 +14,9 @@ export interface ToastState {
 export interface ConfirmState {
   title: string;
   message?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  variant?: "danger" | "default";
   onConfirm: () => void;
   onCancel?: () => void;
 }

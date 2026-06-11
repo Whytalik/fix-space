@@ -5,8 +5,10 @@ import { AddDatabaseModal } from "@/components/database/add-database-modal";
 import { useAppContext } from "@/context/app-context";
 import { useModal } from "@/hooks/ui/use-modal";
 import { FolderPlus, LayoutGrid } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function SidebarActions() {
+  const t = useTranslations("SidebarActions");
   const { space } = useAppContext();
   const addSection = useModal();
   const addDatabase = useModal();
@@ -19,7 +21,7 @@ export function SidebarActions() {
         className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-ink-secondary hover:bg-surface hover:text-ink transition-colors duration-150 w-full"
       >
         <FolderPlus size={14} className="shrink-0" />
-        <span>Add section</span>
+        <span>{t("addSection")}</span>
       </button>
       <button
         type="button"
@@ -27,7 +29,7 @@ export function SidebarActions() {
         className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-ink-secondary hover:bg-surface hover:text-ink transition-colors duration-150 w-full"
       >
         <LayoutGrid size={14} className="shrink-0" />
-        <span>Add database</span>
+        <span>{t("addDatabase")}</span>
       </button>
 
       {addSection.isOpen && <AddSectionModal onClose={addSection.close} />}

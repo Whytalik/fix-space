@@ -17,10 +17,10 @@ interface MarketSessionsProps {
 const ALL_SESSIONS = ["Tokyo", "Frankfurt", "London", "New York"];
 
 function formatNextSessionLocal(nextUtc: string): string {
-  const [h, m] = nextUtc.split(":");
-  if (!h) return nextUtc;
+  const [hours, minutes] = nextUtc.split(":");
+  if (!hours) return nextUtc;
   const d = new Date();
-  d.setUTCHours(Number(h), m ? Number(m) : 0, 0, 0);
+  d.setUTCHours(Number(hours), minutes ? Number(minutes) : 0, 0, 0);
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 

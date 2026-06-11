@@ -24,12 +24,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
 
   const messages = (
     await Promise.all(
-      namespaces.map(async (ns) => {
+      namespaces.map(async (namespace) => {
         try {
-          const nsModule = await import(`../../messages/${locale}/${ns}.json`);
+          const nsModule = await import(`../../messages/${locale}/${namespace}.json`);
           return nsModule.default;
         } catch (e) {
-          console.error(`Failed to load namespace ${ns} for locale ${locale}`, e);
+          console.error(`Failed to load namespace ${namespace} for locale ${locale}`, e);
           return {};
         }
       }),

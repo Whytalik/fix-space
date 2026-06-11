@@ -12,7 +12,7 @@ export default function DatabasePage() {
   const t = useTranslations("DatabasePage");
 
   return (
-    <div className="flex-1 overflow-y-auto px-8 py-10 animate-fade-up">
+    <div className="flex-1 overflow-y-auto scrollbar px-8 py-10 animate-fade-up">
       <DatabaseHeader />
 
       {isLoading ? (

@@ -56,6 +56,9 @@ const nextConfig = {
     "reflect-metadata",
     "express",
   ],
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
+  },
   experimental: {
   },
   reactCompiler: true,

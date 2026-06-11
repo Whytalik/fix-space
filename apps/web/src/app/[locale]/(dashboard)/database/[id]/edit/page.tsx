@@ -144,14 +144,21 @@ export default function EditDatabasePage() {
 
         {activeTab === "properties" && (
           <EditPropertiesSection
-            properties={properties}
+            properties={properties.filter((p) => !(p.position === 0 && p.type === "TEXT"))}
             databases={allDatabases}
             isLocked={isLocked}
             isPreset={!!database.isPreset}
             onAddProperty={handleAddProperty}
             onEditProperty={handleEditProperty}
             onDeleteProperty={handleDeleteProperty}
-            onPropertiesChange={applyPropertiesUpdate}
+            onPropertiesChange={(updated) => {
+              const nameProp = properties.find((p) => p.position === 0 && p.type === "TEXT");
+              if (nameProp) {
+                applyPropertiesUpdate([nameProp, ...updated]);
+              } else {
+                applyPropertiesUpdate(updated);
+              }
+            }}
             onPropertyUpdate={handlePropertyUpdate}
           />
         )}

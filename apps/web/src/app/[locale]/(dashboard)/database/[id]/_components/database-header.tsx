@@ -34,7 +34,7 @@ export function DatabaseHeader() {
 
   const moreItems = [
     {
-      label: "Automations",
+      label: t("automations"),
       icon: <Workflow size={13} />,
       onClick: () => router.push(`/database/${database!.id}/automations`),
     },

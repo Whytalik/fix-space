@@ -33,7 +33,7 @@ export function DashboardView() {
 
   return (
     <div className="flex-1 flex flex-col min-w-0 overflow-hidden animate-fade-up">
-      <main className="flex-1 overflow-y-auto scrollbar p-6 md:p-8 lg:p-10">
+      <main className="flex-1 overflow-y-auto no-scrollbar p-6 md:p-8 lg:p-10">
         {!space && (
           <div className="mt-8">
             <EmptyState title={t("noSpace")} description={t("noSpaceDesc")} />
@@ -45,7 +45,7 @@ export function DashboardView() {
         {dashboard && space && (
           <div className="flex flex-col gap-6">
             <div className="flex flex-col xl:flex-row gap-6">
-              <div className="flex-1 bg-surface border border-border rounded-xl p-6 flex flex-col justify-center">
+              <div className="flex-1 bg-surface border border-stroke rounded-2xl p-6 flex flex-col justify-center">
                 <h1 className="type-page-title">
                   {t("welcome")}, <span className="text-accent">{user.username}</span>
                 </h1>

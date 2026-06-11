@@ -5,7 +5,6 @@ import { IconPicker } from "@/components/ui/icons/icon-picker";
 import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { PropertyHint } from "../../_components/properties/ui/property-hint";
 
 type EditGeneralSectionProps = {
   icon: string;
@@ -62,7 +61,6 @@ export function EditGeneralSection({
               {icon ? (
                 <>
                   <IconDisplay value={icon} size={18} />
-                  <span className="text-ink-secondary text-xs">{icon.startsWith("icon:") ? icon.slice(5) : icon}</span>
                 </>
               ) : (
                 <span className="text-ink-muted">{t("chooseIcon")}</span>
@@ -76,7 +74,6 @@ export function EditGeneralSection({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5">
               <label className="type-field-label">{t("title")}</label>
-              <PropertyHint hint="Name of the database as it appears in the sidebar and header" />
             </div>
             <input
               type="text"

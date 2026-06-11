@@ -40,9 +40,17 @@ export function DatabaseAddButton() {
   }
 
   function handleClick() {
-    const resolvedTemplateId = activeView?.useDefaultTemplate
-      ? activeView.defaultTemplateId || templates.find((template) => template.isDefault)?.id
-      : undefined;
+    let resolvedTemplateId: string | undefined = undefined;
+
+    if (activeView?.useDefaultTemplate) {
+      if (activeView.defaultTemplateId) {
+        resolvedTemplateId = activeView.defaultTemplateId;
+      } else {
+        resolvedTemplateId = undefined;
+      }
+    } else {
+      resolvedTemplateId = templates.find((t) => t.isDefault)?.id;
+    }
 
     if (resolvedTemplateId) {
       handleCreate(resolvedTemplateId);

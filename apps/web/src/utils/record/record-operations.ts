@@ -37,8 +37,8 @@ function checkEmpty(rawValue: unknown): boolean {
   if (rawValue === null || rawValue === undefined || rawValue === "") return true;
   if (Array.isArray(rawValue) && rawValue.length === 0) return true;
   if (typeof rawValue === "object" && !Array.isArray(rawValue)) {
-    const obj = rawValue as Record<string, unknown>;
-    return obj.label === null || obj.label === "" || obj.value === null || obj.value === "";
+    const selectValue = rawValue as Record<string, unknown>;
+    return selectValue.label === null || selectValue.label === "" || selectValue.value === null || selectValue.value === "";
   }
   return false;
 }
@@ -190,9 +190,9 @@ export function matchesFilter(record: RecordResponseDto, filter: RecordFilterDto
         case FilterOperator.IS_NOT_EMPTY:
           return relationValues.length > 0;
         case FilterOperator.IN:
-          return filterValues.length > 0 && filterValues.some((fv) => relationValues.includes(fv));
+          return filterValues.length > 0 && filterValues.some((filterValue) => relationValues.includes(filterValue));
         case FilterOperator.NOT_IN:
-          return filterValues.length === 0 || !filterValues.some((fv) => relationValues.includes(fv));
+          return filterValues.length === 0 || !filterValues.some((filterValue) => relationValues.includes(filterValue));
         default:
           return true;
       }
