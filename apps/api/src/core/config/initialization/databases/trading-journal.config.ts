@@ -1,5 +1,5 @@
 import { PropertyType } from "@fixspace/domain";
-import { colors, DATE_CONFIG, DIRECTION_OPTIONS, PAIR_CATEGORIES, SESSION_OPTIONS, TIMEFRAME_OPTIONS, FORMULA_TEXT } from "../constants";
+import { colors, DATE_CONFIG, DIRECTION_OPTIONS, PAIR_CATEGORIES, SESSION_OPTIONS, TIMEFRAME_OPTIONS } from "../constants";
 import type { InitPropertyDef } from "../types";
 
 export const tradingJournalProperties: InitPropertyDef[] = [
@@ -105,7 +105,11 @@ export const tradingJournalProperties: InitPropertyDef[] = [
     name: "Risk Amount ($)",
     type: PropertyType.FORMULA,
     position: 11,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "ABS({{Entry Price}} - {{Initial SL}}) * {{Quantity}}",
+      resultType: "NUMBER",
+    },
     hint: "Сума, яку ви втратите при досягненні Stop Loss.",
     group: "Risk Management",
   },
@@ -113,7 +117,11 @@ export const tradingJournalProperties: InitPropertyDef[] = [
     name: "Risk %",
     type: PropertyType.FORMULA,
     position: 12,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "({{Risk Amount ($)}} / 100000) * 100",
+      resultType: "NUMBER",
+    },
     hint: "Відсоток від капіталу під загрозою. Базовий показник ризик-менеджменту.",
     group: "Risk Management",
   },
@@ -121,7 +129,12 @@ export const tradingJournalProperties: InitPropertyDef[] = [
     name: "Planned R",
     type: PropertyType.FORMULA,
     position: 13,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression:
+        "IF({{Direction}} == 'Long', ({{Initial TP}} - {{Entry Price}}) / ({{Entry Price}} - {{Initial SL}}), ({{Entry Price}} - {{Initial TP}}) / ({{Initial SL}} - {{Entry Price}}))",
+      resultType: "NUMBER",
+    },
     hint: "Потенційна винагорода відносно ризику.",
     group: "Risk Management",
   },
@@ -129,7 +142,12 @@ export const tradingJournalProperties: InitPropertyDef[] = [
     name: "Actual R",
     type: PropertyType.FORMULA,
     position: 14,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression:
+        "IF({{Direction}} == 'Long', ({{Exit Price}} - {{Entry Price}}) / ({{Entry Price}} - {{Initial SL}}), ({{Entry Price}} - {{Exit Price}}) / ({{Initial SL}} - {{Entry Price}}))",
+      resultType: "NUMBER",
+    },
     hint: "Фактичне R-кратне в одиницях ризику. Головний показник стабільності.",
     group: "Risk Management",
   },
@@ -137,7 +155,12 @@ export const tradingJournalProperties: InitPropertyDef[] = [
     name: "Gross P&L",
     type: PropertyType.FORMULA,
     position: 15,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression:
+        "IF({{Direction}} == 'Long', ({{Exit Price}} - {{Entry Price}}) * {{Quantity}}, ({{Entry Price}} - {{Exit Price}}) * {{Quantity}})",
+      resultType: "NUMBER",
+    },
     hint: "Результат угоди без урахування витрат.",
     group: "Risk Management",
   },
@@ -153,7 +176,11 @@ export const tradingJournalProperties: InitPropertyDef[] = [
     name: "Net P&L",
     type: PropertyType.FORMULA,
     position: 17,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "{{Gross P&L}} - {{Fees}}",
+      resultType: "NUMBER",
+    },
     hint: "Реальний прибуток, який залишився на балансі після всіх витрат.",
     group: "Risk Management",
   },
@@ -290,7 +317,12 @@ export const tradingJournalProperties: InitPropertyDef[] = [
     name: "Exit Efficiency",
     type: PropertyType.FORMULA,
     position: 29,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression:
+        "IF({{Direction}} == 'Long', ({{Exit Price}} - {{Entry Price}}) / ({{MFE (Max Fav)}} - {{Entry Price}}) * 100, ({{Entry Price}} - {{Exit Price}}) / ({{Entry Price}} - {{MFE (Max Fav)}}) * 100)",
+      resultType: "PROGRESS",
+    },
     hint: "Наскільки вчасно ви вийшли. 100% — вихід на самому піку (MFE).",
     group: "Advanced",
   },
@@ -298,7 +330,11 @@ export const tradingJournalProperties: InitPropertyDef[] = [
     name: "Hold Time",
     type: PropertyType.FORMULA,
     position: 30,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "DATE_DIFF({{Entry Date}}, {{Exit Date}}, 'hours')",
+      resultType: "DURATION",
+    },
     hint: "Тривалість угоди. Допомагає оптимізувати час очікування.",
     group: "Advanced",
   },

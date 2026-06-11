@@ -5,4 +5,8 @@ export const DATE_CONFIG = {
   timeFormat: "HH:mm",
 } as const;
 
-export const FORMULA_TEXT = { formula: "", output: { type: "text" } };
+export const FORMULA_TEXT = {
+  type: "CUSTOM",
+  expression: "'—'",
+  resultType: "TEXT",
+};

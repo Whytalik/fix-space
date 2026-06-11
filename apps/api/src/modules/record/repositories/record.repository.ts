@@ -4,21 +4,17 @@ import { BaseRepository } from "@/common/utils/base.repository";
 
 @Injectable()
 export class RecordRepository extends BaseRepository {
-  async findDatabaseByOwner(databaseId: string, userId: string) {
-    return prisma.database.findFirst({
-      where: { id: databaseId, space: { ownerId: userId } },
-      select: { id: true },
+  async findByIdWithOwner(id: string, userId: string) {
+    return prisma.record.findFirst({
+      where: { id, database: { space: { ownerId: userId } } },
     });
   }
 
-  async findDefaultTemplate(databaseId: string, transaction?: Prisma.TransactionClient) {
-    return (transaction ?? prisma).template.findFirst({
-      where: { databaseId, isDefault: true },
+  async findManyByDatabase(databaseId: string) {
+    return prisma.record.findMany({
+      where: { databaseId },
+      include: { values: true },
     });
-  }
-
-  async findPropertiesByDatabase(databaseId: string) {
-    return prisma.property.findMany({ where: { databaseId } });
   }
 
   async countByDatabase(databaseId: string) {

@@ -83,7 +83,7 @@ export class PropertyService {
       name: createPropertyDto.name,
     });
 
-    const database = await this.propertyRepo.findDatabaseByOwner(databaseId, userId);
+    const database = await this.databaseRepo.findDatabaseByOwner(databaseId, userId);
 
     if (!database) {
       throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
@@ -224,7 +224,7 @@ export class PropertyService {
       throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id }));
     }
 
-    const database = await this.propertyRepo.findDatabaseByOwner(existingProperty.databaseId, userId);
+    const database = await this.databaseRepo.findDatabaseByOwner(existingProperty.databaseId, userId);
     if (database?.isLocked) {
       throw new ForbiddenException(t("errors.DATABASE_STRUCTURE_LOCKED"));
     }
@@ -410,7 +410,7 @@ export class PropertyService {
       throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id }));
     }
 
-    const database = await this.propertyRepo.findDatabaseByOwner(existingProperty.databaseId, userId);
+    const database = await this.databaseRepo.findDatabaseByOwner(existingProperty.databaseId, userId);
     if (database?.isLocked) {
       throw new ForbiddenException(t("errors.DATABASE_STRUCTURE_LOCKED"));
     }

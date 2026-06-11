@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import { AppLogger } from "@/common/logger/app-logger.service";
+import { StorageService } from "@/core/storage/storage.service";
+import { DatabaseRepository } from "@/modules/database/repositories/database.repository";
+import { PropertyRepository } from "@/modules/property/repositories/property.repository";
 import { TemplateService } from "../template.service";
 import { TemplateRepository } from "../repositories/template.repository";
 
@@ -42,9 +45,21 @@ describe("TemplateService", () => {
     error: jest.fn(),
   } as unknown as jest.Mocked<AppLogger>;
 
-  const mockTemplateRepo = {
+  const mockStorageService = {
+    saveContentImage: jest.fn(),
+    saveAvatar: jest.fn(),
+    removeAvatarFiles: jest.fn(),
+  };
+
+  const mockDatabaseRepo = {
     findDatabaseByOwner: jest.fn(),
-    findPropertiesByDatabase: jest.fn(),
+  };
+
+  const mockPropertyRepo = {
+    findManyByDatabase: jest.fn(),
+  };
+
+  const mockTemplateRepo = {
     count: jest.fn(),
     findById: jest.fn(),
     findByIdWithValues: jest.fn(),
@@ -64,6 +79,9 @@ describe("TemplateService", () => {
       providers: [
         TemplateService,
         { provide: TemplateRepository, useValue: mockTemplateRepo },
+        { provide: StorageService, useValue: mockStorageService },
+        { provide: DatabaseRepository, useValue: mockDatabaseRepo },
+        { provide: PropertyRepository, useValue: mockPropertyRepo },
         { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();
@@ -76,7 +94,7 @@ describe("TemplateService", () => {
 
   describe("create", () => {
     it("TC-TMPL-U-002: should create template with property values", async () => {
-      mockTemplateRepo.findDatabaseByOwner.mockResolvedValue({ id: "db-1", spaceId: "space-1", ownerId: "user-1" });
+      mockDatabaseRepo.findDatabaseByOwner.mockResolvedValue({ id: "db-1", spaceId: "space-1", ownerId: "user-1" });
       mockTemplateRepo.count.mockResolvedValue(0);
       mockTemplateRepo.create.mockResolvedValue({
         id: "tpl-1",
@@ -85,7 +103,7 @@ describe("TemplateService", () => {
         isDefault: true,
         position: 0,
       });
-      mockTemplateRepo.findPropertiesByDatabase.mockResolvedValue([{ id: "prop-1", name: "Name", type: "TEXT", databaseId: "db-1" }]);
+      mockPropertyRepo.findManyByDatabase.mockResolvedValue([{ id: "prop-1", name: "Name", type: "TEXT", databaseId: "db-1" }]);
       (prisma.templatePropertyValue.create as jest.Mock<any>).mockResolvedValue({ id: "tpl-val-1" });
       mockTemplateRepo.findUniqueOrThrowWithValues.mockResolvedValue({
         id: "tpl-1",
@@ -104,10 +122,10 @@ describe("TemplateService", () => {
     });
 
     it("TC-TMPL-U-002: should set isDefault to true for first template", async () => {
-      mockTemplateRepo.findDatabaseByOwner.mockResolvedValue({ id: "db-1", spaceId: "space-1", ownerId: "user-1" });
+      mockDatabaseRepo.findDatabaseByOwner.mockResolvedValue({ id: "db-1", spaceId: "space-1", ownerId: "user-1" });
       mockTemplateRepo.count.mockResolvedValue(0);
       mockTemplateRepo.create.mockResolvedValue({ id: "tpl-1", name: "First Template", databaseId: "db-1", isDefault: true });
-      mockTemplateRepo.findPropertiesByDatabase.mockResolvedValue([]);
+      mockPropertyRepo.findManyByDatabase.mockResolvedValue([]);
       mockTemplateRepo.findUniqueOrThrowWithValues.mockResolvedValue({
         id: "tpl-1",
         name: "First Template",
@@ -122,10 +140,10 @@ describe("TemplateService", () => {
     });
 
     it("TC-TMPL-U-002: should reset other defaults when creating new default", async () => {
-      mockTemplateRepo.findDatabaseByOwner.mockResolvedValue({ id: "db-1", spaceId: "space-1", ownerId: "user-1" });
+      mockDatabaseRepo.findDatabaseByOwner.mockResolvedValue({ id: "db-1", spaceId: "space-1", ownerId: "user-1" });
       mockTemplateRepo.count.mockResolvedValue(1);
       mockTemplateRepo.create.mockResolvedValue({ id: "tpl-2", name: "New Default", databaseId: "db-1", isDefault: true });
-      mockTemplateRepo.findPropertiesByDatabase.mockResolvedValue([]);
+      mockPropertyRepo.findManyByDatabase.mockResolvedValue([]);
       mockTemplateRepo.findUniqueOrThrowWithValues.mockResolvedValue({
         id: "tpl-2",
         name: "New Default",

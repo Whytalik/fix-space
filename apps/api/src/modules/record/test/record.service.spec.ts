@@ -8,6 +8,11 @@ import { RecordService } from "../record.service";
 import { RecordRepository } from "../repositories/record.repository";
 import { SettingsService } from "@/modules/settings/settings.service";
 import { FormulaRecalculator } from "@/modules/property/types/formula/formula-recalculator.service";
+import { DatabaseRepository } from "@/modules/database/repositories/database.repository";
+import { PropertyRepository } from "@/modules/property/repositories/property.repository";
+import { TemplateRepository } from "@/modules/template/repositories/template.repository";
+import { RecordContentService } from "@/modules/record-content/record-content.service";
+import { ViewRepository } from "@/modules/view/repositories/view.repository";
 
 jest.mock("@fixspace/database", () => ({
   Prisma: {
@@ -44,13 +49,23 @@ describe("RecordService", () => {
 
   const mockRecordRepo = {
     findById: jest.fn(),
-    findDatabaseByOwner: jest.fn(),
-    findPropertiesByDatabase: jest.fn(),
     findUniqueOrThrowWithValues: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
     transaction: jest.fn((callback) => callback(prisma)),
+  };
+
+  const mockDatabaseRepo = {
+    findDatabaseByOwner: jest.fn(),
+  };
+
+  const mockPropertyRepo = {
+    findManyByDatabase: jest.fn(),
+  };
+
+  const mockTemplateRepo = {
+    findDefaultInDatabase: jest.fn(),
   };
 
   const mockEventEmitter = { emitAsync: jest.fn().mockResolvedValue([]) };
@@ -63,6 +78,11 @@ describe("RecordService", () => {
         { provide: EventEmitter2, useValue: mockEventEmitter },
         { provide: SettingsService, useValue: mockSettingsService },
         { provide: FormulaRecalculator, useValue: mockFormulaRecalculator },
+        { provide: RecordContentService, useValue: { duplicate: jest.fn() } },
+        { provide: ViewRepository, useValue: { findById: jest.fn() } },
+        { provide: DatabaseRepository, useValue: mockDatabaseRepo },
+        { provide: PropertyRepository, useValue: mockPropertyRepo },
+        { provide: TemplateRepository, useValue: mockTemplateRepo },
         { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();

@@ -1,9 +1,29 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@fixspace/domain";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseFilePipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
+
+import { ContentImageResponseDto, CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@fixspace/domain";
+import { memoryStorage } from "multer";
+
 import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
 import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
 import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
+
 import { DuplicateTemplateUseCase } from "./providers/duplicate-template.usecase";
 import { TemplateService } from "./template.service";
 
@@ -110,5 +130,31 @@ export class TemplateController {
   @ApiResponse({ status: 404, description: "Template not found." })
   reset(@Param("id") id: string) {
     return this.templateService.reset(id);
+  }
+
+  @Post(":id/images")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({
+    model: "template",
+    ownerPath: ["database", "space", "ownerId"],
+  })
+  @UseInterceptors(FileInterceptor("image", { storage: memoryStorage() }))
+  @ApiOperation({ summary: "Upload an image for template content" })
+  @ApiParam({ name: "id", type: String })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        image: { type: "string", format: "binary", description: "Image file (JPEG, PNG, or WebP, max 5 MB)" },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: "Image uploaded.", type: ContentImageResponseDto })
+  @ApiResponse({ status: 400, description: "Invalid file type or file too large." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  uploadImage(@Param("id") id: string, @UploadedFile(new ParseFilePipe({ fileIsRequired: true })) file: Express.Multer.File) {
+    return this.templateService.uploadImage(id, file);
   }
 }

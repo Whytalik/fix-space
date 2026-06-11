@@ -97,9 +97,9 @@ export class FormulaRecalculator {
       });
 
       const byRecord = new Map<string, Record<string, unknown>>();
-      for (const rv of relatedValues) {
-        if (!byRecord.has(rv.recordId)) byRecord.set(rv.recordId, {});
-        byRecord.get(rv.recordId)![toFieldKey(rv.propertyId)] = this.coerceValue(rv.value);
+      for (const relatedValue of relatedValues) {
+        if (!byRecord.has(relatedValue.recordId)) byRecord.set(relatedValue.recordId, {});
+        byRecord.get(relatedValue.recordId)![toFieldKey(relatedValue.propertyId)] = this.coerceValue(relatedValue.value);
       }
 
       context[toFieldKey(v.propertyId)] = relatedIds.map((id) => byRecord.get(id) ?? {});
@@ -113,8 +113,8 @@ export class FormulaRecalculator {
     if (typeof value === "number") return value;
     if (typeof value === "boolean") return value;
     if (typeof value === "string") {
-      const num = Number(value);
-      if (!isNaN(num) && value.trim() !== "") return num;
+      const parsedNumber = Number(value);
+      if (!isNaN(parsedNumber) && value.trim() !== "") return parsedNumber;
       return value;
     }
     return value;

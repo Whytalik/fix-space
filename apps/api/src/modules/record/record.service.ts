@@ -1,17 +1,26 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
+
 import { Prisma } from "@fixspace/database";
 import { CreateRecordDto, RecordResponseDto, UpdateRecordDto } from "@fixspace/domain";
+
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
 import { generateUniqueName } from "@/common/utils/generate-unique-name";
+
 import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
 import { SettingsService } from "@/modules/settings/settings.service";
 import { FormulaRecalculator } from "@/modules/property/types/formula/formula-recalculator.service";
+import { RecordContentService } from "@/modules/record-content/record-content.service";
+import { DatabaseRepository } from "@/modules/database/repositories/database.repository";
+import { PropertyRepository } from "@/modules/property/repositories/property.repository";
+import { TemplateRepository } from "@/modules/template/repositories/template.repository";
+import { ViewRepository } from "@/modules/view/repositories/view.repository";
 import { RecordRepository } from "./repositories/record.repository";
 import { toRecordResponseDto } from "./utils/to-record-response.util";
 import { parseNamePattern } from "./utils/name-pattern-parser.util";
+import { normalizeContentSchema, hasContentRows } from "./utils/content-schema.util";
 
 @Injectable()
 export class RecordService {
@@ -21,6 +30,11 @@ export class RecordService {
     private readonly settingsService: SettingsService,
     private readonly formulaRecalculator: FormulaRecalculator,
     private readonly recordRepo: RecordRepository,
+    private readonly recordContentService: RecordContentService,
+    private readonly viewRepo: ViewRepository,
+    private readonly databaseRepo: DatabaseRepository,
+    private readonly propertyRepo: PropertyRepository,
+    private readonly templateRepo: TemplateRepository,
   ) {
     this.logger.setContext(RecordService.name);
   }
@@ -33,48 +47,33 @@ export class RecordService {
   ): Promise<RecordResponseDto> {
     this.logger.debug("Creating record", { databaseId, viewId: createRecordDto.viewId });
 
-    const database = await this.recordRepo.findDatabaseByOwner(databaseId, userId);
+    const database = await this.databaseRepo.findDatabaseByOwner(databaseId, userId);
 
     if (!database) {
-      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
+      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id: databaseId }));
     }
 
-    let view: any = null;
-    if (createRecordDto.viewId) {
-      view = await this.recordRepo.transaction((tx) =>
-        tx.view.findFirst({
-          where: { id: createRecordDto.viewId, databaseId },
-        }),
-      );
-      if (!view) {
-        throw new NotFoundException(t("errors.VIEW_NOT_FOUND"));
-      }
-    }
+    const properties = await this.propertyRepo.findManyByDatabase(databaseId);
 
-    const recordLimit = view?.recordLimit;
-    if (recordLimit) {
-      const count = await this.recordRepo.countByDatabase(databaseId);
-      if (count >= recordLimit) {
-        throw new BadRequestException(t("errors.RECORD_LIMIT_REACHED"));
-      }
-    }
+    const view = createRecordDto.viewId ? await this.viewRepo.findById(createRecordDto.viewId) : null;
 
-    const { icon: effectiveIcon } = await this.settingsService.resolveDefaults(userId, SettingsCategory.RECORD, {
-      icon: createRecordDto.icon,
-    });
-
-    const properties = await this.recordRepo.findPropertiesByDatabase(databaseId);
+    let capturedTemplateContent: unknown = null;
 
     const result = await this.recordRepo.transaction(async (transaction) => {
       let templateId = createRecordDto.templateId;
+      let recordIcon = createRecordDto.icon;
 
-      if (!templateId) {
+      this.logger.debug("Starting transaction for record creation", { templateId, providedName: createRecordDto.name });
+
+      if (templateId === undefined) {
         if (view?.useDefaultTemplate && view.defaultTemplateId) {
           templateId = view.defaultTemplateId;
+          this.logger.debug("Resolved template from view default", { templateId });
         } else if (view?.useDefaultTemplate !== false) {
-          const defaultTemplate = await this.recordRepo.findDefaultTemplate(databaseId, transaction);
+          const defaultTemplate = await this.templateRepo.findDefaultInDatabase(databaseId, transaction);
           if (defaultTemplate) {
             templateId = defaultTemplate.id;
+            this.logger.debug("Resolved template from database default", { templateId });
           }
         }
       }
@@ -97,8 +96,17 @@ export class RecordService {
           throw new NotFoundException(t("errors.TEMPLATE_NOT_FOUND"));
         }
 
-        if (template.namePattern && (!recordName || recordName === "Untitled")) {
-          recordName = await parseNamePattern(template.namePattern, databaseId, transaction);
+        if (!recordIcon && template.icon) {
+          recordIcon = template.icon;
+        }
+
+        let patternToUse = template.namePattern;
+        if (!patternToUse && template.name?.includes("{{")) {
+          patternToUse = template.name;
+        }
+
+        if (patternToUse && (!recordName || recordName === "Untitled" || recordName === "Без назви")) {
+          recordName = await parseNamePattern(patternToUse, databaseId, transaction);
         }
 
         for (const templateValue of template.values) {
@@ -106,7 +114,13 @@ export class RecordService {
             templateValues[templateValue.propertyId] = templateValue.value;
           }
         }
+
+        capturedTemplateContent = template.content;
       }
+
+      const { icon: effectiveIcon } = await this.settingsService.resolveDefaults(userId, SettingsCategory.RECORD, {
+        icon: recordIcon,
+      });
 
       const record = await this.recordRepo.create(
         {
@@ -137,12 +151,16 @@ export class RecordService {
       this.logger.log("Record created", {
         recordId: record.id,
         databaseId,
-        templateId: createRecordDto.templateId,
+        templateId: templateId,
       });
 
       const createdRecord = await this.recordRepo.findUniqueOrThrowWithValues(record.id, transaction);
       return toRecordResponseDto(createdRecord);
     });
+
+    if (hasContentRows(capturedTemplateContent)) {
+      await this.recordContentService.update(result.id, { content: normalizeContentSchema(capturedTemplateContent) });
+    }
 
     if (!options?.skipAutomations) {
       await this.eventEmitter.emitAsync("automation.recordCreated", { record: result, userId });
@@ -236,7 +254,9 @@ export class RecordService {
       throw new NotFoundException(t("errors.RECORD_NOT_FOUND_ID", { id }));
     }
 
-    return this.recordRepo.transaction(async (transaction) => {
+    let capturedTemplateContent: unknown = null;
+
+    const result = await this.recordRepo.transaction(async (transaction) => {
       const template = await transaction.template.findFirst({
         where: { id: templateId, databaseId: record.databaseId },
         include: { values: true },
@@ -244,6 +264,13 @@ export class RecordService {
 
       if (!template) {
         throw new NotFoundException(t("errors.TEMPLATE_NOT_FOUND"));
+      }
+
+      capturedTemplateContent = template.content;
+
+      let recordName = record.name;
+      if (template.namePattern && (!recordName || recordName === "Untitled" || recordName === "Без назви")) {
+        recordName = await parseNamePattern(template.namePattern, record.databaseId, transaction);
       }
 
       for (const templateValue of template.values) {
@@ -269,15 +296,26 @@ export class RecordService {
 
       await transaction.record.update({
         where: { id },
-        data: { templateId },
+        data: {
+          templateId,
+          name: recordName,
+        },
       });
 
       await this.formulaRecalculator.recalculate(id, record.databaseId, transaction);
+
+      if (capturedTemplateContent) {
+        await this.recordContentService.update(id, {
+          content: normalizeContentSchema(capturedTemplateContent),
+        });
+      }
 
       this.logger.log("Template applied", { recordId: id, templateId });
       const updated = await this.recordRepo.findUniqueOrThrowWithValues(id, transaction);
       return toRecordResponseDto(updated);
     });
+
+    return result;
   }
 
   async duplicate(id: string): Promise<RecordResponseDto> {

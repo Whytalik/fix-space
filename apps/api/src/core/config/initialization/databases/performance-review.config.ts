@@ -1,5 +1,5 @@
 import { PropertyType } from "@fixspace/domain";
-import { DATE_CONFIG, FORMULA_TEXT } from "../constants";
+import { DATE_CONFIG } from "../constants";
 import type { InitPropertyDef } from "../types";
 
 export const performanceReviewProperties: InitPropertyDef[] = [
@@ -57,7 +57,11 @@ export const performanceReviewProperties: InitPropertyDef[] = [
     name: "Net P&L",
     type: PropertyType.FORMULA,
     position: 5,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "SUM(MAP({{Trades}}, '{{trading-journal.Net P&L}}'))",
+      resultType: "NUMBER",
+    },
     hint: "Ваш реальний чистий заробіток за цей час.",
     group: "Stats",
   },
@@ -65,7 +69,11 @@ export const performanceReviewProperties: InitPropertyDef[] = [
     name: "Trade Count",
     type: PropertyType.FORMULA,
     position: 6,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "COUNT({{Trades}})",
+      resultType: "NUMBER",
+    },
     hint: "Активність угод.",
     group: "Stats",
   },
@@ -73,7 +81,11 @@ export const performanceReviewProperties: InitPropertyDef[] = [
     name: "Win Rate",
     type: PropertyType.FORMULA,
     position: 7,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "0",
+      resultType: "NUMBER",
+    },
     hint: "Якість вибору сетапів протягом періоду.",
     group: "Stats",
   },

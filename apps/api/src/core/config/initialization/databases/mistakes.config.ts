@@ -1,5 +1,5 @@
 import { PropertyType } from "@fixspace/domain";
-import { colors, DATE_CONFIG, FORMULA_TEXT } from "../constants";
+import { colors, DATE_CONFIG } from "../constants";
 import type { InitPropertyDef } from "../types";
 
 export const mistakesProperties: InitPropertyDef[] = [
@@ -78,7 +78,11 @@ export const mistakesProperties: InitPropertyDef[] = [
     name: "Severity",
     type: PropertyType.FORMULA,
     position: 6,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "IF(COUNT({{Trading Journal}}) > 5, 'High', IF(COUNT({{Trading Journal}}) > 2, 'Medium', 'Low'))",
+      resultType: "TEXT",
+    },
     hint: "Рівень небезпеки помилки на основі її частоти.",
     group: "Stats",
   },
@@ -86,7 +90,11 @@ export const mistakesProperties: InitPropertyDef[] = [
     name: "Total Cost",
     type: PropertyType.FORMULA,
     position: 7,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "ABS(SUM(MAP({{Trading Journal}}, '{{trading-journal.Net P&L}}')))",
+      resultType: "NUMBER",
+    },
     hint: "Об'єктивна фінансова шкода, яку помилка нанесла балансу.",
     group: "Stats",
   },
@@ -94,7 +102,11 @@ export const mistakesProperties: InitPropertyDef[] = [
     name: "Last Used",
     type: PropertyType.FORMULA,
     position: 8,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "MAX(MAP({{Trading Journal}}, '{{trading-journal.Entry Date}}'))",
+      resultType: "DATE",
+    },
     hint: "Дата останнього повторення.",
     group: "Stats",
   },

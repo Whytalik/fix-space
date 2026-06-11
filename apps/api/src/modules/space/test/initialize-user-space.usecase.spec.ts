@@ -8,6 +8,7 @@ import { PropertyService } from "@/modules/property/property.service";
 import { PropertyValueRepository } from "@/modules/property-value/repositories/property-value.repository";
 import { RecordRepository } from "@/modules/record/repositories/record.repository";
 import { TemplateService } from "@/modules/template/template.service";
+import { ViewService } from "@/modules/view/view.service";
 import { SpaceRepository } from "../repositories/space.repository";
 import { SectionService } from "../providers/section.service";
 import { SpaceService } from "../space.service";
@@ -90,6 +91,9 @@ function setupFullMocks() {
     templateService: {
       create: jest.fn().mockResolvedValue({ id: "tpl-1" }),
     },
+    viewService: {
+      create: jest.fn().mockResolvedValue({ id: "view-1" }),
+    },
     propertyRepo: {
       findManyByDatabase: jest
         .fn()
@@ -136,6 +140,7 @@ describe("InitializeUserSpaceUseCase", () => {
         { provide: DatabaseService, useValue: mocks.databaseService },
         { provide: PropertyService, useValue: mocks.propertyService },
         { provide: TemplateService, useValue: mocks.templateService },
+        { provide: ViewService, useValue: mocks.viewService },
         { provide: InitializationConfigService, useValue: mockInitConfig },
         { provide: AppLogger, useValue: mockLogger },
         { provide: PropertyRepository, useValue: mocks.propertyRepo },
@@ -219,6 +224,7 @@ describe("InitializeUserSpaceUseCase", () => {
           { provide: DatabaseService, useValue: mocks.databaseService },
           { provide: PropertyService, useValue: mocks.propertyService },
           { provide: TemplateService, useValue: mocks.templateService },
+          { provide: ViewService, useValue: mocks.viewService },
           { provide: InitializationConfigService, useValue: mockInitConfig },
           { provide: AppLogger, useValue: mockLogger },
           { provide: PropertyRepository, useValue: mocks.propertyRepo },

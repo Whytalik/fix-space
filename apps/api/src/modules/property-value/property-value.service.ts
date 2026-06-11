@@ -7,6 +7,8 @@ import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
 import { PropertyTypeRegistry } from "@/modules/property/types";
 import { FormulaRecalculator } from "@/modules/property/types/formula/formula-recalculator.service";
+import { RecordRepository } from "@/modules/record/repositories/record.repository";
+import { PropertyRepository } from "@/modules/property/repositories/property.repository";
 import { PropertyValueRepository } from "./repositories/property-value.repository";
 
 @Injectable()
@@ -17,6 +19,8 @@ export class PropertyValueService {
     private readonly typeRegistry: PropertyTypeRegistry,
     private readonly formulaRecalculator: FormulaRecalculator,
     private readonly propertyValueRepo: PropertyValueRepository,
+    private readonly recordRepo: RecordRepository,
+    private readonly propertyRepo: PropertyRepository,
   ) {
     this.logger.setContext(PropertyValueService.name);
   }
@@ -32,13 +36,13 @@ export class PropertyValueService {
       propertyId: createPropertyValueDto.propertyId,
     });
 
-    const record = await this.propertyValueRepo.findRecordByOwner(recordId, userId);
+    const record = await this.recordRepo.findByIdWithOwner(recordId, userId);
 
     if (!record) {
       throw new NotFoundException(t("errors.RECORD_NOT_FOUND_ID", { id: recordId }));
     }
 
-    const property = await this.propertyValueRepo.findPropertyById(createPropertyValueDto.propertyId);
+    const property = await this.propertyRepo.findById(createPropertyValueDto.propertyId);
 
     if (!property) {
       throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id: createPropertyValueDto.propertyId }));
@@ -67,7 +71,7 @@ export class PropertyValueService {
     const oldValue = existingPv?.value ?? null;
 
     const propertyValue = await this.propertyValueRepo.transaction(async (tx) => {
-      const pv = await this.propertyValueRepo.upsert(
+      const saved = await this.propertyValueRepo.upsert(
         recordId,
         createPropertyValueDto.propertyId,
         formattedValue as Prisma.InputJsonValue,
@@ -75,7 +79,7 @@ export class PropertyValueService {
         tx,
       );
       await this.formulaRecalculator.recalculate(recordId, record.databaseId, tx);
-      return pv;
+      return saved;
     });
 
     this.logger.log("Property value created", {
@@ -147,9 +151,9 @@ export class PropertyValueService {
     const oldValue = existingValue.value;
 
     const propertyValue = await this.propertyValueRepo.transaction(async (tx) => {
-      const pv = await this.propertyValueRepo.update(id, updateData, tx);
+      const updated = await this.propertyValueRepo.update(id, updateData, tx);
       await this.formulaRecalculator.recalculate(existingValue.recordId, existingValue.property.databaseId, tx);
-      return pv;
+      return updated;
     });
 
     this.logger.log("Property value updated", { id });
@@ -178,9 +182,9 @@ export class PropertyValueService {
     }
 
     const propertyValue = await this.propertyValueRepo.transaction(async (tx) => {
-      const pv = await this.propertyValueRepo.delete(id, tx);
+      const deleted = await this.propertyValueRepo.delete(id, tx);
       await this.formulaRecalculator.recalculate(existingValue.recordId, existingValue.property.databaseId, tx);
-      return pv;
+      return deleted;
     });
 
     this.logger.log("Property value removed", { id });

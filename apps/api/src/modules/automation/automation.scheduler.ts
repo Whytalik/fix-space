@@ -4,11 +4,10 @@ import { SchedulerRegistry } from "@nestjs/schedule";
 import { CronJob } from "cron";
 
 import { AppLogger } from "@/common/logger/app-logger.service";
-import { AutomationStatus } from "@fixspace/domain";
 
 import { AutomationRepository } from "./repositories/automation.repository";
 
-interface ScheduleConfig {
+export interface ScheduleConfig {
   interval: "daily" | "weekly" | "monthly";
   time: string;
   dayOfWeek?: number;
@@ -33,14 +32,14 @@ export class AutomationScheduler implements OnModuleInit {
   async onModuleInit(): Promise<void> {
     this.logger.debug("Registering scheduled automations on startup");
     try {
-      const all = await this.automationRepo.findAllScheduled();
-      for (const automation of all) {
+      const scheduledAutomations = await this.automationRepo.findAllScheduled();
+      for (const automation of scheduledAutomations) {
         this.registerJob(automation.id, automation.config as unknown as ScheduleConfig);
       }
-      this.logger.log("Scheduled automations registered", { count: all.length });
+      this.logger.log("Scheduled automations registered", { count: scheduledAutomations.length });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      this.logger.warn("Could not register scheduled automations on startup — DB may not be ready", { error: msg });
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      this.logger.warn("Could not register scheduled automations on startup — DB may not be ready", { error: errorMessage });
     }
   }
 
@@ -56,7 +55,7 @@ export class AutomationScheduler implements OnModuleInit {
       this.schedulerRegistry.deleteCronJob(jobName);
     }
 
-    const job = new CronJob(cronExpression, async () => {
+    const cronJob = new CronJob(cronExpression, async () => {
       this.logger.debug("Scheduled automation fired", { automationId });
       const automation = await this.automationRepo.findById(automationId);
       if (!automation?.active) {
@@ -66,8 +65,8 @@ export class AutomationScheduler implements OnModuleInit {
       await this.eventEmitter.emitAsync("automation.scheduled", { automationId } satisfies AutomationScheduledEvent);
     });
 
-    this.schedulerRegistry.addCronJob(jobName, job);
-    job.start();
+    this.schedulerRegistry.addCronJob(jobName, cronJob);
+    cronJob.start();
     this.logger.log("Cron job registered", { automationId, cronExpression });
   }
 

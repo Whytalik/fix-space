@@ -35,6 +35,10 @@ export class SectionRepository extends BaseRepository {
     });
   }
 
+  async findInSpace(sectionId: string, spaceId: string) {
+    return prisma.section.findFirst({ where: { id: sectionId, spaceId } });
+  }
+
   async findDuplicate(name: string, spaceId: string, excludeId: string, transaction?: Prisma.TransactionClient) {
     return (transaction ?? prisma).section.findFirst({
       where: { name, spaceId, id: { not: excludeId } },

@@ -71,8 +71,11 @@ export class DatabaseRepository extends BaseRepository {
     return prisma.database.findMany({ where: { spaceId, space: { ownerId: userId } } });
   }
 
-  async findSectionInSpace(sectionId: string, spaceId: string) {
-    return prisma.section.findFirst({ where: { id: sectionId, spaceId } });
+  async findWithSpace(id: string) {
+    return prisma.database.findUnique({
+      where: { id },
+      include: { space: { select: { ownerId: true } } },
+    });
   }
 
   async create(data: Prisma.DatabaseUncheckedCreateInput, transaction?: Prisma.TransactionClient) {
