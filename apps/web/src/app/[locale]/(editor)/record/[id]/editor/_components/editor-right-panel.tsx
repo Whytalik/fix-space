@@ -266,13 +266,13 @@ function RowInspector({
                 min="10"
                 max="90"
                 step="1"
-                value={col.width}
+                value={column.width}
                 onChange={(e) => {
                   const newWidth = parseFloat(e.target.value);
                   const currentWidths = row.columns.map((c) => c.width);
                   const updated = [...currentWidths];
 
-                  const delta = newWidth - col.width;
+                  const delta = newWidth - column.width;
                   updated[idx] = newWidth;
 
                   const otherIndices = currentWidths.map((_, i) => i).filter((i) => i !== idx);
