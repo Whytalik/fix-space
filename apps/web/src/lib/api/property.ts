@@ -31,3 +31,13 @@ export function deleteProperty(propertyId: string) {
     method: "DELETE",
   });
 }
+
+export function previewFormulaForDatabase(
+  databaseId: string,
+  config: Record<string, unknown>,
+): Promise<{ result: unknown; isSample: boolean }> {
+  return apiFetch("/properties/preview-formula", {
+    method: "POST",
+    body: { databaseId, config },
+  });
+}

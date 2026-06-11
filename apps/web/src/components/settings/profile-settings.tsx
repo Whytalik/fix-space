@@ -26,10 +26,10 @@ const TIMEZONE_OPTIONS = (() => {
       ? (Intl as unknown as { supportedValuesOf: (key: string) => string[] }).supportedValuesOf("timeZone")
       : ["UTC", "Europe/Kyiv", "Europe/London", "America/New_York", "America/Chicago", "America/Los_Angeles", "Asia/Tokyo"];
 
-  const normalized = raw.map((tz) => (tz === "Europe/Kiev" ? "Europe/Kyiv" : tz));
+  const normalized = raw.map((timezone) => (timezone === "Europe/Kiev" ? "Europe/Kyiv" : timezone));
   if (!normalized.includes("Europe/Kyiv")) normalized.push("Europe/Kyiv");
 
-  return [...new Set(normalized)].map((tz) => ({ value: tz, label: tz }));
+  return [...new Set(normalized)].map((timezone) => ({ value: timezone, label: timezone }));
 })();
 
 export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
@@ -204,26 +204,6 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
                   }`}
                 >
                   {format === "12h" ? t("timeFormat12h") : t("timeFormat24h")}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-ink-secondary">{t("startOfWeek")}</label>
-            <div className="flex gap-2">
-              {([1, 0] as const).map((day) => (
-                <button
-                  key={day}
-                  type="button"
-                  onClick={() => setDatetimeForm((prev) => (prev ? { ...prev, startOfWeek: day } : prev))}
-                  className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors duration-150 ${
-                    datetimeForm.startOfWeek === day
-                      ? "border-accent bg-accent/10 text-accent"
-                      : "border-stroke bg-surface text-ink-secondary hover:border-stroke-subtle hover:bg-hover hover:text-ink"
-                  }`}
-                >
-                  {day === 1 ? t("monday") : t("sunday")}
                 </button>
               ))}
             </div>

@@ -1,4 +1,9 @@
+import { PropertyType } from "../property-type.enum";
+import { FormulaType } from "./formula.types";
+
 export const DEFAULT_FORMULA_PROPERTY = {
-  formula: "",
-  output: { type: "text" as const },
+  type: FormulaType.CUSTOM,
+  expression: "",
+  resultType: PropertyType.TEXT,
+  uiState: {},
 };

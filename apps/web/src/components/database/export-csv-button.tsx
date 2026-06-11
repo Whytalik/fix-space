@@ -55,7 +55,7 @@ interface ExportCsvModalProps {
   activeFiltersCount?: number;
 }
 
-function ExportCsvModal({ isOpen, onClose, databaseId, activeViewId, activeFiltersCount = 0 }: ExportCsvModalProps) {
+export function ExportCsvModal({ isOpen, onClose, databaseId, activeViewId, activeFiltersCount = 0 }: ExportCsvModalProps) {
   const t = useTranslations("ExportCsvButton");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [includeMetaFields, setIncludeMetaFields] = useState(true);

@@ -24,47 +24,59 @@ export function validateCsvFile(file: Express.Multer.File): void {
 
 export function parseCsvBuffer(buffer: Buffer, previewOnly = false): ParsedCsvResult {
   try {
-    const allRecords = parse(buffer, {
-      columns: true,
+    const rawRecords = parse(buffer, {
       skip_empty_lines: true,
       trim: true,
       bom: true,
-      relax_column_count: true, // Allow rows with fewer/more columns (we'll handle mapping)
-    }) as Record<string, string>[];
+      relax_column_count: true,
+    }) as string[][];
 
-    if (allRecords.length === 0) {
-      // Check for headers only
-      const headersOnly = parse(buffer, {
-        to: 1,
-        skip_empty_lines: true,
-        trim: true,
-        bom: true,
-      }) as string[][];
-
-      const firstRow = headersOnly[0];
-      if (!firstRow || firstRow.filter(Boolean).length === 0) {
-        throw new BadRequestException(t("errors.CSV_EMPTY_FILE"));
-      }
-
-      return {
-        columns: firstRow.filter(Boolean),
-        rows: [],
-        totalRows: 0,
-      };
-    }
-
-    const firstRecord = allRecords[0];
-    if (!firstRecord) {
+    if (rawRecords.length === 0) {
       throw new BadRequestException(t("errors.CSV_EMPTY_FILE"));
     }
 
-    const columns = Object.keys(firstRecord).filter(Boolean);
-    const rows = previewOnly ? allRecords.slice(0, PREVIEW_ROWS) : allRecords;
+    // Find the header row: the first row with the maximum number of non-empty fields in the first 50 rows
+    let headerIndex = 0;
+    let maxCols = 0;
+    const searchLimit = Math.min(rawRecords.length, 50);
+
+    for (let i = 0; i < searchLimit; i++) {
+      const row = rawRecords[i];
+      if (!row) continue;
+
+      const colsCount = row.filter(Boolean).length;
+      if (colsCount > maxCols) {
+        maxCols = colsCount;
+        headerIndex = i;
+      }
+    }
+
+    const headerRow = rawRecords[headerIndex];
+    if (!headerRow || maxCols === 0) {
+      throw new BadRequestException(t("errors.CSV_EMPTY_FILE"));
+    }
+
+    const columnsArray = headerRow;
+    const dataRecords = rawRecords.slice(headerIndex + 1).filter((row) => row.some((cell) => cell.trim() !== ""));
+
+    const mappedRecords = dataRecords.map((row) => {
+      const obj: Record<string, string> = {};
+      for (let i = 0; i < columnsArray.length; i++) {
+        const colName = columnsArray[i];
+        if (colName) {
+          obj[colName] = row[i] ?? "";
+        }
+      }
+      return obj;
+    });
+
+    const columns = Array.from(new Set(columnsArray.filter(Boolean)));
+    const rows = previewOnly ? mappedRecords.slice(0, PREVIEW_ROWS) : mappedRecords;
 
     return {
       columns,
       rows,
-      totalRows: allRecords.length,
+      totalRows: mappedRecords.length,
     };
   } catch (error: any) {
     if (error instanceof BadRequestException) throw error;

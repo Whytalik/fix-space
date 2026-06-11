@@ -4,7 +4,15 @@ import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { IconPicker } from "@/components/ui/icons/icon-picker";
-import type { DatabaseResponseDto, SelectCategory, SelectOption, StatusCategoryConfig, StatusOptionColor } from "@fixspace/domain";
+import type {
+  DatabaseResponseDto,
+  PropertyResponseDto,
+  SelectCategory,
+  SelectOption,
+  StatusCategoryConfig,
+  StatusOptionColor,
+  FormulaPropertyConfig,
+} from "@fixspace/domain";
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -19,16 +27,18 @@ import {
 } from "@fixspace/domain/enums";
 import { Image as ImageIcon, Plus, Trash2, X, GripVertical } from "lucide-react";
 import { useState } from "react";
+import { FormulaConfig } from "./properties/formula-config";
 
 type PropertyTypeConfigProps = {
   type: PropertyType;
   config: Record<string, unknown>;
+  properties: PropertyResponseDto[];
   databases: DatabaseResponseDto[];
   isViewMode: boolean;
   onPatch: (patch: Record<string, unknown>) => void;
 };
 
-export function PropertyTypeConfig({ type, config, databases, onPatch }: PropertyTypeConfigProps) {
+export function PropertyTypeConfig({ type, config, properties, databases, onPatch }: PropertyTypeConfigProps) {
   const [iconPickerState, setIconPickerState] = useState<{
     element: HTMLElement;
     categoryIndex: number;
@@ -43,34 +53,45 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
   }
 
   function removeSelectCategory(index: number) {
-    onPatch({ categories: selectCategories.filter((_, i) => i !== index) });
+    onPatch({ categories: selectCategories.filter((_, currentCategoryIndex) => currentCategoryIndex !== index) });
   }
 
   function updateSelectCategoryLabel(index: number, label: string) {
-    onPatch({ categories: selectCategories.map((category, i) => (i === index ? { ...category, label } : category)) });
+    onPatch({
+      categories: selectCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === index ? { ...category, label } : category,
+      ),
+    });
   }
 
   function addSelectOption(categoryIndex: number) {
     onPatch({
-      categories: selectCategories.map((category, i) =>
-        i === categoryIndex ? { ...category, options: [...category.options, { value: "" } as SelectOption] } : category,
+      categories: selectCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex ? { ...category, options: [...category.options, { value: "" } as SelectOption] } : category,
       ),
     });
   }
 
   function removeSelectOption(categoryIndex: number, optionIndex: number) {
     onPatch({
-      categories: selectCategories.map((category, i) =>
-        i === categoryIndex ? { ...category, options: category.options.filter((_, j) => j !== optionIndex) } : category,
+      categories: selectCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex
+          ? { ...category, options: category.options.filter((_, currentOptionIndex) => currentOptionIndex !== optionIndex) }
+          : category,
       ),
     });
   }
 
   function updateSelectOption(categoryIndex: number, optionIndex: number, value: string) {
     onPatch({
-      categories: selectCategories.map((category, i) =>
-        i === categoryIndex
-          ? { ...category, options: category.options.map((option, j) => (j === optionIndex ? { ...option, value } : option)) }
+      categories: selectCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex
+          ? {
+              ...category,
+              options: category.options.map((option, currentOptionIndex) =>
+                currentOptionIndex === optionIndex ? { ...option, value } : option,
+              ),
+            }
           : category,
       ),
     });
@@ -78,9 +99,14 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
 
   function updateSelectOptionColor(categoryIndex: number, optionIndex: number, color: string) {
     onPatch({
-      categories: selectCategories.map((category, i) =>
-        i === categoryIndex
-          ? { ...category, options: category.options.map((option, j) => (j === optionIndex ? { ...option, color } : option)) }
+      categories: selectCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex
+          ? {
+              ...category,
+              options: category.options.map((option, currentOptionIndex) =>
+                currentOptionIndex === optionIndex ? { ...option, color } : option,
+              ),
+            }
           : category,
       ),
     });
@@ -88,9 +114,14 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
 
   function updateSelectOptionIcon(categoryIndex: number, optionIndex: number, icon: string) {
     onPatch({
-      categories: selectCategories.map((category, i) =>
-        i === categoryIndex
-          ? { ...category, options: category.options.map((option, j) => (j === optionIndex ? { ...option, icon } : option)) }
+      categories: selectCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex
+          ? {
+              ...category,
+              options: category.options.map((option, currentOptionIndex) =>
+                currentOptionIndex === optionIndex ? { ...option, icon } : option,
+              ),
+            }
           : category,
       ),
     });
@@ -101,13 +132,17 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
 
   function updateStatusCategoryLabel(categoryIndex: number, label: string) {
     onPatch({
-      categories: statusCategories.map((category, i) => (i === categoryIndex ? { ...category, label } : category)),
+      categories: statusCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex ? { ...category, label } : category,
+      ),
     });
   }
 
   function updateStatusCategoryDefaultOption(categoryIndex: number, defaultOption: string) {
     onPatch({
-      categories: statusCategories.map((category, i) => (i === categoryIndex ? { ...category, defaultOption } : category)),
+      categories: statusCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex ? { ...category, defaultOption } : category,
+      ),
     });
   }
 
@@ -340,8 +375,8 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
 
   function addStatusOption(categoryIndex: number) {
     onPatch({
-      categories: statusCategories.map((category, i) =>
-        i === categoryIndex
+      categories: statusCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex
           ? {
               ...category,
               options: [...category.options, { name: "New option", color: STATUS_OPTION_COLOR_VALUES[0] as StatusOptionColor }],
@@ -353,17 +388,24 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
 
   function removeStatusOption(categoryIndex: number, optionIndex: number) {
     onPatch({
-      categories: statusCategories.map((category, i) =>
-        i === categoryIndex ? { ...category, options: category.options.filter((_, j) => j !== optionIndex) } : category,
+      categories: statusCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex
+          ? { ...category, options: category.options.filter((_, currentOptionIndex) => currentOptionIndex !== optionIndex) }
+          : category,
       ),
     });
   }
 
   function updateStatusOptionName(categoryIndex: number, optionIndex: number, optName: string) {
     onPatch({
-      categories: statusCategories.map((category, i) =>
-        i === categoryIndex
-          ? { ...category, options: category.options.map((option, j) => (j === optionIndex ? { ...option, name: optName } : option)) }
+      categories: statusCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex
+          ? {
+              ...category,
+              options: category.options.map((option, currentOptionIndex) =>
+                currentOptionIndex === optionIndex ? { ...option, name: optName } : option,
+              ),
+            }
           : category,
       ),
     });
@@ -371,9 +413,14 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
 
   function updateStatusOptionColor(categoryIndex: number, optionIndex: number, color: StatusOptionColor) {
     onPatch({
-      categories: statusCategories.map((category, i) =>
-        i === categoryIndex
-          ? { ...category, options: category.options.map((option, j) => (j === optionIndex ? { ...option, color } : option)) }
+      categories: statusCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex
+          ? {
+              ...category,
+              options: category.options.map((option, currentOptionIndex) =>
+                currentOptionIndex === optionIndex ? { ...option, color } : option,
+              ),
+            }
           : category,
       ),
     });
@@ -381,9 +428,14 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
 
   function updateStatusOptionIcon(categoryIndex: number, optionIndex: number, icon: string) {
     onPatch({
-      categories: statusCategories.map((category, i) =>
-        i === categoryIndex
-          ? { ...category, options: category.options.map((option, j) => (j === optionIndex ? { ...option, icon } : option)) }
+      categories: statusCategories.map((category, currentCategoryIndex) =>
+        currentCategoryIndex === categoryIndex
+          ? {
+              ...category,
+              options: category.options.map((option, currentOptionIndex) =>
+                currentOptionIndex === optionIndex ? { ...option, icon } : option,
+              ),
+            }
           : category,
       ),
     });
@@ -688,6 +740,9 @@ export function PropertyTypeConfig({ type, config, databases, onPatch }: Propert
           </div>
         </div>
       );
+
+    case PropertyType.FORMULA:
+      return <FormulaConfig config={config as unknown as FormulaPropertyConfig} properties={properties} onPatch={onPatch} />;
 
     default:
       return null;

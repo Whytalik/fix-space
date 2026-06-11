@@ -84,5 +84,8 @@
   "CSV_INVALID_FORMAT": "Невірний формат файлу. Підтримуються лише CSV-файли",
   "CSV_EMPTY_FILE": "CSV-файл порожній або не містить рядків даних",
   "CSV_MISSING_COLUMNS": "CSV-файл не містить заголовків стовпців",
-  "NOTIFICATION_NOT_FOUND": "Сповіщення не знайдено"
+  "NOTIFICATION_NOT_FOUND": "Сповіщення не знайдено",
+  "AUTOMATION_NOT_FOUND": "Автоматизацію не знайдено",
+  "AUTOMATION_LIMIT_EXCEEDED": "Досягнуто максимальну кількість автоматизацій (10) для цієї бази даних",
+  "AUTOMATION_TRIGGER_ACTION_INCOMPATIBLE": "Цей тип дії несумісний із вибраним тригером"
 }

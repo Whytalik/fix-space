@@ -1,6 +1,8 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { AcceptLanguageResolver, HeaderResolver, I18nModule, QueryResolver } from "nestjs-i18n";
 import * as path from "path";
@@ -26,6 +28,7 @@ import { ImportExportModule } from "./modules/import-export/import-export.module
 import { NotificationModule } from "./modules/notification/notification.module";
 import { UserModule } from "./modules/user/user.module";
 import { ViewModule } from "./modules/view/view.module";
+import { AutomationModule } from "./modules/automation/automation.module";
 
 @Module({
   imports: [
@@ -42,6 +45,8 @@ import { ViewModule } from "./modules/view/view.module";
       },
       resolvers: [new QueryResolver(["lang", "locale"]), new HeaderResolver(["x-custom-lang"]), new AcceptLanguageResolver()],
     }),
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -65,6 +70,7 @@ import { ViewModule } from "./modules/view/view.module";
     SettingsModule,
     ImportExportModule,
     NotificationModule,
+    AutomationModule,
   ],
   providers: [
     {

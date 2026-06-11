@@ -1,6 +1,7 @@
 "use client";
 
 import type { FormulaPropertyConfig } from "@fixspace/domain";
+import { PropertyType } from "@fixspace/domain/enums";
 import { useDateFormat } from "@/hooks/format/use-date-format";
 
 type FormulaPropertyProps = {
@@ -13,28 +14,28 @@ export function FormulaProperty({ readOnly, value, config }: FormulaPropertyProp
   const { formatDate } = useDateFormat();
 
   if (readOnly) {
-    const outputType = config?.output?.type ?? "text";
+    const resultType = config?.resultType ?? PropertyType.TEXT;
 
-    if (outputType === "checkbox") {
+    if (resultType === PropertyType.CHECKBOX) {
       return <span className={`inline-block w-4 h-4 rounded border ${value ? "bg-accent border-accent" : "border-stroke"}`} />;
     }
 
-    if (outputType === "date") {
+    if (resultType === PropertyType.DATE) {
       const date = new Date(value as string);
       if (isNaN(date.getTime())) return <span className="text-ink-muted">—</span>;
-      return <span className="text-ink-secondary text-sm">{formatDate(date)}</span>;
+      return <span className="type-body text-ink-secondary">{formatDate(date)}</span>;
     }
 
-    if (outputType === "number") {
+    if (resultType === PropertyType.NUMBER || resultType === PropertyType.RATING || resultType === PropertyType.PROGRESS) {
       return (
         <span className="text-ink font-mono tabular-nums text-sm">
-          {typeof value === "number" ? value.toLocaleString() : String(value)}
+          {typeof value === "number" ? value.toLocaleString() : String(value ?? "")}
         </span>
       );
     }
 
     return (
-      <span className="text-ink text-sm truncate max-w-50">
+      <span className="type-body text-ink truncate max-w-50">
         {Array.isArray(value) ? (value as unknown[]).join(", ") : String(value ?? "")}
       </span>
     );

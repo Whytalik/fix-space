@@ -2,52 +2,53 @@ import { Injectable } from "@nestjs/common";
 import {
   DEFAULT_FORMULA_PROPERTY,
   FilterOperator,
-  FORMULA_OUTPUT_TYPE_VALUES,
-  FormulaOutputType,
+  FormulaPresetName,
+  FormulaType,
   OPERATORS_BY_PROPERTY_TYPE,
   PropertyType,
 } from "@fixspace/domain";
 import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
+import { FormulaEngine } from "./formula-engine.service";
 
 @Injectable()
 export class FormulaHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
   readonly type = PropertyType.FORMULA;
 
+  constructor(private readonly formulaEngine: FormulaEngine) {}
+
   getDefaultConfig(): Record<string, unknown> {
-    return {
-      ...DEFAULT_FORMULA_PROPERTY,
-      output: {
-        type: "text",
-      },
-    };
+    return { ...DEFAULT_FORMULA_PROPERTY };
   }
 
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (config.formula !== undefined && typeof config.formula !== "string") {
-      errors.push("formula must be a string");
+    if (!config.type || !Object.values(FormulaType).includes(config.type as FormulaType)) {
+      errors.push(`type must be one of: ${Object.values(FormulaType).join(", ")}`);
     }
 
-    if (config.output !== undefined) {
-      if (typeof config.output !== "object" || config.output === null) {
-        errors.push("output must be an object");
-      } else {
-        const output = config.output as Record<string, unknown>;
-
-        if (!FORMULA_OUTPUT_TYPE_VALUES.includes(output.type as FormulaOutputType)) {
-          errors.push(`output.type must be one of: ${FORMULA_OUTPUT_TYPE_VALUES.join(", ")}`);
-        }
-
-        if (output.type === "relation") {
-          if (typeof output.relatedEntityId !== "string") {
-            errors.push("output.relatedEntityId must be a string for relation output");
-          }
-          if (typeof output.multiple !== "boolean") {
-            errors.push("output.multiple must be a boolean for relation output");
-          }
-        }
+    if (config.type === FormulaType.PRESET) {
+      if (!config.presetName || !Object.values(FormulaPresetName).includes(config.presetName as FormulaPresetName)) {
+        errors.push(`presetName must be one of: ${Object.values(FormulaPresetName).join(", ")}`);
       }
+    }
+
+    if (typeof config.expression !== "string" || !config.expression) {
+      errors.push("expression is required and must be a non-empty string");
+    } else {
+      try {
+        this.formulaEngine.validateExpression(config.expression);
+      } catch (error) {
+        errors.push(`Invalid formula expression: ${(error as Error).message}`);
+      }
+    }
+
+    if (!config.resultType || !Object.values(PropertyType).includes(config.resultType as PropertyType)) {
+      errors.push(`resultType must be one of: ${Object.values(PropertyType).join(", ")}`);
+    }
+
+    if (config.uiState !== undefined && (typeof config.uiState !== "object" || config.uiState === null)) {
+      errors.push("uiState must be an object");
     }
 
     return errors.length > 0 ? errors : null;

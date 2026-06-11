@@ -1,0 +1,110 @@
+{
+  "Automation": {
+    "pageTitle": "Automations",
+    "newAutomation": "New Automation",
+    "editAutomation": "Edit Automation",
+    "emptyTitle": "No automations yet",
+    "emptyDescription": "Create your first automation to simplify working with the database.",
+    "rulesTitle": "Automation Rules",
+    "triggers": {
+      "ON_RECORD_CREATE": "Record created",
+      "ON_FIELD_CHANGE": "Field changes",
+      "ON_SCHEDULE": "On schedule"
+    },
+    "actions": {
+      "SET_FIELD_VALUE": "Set field value",
+      "CREATE_RECORD": "Create record",
+      "LINK_RECORDS": "Link records"
+    },
+    "details": "Details",
+    "delete": "Delete",
+    "edit": "Edit",
+    "deleteConfirmTitle": "Delete automation?",
+    "deleteConfirmMessage": "This will permanently delete the automation and all its logs. This action cannot be undone.",
+    "noLogs": "No runs yet",
+    "scheduleLabel": "Schedule",
+    "actionsLabel": "Actions",
+    "lastRunsLabel": "Last runs",
+    "state": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "name": "Name",
+    "namePlaceholder": "My Automation",
+    "whenSection": "WHEN",
+    "thenSection": "THEN",
+    "addAction": "Add action",
+    "back": "Back",
+    "save": "Save",
+    "selectTemplateHint": "Choose a template or start from scratch",
+    "startFromScratch": "Start from scratch",
+    "scheduleIntervals": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "daysOfWeek": {
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday",
+      "0": "Sunday"
+    },
+    "propertyPlaceholder": "— select a property —",
+    "databasePlaceholder": "— select a database —",
+    "noRelationFields": "— no RELATION fields —",
+    "templates": {
+      "dateOnChange": {
+        "name": "Set date on change",
+        "when": "Field changes",
+        "then": "Fill DATE field with current date"
+      },
+      "fillOnCreate": {
+        "name": "Fill field on create",
+        "when": "Record created",
+        "then": "Set field to a specified value"
+      },
+      "scheduleCreate": {
+        "name": "Remind on schedule",
+        "when": "On schedule",
+        "then": "Create a new record"
+      },
+      "copyToDb": {
+        "name": "Copy to another database",
+        "when": "Field changes",
+        "then": "Create a record in another database"
+      },
+      "autoLogMistake": {
+        "name": "Auto-log mistake",
+        "when": "Rule Violation is checked",
+        "then": "Create a record in Mistakes database"
+      },
+      "weeklyReview": {
+        "name": "Weekly Performance Review",
+        "when": "Every Monday at selected time",
+        "then": "Create a record in Performance Review"
+      },
+      "autoCategorize": {
+        "name": "Auto-categorize result",
+        "when": "P&L changes",
+        "then": "Set the Result field"
+      },
+      "riskLimit": {
+        "name": "Mark limit breach",
+        "when": "Risk field changes",
+        "then": "Set CHECKBOX \"Limit breached\""
+      },
+      "linkTradesToReview": {
+        "name": "Auto-link trades to review",
+        "when": "Performance Review record created",
+        "then": "Link trades by date range"
+      }
+    },
+    "scheduleSummary": {
+      "weekly": "Weekly ({day})",
+      "monthly": "Monthly ({day})",
+      "at": "at {time}"
+    }
+  }
+}

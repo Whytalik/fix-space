@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { CreatePropertyDto, PropertyResponseDto, UpdatePropertyDto } from "@fixspace/domain";
+import { CreatePropertyDto, FormulaPropertyConfig, PropertyResponseDto, UpdatePropertyDto } from "@fixspace/domain";
 import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
 import { t } from "@/common/utils/i18n.helper";
 import { PropertyService } from "./property.service";
@@ -85,6 +85,25 @@ export class PropertyController {
     userId: string,
   ) {
     return this.propertyService.duplicate(id, userId);
+  }
+
+  @Post("preview-formula")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Preview formula result against the first database record" })
+  @ApiBody({ type: Object })
+  @ApiResponse({ status: 200, description: "Formula preview result." })
+  previewFormulaForDatabase(@Body() body: { databaseId: string; config: FormulaPropertyConfig }) {
+    return this.propertyService.previewFormulaForDatabase(body.databaseId, body.config);
+  }
+
+  @Post(":id/preview")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Preview formula result" })
+  @ApiParam({ name: "id", type: String })
+  @ApiBody({ type: Object })
+  @ApiResponse({ status: 200, description: "Formula preview successful." })
+  preview(@Param("id") id: string, @Body() body: { config: FormulaPropertyConfig; recordValues: Record<string, unknown> }) {
+    return this.propertyService.previewFormula(id, body.config, body.recordValues);
   }
 
   @Delete(":id")

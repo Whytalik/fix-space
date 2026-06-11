@@ -784,6 +784,264 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Properties",
+      "item": [
+        {
+          "name": "Preview Formula",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has result field\", () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.have.property(\"result\");",
+                  "    pm.expect(res).to.have.property(\"isSample\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"databaseId\": \"{{database_id}}\",\n    \"config\": {\n        \"type\": \"PRESET\",\n        \"presetName\": \"R_MULTIPLE\",\n        \"expression\": \"field_00000000_0000_0000_0000_000000000001 / field_00000000_0000_0000_0000_000000000002\",\n        \"resultType\": \"NUMBER\",\n        \"uiState\": {}\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/properties/preview-formula",
+              "host": ["{{base_url}}"],
+              "path": ["properties", "preview-formula"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Automations",
+      "item": [
+        {
+          "name": "Create Automation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Has id\", () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.have.property(\"id\");",
+                  "    pm.collectionVariables.set(\"automation_id\", res.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"databaseId\": \"{{database_id}}\",\n  \"name\": \"My Automation\",\n  \"trigger\": \"ON_RECORD_CREATE\",\n  \"active\": true,\n  \"actions\": [\n    {\n      \"type\": \"SET_FIELD_VALUE\",\n      \"propertyId\": \"{{property_id}}\",\n      \"valueType\": \"FIXED\",\n      \"value\": \"done\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/automations",
+              "host": ["{{base_url}}"],
+              "path": ["automations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Automations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Is array\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/automations?databaseId={{database_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["automations"],
+              "query": [
+                {
+                  "key": "databaseId",
+                  "value": "{{database_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Automation by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has id\", () => pm.expect(pm.response.json()).to.have.property(\"id\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/automations/{{automation_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["automations", "{{automation_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Automation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Automation\",\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/automations/{{automation_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["automations", "{{automation_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Automation Logs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Is array\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/automations/{{automation_id}}/logs",
+              "host": ["{{base_url}}"],
+              "path": ["automations", "{{automation_id}}", "logs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Test (Dry Run) Automation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Has results\", () => pm.expect(pm.response.json()).to.have.property(\"results\"));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recordId\": \"{{record_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/automations/{{automation_id}}/test",
+              "host": ["{{base_url}}"],
+              "path": ["automations", "{{automation_id}}", "test"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Automation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/automations/{{automation_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["automations", "{{automation_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "auth": {
@@ -857,6 +1115,11 @@
     },
     {
       "key": "reset_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "automation_id",
       "value": "",
       "type": "string"
     }

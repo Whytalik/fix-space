@@ -16,6 +16,14 @@ interface MarketSessionsProps {
 
 const ALL_SESSIONS = ["Tokyo", "Frankfurt", "London", "New York"];
 
+function formatNextSessionLocal(nextUtc: string): string {
+  const [h, m] = nextUtc.split(":");
+  if (!h) return nextUtc;
+  const d = new Date();
+  d.setUTCHours(Number(h), m ? Number(m) : 0, 0, 0);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
 export function MarketSessions({ data }: MarketSessionsProps) {
   const t = useTranslations("Dashboard");
   const sessionT = useTranslations("SessionIndicator");
@@ -84,7 +92,8 @@ export function MarketSessions({ data }: MarketSessionsProps) {
 
       <div className="mt-4 text-sm text-ink-secondary flex items-center gap-2">
         <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-        {t("next")} {t("sessionIndicator.opensAt")} <span className="font-semibold text-ink">{data.nextSessionOpening}</span>
+        {t("next")} {t("sessionIndicator.opensAt")}{" "}
+        <span className="font-semibold text-ink">{formatNextSessionLocal(data.nextSessionOpening)}</span>
       </div>
     </Card>
   );

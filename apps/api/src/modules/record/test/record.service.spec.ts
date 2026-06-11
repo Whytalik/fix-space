@@ -1,4 +1,5 @@
 import { NotFoundException } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -6,6 +7,7 @@ import { AppLogger } from "@/common/logger/app-logger.service";
 import { RecordService } from "../record.service";
 import { RecordRepository } from "../repositories/record.repository";
 import { SettingsService } from "@/modules/settings/settings.service";
+import { FormulaRecalculator } from "@/modules/property/types/formula/formula-recalculator.service";
 
 jest.mock("@fixspace/database", () => ({
   Prisma: {
@@ -36,6 +38,10 @@ describe("RecordService", () => {
     getDefaultIcon: jest.fn(),
   };
 
+  const mockFormulaRecalculator = {
+    recalculate: jest.fn().mockResolvedValue(undefined),
+  };
+
   const mockRecordRepo = {
     findById: jest.fn(),
     findDatabaseByOwner: jest.fn(),
@@ -47,12 +53,16 @@ describe("RecordService", () => {
     transaction: jest.fn((callback) => callback(prisma)),
   };
 
+  const mockEventEmitter = { emitAsync: jest.fn().mockResolvedValue([]) };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RecordService,
         { provide: RecordRepository, useValue: mockRecordRepo },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
         { provide: SettingsService, useValue: mockSettingsService },
+        { provide: FormulaRecalculator, useValue: mockFormulaRecalculator },
         { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();

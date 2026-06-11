@@ -58,8 +58,8 @@ export class PropertyValueController {
   @ApiResponse({ status: 200, description: "Property value updated.", type: PropertyValueResponseDto })
   @ApiResponse({ status: 404, description: "Property value not found." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
-  update(@Param("id") id: string, @Body() updatePropertyValueDto: UpdatePropertyValueDto) {
-    return this.propertyValueService.update(id, updatePropertyValueDto);
+  update(@Param("id") id: string, @Body() updatePropertyValueDto: UpdatePropertyValueDto, @CurrentUser("userId") userId: string) {
+    return this.propertyValueService.update(id, updatePropertyValueDto, userId);
   }
 
   @Delete(":id")
