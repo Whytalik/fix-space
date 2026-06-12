@@ -97,7 +97,7 @@ export function AppProvider({
 
   const { data: user = null, isLoading: isUserLoading } = useUserQuery({
     initialData: initialUser || undefined,
-    enabled: !!initialUser || typeof window !== "undefined",
+    enabled: true,
   });
 
   const { data: spaces = initialSpaces, isLoading: isSpacesLoading } = useSpacesQuery({

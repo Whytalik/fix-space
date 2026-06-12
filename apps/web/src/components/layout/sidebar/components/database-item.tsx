@@ -126,6 +126,7 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
             ref={menuButtonRef}
             variant="ghost"
             size="icon"
+            title={t("options")}
             onClick={handleMenuToggle}
             className={`mr-1 shrink-0 transition-opacity duration-150 ${showMenu ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
           >

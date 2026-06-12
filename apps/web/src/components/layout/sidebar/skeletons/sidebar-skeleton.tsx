@@ -9,7 +9,9 @@ interface SidebarSkeletonProps {
 export function SidebarSkeleton({ collapsed }: SidebarSkeletonProps) {
   return (
     <div className="relative shrink-0 h-full">
-      <aside className={`${collapsed ? "w-14" : "w-60"} border-r border-stroke px-3 pt-3 pb-6 flex flex-col gap-4 overflow-hidden h-full`}>
+      <aside
+        className={`${collapsed ? "w-14" : "w-[250px]"} border-r border-stroke px-3 pt-3 pb-6 flex flex-col gap-4 overflow-hidden h-full`}
+      >
         {collapsed ? (
           <div className="flex justify-center pb-3 -mx-3 border-b border-stroke">
             <Skeleton className="w-8 h-8 rounded-lg" />

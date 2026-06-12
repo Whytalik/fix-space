@@ -25,14 +25,14 @@ export function TemplatePickerModal({ templates, onSelect, onClose }: TemplatePi
             className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-ink hover:bg-surface-hover transition-all duration-150 text-left cursor-pointer active:scale-[0.98]"
           >
             <div className="w-9 h-9 flex items-center justify-center rounded-lg bg-surface border border-stroke shrink-0 shadow-sm group-hover:border-accent/30 transition-colors duration-150">
-              <IconDisplay value={template.icon || "icon:LayoutGrid"} size={18} />
+              <IconDisplay value={template.icon || "icon:LayoutTemplate"} size={18} />
             </div>
             <div className="flex-1 min-w-0">
               <span className="block truncate font-semibold">{template.name}</span>
-              {template.description && <p className="text-[10px] text-ink-muted truncate">{template.description}</p>}
+              {template.description && <p className="type-hint truncate">{template.description}</p>}
             </div>
             {template.isDefault && (
-              <span className="flex items-center gap-1 text-[9px] font-bold text-accent uppercase tracking-widest shrink-0 bg-accent/5 px-1.5 py-0.5 rounded border border-accent/20">
+              <span className="flex items-center gap-1 text-xs font-bold text-accent uppercase tracking-widest shrink-0 bg-accent/5 px-1.5 py-0.5 rounded border border-accent/20">
                 <Star size={8} fill="currentColor" />
                 {t("default")}
               </span>
@@ -43,7 +43,7 @@ export function TemplatePickerModal({ templates, onSelect, onClose }: TemplatePi
         <div className="border-t border-stroke-subtle mt-2 pt-2">
           <button
             onClick={() => onSelect(null)}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-ink-secondary hover:bg-surface-hover transition-all duration-150 text-left cursor-pointer active:scale-[0.98]"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-ink-secondary hover:bg-surface-hover transition-all duration-150 text-left cursor-pointer active:scale-[0.98]"
           >
             <div className="w-9 h-9 flex items-center justify-center rounded-lg bg-surface border border-stroke shrink-0 opacity-40">
               <FileText size={18} />

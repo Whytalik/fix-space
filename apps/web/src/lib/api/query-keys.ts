@@ -26,4 +26,9 @@ export const queryKeys = {
     detail: (id: string) => ["templates", "detail", id] as const,
     values: (templateId: string) => ["templates", "values", templateId] as const,
   },
+  integrationConnections: {
+    all: () => ["integrationConnections"] as const,
+    detail: (id: string) => ["integrationConnections", id] as const,
+    trades: (id: string, startDate: string, endDate: string) => ["integrationConnections", id, "trades", startDate, endDate] as const,
+  },
 };

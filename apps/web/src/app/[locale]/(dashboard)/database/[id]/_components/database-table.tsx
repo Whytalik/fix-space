@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/primitives/actions/button";
 import { deleteRecord, duplicateRecord } from "@/lib/api/record";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { FileText, Copy, Trash2, ChevronDown } from "lucide-react";
+import { FileText, Copy, Trash2, ChevronDown, Link as LinkIcon } from "lucide-react";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { SummaryCell } from "./summary-cell";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
@@ -284,6 +284,11 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                         <PropertyIcon type={prop.type} />
                       </span>
                       <span className="truncate">{prop.name}</span>
+                      {prop.integrationKey && (
+                        <span title="Automated by integration" className="flex items-center">
+                          <LinkIcon size={12} className="text-accent shrink-0" />
+                        </span>
+                      )}
                       {prop.hint && <PropertyHint hint={prop.hint} />}
                     </span>
                     <div

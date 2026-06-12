@@ -4,6 +4,7 @@ import { PropertyType } from "@fixspace/domain/enums";
 import type { PropertyResponseDto } from "@fixspace/domain";
 import { PropertyIcon } from "@/app/[locale]/(dashboard)/database/[id]/_components/properties/ui/property-icon";
 import { PropertyHint } from "@/app/[locale]/(dashboard)/database/[id]/_components/properties/ui/property-hint";
+import { Link2 } from "lucide-react";
 import { CellValue } from "@/app/[locale]/(dashboard)/database/[id]/_components/cell-value";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createPropertyValue, updatePropertyValue } from "@/lib/api/property-value";
@@ -49,6 +50,11 @@ export function RecordPropertyRow({ recordId, property, value, valueId }: Record
         </span>
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-sm text-ink-secondary truncate">{property.name}</span>
+          {property.integrationKey && (
+            <span title="Automated by integration" className="flex items-center">
+              <Link2 size={12} className="text-accent shrink-0" />
+            </span>
+          )}
           {property.hint && <PropertyHint hint={property.hint} />}
         </div>
       </div>

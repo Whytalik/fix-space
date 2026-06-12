@@ -27,6 +27,7 @@ interface NameIconColorModalProps {
   error?: string | null;
   onSubmit: (values: NameIconColorValues) => void;
   onClose: () => void;
+  children?: React.ReactNode;
 }
 
 export function NameIconColorModal({
@@ -40,6 +41,7 @@ export function NameIconColorModal({
   error,
   onSubmit,
   onClose,
+  children,
 }: NameIconColorModalProps) {
   const t = useTranslations("NameIconColorModal");
   const [name, setName] = useState(initialValues?.name ?? "");
@@ -66,6 +68,7 @@ export function NameIconColorModal({
   return (
     <ModalShell isOpen onClose={onClose} title={title} size="sm">
       <div className="flex flex-col gap-3">
+        {children}
         {hint && <p className="type-hint">{hint}</p>}
         <div className="flex flex-col gap-1.5">
           <label className="type-field-label">{t("nameLabel") || "Name"}</label>

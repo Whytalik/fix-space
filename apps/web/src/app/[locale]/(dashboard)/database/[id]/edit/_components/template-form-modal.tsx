@@ -30,7 +30,7 @@ export function TemplateFormModal({ mode, template, databaseId, onClose }: Templ
 
   const [name, setName] = useState(template?.name ?? "");
   const [description, setDescription] = useState(template?.description ?? "");
-  const [icon, setIcon] = useState(template?.icon ?? "icon:LayoutGrid");
+  const [icon, setIcon] = useState(template?.icon ?? "icon:LayoutTemplate");
   const [showIconPicker, setShowIconPicker] = useState(false);
   const iconButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -110,7 +110,7 @@ export function TemplateFormModal({ mode, template, databaseId, onClose }: Templ
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
-          <p className="mt-2 text-[10px] text-ink-muted leading-relaxed opacity-60 italic">
+          <p className="mt-2 type-hint leading-relaxed opacity-60 italic">
             Tokens supported: {"{{today}}"}, {"{{day}}"}, {"{{month}}"}, {"{{count}}"}
           </p>
         </div>

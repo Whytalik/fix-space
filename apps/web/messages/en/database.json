@@ -331,6 +331,7 @@
     "removeDefaultDesc": "Another template will automatically become the default. New records will still use a template."
   },
   "DatabaseItem": {
+    "options": "Options",
     "edit": "Edit",
     "duplicate": "Duplicate",
     "delete": "Delete",

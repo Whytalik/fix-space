@@ -13,7 +13,7 @@ import { RecordSettings } from "./record-settings";
 import { SectionSettings } from "./section-settings";
 import { IntegrationSettings } from "./integration-settings";
 import { ViewSettings } from "./view-settings";
-import { Database, FolderOpen, LayoutDashboard, Table2, FileText, User, Palette, Puzzle, X } from "lucide-react";
+import { Database, FolderOpen, Table2, FileText, User, Palette, Puzzle, X, Box, LayoutTemplate } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
@@ -37,10 +37,10 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
   const categories: { id: SettingsCategory; label: string; icon: typeof User }[] = [
     { id: "profile", label: t("profile"), icon: User },
-    { id: "space", label: t("space"), icon: LayoutDashboard },
+    { id: "space", label: t("space"), icon: Box },
     { id: "appearance", label: t("appearance"), icon: Palette },
     { id: "database", label: t("database"), icon: Database },
-    { id: "template", label: t("template"), icon: Table2 },
+    { id: "template", label: t("template"), icon: LayoutTemplate },
     { id: "record", label: t("record"), icon: FileText },
     { id: "section", label: t("section"), icon: FolderOpen },
     { id: "view", label: t("view"), icon: Table2 },
@@ -90,13 +90,13 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
           </div>
           <div className="flex-1 overflow-y-auto px-8 py-6 scrollbar">
             {activeCategory === "profile" && <ProfileSettings compact />}
-            {activeCategory === "space" && <SpaceSettings />}
             {activeCategory === "appearance" && <AppearanceSettings />}
+            {activeCategory === "space" && <SpaceSettings />}
+            {activeCategory === "section" && <SectionSettings />}
             {activeCategory === "database" && <DatabaseSettings />}
+            {activeCategory === "view" && <ViewSettings />}
             {activeCategory === "template" && <TemplateSettings />}
             {activeCategory === "record" && <RecordSettings />}
-            {activeCategory === "section" && <SectionSettings />}
-            {activeCategory === "view" && <ViewSettings />}
             {activeCategory === "integration" && <IntegrationSettings />}
           </div>
         </div>
