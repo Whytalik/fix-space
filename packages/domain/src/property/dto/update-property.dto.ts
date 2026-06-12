@@ -63,6 +63,11 @@ export class UpdatePropertyDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   group?: string;
 
+  @ApiProperty({ description: "Key for integration mapping", example: "pair", required: false, nullable: true })
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  integrationKey?: string | null;
+
   @ApiProperty({ description: "Property group ID", example: "group_1", required: false })
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })

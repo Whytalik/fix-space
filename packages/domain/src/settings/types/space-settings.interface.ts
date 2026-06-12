@@ -12,6 +12,6 @@ export class SpaceSettings {
 }
 
 export const DEFAULT_SPACE_SETTINGS: SpaceSettings = {
-  defaultSpaceIcon: "icon:LayoutDashboard",
+  defaultSpaceIcon: "icon:Box",
   showPresetIndicators: true,
 };

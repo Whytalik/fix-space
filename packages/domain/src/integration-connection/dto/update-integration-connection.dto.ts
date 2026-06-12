@@ -5,15 +5,21 @@ import { ApiProperty } from "@nestjs/swagger";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
 import { IntegrationService } from "./create-integration-connection.dto";
-import { CTraderCredentials, ExchangeCredentials, Mt5Credentials, OkxCredentials } from "./credentials.dto";
+import { ExchangeCredentials, Mt5Credentials } from "./credentials.dto";
 
 export enum IntegrationStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
   ERROR = "ERROR",
+  PENDING = "PENDING",
 }
 
 export class UpdateIntegrationConnectionDto {
+  @ApiProperty({ description: "Space identifier", example: "123e4567-e89b-12d3-a456-426614174000", required: false, nullable: true })
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  spaceId?: string | null;
+
   @ApiProperty({ description: "Integration service provider", example: "BINANCE", required: false })
   @IsOptional()
   @IsEnum(IntegrationService, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
@@ -34,14 +40,11 @@ export class UpdateIntegrationConnectionDto {
       property: "service",
       subTypes: [
         { value: ExchangeCredentials, name: IntegrationService.BINANCE },
-        { value: ExchangeCredentials, name: IntegrationService.BYBIT },
-        { value: OkxCredentials, name: IntegrationService.OKX },
         { value: Mt5Credentials, name: IntegrationService.METATRADER5 },
-        { value: CTraderCredentials, name: IntegrationService.CTRADER },
       ],
     },
   })
-  credentials?: ExchangeCredentials | OkxCredentials | Mt5Credentials | CTraderCredentials;
+  credentials?: ExchangeCredentials | Mt5Credentials;
 
   @ApiProperty({ description: "Connection status", example: "ACTIVE", required: false })
   @IsOptional()

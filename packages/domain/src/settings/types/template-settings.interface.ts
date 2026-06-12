@@ -9,5 +9,5 @@ export class TemplateSettings {
 }
 
 export const DEFAULT_TEMPLATE_SETTINGS: TemplateSettings = {
-  defaultTemplateIcon: "icon:LayoutGrid",
+  defaultTemplateIcon: "icon:LayoutTemplate",
 };

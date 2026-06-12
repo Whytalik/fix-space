@@ -62,6 +62,10 @@ export class PropertyResponseDto {
   @Expose()
   isProtected: boolean;
 
+  @ApiProperty({ description: "Key for integration mapping", example: "pair", required: false })
+  @Expose()
+  integrationKey?: string | null;
+
   @ApiProperty({ description: "Visibility condition", required: false, type: () => VisibilityConditionDto })
   @Expose()
   visibilityCondition?: VisibilityConditionDto | null;

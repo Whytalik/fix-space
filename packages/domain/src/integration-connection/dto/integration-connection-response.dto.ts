@@ -13,6 +13,14 @@ export class IntegrationConnectionResponseDto {
   @Expose()
   userId: string;
 
+  @ApiProperty({ description: "Space identifier", example: "123e4567-e89b-12d3-a456-426614174000", required: true, nullable: true })
+  @Expose()
+  spaceId: string | null;
+
+  @ApiProperty({ description: "Linked space details", required: false, nullable: true })
+  @Expose()
+  space: { id: string; name: string } | null;
+
   @ApiProperty({ description: "Integration service provider", example: "BINANCE", required: true })
   @Expose()
   service: IntegrationService;
@@ -29,7 +37,7 @@ export class IntegrationConnectionResponseDto {
   @Expose()
   syncInterval: number;
 
-  @ApiProperty({ description: "Market type (e.g. spot, futures)", example: "spot", required: true, nullable: true })
+  @ApiProperty({ description: "Market type (e.g. spot, futures)", example: "futures", required: true, nullable: true })
   @Expose()
   marketType: string | null;
 
@@ -48,6 +56,10 @@ export class IntegrationConnectionResponseDto {
   @ApiProperty({ description: "Number of consecutive failed sync attempts", example: 0, required: true })
   @Expose()
   consecutiveFailures: number;
+
+  @ApiProperty({ description: "Connection configuration (JSON)", required: false })
+  @Expose()
+  config?: Record<string, unknown>;
 
   @ApiProperty({ description: "Record creation timestamp", required: true })
   @Expose()
