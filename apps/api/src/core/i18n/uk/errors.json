@@ -87,5 +87,13 @@
   "NOTIFICATION_NOT_FOUND": "Сповіщення не знайдено",
   "AUTOMATION_NOT_FOUND": "Автоматизацію не знайдено",
   "AUTOMATION_LIMIT_EXCEEDED": "Досягнуто максимальну кількість автоматизацій (10) для цієї бази даних",
-  "AUTOMATION_TRIGGER_ACTION_INCOMPATIBLE": "Цей тип дії несумісний із вибраним тригером"
+  "AUTOMATION_TRIGGER_ACTION_INCOMPATIBLE": "Цей тип дії несумісний із вибраним тригером",
+  "INTEGRATION_CONNECTION_NOT_FOUND": "Підключення інтеграції не знайдено",
+  "INTEGRATION_CONNECTION_LIMIT_REACHED": "Досягнуто максимальну кількість підключень {service} ({limit})",
+  "INTEGRATION_CREDENTIALS_INVALID": "Недійсні облікові дані {service}: {error}",
+  "INTEGRATION_KEY_NOT_READ_ONLY": "API ключ повинен бути лише для читання (enableTrading та enableWithdrawals мають бути вимкнені)",
+  "INTEGRATION_SYNC_FAILED": "Синхронізація не вдалася для {name}: {error}",
+  "INTEGRATION_NOT_LINKED_TO_SPACE": "Підключення інтеграції не привʼязане до жодного спейсу.",
+  "UNKNOWN_PRESET_TYPE": "Невідомий тип шаблонної бази даних: {type}",
+  "PRESET_DATABASE_EXISTS": "База даних типу \"{type}\" вже існує"
 }

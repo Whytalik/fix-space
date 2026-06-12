@@ -82,6 +82,11 @@ export class CreatePropertyDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   groupId?: string;
 
+  @ApiProperty({ description: "Key for integration mapping", example: "pair", required: false })
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  integrationKey?: string;
+
   @ApiProperty({ description: "Property type-specific configuration", required: false })
   @IsOptional()
   @ValidateNested()

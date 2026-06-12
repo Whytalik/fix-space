@@ -298,7 +298,7 @@ const defaultDatabaseProperties: InitPropertyDef[] = [
 ];
 
 export const defaultInitializationConfig: InitializationConfig = {
-  spaceIcon: "icon:LayoutDashboard",
+  spaceIcon: "icon:Box",
   sections: [
     { key: "routine", name: "Routine", position: 0, icon: "icon:CalendarDays", color: "#818cf8" },
     { key: "insight", name: "Insight", position: 1, icon: "icon:Lightbulb", color: "#fbbf24" },

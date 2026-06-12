@@ -83,7 +83,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorType = "VALIDATION";
 
       this.logger.log(
-        `\x1b[33m✖\x1b[0m  [\x1b[33m${errorType}\x1b[0m] ${colorStatus(status)} | [${colorMethod(method)}] ${url} | ${rawMessages.join(", ")}`,
+        `\x1b[33m✖\x1b[0m  [\x1b[33m${errorType}\x1b[0m] ${colorStatus(status)} | [${colorMethod(method)}] ${url} | ${JSON.stringify(exception.errors)}`,
       );
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();

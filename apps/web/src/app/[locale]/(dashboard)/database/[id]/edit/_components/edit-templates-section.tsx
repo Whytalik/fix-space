@@ -109,11 +109,11 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
           {templates.map((template) => (
             <div
               key={template.id}
-              className="group relative flex items-center gap-3 p-4 bg-canvas border border-stroke rounded-2xl hover:border-accent/30 hover:shadow-sm transition-colors duration-200 cursor-pointer"
+              className="group relative flex items-center gap-3 p-4 bg-canvas border border-stroke rounded-2xl hover:border-accent/30 hover:shadow-sm transition-colors duration-150 cursor-pointer"
               onClick={() => router.push(`/database/${databaseId}/template/${template.id}`)}
             >
               <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-surface border border-stroke shadow-sm">
-                <IconDisplay value={template.icon || "icon:LayoutGrid"} size={20} />
+                <IconDisplay value={template.icon || "icon:LayoutTemplate"} size={20} />
               </div>
 
               <div className="flex-1 min-w-0">

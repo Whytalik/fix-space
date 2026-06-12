@@ -2,6 +2,7 @@
 
 import { useEscape } from "@/hooks/ui/use-escape";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
@@ -24,6 +25,7 @@ interface ModalShellProps {
 }
 
 export function ModalShell({ isOpen, onClose, title, size = "md", children, footer, headerPrefix, headerSuffix }: ModalShellProps) {
+  const t = useTranslations("UI");
   useEscape(onClose);
 
   if (!isOpen) return null;
@@ -43,6 +45,7 @@ export function ModalShell({ isOpen, onClose, title, size = "md", children, foot
             {headerSuffix}
             <button
               onClick={onClose}
+              title={t("close")}
               className="text-ink-muted hover:text-ink transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas rounded p-0.5"
             >
               <X size={15} />

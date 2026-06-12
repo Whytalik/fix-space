@@ -4,7 +4,7 @@ import { PropertyIcon } from "../../_components/properties/ui/property-icon";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { DatabaseResponseDto } from "@fixspace/domain";
-import { Check, ChevronDown, ChevronRight, GripVertical, Pencil, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, GripVertical, Link2, Pencil, Trash2, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { GroupItem, PropItem } from "./property-list.utils";
 import { getConfigSummary } from "./property-list.utils";
@@ -146,6 +146,11 @@ export function PropertyRow({ item, databases, isLocked, onEdit, onDelete }: Pro
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className={`text-sm ${prop.isVisible === false ? "text-ink-muted" : "text-ink"}`}>{prop.name}</span>
+          {prop.integrationKey && (
+            <span title="Automated by integration" className="flex items-center">
+              <Link2 size={12} className="text-accent shrink-0" />
+            </span>
+          )}
           {prop.hint && <PropertyHint hint={prop.hint} />}
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">

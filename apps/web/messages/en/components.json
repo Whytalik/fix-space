@@ -1,4 +1,7 @@
 {
+  "UI": {
+    "close": "Close"
+  },
   "Search": {
     "placeholder": "Search records...",
     "hint": "Start typing to search across your space",
@@ -153,6 +156,7 @@
     "showAllResults": "Show all results in {database}"
   },
   "SectionItem": {
+    "options": "Options",
     "addDatabase": "Add database",
     "edit": "Edit",
     "duplicate": "Duplicate",

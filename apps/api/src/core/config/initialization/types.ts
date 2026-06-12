@@ -11,6 +11,7 @@ import type { SeedRecord } from "./seeds";
 export type InitPropertyDef = Omit<CreatePropertyDto, "databaseId" | "config"> & {
   config?: Record<string, unknown>;
   visibilityCondition?: Record<string, unknown>;
+  integrationKey?: string;
 };
 
 export type InitTemplateDef = Omit<CreateTemplateDto, "databaseId">;

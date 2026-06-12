@@ -2,6 +2,7 @@
 
 import type { PropertyResponseDto } from "@fixspace/domain";
 import { PropertyIcon } from "../../../_components/properties/ui/property-icon";
+import { Link2 } from "lucide-react";
 import { CellValue } from "../../../_components/cell-value";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createTemplatePropertyValue, updateTemplatePropertyValue } from "@/lib/api/template-property-value";
@@ -43,6 +44,11 @@ export function TemplatePropertyRow({ templateId, property, value, valueId }: Te
         </span>
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-sm text-ink-secondary truncate">{property.name}</span>
+          {property.integrationKey && (
+            <span title="Automated by integration" className="flex items-center">
+              <Link2 size={12} className="text-accent shrink-0" />
+            </span>
+          )}
         </div>
       </div>
 

@@ -1,4 +1,8 @@
 {
   "import_completed": "Import completed: {imported} records added, {skipped} skipped",
-  "export_completed": "Export completed: {count} records exported"
+  "export_completed": "Export completed: {count} records exported",
+  "integration_sync_completed": "Sync completed: {synced} new trades, {skipped} duplicates",
+  "integration_sync_failed": "Sync failed: {error}",
+  "integration_no_journal": "Integration \"{service}\": Trading Journal database not found. Please create one to enable auto-import.",
+  "integration_missing_properties": "Integration \"{service}\": Some mapped properties are missing in your Trading Journal ({properties}). Records will be created with partial data."
 }

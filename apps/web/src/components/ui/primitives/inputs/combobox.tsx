@@ -120,7 +120,9 @@ export function Combobox(props: ComboboxProps) {
     disabled,
   } = props as { freeText?: boolean; nullable?: boolean; placement?: "top" | "bottom"; size?: "md" | "sm"; disabled?: boolean };
   const inputCls = size === "sm" ? "field-input w-full !py-1 !text-xs" : "field-input w-full";
-  const currentLabel = freeText ? (props.value as string) : (props.options.find((option) => option.value === props.value)?.label ?? "");
+  const selectedOption = freeText ? null : props.options.find((option) => option.value === props.value);
+  const currentLabel = freeText ? (props.value as string) : (selectedOption?.label ?? "");
+  const showIcon = !open && selectedOption?.icon;
 
   const filtered = props.options.filter((option) => query === currentLabel || option.label.toLowerCase().includes(query.toLowerCase()));
 
@@ -154,6 +156,11 @@ export function Combobox(props: ComboboxProps) {
 
   return (
     <div className="relative">
+      {showIcon && (
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-secondary pointer-events-none flex items-center justify-center">
+          <IconDisplay value={selectedOption?.icon ?? ""} size={14} />
+        </span>
+      )}
       <input
         ref={inputRef}
         type="text"
@@ -162,7 +169,7 @@ export function Combobox(props: ComboboxProps) {
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={props.placeholder}
-        className={inputCls}
+        className={`${inputCls} ${showIcon ? "pl-9" : ""}`}
         disabled={disabled}
       />
       {open && !disabled && filtered.length > 0 && (

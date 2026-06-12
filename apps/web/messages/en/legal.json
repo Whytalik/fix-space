@@ -95,6 +95,7 @@
   "Footer": {
     "legal": "Legal",
     "privacy": "Privacy Policy",
-    "terms": "Terms of Service"
+    "terms": "Terms of Service",
+    "copyright": "© {year} FIX Space. All rights reserved."
   }
 }

@@ -26,10 +26,12 @@ import { SpaceModule } from "./modules/space/space.module";
 import { TemplatePropertyValueModule } from "./modules/template-property-value/template-property-value.module";
 import { TemplateModule } from "./modules/template/template.module";
 import { ImportExportModule } from "./modules/import-export/import-export.module";
+import { IntegrationConnectionModule } from "./modules/integration-connection/integration-connection.module";
 import { NotificationModule } from "./modules/notification/notification.module";
 import { UserModule } from "./modules/user/user.module";
 import { ViewModule } from "./modules/view/view.module";
 import { AutomationModule } from "./modules/automation/automation.module";
+import { CacheModule } from "./core/cache/cache.module";
 
 @Module({
   imports: [
@@ -55,6 +57,7 @@ import { AutomationModule } from "./modules/automation/automation.module";
       },
     ]),
     LoggerModule,
+    CacheModule,
     UserModule,
     AuthModule,
     JwtModule,
@@ -71,6 +74,7 @@ import { AutomationModule } from "./modules/automation/automation.module";
     TemplatePropertyValueModule,
     SettingsModule,
     ImportExportModule,
+    IntegrationConnectionModule,
     NotificationModule,
     AutomationModule,
   ],
