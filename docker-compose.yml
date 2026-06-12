@@ -15,6 +15,27 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mt5-sidecar:
+    profiles:
+      - full
+    build:
+      context: ./services/mt5-sidecar
+      dockerfile: Dockerfile
+    environment:
+      - MT5_SIDECAR_TOKEN=${MT5_SIDECAR_TOKEN:-}
+    ports:
+      - '8000:8000'
+
   api:
     profiles:
       - full
@@ -30,11 +51,19 @@ services:
       - PORT=3000
       - NODE_ENV=production
       - COOKIE_SECURE=false
+      - MT5_SIDECAR_URL=http://mt5-sidecar:8000
+      - MT5_SIDECAR_TOKEN=${MT5_SIDECAR_TOKEN:-}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     ports:
       - '3000:3000'
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      mt5-sidecar:
+        condition: service_started
 
   web:
     profiles:

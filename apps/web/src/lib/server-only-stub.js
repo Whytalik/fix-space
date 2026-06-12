@@ -41,6 +41,8 @@ export const MinLength = stub;
 export const ValidateIf = stub;
 export const ValidateNested = stub;
 export const validate = stub;
+export const IsDateString = stub;
+export const IsISO8601 = stub;
 
 export const Exclude = stub;
 export const Expose = stub;
