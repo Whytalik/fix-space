@@ -15,5 +15,6 @@ export * from "./settings";
 export * from "./space";
 export * from "./template";
 export * from "./template-property-value";
+export * from "./statistics";
 export * from "./user";
 export * from "./view";

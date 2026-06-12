@@ -10,7 +10,7 @@ export class Database {
   type?: string;
   key?: string;
   icon?: string;
-  isPreset: boolean;
+  isKey: boolean;
   isLocked: boolean;
   enableStats: boolean;
   createdAt: Date;

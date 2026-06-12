@@ -1,8 +1,21 @@
-import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
+import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { i18nValidationMessage } from "nestjs-i18n";
 
 import { I18nTranslations } from "../../generated/i18n.generated";
+
+export enum ProgressMode {
+  CUSTOM = "custom",
+  SOURCE = "source",
+}
+
+export enum ProgressRollupType {
+  PERCENT_COMPLETE = "percent_complete",
+  PERCENT_CHECKED = "percent_checked",
+  AVERAGE = "average",
+  SUM = "sum",
+  COUNT = "count",
+}
 
 export class ProgressThreshold {
   @IsNumber({}, { message: i18nValidationMessage<I18nTranslations>("validation.IS_NUMBER") })
@@ -34,6 +47,22 @@ export class ProgressPropertyConfig {
   @ValidateNested({ each: true })
   @Type(() => ProgressThreshold)
   thresholds: ProgressThreshold[];
+
+  @IsOptional()
+  @IsEnum(ProgressMode, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
+  mode?: ProgressMode;
+
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  relationPropertyId?: string;
+
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  targetPropertyId?: string;
+
+  @IsOptional()
+  @IsEnum(ProgressRollupType, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
+  rollupType?: ProgressRollupType;
 }
 
 export { DEFAULT_PROGRESS_PROPERTY } from "./progress.constants";

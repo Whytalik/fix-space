@@ -5,4 +5,5 @@ export const DEFAULT_PROGRESS_PROPERTY = {
   step: 1,
   showLabel: true,
   thresholds: [] as { upTo: number; color: string }[],
+  mode: "custom",
 };

@@ -48,9 +48,9 @@ export class DatabaseResponseDto {
   @Expose()
   sectionId: string | null;
 
-  @ApiProperty({ description: "Whether this is a preset database", example: false })
+  @ApiProperty({ description: "Whether this is a key database", example: false })
   @Expose()
-  isPreset: boolean;
+  isKey: boolean;
 
   @ApiProperty({ description: "Whether the database is locked", example: false })
   @Expose()

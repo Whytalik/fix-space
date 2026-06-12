@@ -17,6 +17,9 @@ export type DatabaseType =
   | "operations"
   | "trading-system"
   | "performance-review"
+  | "learning-tasks"
+  | "economic-events"
+  | "economic-releases"
   | "custom";
 
 export const DATABASE_TYPES: DatabaseType[] = [
@@ -29,6 +32,9 @@ export const DATABASE_TYPES: DatabaseType[] = [
   "operations",
   "trading-system",
   "performance-review",
+  "learning-tasks",
+  "economic-events",
+  "economic-releases",
   "custom",
 ];
 
@@ -77,10 +83,10 @@ export class CreateDatabaseDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   icon?: string;
 
-  @ApiProperty({ description: "Whether database is a preset", example: false, required: false })
+  @ApiProperty({ description: "Whether this is a key database", example: false, required: false })
   @IsOptional()
   @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
-  isPreset?: boolean;
+  isKey?: boolean;
 
   @ApiProperty({ description: "Whether to enable statistics", example: true, required: false })
   @IsOptional()
