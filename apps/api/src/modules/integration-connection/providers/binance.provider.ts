@@ -44,7 +44,7 @@ export class BinanceProvider implements IntegrationProvider {
   }
 
   async validateCredentials(credentials: unknown): Promise<ValidationResult> {
-    this.logger.debug("Validating Binance credentials for Futures");
+    this.logger.debug("Validating Binance credentials");
     const { apiKey, apiSecret } = credentials as Record<string, string>;
     const cleanApiKey = apiKey?.trim();
     const cleanApiSecret = apiSecret?.trim();
@@ -57,16 +57,32 @@ export class BinanceProvider implements IntegrationProvider {
       const permissions = await client.getApiKeyPermissions();
 
       const enableReading = permissions?.enableReading === true;
+      const enableWithdrawals = permissions?.enableWithdrawals === true;
+      const enableSpotAndMarginTrading = permissions?.enableSpotAndMarginTrading === true;
       const enableFutures = permissions?.enableFutures === true;
+      const enableMargin = permissions?.enableMargin === true;
 
-      if (!enableReading || !enableFutures) {
+      if (!enableReading) {
         return {
           valid: false,
-          error: "API key must have 'Reading' and 'Futures' permissions enabled",
+          error: "API key must have 'Reading' permissions enabled (read-only)",
         };
       }
 
-      return { valid: true, accountId: "FUTURES" };
+      if (enableWithdrawals || enableSpotAndMarginTrading || enableFutures || enableMargin) {
+        return {
+          valid: false,
+          error: "API key must be read-only (trading and withdrawals must be disabled)",
+        };
+      }
+
+      const accountInfo = (await client.getAccountInformation()) as unknown as {
+        accoountType?: string;
+        accountType?: string;
+      };
+      const accountType = accountInfo?.accoountType || accountInfo?.accountType || "SPOT";
+
+      return { valid: true, accountId: `${accountType} - ${accountType}` };
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Unknown error";
       this.logger.warn("Binance credential validation failed", { error: message });
