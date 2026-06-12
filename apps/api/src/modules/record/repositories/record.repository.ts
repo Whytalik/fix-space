@@ -50,6 +50,16 @@ export class RecordRepository extends BaseRepository {
     ]);
   }
 
+  async findBySourceIntegration(connectionId: string, sourcePositionIds: string[]) {
+    return prisma.record.findMany({
+      where: {
+        sourceIntegrationId: connectionId,
+        sourcePositionId: { in: sourcePositionIds },
+      },
+      select: { sourcePositionId: true },
+    });
+  }
+
   async findWithFilters(
     databaseId: string,
     userId: string,

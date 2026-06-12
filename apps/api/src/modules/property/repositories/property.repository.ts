@@ -35,12 +35,12 @@ export class PropertyRepository extends BaseRepository {
     return prisma.property.findMany({ where: { databaseId } });
   }
 
-  async create(data: Prisma.PropertyUncheckedCreateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).property.create({ data });
+  async create(data: Prisma.PropertyUncheckedCreateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).property.create({ data });
   }
 
-  async update(id: string, data: Prisma.PropertyUpdateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).property.update({ where: { id }, data });
+  async update(id: string, data: Prisma.PropertyUpdateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).property.update({ where: { id }, data });
   }
 
   async delete(id: string) {

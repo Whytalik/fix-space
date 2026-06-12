@@ -86,5 +86,13 @@
   "NOTIFICATION_NOT_FOUND": "Notification not found",
   "AUTOMATION_NOT_FOUND": "Automation not found",
   "AUTOMATION_LIMIT_EXCEEDED": "Maximum number of automations (10) reached for this database",
-  "AUTOMATION_TRIGGER_ACTION_INCOMPATIBLE": "This action type is not compatible with the selected trigger"
+  "AUTOMATION_TRIGGER_ACTION_INCOMPATIBLE": "This action type is not compatible with the selected trigger",
+  "INTEGRATION_CONNECTION_NOT_FOUND": "Integration connection not found",
+  "INTEGRATION_CONNECTION_LIMIT_REACHED": "Maximum number of {service} connections ({limit}) reached",
+  "INTEGRATION_CREDENTIALS_INVALID": "Invalid {service} credentials: {error}",
+  "INTEGRATION_KEY_NOT_READ_ONLY": "API key must be read-only (enableTrading and enableWithdrawals must be disabled)",
+  "INTEGRATION_SYNC_FAILED": "Synchronization failed for {name}: {error}",
+  "INTEGRATION_NOT_LINKED_TO_SPACE": "Integration connection is not linked to any space.",
+  "UNKNOWN_PRESET_TYPE": "Unknown preset database type: {type}",
+  "PRESET_DATABASE_EXISTS": "A database of type \"{type}\" already exists"
 }

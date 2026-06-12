@@ -18,6 +18,7 @@ type PropertyWithDatabase =
       createdAt: Date;
       updatedAt: Date;
       isProtected: boolean;
+      integrationKey?: string | null;
     };
 
 export function toPropertyResponseDto(property: PropertyWithDatabase): PropertyResponseDto {

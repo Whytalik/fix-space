@@ -29,6 +29,14 @@ export const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   GOOGLE_CALLBACK_URL: z.string().default("http://localhost:3000/auth/google/callback"),
+
+  CREDENTIALS_ENCRYPTION_KEY: z
+    .string()
+    .length(64, "CREDENTIALS_ENCRYPTION_KEY must be a 64-char hex string (32 bytes). Generate with: openssl rand -hex 32")
+    .default("0".repeat(64)),
+
+  MT5_SIDECAR_URL: z.string().url().optional(),
+  MT5_SIDECAR_TOKEN: z.string().optional(),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

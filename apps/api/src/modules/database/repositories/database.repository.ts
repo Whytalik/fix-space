@@ -67,6 +67,18 @@ export class DatabaseRepository extends BaseRepository {
     });
   }
 
+  async findByTypeForOwner(type: string, userId: string) {
+    return prisma.database.findFirst({
+      where: { type, space: { ownerId: userId } },
+    });
+  }
+
+  async findByTypeInSpace(type: string, spaceId: string) {
+    return prisma.database.findFirst({
+      where: { type, spaceId },
+    });
+  }
+
   async findAllBySpace(spaceId: string, userId: string) {
     return prisma.database.findMany({ where: { spaceId, space: { ownerId: userId } } });
   }
