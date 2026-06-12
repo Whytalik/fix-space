@@ -15,13 +15,13 @@ import { SpaceSwitcher } from "@/components/navigation/space-switcher";
 import { SidebarSkeleton } from "./skeletons/sidebar-skeleton";
 interface SidebarProps {
   initialCollapsed?: boolean;
-  initialCollapsedSections?: string[];
+  initialExpandedSections?: string[];
 }
 
-export function Sidebar({ initialCollapsed = false, initialCollapsedSections = [] }: SidebarProps) {
+export function Sidebar({ initialCollapsed = false, initialExpandedSections = [] }: SidebarProps) {
   const t = useTranslations("Sidebar");
   const { space, isLoading } = useAppContext();
-  const { collapsed, toggle, collapsedSections, toggleSection, isMounted } = useSidebarState(initialCollapsed, initialCollapsedSections);
+  const { collapsed, toggle, expandedSections, toggleSection, isMounted } = useSidebarState(initialCollapsed, initialExpandedSections);
   const { contentRef, sensors, verticalOnly, collisionDetection, activeDrag, handleDragStart, handleDragCancel, handleDragEnd } =
     useSidebarDnd();
 
@@ -62,7 +62,7 @@ export function Sidebar({ initialCollapsed = false, initialCollapsedSections = [
                   key={section.id}
                   section={section}
                   collapsed
-                  isCollapsed={collapsedSections.has(section.id)}
+                  isExpanded={expandedSections.has(section.id)}
                   onToggle={() => toggleSection(section.id)}
                 />
               ))}
@@ -84,7 +84,7 @@ export function Sidebar({ initialCollapsed = false, initialCollapsedSections = [
                   <SectionItem
                     key={section.id}
                     section={section}
-                    isCollapsed={collapsedSections.has(section.id)}
+                    isExpanded={expandedSections.has(section.id)}
                     onToggle={() => toggleSection(section.id)}
                   />
                 ))}
@@ -100,7 +100,7 @@ export function Sidebar({ initialCollapsed = false, initialCollapsedSections = [
                 activeDrag={activeDrag}
                 sections={sections}
                 unsectioned={unsectioned}
-                collapsedSections={collapsedSections}
+                expandedSections={expandedSections}
               />
             </DndContext>
           )}

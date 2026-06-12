@@ -1,9 +1,10 @@
 "use client";
 
 import { ModalShell } from "@/components/ui/overlays/modal-shell";
-import { Star } from "lucide-react";
+import { Star, FileText } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { TemplateResponseDto } from "@fixspace/domain";
+import { IconDisplay } from "@/components/ui/icons/icon-display";
 
 interface TemplatePickerModalProps {
   templates: TemplateResponseDto[];
@@ -16,35 +17,38 @@ export function TemplatePickerModal({ templates, onSelect, onClose }: TemplatePi
 
   return (
     <ModalShell isOpen={true} onClose={onClose} title={t("chooseTemplate")} size="sm">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 p-2">
         {templates.map((template) => (
           <button
             key={template.id}
             onClick={() => onSelect(template.id)}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-ink hover:bg-canvas-subtle transition-colors duration-150 text-left"
+            className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-ink hover:bg-surface-hover transition-all duration-150 text-left cursor-pointer active:scale-[0.98]"
           >
-            <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface border border-stroke shrink-0 text-base">
-              {template.icon || "📄"}
+            <div className="w-9 h-9 flex items-center justify-center rounded-lg bg-surface border border-stroke shrink-0 shadow-sm group-hover:border-accent/30 transition-colors duration-150">
+              <IconDisplay value={template.icon || "icon:LayoutGrid"} size={18} />
             </div>
-            <span className="flex-1 truncate font-medium">{template.name}</span>
+            <div className="flex-1 min-w-0">
+              <span className="block truncate font-semibold">{template.name}</span>
+              {template.description && <p className="text-[10px] text-ink-muted truncate">{template.description}</p>}
+            </div>
             {template.isDefault && (
-              <span className="flex items-center gap-1 text-xs font-semibold text-accent uppercase tracking-wider shrink-0">
-                <Star size={9} fill="currentColor" />
+              <span className="flex items-center gap-1 text-[9px] font-bold text-accent uppercase tracking-widest shrink-0 bg-accent/5 px-1.5 py-0.5 rounded border border-accent/20">
+                <Star size={8} fill="currentColor" />
                 {t("default")}
               </span>
             )}
           </button>
         ))}
 
-        <div className="border-t border-stroke-subtle mt-1 pt-1">
+        <div className="border-t border-stroke-subtle mt-2 pt-2">
           <button
             onClick={() => onSelect(null)}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-ink-secondary hover:bg-canvas-subtle transition-colors duration-150 text-left"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-ink-secondary hover:bg-surface-hover transition-all duration-150 text-left cursor-pointer active:scale-[0.98]"
           >
-            <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface border border-stroke shrink-0 text-base opacity-40">
-              📄
+            <div className="w-9 h-9 flex items-center justify-center rounded-lg bg-surface border border-stroke shrink-0 opacity-40">
+              <FileText size={18} />
             </div>
-            <span className="flex-1 truncate">{t("noTemplate")}</span>
+            <span className="flex-1 truncate font-medium">{t("noTemplate")}</span>
           </button>
         </div>
       </div>

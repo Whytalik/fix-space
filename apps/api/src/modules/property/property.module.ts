@@ -1,8 +1,8 @@
-import { Module, forwardRef } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { ViewModule } from "@/modules/view/view.module";
-import { DatabaseModule } from "@/modules/database/database.module";
+import { DatabaseDataModule } from "@/modules/database/database-data.module";
 import { PropertyController } from "./property.controller";
-import { PropertyRepository } from "./repositories/property.repository";
+import { PropertyDataModule } from "./property-data.module";
 import { PropertyService } from "./property.service";
 import {
   CheckboxHandler,
@@ -37,11 +37,10 @@ const handlers = [
 ];
 
 @Module({
-  imports: [ViewModule, forwardRef(() => DatabaseModule)],
+  imports: [ViewModule, DatabaseDataModule, PropertyDataModule],
   controllers: [PropertyController],
   providers: [
     PropertyService,
-    PropertyRepository,
     PropertyTypeRegistry,
     FormulaEngine,
     FormulaRecalculator,
@@ -52,6 +51,6 @@ const handlers = [
       inject: handlers,
     },
   ],
-  exports: [PropertyService, PropertyRepository, PropertyTypeRegistry, FormulaEngine, FormulaRecalculator],
+  exports: [PropertyService, PropertyDataModule, PropertyTypeRegistry, FormulaEngine, FormulaRecalculator],
 })
 export class PropertyModule {}

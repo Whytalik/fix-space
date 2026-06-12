@@ -17,10 +17,10 @@ export function formatDate(value: string | Date | null | undefined, settings: Da
     return dayjs.utc(value).fromNow();
   }
 
-  const tz = settings.timezone || "UTC";
+  const userTimezone = settings.timezone || "UTC";
   return dayjs
     .utc(value)
-    .tz(tz)
+    .tz(userTimezone)
     .format(settings.dateFormat || "DD/MM/YYYY");
 }
 
@@ -31,10 +31,10 @@ export function formatDateTime(value: string | Date | null | undefined, settings
     return dayjs.utc(value).fromNow();
   }
 
-  const tz = settings.timezone || "UTC";
+  const userTimezone = settings.timezone || "UTC";
   const timeFmt = settings.timeFormat === "12h" ? "hh:mm A" : "HH:mm";
   return dayjs
     .utc(value)
-    .tz(tz)
+    .tz(userTimezone)
     .format(`${settings.dateFormat || "DD/MM/YYYY"} ${timeFmt}`);
 }

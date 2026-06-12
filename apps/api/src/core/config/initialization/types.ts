@@ -1,4 +1,11 @@
-import type { CreateDatabaseDto, CreatePropertyDto, CreateSectionDto, CreateTemplateDto, DatabaseType } from "@fixspace/domain";
+import type {
+  CreateDatabaseDto,
+  CreatePropertyDto,
+  CreateSectionDto,
+  CreateTemplateDto,
+  CreateViewDto,
+  DatabaseType,
+} from "@fixspace/domain";
 import type { SeedRecord } from "./seeds";
 
 export type InitPropertyDef = Omit<CreatePropertyDto, "databaseId" | "config"> & {
@@ -8,11 +15,14 @@ export type InitPropertyDef = Omit<CreatePropertyDto, "databaseId" | "config"> &
 
 export type InitTemplateDef = Omit<CreateTemplateDto, "databaseId">;
 
+export type InitViewDef = Omit<CreateViewDto, "databaseId">;
+
 export type DatabaseTemplate = Omit<CreateDatabaseDto, "spaceId" | "properties"> & {
   type?: DatabaseType;
   properties?: InitPropertyDef[];
   seeds?: SeedRecord[];
   templates?: InitTemplateDef[];
+  views?: InitViewDef[];
 };
 
 export interface InitializationConfig {

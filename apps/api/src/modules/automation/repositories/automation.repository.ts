@@ -6,27 +6,6 @@ const LOG_RETENTION = 50;
 
 @Injectable()
 export class AutomationRepository extends BaseRepository {
-  async findDatabaseByOwner(databaseId: string, userId: string) {
-    return prisma.database.findFirst({
-      where: { id: databaseId, space: { ownerId: userId } },
-    });
-  }
-
-  async findDatabaseName(databaseId: string): Promise<string | null> {
-    const db = await prisma.database.findUnique({
-      where: { id: databaseId },
-      select: { name: true },
-    });
-    return db?.name ?? null;
-  }
-
-  async findDatabaseWithOwner(databaseId: string) {
-    return prisma.database.findUnique({
-      where: { id: databaseId },
-      include: { space: { select: { ownerId: true } } },
-    });
-  }
-
   async findAllByDatabase(databaseId: string) {
     return prisma.automation.findMany({ where: { databaseId } });
   }
@@ -42,20 +21,6 @@ export class AutomationRepository extends BaseRepository {
   async findByOwner(id: string, userId: string) {
     return prisma.automation.findFirst({
       where: { id, database: { space: { ownerId: userId } } },
-    });
-  }
-
-  async findRecordWithValues(recordId: string) {
-    return prisma.record.findUnique({
-      where: { id: recordId },
-      include: { values: true },
-    });
-  }
-
-  async findAllRecordsWithValues(databaseId: string) {
-    return prisma.record.findMany({
-      where: { databaseId },
-      include: { values: true },
     });
   }
 

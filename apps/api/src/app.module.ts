@@ -19,6 +19,7 @@ import { JwtModule } from "./core/jwt/jwt.module";
 import { PropertyValueModule } from "./modules/property-value/property-value.module";
 import { PropertyModule } from "./modules/property/property.module";
 import { PropertyGroupModule } from "./modules/property-group/property-group.module";
+import { RecordContentModule } from "./modules/record-content/record-content.module";
 import { RecordModule } from "./modules/record/record.module";
 import { SettingsModule } from "./modules/settings/settings.module";
 import { SpaceModule } from "./modules/space/space.module";
@@ -64,6 +65,7 @@ import { AutomationModule } from "./modules/automation/automation.module";
     PropertyModule,
     PropertyGroupModule,
     RecordModule,
+    RecordContentModule,
     PropertyValueModule,
     TemplateModule,
     TemplatePropertyValueModule,

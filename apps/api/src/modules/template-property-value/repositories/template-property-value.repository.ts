@@ -4,16 +4,6 @@ import { BaseRepository } from "@/common/utils/base.repository";
 
 @Injectable()
 export class TemplatePropertyValueRepository extends BaseRepository {
-  async findTemplateByOwner(templateId: string, userId: string) {
-    return prisma.template.findFirst({
-      where: { id: templateId, database: { space: { ownerId: userId } } },
-    });
-  }
-
-  async findPropertyById(propertyId: string) {
-    return prisma.property.findUnique({ where: { id: propertyId } });
-  }
-
   async findById(id: string) {
     return prisma.templatePropertyValue.findUnique({
       where: { id },

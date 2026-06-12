@@ -1,9 +1,16 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+
 import { Prisma } from "@fixspace/database";
-import { CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@fixspace/domain";
+import { ContentImageResponseDto, CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@fixspace/domain";
+
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
+
+import { StorageService } from "@/core/storage/storage.service";
+import { DatabaseRepository } from "@/modules/database/repositories/database.repository";
+import { PropertyRepository } from "@/modules/property/repositories/property.repository";
+
 import { TemplateRepository } from "./repositories/template.repository";
 
 @Injectable()
@@ -11,6 +18,9 @@ export class TemplateService {
   constructor(
     private readonly logger: AppLogger,
     private readonly templateRepo: TemplateRepository,
+    private readonly storageService: StorageService,
+    private readonly databaseRepo: DatabaseRepository,
+    private readonly propertyRepo: PropertyRepository,
   ) {
     this.logger.setContext(TemplateService.name);
   }
@@ -18,13 +28,13 @@ export class TemplateService {
   async create(databaseId: string, dto: CreateTemplateDto, userId: string): Promise<TemplateResponseDto> {
     this.logger.debug("Creating template", { databaseId });
 
-    const database = await this.templateRepo.findDatabaseByOwner(databaseId, userId);
+    const database = await this.databaseRepo.findDatabaseByOwner(databaseId, userId);
 
     if (!database) {
       throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
     }
 
-    const properties = await this.templateRepo.findPropertiesByDatabase(databaseId);
+    const properties = await this.propertyRepo.findManyByDatabase(databaseId);
 
     return await this.templateRepo.transaction(async (transaction) => {
       const existingCount = await this.templateRepo.count(databaseId, transaction);
@@ -193,5 +203,12 @@ export class TemplateService {
       this.logger.log("Template reset", { id });
       return new TemplateResponseDto(updated as unknown as Partial<TemplateResponseDto>);
     });
+  }
+
+  async uploadImage(id: string, file: Express.Multer.File): Promise<ContentImageResponseDto> {
+    this.logger.debug("Uploading template content image", { id });
+    const url = await this.storageService.saveContentImage(file);
+    this.logger.log("Template content image uploaded", { id });
+    return new ContentImageResponseDto({ url });
   }
 }

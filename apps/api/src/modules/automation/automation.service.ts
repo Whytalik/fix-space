@@ -5,24 +5,27 @@ import { NotificationType, Prisma } from "@fixspace/database";
 import {
   AutomationAction,
   AutomationActionType,
+  AutomationFilterDto,
   AutomationLogResponseDto,
   AutomationResponseDto,
   AutomationStatus,
   AutomationTrigger,
   AutomationWriteMode,
   CreateAutomationDto,
+  LinkRecordsAction,
   UpdateAutomationDto,
 } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
+import { DatabaseRepository } from "@/modules/database/repositories/database.repository";
 import { PropertyValueService } from "@/modules/property-value/property-value.service";
+import { RecordRepository } from "@/modules/record/repositories/record.repository";
 import { RecordService } from "@/modules/record/record.service";
-
 import { NotificationService } from "@/modules/notification/notification.service";
 
 import { AutomationEngine, RecordForAutomation } from "./automation.engine";
-import { AutomationScheduler, AutomationScheduledEvent } from "./automation.scheduler";
+import { AutomationScheduler, AutomationScheduledEvent, ScheduleConfig } from "./automation.scheduler";
 import { AutomationRepository } from "./repositories/automation.repository";
 
 export interface AutomationRecordCreatedEvent {
@@ -57,6 +60,8 @@ export class AutomationService {
     private readonly recordService: RecordService,
     private readonly scheduler: AutomationScheduler,
     private readonly notificationService: NotificationService,
+    private readonly databaseRepo: DatabaseRepository,
+    private readonly recordRepo: RecordRepository,
   ) {
     this.logger.setContext(AutomationService.name);
   }
@@ -64,7 +69,7 @@ export class AutomationService {
   async create(dto: CreateAutomationDto, userId: string): Promise<AutomationResponseDto> {
     this.logger.debug("Creating automation", { databaseId: dto.databaseId, name: dto.name });
 
-    const db = await this.automationRepo.findDatabaseByOwner(dto.databaseId, userId);
+    const db = await this.databaseRepo.findDatabaseByOwner(dto.databaseId, userId);
     if (!db) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
 
     const count = await this.automationRepo.countByDatabase(dto.databaseId);
@@ -81,21 +86,21 @@ export class AutomationService {
     });
 
     if (dto.trigger === AutomationTrigger.ON_SCHEDULE && isActive && dto.config) {
-      this.scheduler.registerJob(entity.id, dto.config as any);
+      this.scheduler.registerJob(entity.id, dto.config as unknown as ScheduleConfig);
     }
 
     this.logger.log("Automation created", { automationId: entity.id });
-    return new AutomationResponseDto(entity as any);
+    return new AutomationResponseDto(entity as unknown as Partial<AutomationResponseDto>);
   }
 
   async findAll(databaseId: string, userId: string): Promise<AutomationResponseDto[]> {
     this.logger.debug("Finding automations", { databaseId });
 
-    const db = await this.automationRepo.findDatabaseByOwner(databaseId, userId);
+    const db = await this.databaseRepo.findDatabaseByOwner(databaseId, userId);
     if (!db) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
 
     const entities = await this.automationRepo.findAllByDatabase(databaseId);
-    return entities.map((entity) => new AutomationResponseDto(entity as any));
+    return entities.map((entity) => new AutomationResponseDto(entity as unknown as Partial<AutomationResponseDto>));
   }
 
   async findOne(id: string, userId?: string): Promise<AutomationResponseDto> {
@@ -104,7 +109,7 @@ export class AutomationService {
     const entity = userId ? await this.automationRepo.findByOwner(id, userId) : await this.automationRepo.findById(id);
 
     if (!entity) throw new NotFoundException(t("errors.AUTOMATION_NOT_FOUND"));
-    return new AutomationResponseDto(entity as any);
+    return new AutomationResponseDto(entity as unknown as Partial<AutomationResponseDto>);
   }
 
   async update(id: string, dto: UpdateAutomationDto, userId: string): Promise<AutomationResponseDto> {
@@ -126,14 +131,14 @@ export class AutomationService {
     const isSchedule = (dto.trigger ?? exists.trigger) === AutomationTrigger.ON_SCHEDULE;
     const isActive = dto.active ?? exists.active;
     if (isSchedule && isActive) {
-      const config = (dto.config ?? exists.config) as any;
-      if (config) this.scheduler.registerJob(entity.id, config);
+      const configRaw = dto.config ?? exists.config;
+      if (configRaw) this.scheduler.registerJob(entity.id, configRaw as unknown as ScheduleConfig);
     } else {
       this.scheduler.removeJob(entity.id);
     }
 
     this.logger.log("Automation updated", { automationId: entity.id });
-    return new AutomationResponseDto(entity as any);
+    return new AutomationResponseDto(entity as unknown as Partial<AutomationResponseDto>);
   }
 
   async delete(id: string, userId: string): Promise<void> {
@@ -154,7 +159,7 @@ export class AutomationService {
     if (!exists) throw new NotFoundException(t("errors.AUTOMATION_NOT_FOUND"));
 
     const logs = await this.automationRepo.findLogsByAutomation(id);
-    return logs.map((log) => new AutomationLogResponseDto(log as any));
+    return logs.map((log) => new AutomationLogResponseDto(log as unknown as Partial<AutomationLogResponseDto>));
   }
 
   async testRun(id: string, recordId: string, userId: string): Promise<{ results: string[]; status: AutomationStatus }> {
@@ -163,7 +168,7 @@ export class AutomationService {
     const automation = await this.automationRepo.findByOwner(id, userId);
     if (!automation) throw new NotFoundException(t("errors.AUTOMATION_NOT_FOUND"));
 
-    const record = await this.automationRepo.findRecordWithValues(recordId);
+    const record = await this.recordRepo.findById(recordId);
     if (!record) throw new NotFoundException(t("errors.RECORD_NOT_FOUND"));
 
     const actions = (automation.actions as unknown as AutomationAction[]) || [];
@@ -195,7 +200,7 @@ export class AutomationService {
     if (event.skipAutomations) return;
     this.logger.debug("Handling fieldChanged event", { recordId: event.recordId, propertyId: event.propertyId });
 
-    const record = await this.automationRepo.findRecordWithValues(event.recordId);
+    const record = await this.recordRepo.findById(event.recordId);
     if (!record) return;
 
     const automations = await this.automationRepo.findAllByDatabase(event.databaseId);
@@ -222,7 +227,7 @@ export class AutomationService {
     const automation = await this.automationRepo.findById(automationId);
     if (!automation?.active) return;
 
-    const db = await this.automationRepo.findDatabaseWithOwner(automation.databaseId);
+    const db = await this.databaseRepo.findWithSpace(automation.databaseId);
     if (!db) {
       await this.automationRepo.createLog({
         automationId,
@@ -254,9 +259,9 @@ export class AutomationService {
       }
     } catch (err: unknown) {
       status = AutomationStatus.FAILURE;
-      const msg = err instanceof Error ? err.message : String(err);
-      results.push(`Error: ${msg}`);
-      this.logger.error("Scheduled automation action failed", { automationId, error: msg });
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      results.push(`Error: ${errorMessage}`);
+      this.logger.error("Scheduled automation action failed", { automationId, error: errorMessage });
     }
 
     await this.automationRepo.createLog({
@@ -299,9 +304,9 @@ export class AutomationService {
       }
     } catch (err: unknown) {
       status = AutomationStatus.FAILURE;
-      const msg = err instanceof Error ? err.message : String(err);
-      results.push(`Error: ${msg}`);
-      this.logger.error("Automation action failed", { automationId: automation.id, error: msg });
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      results.push(`Error: ${errorMessage}`);
+      this.logger.error("Automation action failed", { automationId: automation.id, error: errorMessage });
     }
 
     await this.automationRepo.createLog({
@@ -344,7 +349,7 @@ export class AutomationService {
   }
 
   private async getDbDisplayName(databaseId: string): Promise<string> {
-    const dbName = await this.automationRepo.findDatabaseName(databaseId);
+    const dbName = (await this.databaseRepo.findById(databaseId))?.name ?? null;
     return dbName ?? databaseId;
   }
 
@@ -375,7 +380,7 @@ export class AutomationService {
   }
 
   private async executeLinkRecords(
-    action: { propertyId: string; sourceDatabaseId: string; filters: any[]; writeMode: string },
+    action: { propertyId: string; sourceDatabaseId: string; filters: AutomationFilterDto[]; writeMode: string },
     record: RecordForAutomation,
     userId: string,
   ): Promise<ActionResult> {
@@ -386,7 +391,7 @@ export class AutomationService {
       return { skipped: true, message: `skipped: a referenced filter field is empty` };
     }
 
-    const candidates = await this.automationRepo.findAllRecordsWithValues(action.sourceDatabaseId);
+    const candidates = await this.recordRepo.findManyByDatabase(action.sourceDatabaseId);
     const matched = candidates.filter((candidate) => this.automationEngine.matchesFilters(candidate, filters, record));
     const matchedIds = matched.map((matchedRecord) => matchedRecord.id);
 
@@ -430,11 +435,12 @@ export class AutomationService {
       case AutomationActionType.CREATE_RECORD:
         return `would create record in database "${action.databaseId}"`;
       case AutomationActionType.LINK_RECORDS: {
-        const filters = (action as any).filters ?? [];
+        const linkAction = action as LinkRecordsAction;
+        const filters = linkAction.filters ?? [];
         if (this.automationEngine.shouldSkipFilters(filters, record)) {
           return `would skip: a referenced filter field is empty`;
         }
-        return `would search and link records from database "${(action as any).sourceDatabaseId}"`;
+        return `would search and link records from database "${linkAction.sourceDatabaseId}"`;
       }
       default:
         return `unknown action`;

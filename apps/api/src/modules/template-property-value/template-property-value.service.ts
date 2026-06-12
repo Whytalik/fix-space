@@ -4,6 +4,8 @@ import { CreateTemplatePropertyValueDto, TemplatePropertyValueResponseDto, Updat
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { PropertyTypeRegistry } from "@/modules/property/types";
+import { TemplateRepository } from "@/modules/template/repositories/template.repository";
+import { PropertyRepository } from "@/modules/property/repositories/property.repository";
 import { TemplatePropertyValueRepository } from "./repositories/template-property-value.repository";
 
 @Injectable()
@@ -12,6 +14,8 @@ export class TemplatePropertyValueService {
     private readonly logger: AppLogger,
     private readonly typeRegistry: PropertyTypeRegistry,
     private readonly templatePropertyValueRepo: TemplatePropertyValueRepository,
+    private readonly templateRepo: TemplateRepository,
+    private readonly propertyRepo: PropertyRepository,
   ) {
     this.logger.setContext(TemplatePropertyValueService.name);
   }
@@ -22,13 +26,13 @@ export class TemplatePropertyValueService {
       propertyId: createDto.propertyId,
     });
 
-    const template = await this.templatePropertyValueRepo.findTemplateByOwner(createDto.templateId, userId);
+    const template = await this.templateRepo.findByIdWithOwner(createDto.templateId, userId);
 
     if (!template) {
       throw new NotFoundException(`Template with id ${createDto.templateId} not found`);
     }
 
-    const property = await this.templatePropertyValueRepo.findPropertyById(createDto.propertyId);
+    const property = await this.propertyRepo.findById(createDto.propertyId);
 
     if (!property) {
       throw new NotFoundException(`Property with id ${createDto.propertyId} not found`);

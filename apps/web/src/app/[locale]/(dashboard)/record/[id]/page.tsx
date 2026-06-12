@@ -11,9 +11,14 @@ import { updateRecord } from "@/lib/api/record";
 import { RecordPropertyList } from "./_components/property-list";
 import { RecordTemplateMenu } from "./_components/record-template-menu";
 import { useTranslations } from "next-intl";
-import { FileText, Eye, EyeOff } from "lucide-react";
+import { FileText, PenLine } from "lucide-react";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { DatabaseProvider } from "@/context/database-context";
+import { ContentArea } from "./_components/content-area";
+import { useContentEditor } from "./_components/content-area/lib/use-content-editor";
+import { useRecordContentQuery } from "@/hooks/api/use-record-content-query";
+import { useRecordContentMutations } from "@/hooks/api/use-record-content-mutations";
+import { Link } from "@/i18n/navigation";
 
 export default function RecordPage() {
   const params = useParams<{ id: string }>();
@@ -21,13 +26,20 @@ export default function RecordPage() {
   const { data: record, isLoading: isRecordLoading } = useRecordQuery(id);
   const { setCurrentDatabaseId } = useAppContext();
   const queryClient = useQueryClient();
-  const tr = useTranslations("RecordPage");
-  const [showMetadata, setShowMetadata] = useState(true);
+  const t = useTranslations("RecordPage");
   const [titleValue, setTitleValue] = useState("");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   const { data: properties = [], isLoading: isPropertiesLoading } = usePropertiesQuery(record?.databaseId || "", {
     enabled: !!record?.databaseId,
+  });
+
+  const { data: serverContent, isLoading: isContentLoading } = useRecordContentQuery(id);
+  const { updateMutation: updateContentMutation } = useRecordContentMutations(id);
+  const contentEditor = useContentEditor({
+    initialContent: serverContent?.content,
+    isLoading: isContentLoading,
+    onSave: (content) => updateContentMutation.mutate({ content }),
   });
 
   useEffect(() => {
@@ -49,7 +61,7 @@ export default function RecordPage() {
   function handleTitleSave() {
     const trimmed = titleValue.trim();
     if (trimmed !== (record?.name ?? "")) {
-      titleMutation.mutate(trimmed || tr("untitled"));
+      titleMutation.mutate(trimmed || t("untitled"));
     }
   }
 
@@ -68,7 +80,7 @@ export default function RecordPage() {
             type="text"
             className="type-page-title bg-transparent border-0 outline-none p-0 min-w-0 w-full placeholder:text-ink-muted"
             value={titleValue}
-            placeholder={tr("untitled")}
+            placeholder={t("untitled")}
             onChange={(e) => setTitleValue(e.target.value)}
             onFocus={() => setIsEditingTitle(true)}
             onBlur={() => {
@@ -81,19 +93,12 @@ export default function RecordPage() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowMetadata(!showMetadata)}
-            className="p-2 rounded-lg text-ink-secondary hover:bg-surface-hover transition-colors"
-            title={showMetadata ? tr("hideMetadata") : tr("showMetadata")}
-          >
-            {showMetadata ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
-          {record && <RecordTemplateMenu recordId={record.id} databaseId={record.databaseId} />}
+          {record && <RecordTemplateMenu recordId={record.id} databaseId={record.databaseId} currentContent={contentEditor.content} />}
         </div>
       </div>
 
-      <div className={`grid gap-8 mb-8 ${showMetadata ? "grid-cols-1 lg:grid-cols-4" : "grid-cols-1"}`}>
-        <div className={`${showMetadata ? "lg:col-span-3" : ""} space-y-8`}>
+      <div className="grid gap-8 mb-8 grid-cols-1 lg:grid-cols-4">
+        <div className="lg:col-span-3 space-y-8">
           <section>
             <div className="card p-4">
               <DatabaseProvider databaseId={record?.databaseId}>
@@ -103,32 +108,38 @@ export default function RecordPage() {
           </section>
         </div>
 
-        {showMetadata && (
-          <div className="space-y-8">
-            <section>
-              <div className="card p-6 space-y-5">
-                <div className="flex flex-col gap-1.5">
-                  <span className="type-nav-label text-ink-muted">{tr("created")}</span>
-                  <span className="text-sm text-ink-secondary font-mono">
-                    {record?.createdAt ? new Date(record.createdAt).toLocaleString() : "—"}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <span className="type-nav-label text-ink-muted">{tr("updated")}</span>
-                  <span className="text-sm text-ink-secondary font-mono">
-                    {record?.updatedAt ? new Date(record.updatedAt).toLocaleString() : "—"}
-                  </span>
-                </div>
+        <div className="space-y-8">
+          <section>
+            <div className="card p-6 space-y-5">
+              <div className="flex flex-col gap-1.5">
+                <span className="type-nav-label text-ink-muted">{t("created")}</span>
+                <span className="text-sm text-ink-secondary font-mono">
+                  {record?.createdAt ? new Date(record.createdAt).toLocaleString() : "—"}
+                </span>
               </div>
-            </section>
-          </div>
-        )}
+              <div className="flex flex-col gap-1.5">
+                <span className="type-nav-label text-ink-muted">{t("updated")}</span>
+                <span className="text-sm text-ink-secondary font-mono">
+                  {record?.updatedAt ? new Date(record.updatedAt).toLocaleString() : "—"}
+                </span>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
 
       <section>
-        <div className="card p-12 border-2 border-dashed border-stroke flex flex-col items-center justify-center text-ink-muted bg-canvas/50">
-          <p className="text-sm italic">{tr("contentPlaceholder")}</p>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="type-nav-label text-ink-muted">{t("content")}</h2>
+          <Link
+            href={`/record/${id}/editor`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-stroke text-ink-secondary hover:text-ink hover:bg-surface-hover transition-colors duration-150"
+          >
+            <PenLine size={13} />
+            {t("editLayout")}
+          </Link>
         </div>
+        <ContentArea editor={contentEditor} mode="view" />
       </section>
     </div>
   );

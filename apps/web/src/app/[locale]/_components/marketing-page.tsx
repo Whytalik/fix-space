@@ -12,11 +12,11 @@ import { LandingSection } from "./landing/landing-section";
 import { SolutionSection } from "./landing/solution-section";
 import { SpecializedSection } from "./landing/specialized-section";
 
-const TemplatesSection = dynamic(() => import("./landing/templates-section").then((mod) => mod.TemplatesSection));
-const HowItWorksSection = dynamic(() => import("./landing/how-it-works-section").then((mod) => mod.HowItWorksSection));
-const ImportSection = dynamic(() => import("./landing/import-section").then((mod) => mod.ImportSection));
-const FaqSection = dynamic(() => import("./landing/faq-section").then((mod) => mod.FaqSection));
-const CtaSection = dynamic(() => import("./landing/cta-section").then((mod) => mod.CtaSection));
+const TemplatesSection = dynamic(() => import("./landing/templates-section").then((module) => module.TemplatesSection));
+const HowItWorksSection = dynamic(() => import("./landing/how-it-works-section").then((module) => module.HowItWorksSection));
+const ImportSection = dynamic(() => import("./landing/import-section").then((module) => module.ImportSection));
+const FaqSection = dynamic(() => import("./landing/faq-section").then((module) => module.FaqSection));
+const CtaSection = dynamic(() => import("./landing/cta-section").then((module) => module.CtaSection));
 
 type MarketingPageProps = {
   locale: string;

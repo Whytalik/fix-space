@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, NotFoundException } from "@nestjs/common";
+import { ConflictException, NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -7,6 +7,7 @@ import { SettingsService } from "@/modules/settings/settings.service";
 import { PropertyTypeRegistry } from "@/modules/property/types";
 import { DatabaseService } from "../database.service";
 import { DatabaseRepository } from "../repositories/database.repository";
+import { SectionRepository } from "@/modules/space/repositories/section.repository";
 import { SpaceRepository } from "@/modules/space/repositories/space.repository";
 import { ViewRepository } from "@/modules/view/repositories/view.repository";
 
@@ -57,12 +58,15 @@ describe("DatabaseService", () => {
     findById: jest.fn(),
     findByIdForDuplicate: jest.fn(),
     findAllBySpace: jest.fn(),
-    findSectionInSpace: jest.fn(),
     findLastPosition: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
     transaction: jest.fn((callback) => callback(prisma)),
+  };
+
+  const mockSectionRepo = {
+    findInSpace: jest.fn(),
   };
 
   const mockSettingsService = {
@@ -85,6 +89,7 @@ describe("DatabaseService", () => {
         { provide: DatabaseRepository, useValue: mockDatabaseRepo },
         { provide: SpaceRepository, useValue: mockSpaceRepo },
         { provide: ViewRepository, useValue: mockViewRepo },
+        { provide: SectionRepository, useValue: mockSectionRepo },
         { provide: PropertyTypeRegistry, useValue: mockTypeRegistry },
         { provide: SettingsService, useValue: mockSettingsService },
         { provide: AppLogger, useValue: mockLogger },
@@ -180,7 +185,7 @@ describe("DatabaseService", () => {
         spaceId: "space-1",
         sectionId: null,
       });
-      mockDatabaseRepo.findSectionInSpace.mockResolvedValue(null);
+      mockSectionRepo.findInSpace.mockResolvedValue(null);
 
       await expect(service.update("db-1", { sectionId: "invalid-section" })).rejects.toThrow(NotFoundException);
     });
@@ -192,7 +197,7 @@ describe("DatabaseService", () => {
         spaceId: "space-1",
         sectionId: "sec-1",
       });
-      mockDatabaseRepo.findSectionInSpace.mockResolvedValue({ id: "sec-2", spaceId: "space-1" });
+      mockSectionRepo.findInSpace.mockResolvedValue({ id: "sec-2", spaceId: "space-1" });
       mockDatabaseRepo.update.mockResolvedValue({
         id: "db-1",
         name: "updated-db",
@@ -246,18 +251,6 @@ describe("DatabaseService", () => {
 
       expect(result).toBeDefined();
       expect(databaseRepo.delete).toHaveBeenCalledWith("db-1");
-    });
-
-    it("TC-DB-U-006: should throw BadRequestException when database is a preset", async () => {
-      mockDatabaseRepo.findById.mockResolvedValue({
-        id: "db-1",
-        name: "test-db",
-        spaceId: "space-1",
-        sectionId: null,
-        isPreset: true,
-      });
-
-      await expect(service.remove("db-1")).rejects.toThrow(BadRequestException);
     });
   });
 });

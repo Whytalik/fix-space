@@ -28,4 +28,5 @@ export { DEFAULT_RATING_PROPERTY } from "./property/types/rating.constants";
 export { DEFAULT_PROGRESS_PROPERTY } from "./property/types/progress.constants";
 export { DEFAULT_FORMULA_PROPERTY } from "./property/types/formula.constants";
 export { DEFAULT_SECTION_SETTINGS } from "./settings/types/section-settings.constants";
+export { DEFAULT_DATABASE_SETTINGS } from "./settings/types/database-settings.interface";
 export { PALETTE_COLORS, type PaletteColorName, PALETTE_COLOR_VALUES } from "./common/colors";

@@ -57,10 +57,10 @@ export function LanguageSwitcher({ variant }: { variant?: "dropdown" | "buttons"
         <DropdownMenu
           anchorEl={triggerRef.current}
           onClose={() => setIsOpen(false)}
-          items={routing.locales.map((loc) => ({
-            label: loc === "uk" ? "Українська" : "English",
-            icon: <span>{loc === "uk" ? "🇺🇦" : "🇺🇸"}</span>,
-            onClick: () => switchLocale(loc),
+          items={routing.locales.map((locale) => ({
+            label: locale === "uk" ? "Українська" : "English",
+            icon: <span>{locale === "uk" ? "🇺🇦" : "🇺🇸"}</span>,
+            onClick: () => switchLocale(locale),
           }))}
         />
       )}

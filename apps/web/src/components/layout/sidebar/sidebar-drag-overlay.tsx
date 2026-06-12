@@ -9,17 +9,17 @@ interface SidebarDragOverlayProps {
   activeDrag: { id: string; type: "section" | "database" } | null;
   sections: SectionResponseDto[];
   unsectioned: DatabaseResponseDto[];
-  collapsedSections: Set<string>;
+  expandedSections: Set<string>;
 }
 
-export function SidebarDragOverlay({ activeDrag, sections, unsectioned, collapsedSections }: SidebarDragOverlayProps) {
+export function SidebarDragOverlay({ activeDrag, sections, unsectioned, expandedSections }: SidebarDragOverlayProps) {
   return (
     <DragOverlay dropAnimation={null}>
       {activeDrag?.type === "section" &&
         (() => {
           const section = sections.find((sectionItem) => sectionItem.id === activeDrag.id);
           if (!section) return null;
-          const isCollapsed = collapsedSections.has(section.id);
+          const isExpanded = expandedSections.has(section.id);
           return (
             <div
               className="flex flex-col rounded-lg border border-stroke w-54 py-1"
@@ -30,7 +30,7 @@ export function SidebarDragOverlay({ activeDrag, sections, unsectioned, collapse
               <div className="flex items-center gap-1.5 px-2 py-1">
                 <ChevronRight
                   size={12}
-                  className={`text-ink-muted shrink-0 transition-transform duration-150 ${isCollapsed ? "" : "rotate-90"}`}
+                  className={`text-ink-muted shrink-0 transition-transform duration-150 ${isExpanded ? "rotate-90" : ""}`}
                 />
                 {section.icon && (
                   <span className="shrink-0 text-ink-secondary flex items-center">
@@ -41,7 +41,7 @@ export function SidebarDragOverlay({ activeDrag, sections, unsectioned, collapse
                   {section.name}
                 </span>
               </div>
-              {!isCollapsed && (section.databases ?? []).length > 0 && (
+              {isExpanded && (section.databases ?? []).length > 0 && (
                 <div
                   className={`ml-5 border-l py-0.5 ${section.color ? "" : "border-stroke"}`}
                   style={section.color ? { borderColor: `color-mix(in srgb, ${section.color} 50%, transparent)` } : undefined}

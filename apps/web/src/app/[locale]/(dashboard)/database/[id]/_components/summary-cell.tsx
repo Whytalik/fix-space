@@ -114,7 +114,7 @@ export function SummaryCell({ propertyId, type, isPrimary = false, className, re
           <div
             ref={menuRef}
             style={menuStyle}
-            className="w-48 bg-canvas border border-stroke rounded-lg shadow-elevated py-1 max-h-64 overflow-y-auto scrollbar"
+            className="w-48 bg-canvas border border-stroke rounded-lg shadow-elevated py-1 max-h-64 overflow-y-auto no-scrollbar"
           >
             <button
               onClick={() => {

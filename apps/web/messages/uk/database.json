@@ -217,6 +217,8 @@
   },
   "TemplateEdit": {
     "title": "Шаблони",
+    "icon": "Іконка",
+    "chooseIcon": "Оберіть іконку...",
     "addTemplate": "Додати шаблон",
     "noTemplates": "Шаблонів ще не створено.",
     "createFirst": "Створити перший шаблон",
@@ -244,7 +246,9 @@
     "setDefaultHint": "Цей шаблон буде автоматично застосовуватися до всіх нових записів.",
     "cancel": "Скасувати",
     "create": "Створити",
-    "save": "Зберегти"
+    "save": "Зберегти",
+    "template": "Шаблон",
+    "content": "Вміст"
   },
   "PropertyForm": {
     "newProperty": "Нова властивість",
@@ -273,11 +277,12 @@
     "icon": "Іконка",
     "chooseIcon": "Вибрати іконку…",
     "title": "Назва",
-    "placeholderTitle": "напр. Журнал угод",
+    "nameLabel": "Назва",
+    "placeholderTitle": "напр. Торговий щоденник",
     "internalName": "Внутрішня назва:",
     "cancel": "Скасувати",
     "creating": "Створення…",
-    "createDatabase": "Створити базу"
+    "createDatabase": "Створити базу даних"
   },
   "DatabasePage": {
     "retry": "Повторити"
@@ -287,13 +292,15 @@
     "addItem": "Додати запис",
     "preset": "Пресет",
     "import": "Імпорт CSV",
-    "export": "Експорт CSV"
+    "export": "Експорт CSV",
+    "automations": "Автоматизації"
   },
   "TemplatePickerModal": {
     "chooseTemplate": "Вибрати шаблон",
     "chooseTemplateDesc": "Виберіть шаблон для застосування до нового запису.",
     "noTemplate": "Без шаблону",
-    "default": "За замовчуванням"
+    "default": "За замовчуванням",
+    "applyTemplate": "Застосувати шаблон"
   },
   "TemplateEditModal": {
     "templateName": "Назва шаблону",

@@ -3,4 +3,6 @@ export enum SettingsCategory {
   DATABASE = "database",
   SECTION = "section",
   RECORD = "record",
+  TEMPLATE = "template",
+  VIEW = "view",
 }

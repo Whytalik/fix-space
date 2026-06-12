@@ -10,6 +10,7 @@ import { useUIContext } from "@/context/ui-context";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { ViewSettingsModal } from "./view-settings-modal";
 import { Button } from "@/components/ui/primitives/actions/button";
+import { useClickOutside } from "@/hooks/ui/use-click-outside";
 
 export function DatabaseViewTabs() {
   const t = useTranslations("DatabaseViewTabs");
@@ -39,12 +40,18 @@ export function DatabaseViewTabs() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [inputValue, setInputValue] = useState(search);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useClickOutside(searchContainerRef, () => {
+    if (searchOpen) {
+      setSearchOpen(false);
+    }
+  });
 
   useEffect(() => {
     if (search === "") {
       setInputValue("");
-      setSearchOpen(false);
     }
   }, [search]);
 
@@ -60,6 +67,15 @@ export function DatabaseViewTabs() {
     debounceRef.current = setTimeout(() => {
       setSearch(value);
     }, 300);
+  }
+
+  function handleSearchKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") {
+      setSearchOpen(false);
+    }
+    if (e.key === "Escape") {
+      clearSearch();
+    }
   }
 
   function clearSearch() {
@@ -259,13 +275,14 @@ export function DatabaseViewTabs() {
         </div>
         <div className="relative flex items-center ml-auto mr-2">
           {searchOpen ? (
-            <div className="flex items-center gap-1 border border-stroke rounded-lg px-2 py-1 bg-canvas">
+            <div ref={searchContainerRef} className="flex items-center gap-1 border border-stroke rounded-lg px-2 py-1 bg-canvas">
               <Search size={13} className="text-ink-muted shrink-0" />
               <input
                 ref={searchInputRef}
                 type="text"
                 value={inputValue}
                 onChange={(e) => handleSearchChange(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
                 placeholder={tToolbar("searchPlaceholder")}
                 className="text-xs text-ink bg-transparent outline-none w-40 placeholder:text-ink-muted"
               />
@@ -276,7 +293,7 @@ export function DatabaseViewTabs() {
           ) : (
             <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)}>
               <Search size={13} />
-              {tToolbar("search")}
+              {search ? search : tToolbar("search")}
             </Button>
           )}
         </div>

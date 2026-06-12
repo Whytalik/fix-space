@@ -1,5 +1,5 @@
 import { PropertyType } from "@fixspace/domain";
-import { colors, DATE_CONFIG, PAIR_CATEGORIES, FORMULA_TEXT } from "../constants";
+import { colors, DATE_CONFIG, PAIR_CATEGORIES } from "../constants";
 import type { InitPropertyDef } from "../types";
 
 export const dailyRoutineProperties: InitPropertyDef[] = [
@@ -99,7 +99,11 @@ export const dailyRoutineProperties: InitPropertyDef[] = [
     name: "Narrative Accuracy",
     type: PropertyType.FORMULA,
     position: 7,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "IF({{Narrative}} == {{Narrative Outcome}}, 'Correct', 'Incorrect')",
+      resultType: "TEXT",
+    },
     hint: "Автоматична оцінка якості вашого аналізу.",
     group: "Analysis",
   },

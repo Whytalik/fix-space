@@ -15,7 +15,7 @@ import { useRouter } from "@/i18n/navigation";
 import { FileText, Copy, Trash2, ChevronDown } from "lucide-react";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { SummaryCell } from "./summary-cell";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/utils/ui/cn";
 
 interface DatabaseTableProps {
@@ -26,7 +26,13 @@ interface DatabaseTableProps {
 export function DatabaseTable({ properties, records }: DatabaseTableProps) {
   const t = useTranslations("DatabaseTable");
   const router = useRouter();
-  const { relatedRecordsMap, invalidateRecords, activeView, wrapCells, groupedRecords, groupColors, hiddenGroups } = useDatabaseContext();
+  const { relatedRecordsMap, invalidateRecords, activeView, updateActiveView, wrapCells, groupedRecords, groupColors, hiddenGroups } =
+    useDatabaseContext();
+
+  const activeViewRef = useRef(activeView);
+  useEffect(() => {
+    activeViewRef.current = activeView;
+  }, [activeView]);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -37,9 +43,64 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
   const hiddenColumns = useMemo(() => new Set(activeView?.hiddenColumns || []), [activeView]);
   const columnWidths = useMemo(() => activeView?.columnWidths || {}, [activeView]);
 
+  const [localWidths, setLocalWidths] = useState<Record<string, number>>({});
+  const resizingStateRef = useRef<{ propId: string; startX: number; startWidth: number; minWidth: number } | null>(null);
+  const currentResizedWidthRef = useRef<number>(0);
+
   const visibleProperties = useMemo(() => {
     return [...properties].filter((p) => !hiddenColumns.has(p.id)).sort((a, b) => a.position - b.position);
   }, [properties, hiddenColumns]);
+
+  const getDefaultWidth = useCallback((prop: PropertyResponseDto) => {
+    let width = 24 + 16 + 8 + prop.name.length * 8 + 16;
+    if (prop.hint) width += 24;
+    return Math.max(120, width);
+  }, []);
+
+  const getPropWidth = useCallback(
+    (prop: PropertyResponseDto) => {
+      const defaultWidth = getDefaultWidth(prop);
+      if (localWidths[prop.id]) return Math.max(defaultWidth, localWidths[prop.id]!);
+      if (columnWidths && columnWidths[prop.id]) return Math.max(defaultWidth, columnWidths[prop.id]!);
+      return defaultWidth;
+    },
+    [localWidths, columnWidths, getDefaultWidth],
+  );
+
+  const handleResizeStart = (e: React.MouseEvent, prop: PropertyResponseDto, currentWidth: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const minWidth = getDefaultWidth(prop);
+    resizingStateRef.current = { propId: prop.id, startX: e.clientX, startWidth: currentWidth, minWidth };
+    currentResizedWidthRef.current = currentWidth;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizingStateRef.current) return;
+      const { propId, startX, startWidth, minWidth } = resizingStateRef.current;
+      const deltaX = e.clientX - startX;
+      const newWidth = Math.max(minWidth, startWidth + deltaX);
+      currentResizedWidthRef.current = newWidth;
+      setLocalWidths((prev) => ({ ...prev, [propId]: newWidth }));
+    };
+
+    const handleMouseUp = () => {
+      if (!resizingStateRef.current) return;
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+
+      const propId = resizingStateRef.current.propId;
+      const finalWidth = currentResizedWidthRef.current;
+      resizingStateRef.current = null;
+
+      if (finalWidth > 0 && activeViewRef.current) {
+        const newColumnWidths = { ...(activeViewRef.current.columnWidths || {}), [propId]: finalWidth };
+        updateActiveView({ columnWidths: newColumnWidths }).catch(console.error);
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
 
   const allSelected = records.length > 0 && records.every((r) => selectedIds.has(r.id));
   const someSelected = selectedIds.size > 0;
@@ -122,7 +183,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
             <td
               key={prop.id}
               className={cn(
-                "px-3 py-2 align-middle border-b border-stroke-subtle last:border-r-0",
+                "px-3 py-2 align-middle border-b border-stroke-subtle last:border-r-0 overflow-hidden",
                 index > 0 && "border-r border-stroke-subtle",
                 index === 0 &&
                   "sticky left-0 z-20 bg-canvas group-hover:bg-hover transition-colors duration-150 shadow-[inset_-1px_0_0_0_var(--color-stroke-subtle)] bg-opacity-100 group-hover:bg-opacity-100",
@@ -131,9 +192,9 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
             >
               <div
                 className={cn(
-                  "flex items-center gap-2",
+                  "flex items-center gap-2 min-w-0",
                   isPrimary && "font-semibold text-ink",
-                  wrapCells ? "break-words whitespace-normal" : "truncate whitespace-nowrap",
+                  wrapCells ? "flex-wrap whitespace-normal" : "whitespace-nowrap",
                 )}
               >
                 {isPrimary && (
@@ -146,7 +207,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                   type={prop.type}
                   config={prop.config}
                   relatedRecords={relatedDbId ? relatedRecordsMap[relatedDbId] : undefined}
-                  className={wrapCells ? "break-words whitespace-normal" : "truncate"}
+                  className={cn("min-w-0 flex-1", wrapCells ? "break-words" : "truncate")}
                 />
               </div>
             </td>
@@ -160,8 +221,8 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
     return <div className="flex items-center justify-center h-40 text-ink-secondary text-sm">{t("noProperties")}</div>;
   }
 
-  const visibleGroups = groupedRecords?.filter((g) => !hiddenGroups.has(g.key)) ?? null;
-  const totalVisibleRecords = visibleGroups ? visibleGroups.reduce((sum, g) => sum + g.records.length, 0) : records.length;
+  const visibleGroups = groupedRecords?.filter((group) => !hiddenGroups.has(group.key)) ?? null;
+  const totalVisibleRecords = visibleGroups ? visibleGroups.reduce((sum, group) => sum + group.records.length, 0) : records.length;
 
   return (
     <div className="flex flex-col gap-3">
@@ -197,8 +258,11 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
           <table className="w-full text-sm border-separate border-spacing-0 table-fixed">
             <colgroup>
               <col className="w-10" />
-              {visibleProperties.map((prop) => (
-                <col key={prop.id} style={{ width: columnWidths[prop.id] ? `${columnWidths[prop.id]}px` : "200px" }} />
+              {visibleProperties.map((prop, idx) => (
+                <col
+                  key={prop.id}
+                  style={idx === visibleProperties.length - 1 ? { width: "auto" } : { width: `${getPropWidth(prop)}px` }}
+                />
               ))}
             </colgroup>
             <thead>
@@ -210,7 +274,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                   <th
                     key={prop.id}
                     className={cn(
-                      "px-3 py-2.5 text-left whitespace-nowrap border-b border-stroke last:border-r-0 font-medium transition-colors duration-150",
+                      "px-3 py-2.5 text-left whitespace-nowrap border-b border-stroke last:border-r-0 font-medium transition-colors duration-150 relative group/th",
                       index > 0 && "border-r border-stroke",
                       index === 0 && "sticky left-0 z-30 bg-surface shadow-[inset_-1px_0_0_0_var(--color-stroke)] bg-opacity-100",
                     )}
@@ -222,6 +286,13 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                       <span className="truncate">{prop.name}</span>
                       {prop.hint && <PropertyHint hint={prop.hint} />}
                     </span>
+                    <div
+                      className={cn(
+                        "absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-accent/40 active:bg-accent z-10 transition-colors duration-150",
+                        resizingStateRef.current?.propId === prop.id ? "bg-accent opacity-100" : "opacity-0 group-hover/th:opacity-100",
+                      )}
+                      onMouseDown={(e) => handleResizeStart(e, prop, getPropWidth(prop))}
+                    />
                   </th>
                 ))}
               </tr>

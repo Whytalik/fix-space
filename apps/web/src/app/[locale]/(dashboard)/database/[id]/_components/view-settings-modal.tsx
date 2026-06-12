@@ -99,32 +99,12 @@ export function ViewSettingsModal({ isOpen, onClose }: ViewSettingsModalProps) {
               <X size={18} />
             </Button>
           </div>
-          <div className="flex-1 overflow-y-auto px-8 py-6 scrollbar">
+          <div className="flex-1 overflow-y-auto px-8 py-6 no-scrollbar">
             {activeTab === "general" && (
               <div className="flex flex-col gap-6">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-ink">{t("name")}</label>
-                  <input
-                    type="text"
-                    value={viewName}
-                    onChange={(e) => setViewName(e.target.value)}
-                    onBlur={() => {
-                      const trimmed = viewName.trim();
-                      if (trimmed && trimmed !== activeView?.name) handleUpdateView({ name: trimmed });
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                      if (e.key === "Escape") setViewName(activeView?.name ?? "");
-                    }}
-                    maxLength={255}
-                    placeholder={t("viewNamePlaceholder")}
-                    className="rounded-lg border border-stroke bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-muted outline-none focus:border-accent transition-colors duration-150"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-ink">{t("viewIcon")}</label>
-                  <span className="text-xs text-ink-muted">{t("viewIconDesc")}</span>
-                  <div>
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0">
+                    <label className="block mb-1.5 text-xs font-semibold text-ink-muted uppercase tracking-wider">{t("viewIcon")}</label>
                     <button
                       ref={iconButtonRef}
                       type="button"
@@ -132,10 +112,7 @@ export function ViewSettingsModal({ isOpen, onClose }: ViewSettingsModalProps) {
                       className="flex items-center gap-2.5 rounded-lg border border-stroke bg-surface px-3 py-2 text-sm text-ink hover:border-accent transition-colors duration-150"
                     >
                       {activeView?.icon ? (
-                        <span className="flex items-center gap-2">
-                          <IconDisplay value={activeView.icon} size={16} />
-                          <span className="text-xs text-ink-secondary">{activeView.icon.replace(/^(icon|trading):/, "")}</span>
-                        </span>
+                        <IconDisplay value={activeView.icon} size={18} />
                       ) : (
                         <span className="text-ink-muted">{t("chooseIcon")}</span>
                       )}
@@ -151,6 +128,25 @@ export function ViewSettingsModal({ isOpen, onClose }: ViewSettingsModalProps) {
                         anchorEl={iconButtonRef.current}
                       />
                     )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <label className="block mb-1.5 text-xs font-semibold text-ink-muted uppercase tracking-wider">{t("name")}</label>
+                    <input
+                      type="text"
+                      value={viewName}
+                      onChange={(e) => setViewName(e.target.value)}
+                      onBlur={() => {
+                        const trimmed = viewName.trim();
+                        if (trimmed && trimmed !== activeView?.name) handleUpdateView({ name: trimmed });
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                        if (e.key === "Escape") setViewName(activeView?.name ?? "");
+                      }}
+                      maxLength={255}
+                      placeholder={t("viewNamePlaceholder")}
+                      className="w-full rounded-lg border border-stroke bg-surface px-3 py-2 text-sm text-ink placeholder:text-ink-muted outline-none focus:border-accent transition-colors duration-150"
+                    />
                   </div>
                 </div>
               </div>

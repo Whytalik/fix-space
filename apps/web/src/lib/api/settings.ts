@@ -1,4 +1,12 @@
-import type { DatabaseSettings, RecordSettings, SectionSettings, SpaceSettings, UserSettings, ViewSettings } from "@fixspace/domain";
+import type {
+  DatabaseSettings,
+  RecordSettings,
+  SectionSettings,
+  SpaceSettings,
+  TemplateSettings,
+  UserSettings,
+  ViewSettings,
+} from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getUserSettings() {
@@ -27,6 +35,14 @@ export function updateSpaceSettings(data: Partial<SpaceSettings>) {
 
 export function updateDatabaseSettings(data: Partial<DatabaseSettings>) {
   return apiFetch<DatabaseSettings>("/settings/database", { method: "PATCH", body: data });
+}
+
+export function getTemplateSettings() {
+  return apiFetch<TemplateSettings>("/settings/template");
+}
+
+export function updateTemplateSettings(data: Partial<TemplateSettings>) {
+  return apiFetch<TemplateSettings>("/settings/template", { method: "PATCH", body: data });
 }
 
 export function updateSectionSettings(data: Partial<SectionSettings>) {

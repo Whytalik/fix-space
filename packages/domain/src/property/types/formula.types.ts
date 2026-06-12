@@ -30,24 +30,13 @@ export class FormulaPropertyConfig {
   @IsEnum(FormulaPresetName, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   presetName?: FormulaPresetName;
 
-  /**
-   * The compiled string expression to be evaluated by the backend.
-   * E.g. "SUM(MAP(field_123, 'price'))"
-   */
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
   expression: string;
 
-  /**
-   * The expected output type of the formula.
-   */
   @IsEnum(PropertyType, { message: i18nValidationMessage<I18nTranslations>("validation.IS_ENUM") })
   resultType: PropertyType;
 
-  /**
-   * Used to store raw dropdown selections from the UI builder.
-   * The backend does not use this for evaluation; it's purely for reconstructing the UI state.
-   */
   @IsOptional()
   @IsObject({ message: i18nValidationMessage<I18nTranslations>("validation.IS_OBJECT") })
   uiState?: Record<string, unknown>;

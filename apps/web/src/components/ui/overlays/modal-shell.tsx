@@ -6,7 +6,7 @@ import { type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 const maxWidths = {
-  sm: "max-w-[420px]",
+  sm: "max-w-[480px]",
   md: "max-w-[520px]",
   lg: "max-w-[640px]",
   xl: "max-w-[860px]",

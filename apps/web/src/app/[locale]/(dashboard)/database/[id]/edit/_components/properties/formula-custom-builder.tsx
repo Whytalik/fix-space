@@ -27,21 +27,21 @@ export function FormulaCustomBuilder({ config, properties, onPatch }: FormulaCus
   }
 
   function buildExpression(newUiState: Record<string, unknown>) {
-    const m = (newUiState.builderMode as string) ?? "calculate";
+    const builderMode = (newUiState.builderMode as string) ?? "calculate";
     let expression = "";
     let resultType: PropertyType = PropertyType.NUMBER;
 
-    if (m === "calculate") {
+    if (builderMode === "calculate") {
       const leftType = (newUiState.leftType as string) ?? "field";
       const rightType = (newUiState.rightType as string) ?? "field";
-      const op = (newUiState.op as string) ?? "+";
+      const operator = (newUiState.op as string) ?? "+";
 
       const left = leftType === "field" ? toFieldKey((newUiState.leftField as string) ?? "") : ((newUiState.leftNumber as string) ?? "0");
 
       const right =
         rightType === "field" ? toFieldKey((newUiState.rightField as string) ?? "") : ((newUiState.rightNumber as string) ?? "0");
 
-      expression = `${left} ${op} ${right}`;
+      expression = `${left} ${operator} ${right}`;
       resultType = PropertyType.NUMBER;
     } else {
       const condField = toFieldKey((newUiState.condField as string) ?? "");

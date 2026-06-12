@@ -12,6 +12,9 @@ export function ConfirmShell() {
     <ConfirmDialog
       title={confirmState.title}
       description={confirmState.message}
+      confirmLabel={confirmState.confirmLabel}
+      cancelLabel={confirmState.cancelLabel}
+      variant={confirmState.variant || "danger"}
       onConfirm={() => {
         confirmState.onConfirm();
         clearConfirm();
@@ -20,7 +23,6 @@ export function ConfirmShell() {
         confirmState.onCancel?.();
         clearConfirm();
       }}
-      variant="danger"
     />
   );
 }

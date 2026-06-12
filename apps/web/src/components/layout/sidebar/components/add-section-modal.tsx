@@ -16,7 +16,7 @@ export function AddSectionModal({ onClose }: AddSectionModalProps) {
   const t = useTranslations("AddSection");
   const { space, updateSpaceInList } = useAppContext();
 
-  const { data: settings = DEFAULT_SECTION_SETTINGS } = useSectionSettingsQuery();
+  const { data: settings, isLoading } = useSectionSettingsQuery();
 
   const { mutate: createSection, isPending: isCreating } = useMutation({
     mutationFn: async (values: { name: string; icon: string; color: string }) => {
@@ -42,12 +42,16 @@ export function AddSectionModal({ onClose }: AddSectionModalProps) {
     },
   });
 
+  if (isLoading) return null;
+
+  const actualSettings = settings ?? DEFAULT_SECTION_SETTINGS;
+
   return (
     <NameIconColorModal
       title={t("title")}
       placeholder={t("placeholder")}
       submitLabel={isCreating ? t("creating") : t("add")}
-      initialValues={{ icon: settings.defaultSectionIcon, color: settings.defaultSectionColor }}
+      initialValues={{ icon: actualSettings.defaultSectionIcon, color: actualSettings.defaultSectionColor }}
       isSubmitting={isCreating}
       onSubmit={(values) => createSection(values)}
       onClose={onClose}

@@ -14,9 +14,9 @@ export function convertCsvValue(raw: string, type: PropertyType): ConvertResult 
       return { value: trimmed, valid: true };
 
     case PropertyType.NUMBER: {
-      const num = Number(trimmed.replace(",", "."));
-      if (isNaN(num)) return { value: null, valid: false, reason: `"${trimmed}" is not a number` };
-      return { value: num, valid: true };
+      const parsed = Number(trimmed.replace(",", "."));
+      if (isNaN(parsed)) return { value: null, valid: false, reason: `"${trimmed}" is not a number` };
+      return { value: parsed, valid: true };
     }
 
     case PropertyType.CHECKBOX: {
@@ -33,21 +33,21 @@ export function convertCsvValue(raw: string, type: PropertyType): ConvertResult 
     }
 
     case PropertyType.DURATION: {
-      const num = Number(trimmed);
-      if (isNaN(num) || num < 0) return { value: null, valid: false, reason: `"${trimmed}" is not a valid duration` };
-      return { value: Math.floor(num), valid: true };
+      const parsed = Number(trimmed);
+      if (isNaN(parsed) || parsed < 0) return { value: null, valid: false, reason: `"${trimmed}" is not a valid duration` };
+      return { value: Math.floor(parsed), valid: true };
     }
 
     case PropertyType.RATING: {
-      const num = parseInt(trimmed, 10);
-      if (isNaN(num) || num < 0 || num > 5) return { value: null, valid: false, reason: `"${trimmed}" must be 0–5` };
-      return { value: num, valid: true };
+      const parsed = parseInt(trimmed, 10);
+      if (isNaN(parsed) || parsed < 0 || parsed > 5) return { value: null, valid: false, reason: `"${trimmed}" must be 0–5` };
+      return { value: parsed, valid: true };
     }
 
     case PropertyType.PROGRESS: {
-      const num = parseInt(trimmed, 10);
-      if (isNaN(num) || num < 0 || num > 100) return { value: null, valid: false, reason: `"${trimmed}" must be 0–100` };
-      return { value: num, valid: true };
+      const parsed = parseInt(trimmed, 10);
+      if (isNaN(parsed) || parsed < 0 || parsed > 100) return { value: null, valid: false, reason: `"${trimmed}" must be 0–100` };
+      return { value: parsed, valid: true };
     }
 
     case PropertyType.SELECT:

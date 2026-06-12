@@ -9,12 +9,12 @@ interface TimePickerProps {
 export function TimePicker({ value, onChange }: TimePickerProps) {
   const [hours, minutes] = value.split(":");
 
-  const handleHoursChange = (h: number) => {
-    onChange(`${String(h).padStart(2, "0")}:${minutes}`);
+  const handleHoursChange = (newHours: number) => {
+    onChange(`${String(newHours).padStart(2, "0")}:${minutes}`);
   };
 
-  const handleMinutesChange = (m: number) => {
-    onChange(`${hours}:${String(m).padStart(2, "0")}`);
+  const handleMinutesChange = (newMinutes: number) => {
+    onChange(`${hours}:${String(newMinutes).padStart(2, "0")}`);
   };
 
   return (

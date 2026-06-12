@@ -23,11 +23,11 @@ import { useModal } from "@/hooks/ui/use-modal";
 interface SectionItemProps {
   section: SectionResponseDto;
   collapsed?: boolean;
-  isCollapsed: boolean;
+  isExpanded: boolean;
   onToggle: () => void;
 }
 
-export function SectionItem({ section, collapsed, isCollapsed, onToggle }: SectionItemProps) {
+export function SectionItem({ section, collapsed, isExpanded, onToggle }: SectionItemProps) {
   const t = useTranslations("SectionItem");
   const { space, updateSpaceInList } = useAppContext();
   const { showToast } = useUIContext();
@@ -117,7 +117,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
         >
           <ChevronRight
             size={12}
-            className={`text-ink-muted shrink-0 ${isMounted ? "transition-transform duration-150" : ""} ${isCollapsed ? "" : "rotate-90"}`}
+            className={`text-ink-muted shrink-0 ${isMounted ? "transition-transform duration-150" : ""} ${isExpanded ? "rotate-90" : ""}`}
           />
           {section.icon && (
             <span className="shrink-0 text-ink-secondary flex items-center">
@@ -173,7 +173,7 @@ export function SectionItem({ section, collapsed, isCollapsed, onToggle }: Secti
         />
       )}
 
-      {!isCollapsed && space && (
+      {isExpanded && space && (
         <div
           className={`ml-5 border-l py-0.5 ${section.color ? "" : "border-stroke"}`}
           style={section.color ? { borderColor: `color-mix(in srgb, ${section.color} 50%, transparent)` } : undefined}

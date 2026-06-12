@@ -20,6 +20,7 @@
     "appearance": "Appearance",
     "space": "Space",
     "database": "Database",
+    "template": "Template",
     "section": "Section",
     "record": "Record",
     "view": "View",
@@ -74,6 +75,13 @@
     "maxSpacesReached": "Maximum {max} spaces per account"
   },
   "DatabaseSettingsComp": {
+    "settingsSaved": "Settings saved.",
+    "defaultIcon": "Default icon",
+    "chooseIcon": "Choose an icon…",
+    "saving": "Saving…",
+    "saveChanges": "Save changes"
+  },
+  "TemplateSettingsComp": {
     "settingsSaved": "Settings saved.",
     "defaultIcon": "Default icon",
     "chooseIcon": "Choose an icon…",

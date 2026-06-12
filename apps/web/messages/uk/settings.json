@@ -20,6 +20,7 @@
     "appearance": "Зовнішній вигляд",
     "space": "Простір",
     "database": "База даних",
+    "template": "Шаблон",
     "section": "Секція",
     "record": "Запис",
     "view": "Подання",
@@ -126,6 +127,13 @@
     "saveChanges": "Зберегти зміни"
   },
   "DatabaseSettingsComp": {
+    "settingsSaved": "Налаштування збережено.",
+    "defaultIcon": "Іконка за замовчуванням",
+    "chooseIcon": "Вибрати іконку…",
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни"
+  },
+  "TemplateSettingsComp": {
     "settingsSaved": "Налаштування збережено.",
     "defaultIcon": "Іконка за замовчуванням",
     "chooseIcon": "Вибрати іконку…",

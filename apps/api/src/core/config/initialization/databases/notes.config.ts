@@ -1,5 +1,5 @@
 import { PropertyType } from "@fixspace/domain";
-import { colors, DATE_CONFIG, FORMULA_TEXT } from "../constants";
+import { colors, DATE_CONFIG } from "../constants";
 import type { InitPropertyDef } from "../types";
 
 export const notesProperties: InitPropertyDef[] = [
@@ -129,7 +129,11 @@ export const notesProperties: InitPropertyDef[] = [
     name: "Last Used",
     type: PropertyType.FORMULA,
     position: 7,
-    config: FORMULA_TEXT,
+    config: {
+      type: "CUSTOM",
+      expression: "MAX(MAP({{Trading Journal}}, '{{trading-journal.Entry Date}}'))",
+      resultType: "DATE",
+    },
     hint: "Дата, коли ви востаннє посилалися на цей інсайт в угодах.",
     group: "General",
   },

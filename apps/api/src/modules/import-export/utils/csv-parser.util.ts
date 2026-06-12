@@ -35,7 +35,6 @@ export function parseCsvBuffer(buffer: Buffer, previewOnly = false): ParsedCsvRe
       throw new BadRequestException(t("errors.CSV_EMPTY_FILE"));
     }
 
-    // Find the header row: the first row with the maximum number of non-empty fields in the first 50 rows
     let headerIndex = 0;
     let maxCols = 0;
     const searchLimit = Math.min(rawRecords.length, 50);
@@ -60,14 +59,14 @@ export function parseCsvBuffer(buffer: Buffer, previewOnly = false): ParsedCsvRe
     const dataRecords = rawRecords.slice(headerIndex + 1).filter((row) => row.some((cell) => cell.trim() !== ""));
 
     const mappedRecords = dataRecords.map((row) => {
-      const obj: Record<string, string> = {};
+      const rowData: Record<string, string> = {};
       for (let i = 0; i < columnsArray.length; i++) {
         const colName = columnsArray[i];
         if (colName) {
-          obj[colName] = row[i] ?? "";
+          rowData[colName] = row[i] ?? "";
         }
       }
-      return obj;
+      return rowData;
     });
 
     const columns = Array.from(new Set(columnsArray.filter(Boolean)));

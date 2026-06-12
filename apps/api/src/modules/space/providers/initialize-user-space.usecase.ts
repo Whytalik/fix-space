@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
-import { CreateSectionDto, CreateSpaceDto, PropertyConfig, PropertyType, SpaceResponseDto } from "@fixspace/domain";
+import { CreateSectionDto, CreateSpaceDto, CreateViewDto, PropertyConfig, PropertyType, SpaceResponseDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { InitializationConfigService } from "@/core/config/initialization/initialization-config.service";
-import type { DatabaseTemplate, InitPropertyDef } from "@/core/config/initialization/types";
+import type { DatabaseTemplate } from "@/core/config/initialization/types";
 import type { SeedRecord, SeedRelation } from "@/core/config/initialization/seeds";
 import { DatabaseService } from "@/modules/database/database.service";
 import { PropertyRepository } from "@/modules/property/repositories/property.repository";
@@ -11,6 +11,7 @@ import { PropertyService } from "@/modules/property/property.service";
 import { PropertyValueRepository } from "@/modules/property-value/repositories/property-value.repository";
 import { RecordRepository } from "@/modules/record/repositories/record.repository";
 import { TemplateService } from "@/modules/template/template.service";
+import { ViewService } from "@/modules/view/view.service";
 import { SpaceRepository } from "../repositories/space.repository";
 import { SpaceService } from "../space.service";
 import { SectionService } from "./section.service";
@@ -28,6 +29,7 @@ export class InitializeUserSpaceUseCase {
     private readonly databaseService: DatabaseService,
     private readonly propertyService: PropertyService,
     private readonly templateService: TemplateService,
+    private readonly viewService: ViewService,
     private readonly initConfig: InitializationConfigService,
     private readonly logger: AppLogger,
     private readonly propertyRepo: PropertyRepository,
@@ -53,6 +55,8 @@ export class InitializeUserSpaceUseCase {
     await this.seedRelations(config.databases, recordIdByType, propCacheByType);
 
     await this.seedTemplates(userId, config.databases, databaseByType);
+
+    await this.seedViews(userId, config.databases, databaseByType);
 
     this.logger.log("Space content seeded", {
       spaceId,
@@ -114,47 +118,73 @@ export class InitializeUserSpaceUseCase {
   }
 
   private async seedProperties(userId: string, databases: DatabaseTemplate[], databaseByType: Map<string, string>): Promise<void> {
-    await Promise.all(
-      databases.map(async (databaseTemplate: DatabaseTemplate) => {
-        const databaseId = databaseTemplate.type ? databaseByType.get(databaseTemplate.type) : undefined;
-        if (!databaseId) {
-          this.logger.error("Space initialization failed: database type not resolved", { type: databaseTemplate.type });
-          throw new Error(`Space initialization failed: database type "${databaseTemplate.type as string}" was not created in Pass 2`);
+    const createdProps = new Map<string, Map<string, string>>();
+    const allPropsByName = new Map<string, string>();
+
+    for (const databaseTemplate of databases) {
+      const databaseId = databaseTemplate.type ? databaseByType.get(databaseTemplate.type) : undefined;
+      if (!databaseId) continue;
+
+      const dbProps = new Map<string, string>();
+      createdProps.set(databaseTemplate.type!, dbProps);
+
+      const nonFormulaProps = (databaseTemplate.properties ?? []).filter((p) => p.type !== PropertyType.FORMULA);
+
+      for (const propertyDefinition of nonFormulaProps) {
+        let propertyConfiguration = (propertyDefinition.config ?? {}) as Record<string, unknown>;
+
+        if (propertyDefinition.type === PropertyType.RELATION && propertyConfiguration.sourceDatabaseType) {
+          const { sourceDatabaseType, ...rest } = propertyConfiguration;
+          const relatedEntityId = databaseByType.get(sourceDatabaseType as string);
+          if (!relatedEntityId) continue;
+          propertyConfiguration = { ...rest, relatedEntityId };
         }
 
-        await Promise.all(
-          (databaseTemplate.properties ?? []).map(async (propertyDefinition: InitPropertyDef) => {
-            let propertyConfiguration = (propertyDefinition.config ?? {}) as Record<string, unknown>;
-
-            if (propertyDefinition.type === PropertyType.RELATION && propertyConfiguration.sourceDatabaseType) {
-              const { sourceDatabaseType, ...rest } = propertyConfiguration;
-              const relatedEntityId = databaseByType.get(sourceDatabaseType as string);
-              if (!relatedEntityId) {
-                this.logger.error("Space initialization failed: RELATION source database not found", {
-                  databaseId,
-                  propertyName: propertyDefinition.name,
-                  sourceDatabaseType,
-                });
-                throw new Error(
-                  `Space initialization failed: RELATION property "${propertyDefinition.name}" references unknown sourceDatabaseType "${sourceDatabaseType as string}"`,
-                );
-              }
-              propertyConfiguration = { ...rest, relatedEntityId };
-            }
-
-            await this.propertyService.create(
-              databaseId,
-              {
-                ...propertyDefinition,
-                databaseId,
-                config: propertyConfiguration as unknown as PropertyConfig,
-              },
-              userId,
-            );
-          }),
+        const property = await this.propertyService.create(
+          databaseId,
+          {
+            ...propertyDefinition,
+            databaseId,
+            config: propertyConfiguration as unknown as PropertyConfig,
+          },
+          userId,
         );
-      }),
-    );
+        dbProps.set(property.name, property.id);
+        allPropsByName.set(`${databaseTemplate.type}.${property.name}`, property.id);
+      }
+    }
+
+    for (const databaseTemplate of databases) {
+      const databaseId = databaseByType.get(databaseTemplate.type!);
+      if (!databaseId) continue;
+
+      const dbProps = createdProps.get(databaseTemplate.type!)!;
+      const formulaProps = (databaseTemplate.properties ?? []).filter((p) => p.type === PropertyType.FORMULA);
+
+      for (const propertyDefinition of formulaProps) {
+        const config = { ...propertyDefinition.config } as any;
+
+        if (config.expression) {
+          config.expression = config.expression.replace(/\{\{(.+?)\}\}/g, (match: string, name: string) => {
+            const key = name.trim();
+            const propId = key.includes(".") ? allPropsByName.get(key) : dbProps.get(key);
+            return propId ? `field_${propId.replace(/-/g, "_")}` : match;
+          });
+        }
+
+        const property = await this.propertyService.create(
+          databaseId,
+          {
+            ...propertyDefinition,
+            databaseId,
+            config: config as unknown as PropertyConfig,
+          },
+          userId,
+        );
+        dbProps.set(property.name, property.id);
+        allPropsByName.set(`${databaseTemplate.type}.${property.name}`, property.id);
+      }
+    }
   }
 
   private async seedTemplates(userId: string, databases: DatabaseTemplate[], databaseByType: Map<string, string>): Promise<void> {
@@ -167,6 +197,53 @@ export class InitializeUserSpaceUseCase {
 
           for (const templateDef of databaseTemplate.templates!) {
             await this.templateService.create(databaseId, { ...templateDef, databaseId }, userId);
+          }
+        }),
+    );
+  }
+
+  private async seedViews(userId: string, databases: DatabaseTemplate[], databaseByType: Map<string, string>): Promise<void> {
+    await Promise.all(
+      databases
+        .filter((databaseTemplate) => databaseTemplate.views?.length && databaseTemplate.type)
+        .map(async (databaseTemplate) => {
+          const databaseId = databaseByType.get(databaseTemplate.type!);
+          if (!databaseId) return;
+
+          const properties = await this.propertyRepo.findManyByDatabase(databaseId);
+          const propByName = new Map(properties.map((property) => [property.name, property]));
+
+          for (const viewDef of databaseTemplate.views!) {
+            const filters = (viewDef.filters ?? []).map((filter) => {
+              const propName = (filter as unknown as { propertyName?: string }).propertyName;
+              if (propName && propByName.has(propName)) {
+                return { ...filter, propertyId: propByName.get(propName)!.id };
+              }
+              return filter;
+            });
+
+            const sort = (viewDef.sort ?? []).map((s) => {
+              const propName = (s as unknown as { propertyName?: string }).propertyName;
+              if (propName && propByName.has(propName)) {
+                return { ...s, propertyId: propByName.get(propName)!.id };
+              }
+              return s;
+            });
+
+            const groupBy = viewDef.groupBy && propByName.has(viewDef.groupBy) ? propByName.get(viewDef.groupBy)!.id : viewDef.groupBy;
+
+            const hiddenColumns = (viewDef.hiddenColumns ?? []).map((colName: string) => {
+              if (propByName.has(colName)) {
+                return propByName.get(colName)!.id;
+              }
+              return colName;
+            });
+
+            await this.viewService.create(
+              databaseId,
+              { ...viewDef, databaseId, filters, sort, groupBy, hiddenColumns } as unknown as CreateViewDto,
+              userId,
+            );
           }
         }),
     );

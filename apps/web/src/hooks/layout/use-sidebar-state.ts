@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useSidebarState(initialCollapsed = false, initialCollapsedSections: string[] = []) {
+export function useSidebarState(initialCollapsed = false, initialExpandedSections: string[] = []) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set(initialCollapsedSections));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(initialExpandedSections));
   const [isMounted, setIsMounted] = useState(false);
 
   const initialCollapsedRef = useRef(initialCollapsed);
-  const initialCollapsedSectionsRef = useRef(initialCollapsedSections);
+  const initialExpandedSectionsRef = useRef(initialExpandedSections);
 
   useEffect(() => {
     setIsMounted(true);
@@ -18,17 +18,17 @@ export function useSidebarState(initialCollapsed = false, initialCollapsedSectio
       }
     }
 
-    const savedSections = localStorage.getItem("sidebar-collapsed-sections");
+    const savedSections = localStorage.getItem("sidebar-expanded-sections");
     if (savedSections) {
       try {
         const parsed = JSON.parse(savedSections) as string[];
         const sortedParsed = [...parsed].sort();
-        const sortedInitial = [...initialCollapsedSectionsRef.current].sort();
+        const sortedInitial = [...initialExpandedSectionsRef.current].sort();
         if (JSON.stringify(sortedParsed) !== JSON.stringify(sortedInitial)) {
-          setCollapsedSections(new Set(parsed));
+          setExpandedSections(new Set(parsed));
         }
       } catch (e) {
-        console.error("Failed to parse sidebar-collapsed-sections from localStorage", e);
+        console.error("Failed to parse sidebar-expanded-sections from localStorage", e);
       }
     }
   }, []);
@@ -47,13 +47,13 @@ export function useSidebarState(initialCollapsed = false, initialCollapsedSectio
   }
 
   function toggleSection(sectionId: string) {
-    setCollapsedSections((prev) => {
+    setExpandedSections((prev) => {
       const next = new Set(prev);
       if (next.has(sectionId)) next.delete(sectionId);
       else next.add(sectionId);
       const array = [...next];
-      localStorage.setItem("sidebar-collapsed-sections", JSON.stringify(array));
-      setCookie("sidebar-collapsed-sections", JSON.stringify(array));
+      localStorage.setItem("sidebar-expanded-sections", JSON.stringify(array));
+      setCookie("sidebar-expanded-sections", JSON.stringify(array));
       return next;
     });
   }
@@ -61,7 +61,7 @@ export function useSidebarState(initialCollapsed = false, initialCollapsedSectio
   return {
     collapsed,
     toggle,
-    collapsedSections,
+    expandedSections,
     toggleSection,
     isMounted,
   };

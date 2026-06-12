@@ -5,6 +5,8 @@ import { useAppContext } from "@/context/app-context";
 import { useMutation } from "@tanstack/react-query";
 import { parseApiError } from "@/lib/api/client";
 import { createDatabase } from "@/lib/api/database";
+import { useDatabaseSettingsQuery } from "@/hooks/api/use-database-settings-query";
+import { DEFAULT_DATABASE_SETTINGS } from "@fixspace/domain/enums";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +21,8 @@ export function AddDatabaseModal({ spaceId, sectionId, onClose, onSaved }: AddDa
   const t = useTranslations("AddDatabaseModal");
   const router = useRouter();
   const { addDatabaseToSpace } = useAppContext();
+
+  const { data: settings, isLoading } = useDatabaseSettingsQuery();
 
   const {
     mutate: save,
@@ -41,11 +45,16 @@ export function AddDatabaseModal({ spaceId, sectionId, onClose, onSaved }: AddDa
 
   const error = mutationError ? parseApiError(mutationError) : null;
 
+  if (isLoading) return null;
+
+  const actualSettings = settings ?? DEFAULT_DATABASE_SETTINGS;
+
   return (
     <NameIconColorModal
       title={t("addDatabase")}
       placeholder={t("placeholderTitle")}
       submitLabel={isSaving ? t("creating") : t("createDatabase")}
+      initialValues={{ icon: actualSettings.defaultDatabaseIcon }}
       isSubmitting={isSaving}
       hideColor
       error={error}

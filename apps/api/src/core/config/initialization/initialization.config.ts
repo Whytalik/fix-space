@@ -1,4 +1,4 @@
-import { PropertyType } from "@fixspace/domain";
+import { FilterField, FilterOperator, PropertyType, SortDirection, SortField } from "@fixspace/domain";
 import { accountsProperties } from "./databases/accounts.config";
 import { dailyRoutineProperties } from "./databases/daily-routine.config";
 import { mistakesProperties } from "./databases/mistakes.config";
@@ -22,6 +22,47 @@ const databases: DatabaseTemplate[] = [
     seeds: seedsByDatabaseType["trading-journal"],
     properties: tradingJournalProperties,
     templates: [{ name: "Default", isDefault: true, position: 0 }],
+    views: [
+      {
+        name: "All Trades",
+        icon: "icon:LayoutList",
+        sort: [{ field: SortField.PROPERTY, propertyName: "Entry Date", direction: SortDirection.DESC } as any],
+      },
+      {
+        name: "Active Trades",
+        icon: "icon:Activity",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Status",
+            operator: FilterOperator.EQUALS,
+            value: "Active",
+          } as any,
+        ],
+        sort: [{ field: SortField.PROPERTY, propertyName: "Entry Date", direction: SortDirection.DESC } as any],
+        hiddenColumns: ["Exit Price", "Exit Date", "Actual R", "Gross P&L", "Net P&L", "Outcome"],
+      },
+      {
+        name: "Performance Log",
+        icon: "icon:TrendingUp",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Status",
+            operator: FilterOperator.EQUALS,
+            value: "Closed",
+          } as any,
+        ],
+        sort: [{ field: SortField.PROPERTY, propertyName: "Exit Date", direction: SortDirection.DESC } as any],
+        hiddenColumns: ["Initial SL", "Initial TP", "Planned R", "Confidence", "Emotion"],
+      },
+      {
+        name: "By Session",
+        icon: "icon:Clock",
+        groupBy: "Session / Time",
+        sort: [{ field: SortField.PROPERTY, propertyName: "Entry Date", direction: SortDirection.DESC } as any],
+      },
+    ],
   },
   {
     name: "[DB] Session Routine",
@@ -32,6 +73,19 @@ const databases: DatabaseTemplate[] = [
     seeds: seedsByDatabaseType["daily-routine"],
     properties: dailyRoutineProperties,
     templates: [{ name: "Default", isDefault: true, position: 0 }],
+    views: [
+      {
+        name: "Chronological",
+        icon: "icon:History",
+        sort: [{ field: SortField.PROPERTY, propertyName: "Date", direction: SortDirection.DESC } as any],
+      },
+      {
+        name: "Analysis Mode",
+        icon: "icon:SearchCode",
+        hiddenColumns: ["Pair", "Date", "Account"],
+        sort: [{ field: SortField.PROPERTY, propertyName: "Date", direction: SortDirection.DESC } as any],
+      },
+    ],
   },
   {
     name: "[DB] Routine Library",
@@ -52,6 +106,25 @@ const databases: DatabaseTemplate[] = [
     seeds: seedsByDatabaseType["notes"],
     properties: notesProperties,
     templates: [{ name: "Default", isDefault: true, position: 0 }],
+    views: [
+      {
+        name: "Active Insights",
+        icon: "icon:Zap",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Status",
+            operator: FilterOperator.EQUALS,
+            value: "Active",
+          } as any,
+        ],
+      },
+      {
+        name: "By Source",
+        icon: "icon:Library",
+        groupBy: "Source",
+      },
+    ],
   },
   {
     name: "[DB] Mistakes",
@@ -62,6 +135,33 @@ const databases: DatabaseTemplate[] = [
     seeds: seedsByDatabaseType["mistakes"],
     properties: mistakesProperties,
     templates: [{ name: "Default", isDefault: true, position: 0 }],
+    views: [
+      {
+        name: "Active Mistakes",
+        icon: "icon:Flame",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Status",
+            operator: FilterOperator.EQUALS,
+            value: "Active",
+          } as any,
+        ],
+        sort: [{ field: SortField.PROPERTY, propertyName: "Date", direction: SortDirection.DESC } as any],
+      },
+      {
+        name: "Resolved",
+        icon: "icon:CheckCircle2",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Status",
+            operator: FilterOperator.EQUALS,
+            value: "Resolved",
+          } as any,
+        ],
+      },
+    ],
   },
   {
     name: "[DB] Performance Review",
@@ -76,6 +176,34 @@ const databases: DatabaseTemplate[] = [
       { name: "Monthly Review", isDefault: false, position: 1 },
       { name: "Quarterly Review", isDefault: false, position: 2 },
     ],
+    views: [
+      {
+        name: "Monthly Reviews",
+        icon: "icon:CalendarDays",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Period",
+            operator: FilterOperator.EQUALS,
+            value: "Monthly",
+          } as any,
+        ],
+        sort: [{ field: SortField.PROPERTY, propertyName: "Date", direction: SortDirection.DESC } as any],
+      },
+      {
+        name: "Weekly Reviews",
+        icon: "icon:Calendar",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Period",
+            operator: FilterOperator.EQUALS,
+            value: "Weekly",
+          } as any,
+        ],
+        sort: [{ field: SortField.PROPERTY, propertyName: "Date", direction: SortDirection.DESC } as any],
+      },
+    ],
   },
   {
     name: "[DB] Accounts",
@@ -86,6 +214,32 @@ const databases: DatabaseTemplate[] = [
     seeds: seedsByDatabaseType["accounts"],
     properties: accountsProperties,
     templates: [{ name: "Default", isDefault: true, position: 0 }],
+    views: [
+      {
+        name: "Active Accounts",
+        icon: "icon:ShieldCheck",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Status",
+            operator: FilterOperator.EQUALS,
+            value: "Active",
+          } as any,
+        ],
+      },
+      {
+        name: "Prop Firms",
+        icon: "icon:Building",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Account Type",
+            operator: FilterOperator.EQUALS,
+            value: "Prop Firm",
+          } as any,
+        ],
+      },
+    ],
   },
   {
     name: "[DB] Operations",
@@ -96,6 +250,32 @@ const databases: DatabaseTemplate[] = [
     seeds: seedsByDatabaseType["operations"],
     properties: operationsProperties,
     templates: [{ name: "Default", isDefault: true, position: 0 }],
+    views: [
+      {
+        name: "Withdrawals",
+        icon: "icon:ArrowUpFromLine",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Type",
+            operator: FilterOperator.EQUALS,
+            value: "Withdrawal",
+          } as any,
+        ],
+      },
+      {
+        name: "Deposits",
+        icon: "icon:ArrowDownToLine",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Type",
+            operator: FilterOperator.EQUALS,
+            value: "Deposit",
+          } as any,
+        ],
+      },
+    ],
   },
   {
     name: "[DB] Trading Systems",

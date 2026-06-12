@@ -367,7 +367,7 @@ export function EditPropertiesSection({
 
           <DragOverlay dropAnimation={null}>
             {activeItem?.kind === "group" && (
-              <div className="flex items-center gap-2 px-3 py-2 bg-surface border border-stroke rounded-lg shadow-md">
+              <div className="flex items-center gap-2 px-3 py-2 bg-surface border border-stroke rounded-lg shadow-md w-[400px]">
                 <GripVertical size={14} className="text-ink-muted shrink-0" />
                 <ChevronRight size={13} className="text-ink-muted shrink-0" />
                 <span className="flex-1 text-xs font-semibold uppercase tracking-widest text-ink-secondary">
@@ -377,7 +377,7 @@ export function EditPropertiesSection({
               </div>
             )}
             {activeItem?.kind === "property" && (
-              <div className="flex items-center gap-2 px-3 py-3 bg-elevated border border-stroke rounded-lg shadow-md">
+              <div className="flex items-center gap-2 px-3 py-3 bg-elevated border border-stroke rounded-lg shadow-md w-[400px]">
                 <GripVertical size={14} className="text-ink-muted shrink-0" />
                 <PropertyIcon type={(activeItem as PropItem).prop.type} size={14} className="text-ink-muted shrink-0" />
                 <span className="text-sm text-ink flex-1">{(activeItem as PropItem).prop.name}</span>

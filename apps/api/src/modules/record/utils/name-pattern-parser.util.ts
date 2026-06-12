@@ -7,27 +7,31 @@ export async function parseNamePattern(pattern: string, databaseId: string, tran
   const day = String(now.getDate()).padStart(2, "0");
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const year = String(now.getFullYear());
+
   const monthName = now.toLocaleString("en-US", { month: "long" });
   const quarter = Math.floor((now.getMonth() + 3) / 3).toString();
 
-  result = result.replace(/{{today}}/g, `${day}.${month}.${year}`);
-  result = result.replace(/{{month}}/g, monthName);
-  result = result.replace(/{{month_num}}/g, month);
-  result = result.replace(/{{year}}/g, year);
-  result = result.replace(/{{quarter}}/g, quarter);
+  result = result.replace(/{{\s*day\s*}}/gi, day);
+  result = result.replace(/{{\s*today\s*}}/gi, `${day}.${month}.${year}`);
+  result = result.replace(/{{\s*month\s*}}/gi, monthName);
+  result = result.replace(/{{\s*month_num\s*}}/gi, month);
+  result = result.replace(/{{\s*year\s*}}/gi, year);
+  result = result.replace(/{{\s*quarter\s*}}/gi, quarter);
 
-  if (result.includes("{{count}}")) {
+  if (result.match(/{{\s*count\s*}}/i)) {
     const count = await transaction.record.count({
       where: { databaseId },
     });
-    result = result.replace(/{{count}}/g, (count + 1).toString());
+    result = result.replace(/{{\s*count\s*}}/gi, (count + 1).toString());
   }
 
-  const countFilterRegex = /{{count:([^=]+)=([^}]+)}}/g;
-  let match;
-  while ((match = countFilterRegex.exec(result)) !== null) {
-    const propertyName = match[1]?.trim();
-    const propertyValue = match[2]?.trim();
+  const countFilterRegex = /{{\s*count\s*:\s*([^=]+)\s*=\s*([^}]+)\s*}}/gi;
+  while (true) {
+    const currentMatch = countFilterRegex.exec(result);
+    if (!currentMatch) break;
+
+    const propertyName = currentMatch[1]?.trim();
+    const propertyValue = currentMatch[2]?.trim();
 
     if (propertyName && propertyValue) {
       const property = await transaction.property.findFirst({
@@ -48,11 +52,12 @@ export async function parseNamePattern(pattern: string, databaseId: string, tran
             },
           },
         });
-        result = result.replace(match[0], (count + 1).toString());
+        result = result.replace(currentMatch[0], (count + 1).toString());
       } else {
-        result = result.replace(match[0], "?");
+        result = result.replace(currentMatch[0], "?");
       }
     }
+    countFilterRegex.lastIndex = 0;
   }
 
   return result;

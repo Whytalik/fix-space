@@ -17,11 +17,9 @@ const stub = new Proxy(noopDecorator, {
 
 export default stub;
 
-// @nestjs/swagger
 export const ApiProperty = stub;
 export const ApiPropertyOptional = stub;
 
-// class-validator
 export const ArrayMinSize = stub;
 export const IsArray = stub;
 export const IsBoolean = stub;
@@ -44,7 +42,6 @@ export const ValidateIf = stub;
 export const ValidateNested = stub;
 export const validate = stub;
 
-// class-transformer
 export const Exclude = stub;
 export const Expose = stub;
 export const plainToInstance = stub;
@@ -52,5 +49,4 @@ export const Transform = stub;
 export const TransformationType = stub;
 export const Type = stub;
 
-// nestjs-i18n
 export const i18nValidationMessage = stub;

@@ -60,6 +60,7 @@ interface DatabaseContextValue {
   relativeDates: boolean;
   refresh: () => void;
   invalidateRecords: () => void;
+  invalidateTemplates: () => void;
   applyDatabaseUpdate: (updated: DatabaseResponseDto) => void;
   applyPropertiesUpdate: (updated: PropertyResponseDto[]) => void;
   setActiveView: (viewId: string) => void;
@@ -109,6 +110,7 @@ const DatabaseContext = createContext<DatabaseContextValue>({
   isViewLocked: false,
   refresh: () => {},
   invalidateRecords: () => {},
+  invalidateTemplates: () => {},
   applyDatabaseUpdate: () => {},
   applyPropertiesUpdate: () => {},
   setActiveView: () => {},
@@ -538,11 +540,16 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
     queryClient.invalidateQueries({ queryKey: queryKeys.records.all(databaseId) });
   }, [databaseId, queryClient]);
 
+  const invalidateTemplates = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.templates.all(databaseId) });
+  }, [databaseId, queryClient]);
+
   const refresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: queryKeys.properties.all(databaseId) });
     queryClient.invalidateQueries({ queryKey: queryKeys.records.all(databaseId) });
     queryClient.invalidateQueries({ queryKey: queryKeys.views.all(databaseId) });
-  }, [databaseId, queryClient]);
+    invalidateTemplates();
+  }, [databaseId, queryClient, invalidateTemplates]);
 
   const applyDatabaseUpdate = useCallback(
     (updated: DatabaseResponseDto) => {
@@ -590,6 +597,7 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
         isViewLocked,
         refresh,
         invalidateRecords,
+        invalidateTemplates,
         applyDatabaseUpdate,
         applyPropertiesUpdate,
         setActiveView,

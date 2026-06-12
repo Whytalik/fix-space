@@ -1,4 +1,4 @@
-import type { CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@fixspace/domain";
+import type { ContentImageResponseDto, CreateTemplateDto, TemplateResponseDto, UpdateTemplateDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getTemplates(databaseId: string) {
@@ -38,5 +38,14 @@ export function duplicateTemplate(id: string) {
 export function resetTemplate(id: string) {
   return apiFetch<TemplateResponseDto>(`/templates/${id}/reset`, {
     method: "POST",
+  });
+}
+
+export function uploadTemplateContentImage(id: string, file: File): Promise<ContentImageResponseDto> {
+  const form = new FormData();
+  form.append("image", file);
+  return apiFetch<ContentImageResponseDto>(`/templates/${id}/images`, {
+    method: "POST",
+    body: form,
   });
 }

@@ -6,11 +6,13 @@ import {
   DEFAULT_RECORD_SETTINGS,
   DEFAULT_SECTION_SETTINGS,
   DEFAULT_SPACE_SETTINGS,
+  DEFAULT_TEMPLATE_SETTINGS,
   DEFAULT_USER_SETTINGS,
   DEFAULT_VIEW_SETTINGS,
   RecordSettings,
   SectionSettings,
   SpaceSettings,
+  TemplateSettings,
   UserSettings,
   ViewSettings,
 } from "@fixspace/domain";
@@ -24,10 +26,13 @@ const DEFAULT_SETTINGS_MAP = {
   [SettingsCategory.DATABASE]: DEFAULT_DATABASE_SETTINGS,
   [SettingsCategory.SECTION]: DEFAULT_SECTION_SETTINGS,
   [SettingsCategory.RECORD]: DEFAULT_RECORD_SETTINGS,
+  [SettingsCategory.TEMPLATE]: DEFAULT_TEMPLATE_SETTINGS,
   [SettingsCategory.VIEW]: DEFAULT_VIEW_SETTINGS,
 };
 
-type UpdateSettingsDto = Partial<UserSettings | SpaceSettings | DatabaseSettings | SectionSettings | RecordSettings | ViewSettings>;
+type UpdateSettingsDto = Partial<
+  UserSettings | SpaceSettings | DatabaseSettings | SectionSettings | RecordSettings | TemplateSettings | ViewSettings
+>;
 
 @ApiTags("Settings")
 @ApiBearerAuth("access-token")

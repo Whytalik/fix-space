@@ -10,6 +10,7 @@ import { SettingsCategory } from "@/modules/settings/constants/settings.constant
 import { SettingsService } from "@/modules/settings/settings.service";
 import { ViewRepository } from "@/modules/view/repositories/view.repository";
 import { DatabaseRepository } from "./repositories/database.repository";
+import { SectionRepository } from "@/modules/space/repositories/section.repository";
 import { SpaceRepository } from "@/modules/space/repositories/space.repository";
 import { toDatabaseResponseDto } from "./utils/to-database-response.util";
 
@@ -27,6 +28,7 @@ export class DatabaseService {
     private readonly databaseRepo: DatabaseRepository,
     private readonly spaceRepo: SpaceRepository,
     private readonly viewRepo: ViewRepository,
+    private readonly sectionRepo: SectionRepository,
   ) {
     this.logger.setContext(DatabaseService.name);
   }
@@ -163,7 +165,7 @@ export class DatabaseService {
     }
 
     if (updateDatabaseDto.sectionId) {
-      const section = await this.databaseRepo.findSectionInSpace(updateDatabaseDto.sectionId, existingDatabase.spaceId);
+      const section = await this.sectionRepo.findInSpace(updateDatabaseDto.sectionId, existingDatabase.spaceId);
       if (!section) {
         throw new NotFoundException(t("errors.SECTION_NOT_FOUND"));
       }
@@ -217,10 +219,6 @@ export class DatabaseService {
 
     if (!existingDatabase) {
       throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id }));
-    }
-
-    if (existingDatabase.isPreset) {
-      throw new BadRequestException(t("errors.CANNOT_REMOVE_PRESET_DATABASE"));
     }
 
     const database = await this.databaseRepo.delete(id);

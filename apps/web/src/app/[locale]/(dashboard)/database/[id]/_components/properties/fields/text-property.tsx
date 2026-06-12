@@ -16,14 +16,15 @@ interface TextPropertyProps {
   onChange?: (value: string) => void;
   placeholder?: string;
   ghost?: boolean;
+  editorClass?: string;
 }
 
-export function TextProperty({ value, readOnly, className, onChange, placeholder, ghost }: TextPropertyProps) {
+export function TextProperty({ value, readOnly, className, onChange, placeholder, ghost, editorClass }: TextPropertyProps) {
   const t = useTranslations("PropertyInput");
 
   if (readOnly) {
     const stringValue = String(value ?? "");
-    if (!stringValue) return <span className="text-ink-muted">—</span>;
+    if (!stringValue) return <span className="text-ink-muted italic opacity-50">{placeholder || "—"}</span>;
 
     return (
       <div
@@ -33,7 +34,9 @@ export function TextProperty({ value, readOnly, className, onChange, placeholder
     );
   }
 
-  return <RichTextEditor value={value} onChange={onChange} placeholder={placeholder || t("enterText")} ghost={ghost} />;
+  return (
+    <RichTextEditor value={value} onChange={onChange} placeholder={placeholder || t("enterText")} ghost={ghost} editorClass={editorClass} />
+  );
 }
 
 function RichTextEditor({
@@ -41,11 +44,13 @@ function RichTextEditor({
   onChange,
   placeholder,
   ghost,
+  editorClass = "text-sm",
 }: {
   value: unknown;
   onChange?: (v: string) => void;
   placeholder: string;
   ghost?: boolean;
+  editorClass?: string;
 }) {
   const extensions = useMemo(
     () => [
@@ -62,7 +67,7 @@ function RichTextEditor({
       Placeholder.configure({
         placeholder,
         emptyEditorClass:
-          "before:content-[attr(data-placeholder)] before:text-ink-muted before:float-left before:pointer-events-none before:h-0",
+          "before:content-[attr(data-placeholder)] before:text-ink-muted before:pointer-events-none before:float-left before:h-0",
       }),
     ],
     [placeholder],
@@ -79,7 +84,7 @@ function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: "outline-none min-h-[1.5em] focus:outline-none ProseMirror-compact text-sm",
+        class: `outline-none min-h-[1.5em] focus:outline-none ProseMirror-compact ${editorClass}`,
       },
     },
   });

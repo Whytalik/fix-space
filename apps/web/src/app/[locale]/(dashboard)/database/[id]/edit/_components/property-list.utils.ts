@@ -111,7 +111,7 @@ export function moveGroupBlock(items: FlatItem[], groupId: string, overId: strin
 
 export function flatItemsToProperties(items: FlatItem[]): PropertyResponseDto[] {
   const result: PropertyResponseDto[] = [];
-  let position = 0;
+  let position = 1;
   let currentGroup: string | null = null;
   for (const item of items) {
     if (item.kind === "group") {

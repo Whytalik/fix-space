@@ -71,10 +71,10 @@ export class FormulaEngine {
 
       case "MemberExpression": {
         const n = node as jsep.MemberExpression;
-        const obj = this.evalNode(n.object, ctx);
-        if (obj === null || obj === undefined || typeof obj !== "object") return null;
+        const target = this.evalNode(n.object, ctx);
+        if (target === null || target === undefined || typeof target !== "object") return null;
         const key = n.computed ? this.evalNode(n.property, ctx) : (n.property as jsep.Identifier).name;
-        return (obj as Record<string, unknown>)[key as string] ?? null;
+        return (target as Record<string, unknown>)[key as string] ?? null;
       }
 
       default:
@@ -82,8 +82,8 @@ export class FormulaEngine {
     }
   }
 
-  private applyBinary(op: string, left: unknown, right: unknown): unknown {
-    switch (op) {
+  private applyBinary(operator: string, left: unknown, right: unknown): unknown {
+    switch (operator) {
       case "+":
         return typeof left === "string" || typeof right === "string"
           ? String(left ?? "") + String(right ?? "")
@@ -118,20 +118,20 @@ export class FormulaEngine {
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         return left || right;
       default:
-        throw new Error(`Unknown binary operator: ${op}`);
+        throw new Error(`Unknown binary operator: ${operator}`);
     }
   }
 
-  private applyUnary(op: string, arg: unknown): unknown {
-    switch (op) {
+  private applyUnary(operator: string, operand: unknown): unknown {
+    switch (operator) {
       case "-":
-        return -(arg as number);
+        return -(operand as number);
       case "+":
-        return +(arg as number);
+        return +(operand as number);
       case "!":
-        return !arg;
+        return !operand;
       default:
-        throw new Error(`Unknown unary operator: ${op}`);
+        throw new Error(`Unknown unary operator: ${operator}`);
     }
   }
 
@@ -148,52 +148,52 @@ export class FormulaEngine {
         return Math.round(args[0] as number);
 
       case "SUM": {
-        const arr = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
-        return arr.reduce<number>((acc, v) => acc + (typeof v === "number" ? v : 0), 0);
+        const items = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
+        return items.reduce<number>((acc, v) => acc + (typeof v === "number" ? v : 0), 0);
       }
 
       case "AVG": {
-        const arr = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
-        const nums = arr.filter((v): v is number => typeof v === "number");
+        const items = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
+        const nums = items.filter((v): v is number => typeof v === "number");
         return nums.length === 0 ? null : nums.reduce((a, b) => a + b, 0) / nums.length;
       }
 
       case "COUNT": {
-        const arr = Array.isArray(args[0]) ? args[0] : [];
-        return arr.filter((v) => v !== null && v !== undefined).length;
+        const items = Array.isArray(args[0]) ? args[0] : [];
+        return items.filter((v) => v !== null && v !== undefined).length;
       }
 
       case "MIN": {
-        const arr = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
-        const nums = arr.filter((v): v is number => typeof v === "number");
+        const items = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
+        const nums = items.filter((v): v is number => typeof v === "number");
         return nums.length === 0 ? null : Math.min(...nums);
       }
 
       case "MAX": {
-        const arr = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
-        const nums = arr.filter((v): v is number => typeof v === "number");
+        const items = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
+        const nums = items.filter((v): v is number => typeof v === "number");
         return nums.length === 0 ? null : Math.max(...nums);
       }
 
       case "COUNT_TRUE": {
-        const arr = Array.isArray(args[0]) ? args[0] : [];
-        return arr.filter(Boolean).length;
+        const items = Array.isArray(args[0]) ? args[0] : [];
+        return items.filter(Boolean).length;
       }
 
       case "IF":
         return args[0] ? args[1] : args[2];
 
       case "MAP": {
-        const arr = Array.isArray(args[0]) ? (args[0] as Record<string, unknown>[]) : [];
+        const items = Array.isArray(args[0]) ? (args[0] as Record<string, unknown>[]) : [];
         const key = args[1] as string;
-        return arr.map((item) => (item !== null && item !== undefined && typeof item === "object" ? (item[key] ?? null) : null));
+        return items.map((item) => (item !== null && item !== undefined && typeof item === "object" ? (item[key] ?? null) : null));
       }
 
       case "DATE_DIFF": {
-        const d1 = new Date(args[0] as string | number | Date);
-        const d2 = new Date(args[1] as string | number | Date);
-        if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return null;
-        const ms = Math.abs(d2.getTime() - d1.getTime());
+        const startDate = new Date(args[0] as string | number | Date);
+        const endDate = new Date(args[1] as string | number | Date);
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
+        const ms = Math.abs(endDate.getTime() - startDate.getTime());
         const unit = (args[2] as string) ?? "days";
         switch (unit) {
           case "minutes":

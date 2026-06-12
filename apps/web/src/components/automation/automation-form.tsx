@@ -70,15 +70,15 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
     setName(automation.name);
     setActive(automation.active);
     setTrigger(automation.trigger);
-    const cfg = (automation.config ?? {}) as Record<string, unknown>;
+    const automationConfig = (automation.config ?? {}) as Record<string, unknown>;
     if (automation.trigger === AutomationTrigger.ON_FIELD_CHANGE) {
-      setFieldChangePropertyId((cfg.propertyId as string) ?? "");
+      setFieldChangePropertyId((automationConfig.propertyId as string) ?? "");
     }
     if (automation.trigger === AutomationTrigger.ON_SCHEDULE) {
-      setScheduleInterval((cfg.interval as string) ?? "daily");
-      setScheduleTime((cfg.time as string) ?? "09:00");
-      setScheduleDow(String(cfg.dayOfWeek ?? 1));
-      setScheduleDom(String(cfg.dayOfMonth ?? 1));
+      setScheduleInterval((automationConfig.interval as string) ?? "daily");
+      setScheduleTime((automationConfig.time as string) ?? "09:00");
+      setScheduleDow(String(automationConfig.dayOfWeek ?? 1));
+      setScheduleDom(String(automationConfig.dayOfMonth ?? 1));
     }
     const rawActions = (automation.actions ?? []) as Array<Record<string, unknown>>;
     if (rawActions.length > 0) {
@@ -348,17 +348,17 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
         <p className="type-hint">{t("selectTemplateHint")}</p>
 
         <div className="flex flex-col gap-2">
-          {templates.map((tpl) => (
+          {templates.map((template) => (
             <button
-              key={tpl.id}
+              key={template.id}
               type="button"
-              onClick={() => applyTemplate(tpl)}
+              onClick={() => applyTemplate(template)}
               className="text-left p-3 border border-stroke rounded-xl bg-surface hover:bg-canvas transition-colors"
             >
-              <p className="type-form-label">{tpl.name}</p>
+              <p className="type-form-label">{template.name}</p>
               <p className="type-hint mt-0.5">
-                <span className="text-ink-secondary">{t("whenSection")}</span> {tpl.when} →{" "}
-                <span className="text-ink-secondary">{t("thenSection")}</span> {tpl.then}
+                <span className="text-ink-secondary">{t("whenSection")}</span> {template.when} →{" "}
+                <span className="text-ink-secondary">{t("thenSection")}</span> {template.then}
               </p>
             </button>
           ))}

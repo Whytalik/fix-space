@@ -154,7 +154,7 @@ export function PropertyVisibilityPanel({ anchorEl, onClose }: PropertyVisibilit
     <div
       ref={containerRef}
       style={panelStyle}
-      className="bg-elevated border border-stroke rounded-lg shadow-lg p-3 w-64 flex flex-col gap-3 animate-fade-up max-h-[70vh] overflow-y-auto scrollbar"
+      className="bg-elevated border border-stroke rounded-lg shadow-lg p-3 w-64 flex flex-col gap-3 animate-fade-up max-h-[70vh] overflow-y-auto no-scrollbar"
     >
       <PropertyVisibilityPanelContent />
     </div>,

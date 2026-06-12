@@ -15,7 +15,7 @@ export function useTemplateQuery(id: string, options: { enabled?: boolean } = {}
   return useQuery({
     queryKey: queryKeys.templates.detail(id),
     queryFn: () => getTemplate(id),
-    enabled: options.enabled && !!id,
+    enabled: (options.enabled ?? true) && !!id,
     staleTime: 1000 * 60 * 5,
   });
 }

@@ -9,6 +9,8 @@ import { NotificationService } from "@/modules/notification/notification.service
 import { PropertyValueService } from "@/modules/property-value/property-value.service";
 import { RecordService } from "@/modules/record/record.service";
 
+import { DatabaseRepository } from "@/modules/database/repositories/database.repository";
+import { RecordRepository } from "@/modules/record/repositories/record.repository";
 import { AutomationEngine } from "../automation.engine";
 import { AutomationScheduler } from "../automation.scheduler";
 import { AutomationService } from "../automation.service";
@@ -32,19 +34,26 @@ describe("AutomationService", () => {
   } as unknown as jest.Mocked<AppLogger>;
 
   const mockAutomationRepo = {
-    findDatabaseByOwner: jest.fn(),
     countByDatabase: jest.fn(),
     findAllByDatabase: jest.fn(),
     findById: jest.fn(),
     findByOwner: jest.fn(),
-    findRecordWithValues: jest.fn(),
-    findAllRecordsWithValues: jest.fn(),
-    findDatabaseWithOwner: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
     createLog: jest.fn(),
     findLogsByAutomation: jest.fn(),
+  };
+
+  const mockDatabaseRepo = {
+    findDatabaseByOwner: jest.fn(),
+    findById: jest.fn(),
+    findWithSpace: jest.fn(),
+  };
+
+  const mockRecordRepo = {
+    findById: jest.fn(),
+    findManyByDatabase: jest.fn(),
   };
 
   const mockEngine = {
@@ -83,6 +92,8 @@ describe("AutomationService", () => {
         { provide: RecordService, useValue: mockRecordService },
         { provide: AutomationScheduler, useValue: mockScheduler },
         { provide: NotificationService, useValue: mockNotificationService },
+        { provide: DatabaseRepository, useValue: mockDatabaseRepo },
+        { provide: RecordRepository, useValue: mockRecordRepo },
         { provide: AppLogger, useValue: mockLogger },
       ],
     }).compile();
@@ -93,7 +104,7 @@ describe("AutomationService", () => {
 
   describe("TC-AUTO-U-006: create — limit enforcement", () => {
     it("TC-AUTO-U-006: should throw BadRequestException when 10 automations already exist", async () => {
-      (mockAutomationRepo.findDatabaseByOwner as jest.Mock).mockResolvedValue({ id: "db-1" });
+      (mockDatabaseRepo.findDatabaseByOwner as jest.Mock).mockResolvedValue({ id: "db-1" });
       (mockAutomationRepo.countByDatabase as jest.Mock).mockResolvedValue(10);
 
       await expect(
@@ -102,7 +113,7 @@ describe("AutomationService", () => {
     });
 
     it("TC-AUTO-U-006: should create successfully when count is below 10", async () => {
-      (mockAutomationRepo.findDatabaseByOwner as jest.Mock).mockResolvedValue({ id: "db-1" });
+      (mockDatabaseRepo.findDatabaseByOwner as jest.Mock).mockResolvedValue({ id: "db-1" });
       (mockAutomationRepo.countByDatabase as jest.Mock).mockResolvedValue(9);
       (mockAutomationRepo.create as jest.Mock).mockResolvedValue({
         id: "auto-new",
@@ -146,7 +157,7 @@ describe("AutomationService", () => {
     });
 
     it("TC-AUTO-U-008: findAll should throw NotFoundException when database not owned", async () => {
-      (mockAutomationRepo.findDatabaseByOwner as jest.Mock).mockResolvedValue(null);
+      (mockDatabaseRepo.findDatabaseByOwner as jest.Mock).mockResolvedValue(null);
 
       await expect(service.findAll("db-1", "wrong-user")).rejects.toThrow(NotFoundException);
     });

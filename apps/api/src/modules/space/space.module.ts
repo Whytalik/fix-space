@@ -6,24 +6,32 @@ import { PropertyValueModule } from "@/modules/property-value/property-value.mod
 import { RecordModule } from "@/modules/record/record.module";
 import { SettingsModule } from "@/modules/settings/settings.module";
 import { TemplateModule } from "@/modules/template/template.module";
-import { SectionRepository } from "./repositories/section.repository";
+import { ViewModule } from "@/modules/view/view.module";
 import { DuplicateSectionUseCase } from "./providers/duplicate-section.usecase";
 import { DuplicateSpaceUseCase } from "./providers/duplicate-space.usecase";
 import { GetDashboardUseCase } from "./providers/get-dashboard.usecase";
 import { InitializeUserSpaceUseCase } from "./providers/initialize-user-space.usecase";
 import { SectionService } from "./providers/section.service";
 import { SpaceController } from "./space.controller";
-import { SpaceRepository } from "./repositories/space.repository";
+import { SpaceDataModule } from "./space-data.module";
 import { SpaceService } from "./space.service";
 
 @Module({
-  imports: [DatabaseModule, PropertyModule, PropertyValueModule, RecordModule, TemplateModule, InitializationConfigModule, SettingsModule],
+  imports: [
+    DatabaseModule,
+    PropertyModule,
+    PropertyValueModule,
+    RecordModule,
+    TemplateModule,
+    InitializationConfigModule,
+    SettingsModule,
+    ViewModule,
+    SpaceDataModule,
+  ],
   controllers: [SpaceController],
   providers: [
     SpaceService,
-    SpaceRepository,
     SectionService,
-    SectionRepository,
     InitializeUserSpaceUseCase,
     DuplicateSpaceUseCase,
     DuplicateSectionUseCase,
@@ -31,9 +39,8 @@ import { SpaceService } from "./space.service";
   ],
   exports: [
     SpaceService,
-    SpaceRepository,
+    SpaceDataModule,
     SectionService,
-    SectionRepository,
     InitializeUserSpaceUseCase,
     DuplicateSpaceUseCase,
     DuplicateSectionUseCase,
