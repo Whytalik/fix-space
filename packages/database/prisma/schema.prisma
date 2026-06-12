@@ -47,10 +47,7 @@ enum NotificationType {
 
 enum IntegrationService {
   BINANCE
-  BYBIT
-  OKX
   METATRADER5
-  CTRADER
 }
 
 enum IntegrationStatus {
@@ -189,6 +186,7 @@ model Notification {
 model IntegrationConnection {
   id                  String             @id @default(uuid())
   userId              String
+  spaceId             String?
   service             IntegrationService
   name                String
   credentials         Json
@@ -196,15 +194,18 @@ model IntegrationConnection {
   syncInterval        Int                @default(5)
   marketType          String?
   externalAccountId   String?
+  config              Json?
   lastSyncAt          DateTime?
   lastSyncError       String?
   consecutiveFailures Int                @default(0)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  space Space? @relation(fields: [spaceId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([spaceId])
   @@index([service])
   @@index([status])
 }
@@ -223,9 +224,10 @@ model Space {
   createdAt DateTime @default(now())
   config    Json?
 
-  owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  databases Database[]
-  sections  Section[]
+  owner                  User                    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  databases              Database[]
+  sections               Section[]
+  integrationConnections IntegrationConnection[]
 
   @@unique([ownerId, name])
   @@index([ownerId])
@@ -305,20 +307,21 @@ model PropertyGroup {
 }
 
 model Property {
-  id          String       @id @default(uuid())
-  databaseId  String
-  groupId     String?
-  name        String
-  type        PropertyType
-  position    Int
-  icon        String?
-  hint        String?
-  group       String?
-  isVisible   Boolean      @default(true)
-  isProtected Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  config      Json?
+  id             String       @id @default(uuid())
+  databaseId     String
+  groupId        String?
+  name           String
+  type           PropertyType
+  position       Int
+  icon           String?
+  hint           String?
+  group          String?
+  isVisible      Boolean      @default(true)
+  isProtected    Boolean      @default(false)
+  integrationKey String?      // e.g. "pair", "entryPrice", "stopLoss"
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  config         Json?
 
   database       Database                @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   propertyGroup  PropertyGroup?          @relation(fields: [groupId], references: [id], onDelete: SetNull)
@@ -328,6 +331,7 @@ model Property {
   @@index([databaseId])
   @@index([position])
   @@index([groupId])
+  @@index([integrationKey])
 }
 
 model Record {
