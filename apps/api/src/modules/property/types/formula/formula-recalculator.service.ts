@@ -14,36 +14,160 @@ export class FormulaRecalculator {
   }
 
   async recalculate(recordId: string, databaseId: string, transaction?: Prisma.TransactionClient): Promise<void> {
-    this.logger.debug("Recalculating formulas for record", { recordId, databaseId });
+    this.logger.debug("Recalculating computed properties for record", { recordId, databaseId });
 
     const client = transaction ?? prisma;
 
-    const formulas = await client.property.findMany({
-      where: { databaseId, type: PropertyType.FORMULA },
+    const [formulas, progressProperties] = await Promise.all([
+      client.property.findMany({ where: { databaseId, type: PropertyType.FORMULA } }),
+      client.property.findMany({ where: { databaseId, type: PropertyType.PROGRESS } }),
+    ]);
+
+    const sourceProgressProps = progressProperties.filter((prop) => {
+      const config = prop.config as any;
+      return config?.mode === "source";
     });
 
-    if (formulas.length === 0) return;
-
-    const context = await this.buildContext(recordId, databaseId, client);
+    if (formulas.length === 0 && sourceProgressProps.length === 0) return;
 
     const updates: Array<Promise<unknown>> = [];
-    for (const formula of formulas) {
-      const config = formula.config as unknown as FormulaPropertyConfig;
-      const result = this.formulaEngine.evaluate(config, context);
 
-      this.logger.debug("Formula evaluated", { propertyId: formula.id, name: formula.name, result });
+    if (formulas.length > 0) {
+      const context = await this.buildContext(recordId, databaseId, client);
+      for (const formula of formulas) {
+        const config = formula.config as unknown as FormulaPropertyConfig;
+        const result = this.formulaEngine.evaluate(config, context);
 
-      updates.push(
-        client.propertyValue.upsert({
-          where: { recordId_propertyId: { recordId, propertyId: formula.id } },
-          update: { value: result as Prisma.InputJsonValue, computed: true },
-          create: { recordId, propertyId: formula.id, value: result as Prisma.InputJsonValue, computed: true },
-        }),
-      );
+        this.logger.debug("Formula evaluated", { propertyId: formula.id, name: formula.name, result });
+
+        updates.push(
+          client.propertyValue.upsert({
+            where: { recordId_propertyId: { recordId, propertyId: formula.id } },
+            update: { value: result as Prisma.InputJsonValue, computed: true },
+            create: { recordId, propertyId: formula.id, value: result as Prisma.InputJsonValue, computed: true },
+          }),
+        );
+      }
+    }
+
+    for (const progressProp of sourceProgressProps) {
+      const result = await this.calculateProgressRollup(recordId, progressProp, client);
+      if (result !== null) {
+        this.logger.debug("Progress rollup evaluated", { propertyId: progressProp.id, name: progressProp.name, result });
+        updates.push(
+          client.propertyValue.upsert({
+            where: { recordId_propertyId: { recordId, propertyId: progressProp.id } },
+            update: { value: result as Prisma.InputJsonValue, computed: true },
+            create: { recordId, propertyId: progressProp.id, value: result as Prisma.InputJsonValue, computed: true },
+          }),
+        );
+      }
     }
 
     await Promise.all(updates);
-    this.logger.log("Formulas recalculated", { recordId, formulasCount: formulas.length });
+    this.logger.log("Computed properties recalculated", {
+      recordId,
+      formulasCount: formulas.length,
+      progressCount: sourceProgressProps.length,
+    });
+  }
+
+  private async calculateProgressRollup(
+    recordId: string,
+    progressProp: any,
+    client: Prisma.TransactionClient | typeof prisma,
+  ): Promise<number | null> {
+    const config = progressProp.config as any;
+    if (!config?.relationPropertyId || !config?.targetPropertyId || !config?.rollupType) {
+      return null;
+    }
+
+    const relationValue = await client.propertyValue.findUnique({
+      where: { recordId_propertyId: { recordId, propertyId: config.relationPropertyId } },
+    });
+
+    if (!relationValue?.value) {
+      return 0;
+    }
+
+    const relatedIds = Array.isArray(relationValue.value) ? (relationValue.value as string[]) : [relationValue.value as string];
+
+    if (relatedIds.length === 0) {
+      return 0;
+    }
+
+    const targetPropDef = await client.property.findUnique({
+      where: { id: config.targetPropertyId },
+    });
+
+    if (!targetPropDef) {
+      return null;
+    }
+
+    const targetValues = await client.propertyValue.findMany({
+      where: {
+        recordId: { in: relatedIds },
+        propertyId: config.targetPropertyId,
+      },
+    });
+
+    const totalCount = relatedIds.length;
+
+    switch (config.rollupType) {
+      case "percent_complete": {
+        let completeOptions: string[] = [];
+        if (targetPropDef.type === PropertyType.STATUS && targetPropDef.config) {
+          const statusConfig = targetPropDef.config as any;
+          const completeCategory = statusConfig.categories?.find((c: any) => c.category === "complete");
+          if (completeCategory) {
+            completeOptions = completeCategory.options?.map((o: any) => o.name) ?? [];
+          }
+        } else if (targetPropDef.type === PropertyType.SELECT && targetPropDef.config) {
+          const selectConfig = targetPropDef.config as any;
+          completeOptions = selectConfig.categories?.flatMap((c: any) => c.options?.map((o: any) => o.value) ?? []) ?? [];
+          completeOptions = completeOptions.filter((val) =>
+            ["done", "complete", "completed", "success", "resolved", "finished", "closed"].includes(val.toLowerCase()),
+          );
+        }
+
+        if (completeOptions.length === 0) {
+          completeOptions = ["done", "complete", "completed", "success", "resolved", "finished", "closed"];
+        }
+
+        const completedCount = targetValues.filter((v) => {
+          if (v.value === null || v.value === undefined) return false;
+          const strVal = String(v.value).toLowerCase();
+          return completeOptions.some((option) => option.toLowerCase() === strVal);
+        }).length;
+
+        return totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+      }
+
+      case "percent_checked": {
+        const checkedCount = targetValues.filter((v) => {
+          return v.value === true || v.value === "true" || v.value === 1;
+        }).length;
+        return totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
+      }
+
+      case "average": {
+        const numbers = targetValues.map((v) => Number(v.value)).filter((n) => !isNaN(n));
+        const sum = numbers.reduce((acc, curr) => acc + curr, 0);
+        return numbers.length > 0 ? Math.round(sum / numbers.length) : 0;
+      }
+
+      case "sum": {
+        const numbers = targetValues.map((v) => Number(v.value)).filter((n) => !isNaN(n));
+        return numbers.reduce((acc, curr) => acc + curr, 0);
+      }
+
+      case "count": {
+        return totalCount;
+      }
+
+      default:
+        return null;
+    }
   }
 
   async previewForDatabase(databaseId: string, config: FormulaPropertyConfig): Promise<{ result: unknown; isSample: boolean }> {

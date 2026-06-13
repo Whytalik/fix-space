@@ -1,20 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { HttpCode, HttpStatus } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
-import {
-  AvailablePresetTypeDto,
-  CreateDatabaseDto,
-  DatabaseResponseDto,
-  DuplicateDatabaseDto,
-  RestorePresetDatabaseDto,
-  UpdateDatabaseDto,
-} from "@fixspace/domain";
+import { CreateDatabaseDto, DatabaseResponseDto, DuplicateDatabaseDto, UpdateDatabaseDto } from "@fixspace/domain";
 import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
 import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
 import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
 import { DatabaseService } from "./database.service";
 import { DuplicateDatabaseUseCase } from "./providers/duplicate-database.usecase";
-import { PresetRestoreService } from "./providers/preset-restore.service";
 
 @ApiTags("Databases")
 @ApiBearerAuth("access-token")
@@ -23,7 +15,6 @@ export class DatabaseController {
   constructor(
     private readonly databaseService: DatabaseService,
     private readonly duplicateDatabaseUseCase: DuplicateDatabaseUseCase,
-    private readonly presetRestoreService: PresetRestoreService,
   ) {}
 
   @Post()
@@ -34,26 +25,8 @@ export class DatabaseController {
   @ApiResponse({ status: 400, description: "Validation error." })
   @ApiResponse({ status: 404, description: "Workspace not found." })
   create(@CurrentUser("userId") userId: string, @Body() createDatabaseDto: CreateDatabaseDto) {
-    createDatabaseDto.isPreset = false;
+    createDatabaseDto.isKey = false;
     return this.databaseService.create(createDatabaseDto.spaceId, createDatabaseDto, userId);
-  }
-
-  @Get("available-preset-types")
-  @ApiOperation({ summary: "Get preset database types available for restore (deleted system databases)" })
-  @ApiResponse({ status: 200, description: "List of available preset types.", type: [AvailablePresetTypeDto] })
-  getAvailablePresetTypes(@CurrentUser("userId") userId: string) {
-    return this.presetRestoreService.getAvailablePresetTypes(userId);
-  }
-
-  @Post("restore-preset")
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: "Restore a preset database (recreate with properties, templates, views)" })
-  @ApiBody({ type: RestorePresetDatabaseDto })
-  @ApiResponse({ status: 201, description: "Preset database restored.", type: DatabaseResponseDto })
-  @ApiResponse({ status: 400, description: "Unknown preset type." })
-  @ApiResponse({ status: 409, description: "Database of this type already exists." })
-  restorePreset(@CurrentUser("userId") userId: string, @Body() dto: RestorePresetDatabaseDto) {
-    return this.presetRestoreService.restore(userId, dto.type, dto.spaceId, dto.sectionId);
   }
 
   @Get()
@@ -122,7 +95,7 @@ export class DatabaseController {
   @ApiOperation({ summary: "Delete database" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Database deleted.", type: DatabaseResponseDto })
-  @ApiResponse({ status: 400, description: "Cannot delete system database." })
+  @ApiResponse({ status: 400, description: "Cannot delete key database." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
   remove(@Param("id") id: string) {
     return this.databaseService.remove(id);

@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { Prisma } from "@fixspace/database";
 import { DuplicateSpaceDto, SpaceResponseDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
@@ -18,6 +18,11 @@ export class DuplicateSpaceUseCase {
 
   async execute(id: string, ownerId: string, options: DuplicateSpaceDto = {}): Promise<SpaceResponseDto> {
     this.logger.debug("Duplicating space with options", { id, ownerId, options });
+
+    const count = await this.spaceRepo.count(ownerId);
+    if (count >= 5) {
+      throw new BadRequestException(t("errors.SPACE_LIMIT_REACHED"));
+    }
 
     const sourceSpace = await this.spaceRepo.findByIdForDuplicate(id);
 

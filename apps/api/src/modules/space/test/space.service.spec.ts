@@ -42,6 +42,7 @@ describe("SpaceService", () => {
     findAll: jest.fn(),
     findOne: jest.fn(),
     findOwner: jest.fn(),
+    count: jest.fn(),
     update: jest.fn(),
     updateMany: jest.fn(),
     delete: jest.fn(),
@@ -78,6 +79,7 @@ describe("SpaceService", () => {
     spaceRepo = module.get(SpaceRepository);
 
     jest.clearAllMocks();
+    mockSpaceRepo.count.mockResolvedValue(0);
   });
 
   describe("create", () => {
@@ -106,6 +108,7 @@ describe("SpaceService", () => {
           isDefault: false,
         }),
         expect.any(Object),
+        expect.anything(),
       );
     });
 
@@ -135,7 +138,15 @@ describe("SpaceService", () => {
           isDefault: true,
         }),
         expect.any(Object),
+        expect.anything(),
       );
+    });
+
+    it("TC-WS-U-005: should throw BadRequestException if space limit of 5 is reached", async () => {
+      mockSpaceRepo.count.mockResolvedValue(5);
+
+      await expect(service.create("user-1", { name: "New Space" })).rejects.toThrow(BadRequestException);
+      expect(spaceRepo.create).not.toHaveBeenCalled();
     });
   });
 

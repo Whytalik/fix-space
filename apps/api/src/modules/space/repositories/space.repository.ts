@@ -67,6 +67,10 @@ export class SpaceRepository extends BaseRepository {
     });
   }
 
+  async count(ownerId: string, transaction?: Prisma.TransactionClient): Promise<number> {
+    return (transaction ?? prisma).space.count({ where: { ownerId } });
+  }
+
   async create(data: Prisma.SpaceUncheckedCreateInput, include?: Prisma.SpaceInclude, transaction?: Prisma.TransactionClient) {
     return (transaction ?? prisma).space.create({ data, include });
   }

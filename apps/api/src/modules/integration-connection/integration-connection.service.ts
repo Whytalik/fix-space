@@ -3,7 +3,6 @@ import {
   CreateIntegrationConnectionDto,
   IntegrationConnectionResponseDto,
   IntegrationService,
-  IntegrationStatus,
   IntegrationTradeDto,
   ImportTradesDto,
   PreviewTradesDto,
@@ -22,7 +21,7 @@ import { RecordService } from "../record/record.service";
 import { SyncRecordService } from "./sync-record.service";
 import { CacheService } from "../../core/cache/cache.service";
 import type { SyncResult, TradeData } from "./providers/integration.provider";
-import { InitializeUserSpaceUseCase } from "@/modules/space/providers/initialize-user-space.usecase";
+import { InitializeUserSpaceUseCase } from "../space/providers/initialize-user-space.usecase";
 
 @Injectable()
 export class IntegrationConnectionService {
@@ -89,7 +88,7 @@ export class IntegrationConnectionService {
       status: DbIntegrationStatus.ACTIVE,
     });
 
-    this.deployAsync(connection.id, dto, provider);
+    void this.deployAsync(connection.id, dto, provider);
 
     await this.notificationService.create(
       userId,
@@ -107,12 +106,12 @@ export class IntegrationConnectionService {
       const validation = await provider.validateCredentials(dto.credentials);
 
       if (!validation.valid) {
-        throw new Error(validation.error);
+        throw new Error(validation.error as string);
       }
 
       await this.integrationRepo.update(connectionId, {
         status: DbIntegrationStatus.ACTIVE,
-        externalAccountId: validation.accountId,
+        externalAccountId: validation.accountId as string | undefined,
       });
       this.logger.log("Async deployment completed", { connectionId });
     } catch (error) {
@@ -198,7 +197,7 @@ export class IntegrationConnectionService {
     let defaultSpace =
       (await prisma.space.findFirst({
         where: { ownerId: userId, isDefault: true },
-      })) ||
+      })) ??
       (await prisma.space.findFirst({
         where: { ownerId: userId },
       }));
@@ -218,7 +217,7 @@ export class IntegrationConnectionService {
         connectionId: connection.id,
         spaceId: defaultSpace.id,
       });
-      await this.integrationRepo.update(connection.id, { spaceId: defaultSpace.id });
+      await this.integrationRepo.update(connection.id as string, { spaceId: defaultSpace.id });
       connection.spaceId = defaultSpace.id;
       return defaultSpace.id;
     }

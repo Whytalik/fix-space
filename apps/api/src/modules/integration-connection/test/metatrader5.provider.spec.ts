@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { ConfigService } from "@nestjs/config";
-import { AppLogger } from "@/common/logger/app-logger.service";
+import type { ConfigService } from "@nestjs/config";
+import type { AppLogger } from "@/common/logger/app-logger.service";
 import { MetaTrader5Provider } from "../providers/metatrader5.provider";
 
 const SIDECAR_URL = "http://mt5-sidecar:8000";

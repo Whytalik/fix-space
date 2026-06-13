@@ -28,8 +28,8 @@
   "SPACE_NOT_FOUND": "Простір не знайдено",
   "DATABASE_NOT_FOUND": "Базу даних не знайдено",
   "DATABASE_NOT_FOUND_ID": "Базу даних з id {id} не знайдено",
-  "DATABASE_STRUCTURE_LOCKED": "Структура бази даних заблокована або це системна база, її неможливо змінити",
-  "CANNOT_DELETE_PRESET_DATABASE": "Неможливо видалити системну базу даних",
+  "DATABASE_STRUCTURE_LOCKED": "Структура бази даних заблокована і не може бути змінена",
+  "CANNOT_DELETE_KEY_DATABASE": "Неможливо видалити ключову базу даних",
   "SECTION_NOT_FOUND": "Секцію не знайдено в цьому просторі",
   "PROPERTY_NOT_FOUND": "Властивість не знайдено",
   "PROPERTY_NOT_FOUND_ID": "Властивість з id {id} не знайдено",
@@ -94,6 +94,5 @@
   "INTEGRATION_KEY_NOT_READ_ONLY": "API ключ повинен бути лише для читання (enableTrading та enableWithdrawals мають бути вимкнені)",
   "INTEGRATION_SYNC_FAILED": "Синхронізація не вдалася для {name}: {error}",
   "INTEGRATION_NOT_LINKED_TO_SPACE": "Підключення інтеграції не привʼязане до жодного спейсу.",
-  "UNKNOWN_PRESET_TYPE": "Невідомий тип шаблонної бази даних: {type}",
-  "PRESET_DATABASE_EXISTS": "База даних типу \"{type}\" вже існує"
+  "SPACE_LIMIT_REACHED": "Досягнуто ліміт просторів (5)"
 }

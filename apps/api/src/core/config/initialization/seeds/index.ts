@@ -9,6 +9,9 @@ import { operationsSeeds } from "./operations.seeds";
 import { tradingSystemSeeds } from "./trading-system.seeds";
 import { routineLibrarySeeds } from "./routine-library.seeds";
 import { performanceReviewSeeds } from "./performance-review.seeds";
+import { learningTasksSeeds } from "./learning-tasks.seeds";
+import { economicEventsSeeds } from "./economic-events.seeds";
+import { economicReleasesSeeds } from "./economic-releases.seeds";
 
 export type { SeedRecord, SeedRelation } from "./types";
 export { tradingJournalSeeds } from "./trading-journal.seeds";
@@ -20,6 +23,9 @@ export { operationsSeeds } from "./operations.seeds";
 export { tradingSystemSeeds } from "./trading-system.seeds";
 export { routineLibrarySeeds } from "./routine-library.seeds";
 export { performanceReviewSeeds } from "./performance-review.seeds";
+export { learningTasksSeeds } from "./learning-tasks.seeds";
+export { economicEventsSeeds } from "./economic-events.seeds";
+export { economicReleasesSeeds } from "./economic-releases.seeds";
 
 export const seedsByDatabaseType: Partial<Record<DatabaseType, SeedRecord[]>> = {
   "trading-journal": tradingJournalSeeds,
@@ -31,4 +37,7 @@ export const seedsByDatabaseType: Partial<Record<DatabaseType, SeedRecord[]>> = 
   "trading-system": tradingSystemSeeds,
   "routine-library": routineLibrarySeeds,
   "performance-review": performanceReviewSeeds,
+  "learning-tasks": learningTasksSeeds,
+  "economic-events": economicEventsSeeds,
+  "economic-releases": economicReleasesSeeds,
 };
