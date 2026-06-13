@@ -179,7 +179,11 @@ export function PropertyFormModal({
           )}
           <PropertyIcon type={selectedType} size={15} className="text-ink-muted shrink-0" />
           <h2 className="type-modal-title flex-1">
-            {mode === "create" ? `Add ${typeMeta[selectedType].label} property` : mode === "view" ? t("viewProperty") : t("editProperty")}
+            {mode === "create"
+              ? t("addPropertyTitle", { type: typeMeta[selectedType].label })
+              : mode === "view"
+                ? t("viewProperty")
+                : t("editProperty")}
           </h2>
           <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink transition-colors duration-150 shrink-0">
             <X size={16} />
@@ -194,7 +198,7 @@ export function PropertyFormModal({
 
             {mode === "edit" && (
               <div>
-                <label className="type-field-label">Type</label>
+                <label className="type-field-label">{t("type")}</label>
                 <div className="flex items-center justify-between mt-1">
                   <div className="flex items-center gap-2 text-sm text-ink">
                     <PropertyIcon type={selectedType} size={14} className="text-ink-muted shrink-0" />
@@ -212,7 +216,7 @@ export function PropertyFormModal({
             )}
 
             <div>
-              <label className="type-field-label">Icon (optional)</label>
+              <label className="type-field-label">{t("icon")}</label>
               <div className="relative mt-1">
                 <button
                   ref={iconButtonRef}
@@ -226,7 +230,7 @@ export function PropertyFormModal({
                       <span className="text-ink-secondary text-xs">{icon.startsWith("icon:") ? icon.slice(5) : icon}</span>
                     </>
                   ) : (
-                    <span className="text-ink-muted text-xs">Choose an icon…</span>
+                    <span className="text-ink-muted text-xs">{t("chooseIcon")}</span>
                   )}
                 </button>
                 {showIconPicker && (

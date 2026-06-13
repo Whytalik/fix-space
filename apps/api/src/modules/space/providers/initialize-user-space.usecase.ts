@@ -103,7 +103,7 @@ export class InitializeUserSpaceUseCase {
             type: databaseTemplate.type,
             icon: databaseTemplate.icon,
             sectionId: databaseTemplate.sectionKey ? sectionByKey.get(databaseTemplate.sectionKey) : undefined,
-            isPreset: true,
+            isKey: databaseTemplate.isKey ?? false,
             properties: [],
           },
           userId,

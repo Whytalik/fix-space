@@ -169,7 +169,15 @@ export function AppProvider({
   function updateSpaceInList(updated: SpaceResponseDto) {
     queryClient.setQueryData<SpaceResponseDto[]>(queryKeys.spaces.all(), (previous) => {
       if (!previous) return [];
-      return previous.map((space) => (space.id === updated.id ? updated : space));
+      return previous.map((space) => {
+        if (space.id === updated.id) {
+          return updated;
+        }
+        if (updated.isDefault) {
+          return { ...space, isDefault: false };
+        }
+        return space;
+      });
     });
   }
 

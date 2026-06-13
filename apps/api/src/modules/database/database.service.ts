@@ -79,7 +79,7 @@ export class DatabaseService {
           spaceId,
           sectionId: createDatabaseDto.sectionId,
           position,
-          isPreset: createDatabaseDto.isPreset ?? false,
+          isKey: createDatabaseDto.isKey ?? false,
         },
         tx,
       );
@@ -179,7 +179,6 @@ export class DatabaseService {
         sectionId: updateDatabaseDto.sectionId,
         position: updateDatabaseDto.position,
         isLocked: updateDatabaseDto.isLocked,
-        isPreset: updateDatabaseDto.isPreset,
       },
       nullableFields: {},
     });
@@ -219,6 +218,10 @@ export class DatabaseService {
 
     if (!existingDatabase) {
       throw new NotFoundException(t("errors.DATABASE_NOT_FOUND_ID", { id }));
+    }
+
+    if (existingDatabase.isKey) {
+      throw new BadRequestException(t("errors.CANNOT_DELETE_KEY_DATABASE"));
     }
 
     const database = await this.databaseRepo.delete(id);

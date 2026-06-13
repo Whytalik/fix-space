@@ -32,6 +32,7 @@ import { UserModule } from "./modules/user/user.module";
 import { ViewModule } from "./modules/view/view.module";
 import { AutomationModule } from "./modules/automation/automation.module";
 import { CacheModule } from "./core/cache/cache.module";
+import { StatisticsModule } from "./modules/statistics/statistics.module";
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { CacheModule } from "./core/cache/cache.module";
     IntegrationConnectionModule,
     NotificationModule,
     AutomationModule,
+    StatisticsModule,
   ],
   providers: [
     {

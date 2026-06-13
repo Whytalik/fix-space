@@ -89,14 +89,6 @@ export function SectionItem({ section, collapsed, isExpanded, onToggle }: Sectio
     setShowMenu((prevShow) => !prevShow);
   }
 
-  if (collapsed) {
-    return (
-      <div className="flex flex-col gap-0.5">
-        {space && section.databases?.map((database) => <DatabaseItem spaceId={space.id} key={database.id} database={database} collapsed />)}
-      </div>
-    );
-  }
-
   const databaseIds = section.databases?.map((database) => database.id) ?? [];
 
   return (
@@ -106,38 +98,48 @@ export function SectionItem({ section, collapsed, isExpanded, onToggle }: Sectio
         ...style,
         ...(section.color ? { backgroundColor: `color-mix(in srgb, ${section.color} 5%, transparent)` } : {}),
       }}
-      className={`flex flex-col rounded-lg ${isDragging ? "opacity-0" : ""}`}
+      className={`flex flex-col rounded-2xl -mx-1.5 ${isDragging ? "opacity-0" : ""}`}
     >
-      <div className={`group flex items-center rounded-lg ${showMenu ? "bg-surface" : "hover:bg-surface"}`}>
+      <div
+        className={`group flex items-center rounded-2xl transition-colors duration-150 ${collapsed ? "justify-center" : ""} ${showMenu ? "bg-surface" : "hover:bg-surface"}`}
+      >
         <button
           type="button"
           {...listeners}
           onClick={onToggle}
-          className={`flex items-center gap-1.5 px-2 py-1 flex-1 min-w-0 touch-none ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}
+          className={`flex items-center gap-1.5 px-2 py-1 h-7 flex-1 min-w-0 touch-none ${isDragging ? "cursor-grabbing" : "cursor-pointer"} ${collapsed ? "justify-center" : ""}`}
         >
-          <ChevronRight
-            size={12}
-            className={`text-ink-muted shrink-0 ${isMounted ? "transition-transform duration-150" : ""} ${isExpanded ? "rotate-90" : ""}`}
-          />
+          {!collapsed && (
+            <span className="shrink-0 flex items-center">
+              <ChevronRight
+                size={12}
+                className={`text-ink-muted ${isMounted ? "transition-transform duration-150" : ""} ${isExpanded ? "rotate-90" : ""}`}
+              />
+            </span>
+          )}
           {section.icon && (
             <span className="shrink-0 text-ink-secondary flex items-center">
               <IconDisplay value={section.icon} size={14} />
             </span>
           )}
-          <span className="type-nav-label truncate" style={{ color: section.color || undefined }}>
-            {section.name}
-          </span>
+          {!collapsed && (
+            <span className="type-nav-label truncate" style={{ color: section.color || undefined }}>
+              {section.name}
+            </span>
+          )}
         </button>
-        <Button
-          ref={menuButtonRef}
-          variant="ghost"
-          size="icon"
-          title={t("options")}
-          onClick={handleMenuToggle}
-          className={`mr-1 shrink-0 transition-opacity duration-150 ${showMenu ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
-        >
-          <MoreHorizontal size={14} />
-        </Button>
+        {!collapsed && (
+          <Button
+            ref={menuButtonRef}
+            variant="ghost"
+            size="icon"
+            title={t("options")}
+            onClick={handleMenuToggle}
+            className={`mr-1 shrink-0 transition-opacity duration-150 ${showMenu ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+          >
+            <MoreHorizontal size={14} />
+          </Button>
+        )}
       </div>
 
       {showMenu && (
@@ -174,14 +176,20 @@ export function SectionItem({ section, collapsed, isExpanded, onToggle }: Sectio
         />
       )}
 
+      {isExpanded && <div className="border-t border-stroke" />}
+
       {isExpanded && space && (
-        <div
-          className={`ml-5 border-l py-0.5 ${section.color ? "" : "border-stroke"}`}
-          style={section.color ? { borderColor: `color-mix(in srgb, ${section.color} 50%, transparent)` } : undefined}
-        >
+        <div className={`py-0.5 ${collapsed ? "ml-0" : "ml-3"}`}>
           <SortableContext items={databaseIds} strategy={verticalListSortingStrategy}>
             {section.databases?.map((database) => (
-              <DatabaseItem spaceId={space.id} key={database.id} database={database} sectionId={section.id} sectionColor={section.color} />
+              <DatabaseItem
+                spaceId={space.id}
+                key={database.id}
+                database={database}
+                sectionId={section.id}
+                sectionColor={section.color}
+                collapsed={collapsed}
+              />
             ))}
           </SortableContext>
         </div>

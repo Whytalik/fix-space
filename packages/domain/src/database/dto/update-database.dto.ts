@@ -59,11 +59,6 @@ export class UpdateDatabaseDto {
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
   icon?: string;
 
-  @ApiProperty({ description: "Whether database is a preset", example: false, required: false })
-  @IsOptional()
-  @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })
-  isPreset?: boolean;
-
   @ApiProperty({ description: "Whether the database is locked", example: false, required: false })
   @IsOptional()
   @IsBoolean({ message: i18nValidationMessage<I18nTranslations>("validation.IS_BOOLEAN") })

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { AppLogger } from "@/common/logger/app-logger.service";
+import type { AppLogger } from "@/common/logger/app-logger.service";
 import { BinanceProvider } from "../providers/binance.provider";
 import type { BinanceTradeFill } from "../providers/binance.provider";
 
@@ -38,12 +38,9 @@ jest.mock("binance", () => {
   };
 });
 
-import { MainClient, USDMClient } from "binance";
-
 const mockGetApiKeyPermissions = (jest.requireMock("binance") as Record<string, unknown>).__mockGetApiKeyPermissions as jest.Mock;
 const mockGetAccountInformation = (jest.requireMock("binance") as Record<string, unknown>).__mockGetAccountInformation as jest.Mock;
 const mockGetAccountTrades = (jest.requireMock("binance") as Record<string, unknown>).__mockGetAccountTrades as jest.Mock;
-const mockGetExchangeInfo = (jest.requireMock("binance") as Record<string, unknown>).__mockGetExchangeInfo as jest.Mock;
 const mockGetUsdmAccountInformation = (jest.requireMock("binance") as Record<string, unknown>).__mockGetUsdmAccountInformation as jest.Mock;
 const mockGetIncomeHistory = (jest.requireMock("binance") as Record<string, unknown>).__mockGetIncomeHistory as jest.Mock;
 const mockGetAllOrders = (jest.requireMock("binance") as Record<string, unknown>).__mockGetAllOrders as jest.Mock;

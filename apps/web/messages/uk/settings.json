@@ -168,8 +168,6 @@
     "default": "За замовчуванням",
     "defaultIcon": "Іконка за замовчуванням",
     "chooseIcon": "Вибрати іконку…",
-    "showPresetIndicators": "Показувати індикатори пресетів",
-    "showPresetIndicatorsDesc": "Відображати спеціальні іконки для системних баз даних.",
     "saveChanges": "Зберегти зміни",
     "timeFormat": "Формат часу",
     "startOfWeek": "Початок тижня",

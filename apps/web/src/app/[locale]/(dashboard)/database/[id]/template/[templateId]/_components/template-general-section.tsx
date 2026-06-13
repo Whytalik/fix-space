@@ -39,7 +39,7 @@ export function TemplateGeneralSection({
 
   return (
     <div className="card p-5 space-y-4">
-      <span className="type-nav-label text-ink-muted block">General</span>
+      <span className="type-nav-label text-ink-muted block">{t("general")}</span>
 
       <div>
         <label className="block mb-1.5 type-field-label">{t("icon")}</label>

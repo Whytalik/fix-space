@@ -80,7 +80,7 @@ export class BinanceProvider implements IntegrationProvider {
         accoountType?: string;
         accountType?: string;
       };
-      const accountType = accountInfo?.accoountType || accountInfo?.accountType || "SPOT";
+      const accountType = accountInfo?.accoountType ?? accountInfo?.accountType ?? "SPOT";
 
       return { valid: true, accountId: `${accountType} - ${accountType}` };
     } catch (error: unknown) {
@@ -121,9 +121,10 @@ export class BinanceProvider implements IntegrationProvider {
       const activeSymbols = new Set<string>();
 
       const account = await usdmClient.getAccountInformation();
-      account.positions.forEach((p: any) => {
-        if (parseFloat(p.positionAmt) !== 0 || parseFloat(p.unrealizedProfit) !== 0) {
-          activeSymbols.add(p.symbol);
+      const positions = account.positions as unknown as Record<string, unknown>[];
+      positions.forEach((p) => {
+        if (parseFloat(p.positionAmt as string) !== 0 || parseFloat(p.unrealizedProfit as string) !== 0) {
+          activeSymbols.add(p.symbol as string);
         }
       });
 
@@ -142,7 +143,7 @@ export class BinanceProvider implements IntegrationProvider {
 
       for (const result of incomeResults) {
         if (result.status === "fulfilled" && result.value) {
-          result.value.forEach((incomeItem: any) => activeSymbols.add(incomeItem.symbol));
+          result.value.forEach((incomeItem: { symbol: string }) => activeSymbols.add(incomeItem.symbol));
         }
       }
 
@@ -184,7 +185,7 @@ export class BinanceProvider implements IntegrationProvider {
         if (result.status === "fulfilled") {
           const { trades, orders } = result.value;
           if (trades.length > 0) allFills.push(...trades);
-          orders.forEach((o: any) => allOrdersMap.set(o.orderId, o));
+          orders.forEach((o: any) => allOrdersMap.set(Number(o.orderId), o));
         } else {
           const reason = result.reason;
           const errorMessage =
@@ -200,10 +201,10 @@ export class BinanceProvider implements IntegrationProvider {
       this.logger.error("Binance sync raw error", { connectionId, error });
       const code = (error as Record<string, unknown>)?.code;
       const message =
-        (error as any)?.message ||
-        (error as any)?.msg ||
-        (error as any)?.body?.message ||
-        (error as any)?.body?.msg ||
+        (error as any)?.message ??
+        (error as any)?.msg ??
+        (error as any)?.body?.message ??
+        (error as any)?.body?.msg ??
         (error instanceof Error ? error.message : String(error));
       const userMessage =
         code === -1003
@@ -258,17 +259,18 @@ export class BinanceProvider implements IntegrationProvider {
 
           if (closingOrder) {
             if (closingOrder.type === "STOP_MARKET" || closingOrder.type === "STOP") {
-              stopLoss = parseFloat(closingOrder.stopPrice);
+              stopLoss = parseFloat(closingOrder.stopPrice as string);
             } else if (closingOrder.type === "TAKE_PROFIT_MARKET" || closingOrder.type === "TAKE_PROFIT") {
-              takeProfit = parseFloat(closingOrder.stopPrice);
+              takeProfit = parseFloat(closingOrder.stopPrice as string);
             }
           }
 
           if (!stopLoss || !takeProfit) {
             for (const o of ordersMap.values()) {
               if (o.symbol === current.symbol && o.time >= current.minTime && o.time <= next.maxTime) {
-                if (!stopLoss && (o.type === "STOP_MARKET" || o.type === "STOP")) stopLoss = parseFloat(o.stopPrice);
-                if (!takeProfit && (o.type === "TAKE_PROFIT_MARKET" || o.type === "TAKE_PROFIT")) takeProfit = parseFloat(o.stopPrice);
+                if (!stopLoss && (o.type === "STOP_MARKET" || o.type === "STOP")) stopLoss = parseFloat(o.stopPrice as string);
+                if (!takeProfit && (o.type === "TAKE_PROFIT_MARKET" || o.type === "TAKE_PROFIT"))
+                  takeProfit = parseFloat(o.stopPrice as string);
               }
             }
           }

@@ -134,7 +134,7 @@ function ComponentRenderer({ component, recordId, templateId, isEditing, onUpdat
           ghost
           value={data.html ?? ""}
           onChange={(html) => onUpdateData(component.id, { html })}
-          placeholder={`Heading ${level}...`}
+          placeholder={t("heading", { level })}
           editorClass="text-inherit leading-inherit"
         />
       </div>
@@ -351,11 +351,11 @@ function ImageComponent({ data, recordId, templateId, isEditing, onUpdate }: Ima
                 <>
                   <ImageIcon size={24} className="opacity-50" />
                   <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
-                    Choose file
+                    {t("chooseFile")}
                   </Button>
                   <div className="flex flex-col items-center gap-1">
-                    <span className="text-[11px] font-medium">or paste image</span>
-                    <span className="text-[10px] opacity-40">PNG, JPG, WebP · max 5 MB</span>
+                    <span className="text-xs font-medium">{t("orPasteImage")}</span>
+                    <span className="text-xs opacity-40">{t("uploadHint")}</span>
                   </div>
                 </>
               )}
@@ -390,9 +390,9 @@ function ImageComponent({ data, recordId, templateId, isEditing, onUpdate }: Ima
           <>
             <ImageIcon size={20} className="opacity-50" />
             <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
-              Choose file
+              {t("chooseFile")}
             </Button>
-            <span className="text-xs opacity-60 italic">or paste image (Ctrl+V)</span>
+            <span className="text-xs opacity-60 italic">{t("pasteImage")}</span>
           </>
         )}
         {error && <p className="mt-1 text-xs text-error">{error}</p>}

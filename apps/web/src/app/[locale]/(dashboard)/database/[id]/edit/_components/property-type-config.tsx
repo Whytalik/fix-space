@@ -12,6 +12,8 @@ import type {
   StatusCategoryConfig,
   StatusOptionColor,
   FormulaPropertyConfig,
+  ProgressPropertyConfig,
+  RelationPropertyConfig,
 } from "@fixspace/domain";
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -26,6 +28,7 @@ import {
   TIME_FORMATS_VALUES,
 } from "@fixspace/domain/enums";
 import { Image as ImageIcon, Plus, Trash2, X, GripVertical } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { FormulaConfig } from "./properties/formula-config";
 
@@ -39,6 +42,7 @@ type PropertyTypeConfigProps = {
 };
 
 export function PropertyTypeConfig({ type, config, properties, databases, onPatch }: PropertyTypeConfigProps) {
+  const t = useTranslations("PropertyConfig");
   const [iconPickerState, setIconPickerState] = useState<{
     element: HTMLElement;
     categoryIndex: number;
@@ -449,7 +453,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
       return (
         <div className="flex flex-col gap-4">
           <div>
-            <p className="type-field-label mb-1">Format</p>
+            <p className="type-field-label mb-1">{t("format")}</p>
             <select
               value={String(config.format ?? "float")}
               onChange={(e) => onPatch({ format: e.target.value })}
@@ -464,7 +468,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
           </div>
           {(config.format === "float" || config.format === "currency" || config.format === "percentage") && (
             <div>
-              <p className="type-field-label mb-1">Decimal places</p>
+              <p className="type-field-label mb-1">{t("decimalPlaces")}</p>
               <input
                 type="number"
                 min={0}
@@ -477,7 +481,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
           )}
           {config.format === "currency" && (
             <div>
-              <p className="type-field-label mb-1">Currency symbol</p>
+              <p className="type-field-label mb-1">{t("currencySymbol")}</p>
               <input
                 type="text"
                 maxLength={4}
@@ -489,7 +493,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="type-field-label mb-1">Prefix</p>
+              <p className="type-field-label mb-1">{t("prefix")}</p>
               <input
                 type="text"
                 maxLength={10}
@@ -500,7 +504,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
               />
             </div>
             <div>
-              <p className="type-field-label mb-1">Suffix</p>
+              <p className="type-field-label mb-1">{t("suffix")}</p>
               <input
                 type="text"
                 maxLength={10}
@@ -512,7 +516,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
             </div>
           </div>
           <div>
-            <p className="type-field-label mb-1">Default value</p>
+            <p className="type-field-label mb-1">{t("defaultValue")}</p>
             <input
               type="number"
               value={Number(config.defaultValue ?? 0)}
@@ -527,7 +531,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
       return (
         <div className="flex flex-col gap-4">
           <div>
-            <p className="type-field-label mb-1">Date format</p>
+            <p className="type-field-label mb-1">{t("dateFormat")}</p>
             <select
               value={String(config.format ?? DATA_FORMATS_VALUES[0])}
               onChange={(e) => onPatch({ format: e.target.value })}
@@ -541,12 +545,12 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
             </select>
           </div>
           <label className="flex items-center justify-between gap-4">
-            <p className="text-sm text-ink">Include time</p>
+            <p className="text-sm text-ink">{t("includeTime")}</p>
             <Toggle value={Boolean(config.includeTime)} onChange={(value) => onPatch({ includeTime: value })} />
           </label>
           {Boolean(config.includeTime) && (
             <div>
-              <p className="type-field-label mb-1">Time format</p>
+              <p className="type-field-label mb-1">{t("timeFormat")}</p>
               <select
                 value={String(config.timeFormat ?? TIME_FORMATS_VALUES[0])}
                 onChange={(e) => onPatch({ timeFormat: e.target.value })}
@@ -566,7 +570,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
     case PropertyType.CHECKBOX:
       return (
         <label className="flex items-center justify-between gap-4">
-          <p className="text-sm text-ink">Default checked</p>
+          <p className="text-sm text-ink">{t("defaultChecked")}</p>
           <Toggle value={Boolean(config.defaultValue)} onChange={(value) => onPatch({ defaultValue: value })} />
         </label>
       );
@@ -576,15 +580,15 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
         <div className="flex flex-col gap-4">
           <label className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-ink">Multi-select</p>
-              <p className="text-xs text-ink-muted mt-0.5">Allow selecting multiple values</p>
+              <p className="text-sm text-ink">{t("multiSelect")}</p>
+              <p className="text-xs text-ink-muted mt-0.5">{t("multiSelectDesc")}</p>
             </div>
             <Toggle value={Boolean(config.isMultiSelect)} onChange={(value) => onPatch({ isMultiSelect: value })} />
           </label>
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSelectDragEnd}>
             <div className="flex flex-col gap-2">
-              <p className="type-field-label">Categories &amp; options</p>
+              <p className="type-field-label">{t("categoriesOptions")}</p>
               <SortableContext items={selectCategories.map((category) => category.label)} strategy={verticalListSortingStrategy}>
                 {selectCategories.map((category, categoryIndex) => (
                   <CategoryItem key={category.label} category={category} categoryIndex={categoryIndex} />
@@ -617,7 +621,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
       return (
         <div className="flex flex-col gap-5">
           <div>
-            <p className="type-field-label mb-1">Default option</p>
+            <p className="type-field-label mb-1">{t("defaultOption")}</p>
             <select
               value={String(config.defaultOption ?? "")}
               onChange={(e) => onPatch({ defaultOption: e.target.value })}
@@ -638,11 +642,11 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
                   type="text"
                   value={category.label ?? ""}
                   onChange={(e) => updateStatusCategoryLabel(categoryIndex, e.target.value)}
-                  placeholder={`${category.category.charAt(0).toUpperCase() + category.category.slice(1)} label…`}
+                  placeholder={t("categoryPlaceholder", { category: t(`statusCategories.${category.category}`) })}
                   className="text-tiny font-semibold uppercase tracking-widest text-ink mb-2 w-full bg-transparent outline-none placeholder:text-ink-muted"
                 />
                 <div className="flex items-center gap-2 mb-2 text-xs text-ink-muted">
-                  <span>Default:</span>
+                  <span>{t("defaultLabel")}</span>
                   <select
                     value={category.defaultOption ?? ""}
                     onChange={(e) => updateStatusCategoryDefaultOption(categoryIndex, e.target.value)}
@@ -666,7 +670,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
                     onClick={() => addStatusOption(categoryIndex)}
                     className="w-full flex items-center gap-1.5 px-3 py-1.5 text-xs text-ink-muted hover:text-ink hover:bg-surface/50 transition-colors duration-150"
                   >
-                    <Plus size={11} /> Add option
+                    <Plus size={11} /> {t("addOption")}
                   </button>
                 </div>
               </div>
@@ -690,21 +694,21 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
       return (
         <div className="flex flex-col gap-4">
           <div>
-            <p className="type-field-label mb-1">Related database</p>
+            <p className="type-field-label mb-1">{t("relatedDatabase")}</p>
             <div className="mt-1">
               <Combobox
                 options={databases.map((database) => ({ value: database.id, label: database.title ?? database.name }))}
                 value={String(config.relatedEntityId ?? "")}
                 onChange={(value) => onPatch({ relatedEntityId: value || undefined })}
-                placeholder="Select database"
+                placeholder={t("selectDatabase")}
                 nullable
               />
             </div>
           </div>
           <label className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-ink">Multiple values</p>
-              <p className="text-xs text-ink-muted mt-0.5">Allow linking to many records</p>
+              <p className="text-sm text-ink">{t("multipleValues")}</p>
+              <p className="text-xs text-ink-muted mt-0.5">{t("multipleValuesDesc")}</p>
             </div>
             <Toggle value={Boolean(config.multiple ?? true)} onChange={(value) => onPatch({ multiple: value })} />
           </label>
@@ -715,7 +719,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
       return (
         <div className="flex flex-col gap-4">
           <div>
-            <p className="type-field-label mb-1">Format</p>
+            <p className="type-field-label mb-1">{t("format")}</p>
             <select
               value={String(config.format ?? "HH:mm")}
               onChange={(e) => onPatch({ format: e.target.value })}
@@ -729,7 +733,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
             </select>
           </div>
           <div>
-            <p className="type-field-label mb-1">Default value (seconds)</p>
+            <p className="type-field-label mb-1">{t("defaultValueSeconds")}</p>
             <input
               type="number"
               min={0}
@@ -740,6 +744,149 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
           </div>
         </div>
       );
+
+    case PropertyType.PROGRESS: {
+      const progressConfig = config as unknown as ProgressPropertyConfig;
+      const relationProperties = properties.filter((p) => p.type === PropertyType.RELATION);
+      const selectedRelationId = progressConfig.relationPropertyId || "";
+      const selectedRelation = relationProperties.find((p) => p.id === selectedRelationId);
+      const relatedDbId = (selectedRelation?.config as RelationPropertyConfig)?.relatedEntityId;
+      interface DatabaseWithProperties extends DatabaseResponseDto {
+        properties?: PropertyResponseDto[];
+      }
+      const relatedDb = databases.find((db) => db.id === relatedDbId) as DatabaseWithProperties | undefined;
+      const targetProperties: PropertyResponseDto[] = relatedDb?.properties ?? [];
+
+      return (
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className="type-field-label mb-1">{t("mode")}</p>
+            <select
+              value={progressConfig.mode || "custom"}
+              onChange={(e) => {
+                const mode = e.target.value;
+                onPatch({
+                  mode,
+                  relationPropertyId: mode === "source" ? relationProperties[0]?.id : undefined,
+                  targetPropertyId: undefined,
+                  rollupType: mode === "source" ? "percent_complete" : undefined,
+                });
+              }}
+              className="field-input w-full"
+            >
+              <option value="custom">{t("modeCustom")}</option>
+              <option value="source">{t("modeSource")}</option>
+            </select>
+          </div>
+
+          {progressConfig.mode === "source" ? (
+            <>
+              <div>
+                <p className="type-field-label mb-1">{t("relationProperty")}</p>
+                <select
+                  value={selectedRelationId}
+                  onChange={(e) => {
+                    const relId = e.target.value;
+                    const relatedProperty = relationProperties.find((p) => p.id === relId);
+                    const rDbId = (relatedProperty?.config as RelationPropertyConfig)?.relatedEntityId;
+                    const relatedDatabase = databases.find((db) => db.id === rDbId) as DatabaseWithProperties | undefined;
+                    onPatch({
+                      relationPropertyId: relId || undefined,
+                      targetPropertyId: relatedDatabase?.properties?.[0]?.id || undefined,
+                    });
+                  }}
+                  className="field-input w-full"
+                >
+                  <option value="">{t("selectRelation")}</option>
+                  {relationProperties.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <p className="type-field-label mb-1">{t("targetProperty")}</p>
+                <select
+                  value={progressConfig.targetPropertyId || ""}
+                  onChange={(e) => onPatch({ targetPropertyId: e.target.value || undefined })}
+                  className="field-input w-full"
+                  disabled={!selectedRelationId}
+                >
+                  <option value="">{t("selectProperty")}</option>
+                  {targetProperties.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.type})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <p className="type-field-label mb-1">{t("rollupType")}</p>
+                <select
+                  value={progressConfig.rollupType || "percent_complete"}
+                  onChange={(e) => onPatch({ rollupType: e.target.value })}
+                  className="field-input w-full"
+                  disabled={!progressConfig.targetPropertyId}
+                >
+                  <option value="percent_complete">{t("percentComplete")}</option>
+                  <option value="percent_checked">{t("percentChecked")}</option>
+                  <option value="average">{t("average")}</option>
+                  <option value="sum">{t("sum")}</option>
+                  <option value="count">{t("count")}</option>
+                </select>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="type-field-label mb-1">{t("minValue")}</p>
+                  <input
+                    type="number"
+                    value={progressConfig.minValue ?? 0}
+                    onChange={(e) => onPatch({ minValue: Number(e.target.value) })}
+                    className="field-input w-full"
+                  />
+                </div>
+                <div>
+                  <p className="type-field-label mb-1">{t("maxValue")}</p>
+                  <input
+                    type="number"
+                    value={progressConfig.maxValue ?? 100}
+                    onChange={(e) => onPatch({ maxValue: Number(e.target.value) })}
+                    className="field-input w-full"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="type-field-label mb-1">{t("step")}</p>
+                  <input
+                    type="number"
+                    min={0.000001}
+                    value={progressConfig.step ?? 1}
+                    onChange={(e) => onPatch({ step: Number(e.target.value) })}
+                    className="field-input w-full"
+                  />
+                </div>
+                <label className="flex items-center gap-2 mt-6 select-none cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(progressConfig.showLabel ?? true)}
+                    onChange={(e) => onPatch({ showLabel: e.target.checked })}
+                    className="h-4 w-4 rounded border-stroke text-accent focus:ring-accent"
+                  />
+                  <span className="text-sm text-ink-secondary">{t("showLabel")}</span>
+                </label>
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }
 
     case PropertyType.FORMULA:
       return <FormulaConfig config={config as unknown as FormulaPropertyConfig} properties={properties} onPatch={onPatch} />;

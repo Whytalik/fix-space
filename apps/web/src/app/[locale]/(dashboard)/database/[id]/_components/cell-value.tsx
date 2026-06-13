@@ -56,11 +56,12 @@ export function CellValue({ value, type, config, relatedRecords, readOnly = true
   }
 
   if (type === PropertyType.PROGRESS) {
+    const isSource = config && typeof config === "object" && "mode" in config && config.mode === "source";
     return (
       <ProgressProperty
         value={typeof value === "number" ? value : null}
         config={isProgressPropertyConfig(config) ? config : null}
-        readOnly={readOnly}
+        readOnly={readOnly || isSource}
         onChange={onChange}
       />
     );
@@ -72,7 +73,15 @@ export function CellValue({ value, type, config, relatedRecords, readOnly = true
 
   switch (type) {
     case PropertyType.TEXT:
-      return <TextProperty value={value} readOnly={readOnly} ghost={ghost} onChange={onChange as (value: string) => void} />;
+      return (
+        <TextProperty
+          value={value}
+          readOnly={readOnly}
+          ghost={ghost}
+          onChange={onChange as (value: string) => void}
+          className={className}
+        />
+      );
 
     case PropertyType.NUMBER:
       return (
@@ -82,6 +91,7 @@ export function CellValue({ value, type, config, relatedRecords, readOnly = true
           readOnly={readOnly}
           ghost={ghost}
           onChange={onChange as (value: number | "") => void}
+          className={className}
         />
       );
 
@@ -147,9 +157,9 @@ export function CellValue({ value, type, config, relatedRecords, readOnly = true
       );
 
     case PropertyType.FORMULA:
-      return <FormulaProperty value={value} config={isFormulaPropertyConfig(config) ? config : null} readOnly />;
+      return <FormulaProperty value={value} config={isFormulaPropertyConfig(config) ? config : null} readOnly className={className} />;
 
     default:
-      return <span className={`text-ink text-sm truncate max-w-50 ${className || ""}`}>{String(value)}</span>;
+      return <span className={`text-ink text-sm truncate max-w-full ${className || ""}`}>{String(value)}</span>;
   }
 }

@@ -11,9 +11,8 @@ import { deleteDatabase as deleteDatabaseApi, duplicateDatabase } from "@/lib/ap
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { DatabaseResponseDto } from "@fixspace/domain";
-import { useSpaceSettingsQuery } from "@/hooks/api/use-space-settings-query";
 import { Button } from "@/components/ui/primitives/actions/button";
-import { Copy, MoreHorizontal, Pencil, Trash, Zap } from "lucide-react";
+import { Copy, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useRef, useState } from "react";
@@ -30,11 +29,9 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
   const t = useTranslations("DatabaseItem");
   const pathname = usePathname();
   const router = useRouter();
-  const { data: settings } = useSpaceSettingsQuery();
   const { currentDatabaseId, removeDatabaseFromSpace, addDatabaseToSpace } = useAppContext();
   const { showToast } = useUIContext();
   const isActive = pathname.startsWith(`/database/${database.id}`) || currentDatabaseId === database.id;
-  const showPresetIcon = database.isPreset && settings?.showPresetIndicators === true;
   const [showMenu, setShowMenu] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -78,7 +75,7 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
   return (
     <div ref={setNodeRef} style={style} className={`${isDragging ? "opacity-0" : ""}`}>
       <div
-        className={`group flex items-center rounded-lg transition-colors duration-150 ${
+        className={`group flex items-center rounded-2xl transition-colors duration-150 ${
           isActive
             ? sectionColor
               ? "text-ink"
@@ -106,18 +103,15 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
           title={collapsed ? database.title || database.name : undefined}
           draggable={false}
           {...listeners}
-          className={`flex items-center gap-2 py-1 flex-1 min-w-0 touch-none ${collapsed ? "justify-center px-2" : sectionId ? "pl-3 pr-2" : "px-2"}`}
+          className={`flex items-center gap-2 py-1 h-7 flex-1 min-w-0 touch-none ${collapsed ? "justify-center px-2" : sectionId ? "pl-3 pr-2" : "px-2"}`}
         >
           <span className="shrink-0 flex items-center">
             <IconDisplay value={database.icon || "📄"} size={14} />
           </span>
           {!collapsed && (
-            <>
-              <span className={`text-sm truncate min-w-0 ${isActive ? "text-ink" : "text-ink-secondary"}`}>
-                {database.title || database.name}
-              </span>
-              {showPresetIcon && <Zap size={11} className="shrink-0 text-accent/80" />}
-            </>
+            <span className={`text-sm truncate min-w-0 whitespace-nowrap ${isActive ? "text-ink" : "text-ink-secondary"}`}>
+              {database.title || database.name}
+            </span>
           )}
         </Link>
 
@@ -142,19 +136,23 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
           items={[
             { label: t("edit"), icon: <Pencil size={14} />, onClick: () => router.push(`/database/${database.id}/edit`) },
             { label: t("duplicate"), icon: <Copy size={14} />, onClick: () => setShowDuplicateModal(true) },
-            {
-              label: t("delete"),
-              icon: <Trash size={14} />,
-              variant: "danger",
-              onClick: () => setShowDeleteConfirm(true),
-            },
+            ...(!database.isKey
+              ? [
+                  {
+                    label: t("delete"),
+                    icon: <Trash size={14} />,
+                    variant: "danger" as const,
+                    onClick: () => setShowDeleteConfirm(true),
+                  },
+                ]
+              : []),
           ]}
         />
       )}
       {showDeleteConfirm && (
         <ConfirmDialog
-          title={database.isPreset ? t("deletePresetDatabase") : t("deleteDatabase")}
-          description={database.isPreset ? t("deletePresetDatabaseDesc") : t("deleteDatabaseDesc")}
+          title={t("deleteDatabase")}
+          description={t("deleteDatabaseDesc")}
           confirmLabel={isDeleting ? t("deleting") : t("delete")}
           variant="danger"
           onConfirm={() => deleteDatabase()}

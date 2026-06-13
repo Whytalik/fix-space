@@ -1,16 +1,13 @@
 "use client";
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
-import { Badge } from "@/components/ui/primitives/display/badge";
 import { useAppContext } from "@/context/app-context";
 import type { DatabaseResponseDto } from "@fixspace/domain";
-import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
 
 export function HeaderDatabase() {
-  const t = useTranslations("DatabaseHeader");
   const pathname = usePathname();
   const { databases, currentDatabaseId } = useAppContext();
   const lastDatabaseRef = useRef<DatabaseResponseDto | null>(null);
@@ -35,11 +32,6 @@ export function HeaderDatabase() {
           <IconDisplay value={displayDatabase.icon || "📄"} size={13} />
         </span>
         {displayDatabase.title || displayDatabase.name}
-        {displayDatabase.isPreset && (
-          <Badge variant="accent" className="text-xs px-1.5 py-0 leading-4">
-            {t("preset")}
-          </Badge>
-        )}
       </Link>
     </>
   );

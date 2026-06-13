@@ -40,6 +40,7 @@ export default function EditDatabasePage() {
   const [icon, setIcon] = useState(() => database?.icon ?? "");
   const [title, setTitle] = useState(() => database?.title ?? "");
   const [isLocked, setIsLocked] = useState(() => database?.isLocked ?? false);
+  const [enableStats, setEnableStats] = useState(() => database?.enableStats ?? false);
   const [propertyModal, setPropertyModal] = useState<{ mode: "create" } | { mode: "edit"; property: PropertyResponseDto } | null>(null);
 
   useEffect(() => {
@@ -47,8 +48,9 @@ export default function EditDatabasePage() {
     setIcon(database.icon ?? "");
     setTitle(database.title ?? "");
     setIsLocked(database.isLocked ?? false);
+    setEnableStats(database.enableStats ?? false);
   }, [database]);
-  async function saveDatabase(patch: Partial<{ icon: string; title: string; isLocked: boolean }>) {
+  async function saveDatabase(patch: Partial<{ icon: string; title: string; isLocked: boolean; enableStats: boolean }>) {
     if (!database) return;
     try {
       const updated = await updateDatabase(database.spaceId, database.id, {
@@ -56,6 +58,7 @@ export default function EditDatabasePage() {
         title: patch.title !== undefined ? patch.title : title,
         name: `${DB_PREFIX}${patch.title !== undefined ? patch.title : title}`,
         isLocked: patch.isLocked !== undefined ? patch.isLocked : isLocked,
+        enableStats: patch.enableStats !== undefined ? patch.enableStats : enableStats,
       });
       applyDatabaseUpdate(updated);
       updateDatabaseInSpace(updated);
@@ -80,6 +83,11 @@ export default function EditDatabasePage() {
   function handleIsLockedChange(value: boolean) {
     setIsLocked(value);
     saveDatabase({ isLocked: value });
+  }
+
+  function handleEnableStatsChange(value: boolean) {
+    setEnableStats(value);
+    saveDatabase({ enableStats: value });
   }
 
   function handlePropertyUpdate(propertyId: string, data: Partial<{ position: number; group: string | null; isVisible: boolean }>) {
@@ -135,10 +143,12 @@ export default function EditDatabasePage() {
             icon={icon}
             title={title}
             isLocked={isLocked}
+            enableStats={enableStats}
             onIconChange={handleIconChange}
             onTitleChange={handleTitleChange}
             onTitleBlur={handleTitleBlur}
             onIsLockedChange={handleIsLockedChange}
+            onEnableStatsChange={handleEnableStatsChange}
           />
         )}
 
@@ -147,7 +157,7 @@ export default function EditDatabasePage() {
             properties={properties.filter((p) => !(p.position === 0 && p.type === "TEXT"))}
             databases={allDatabases}
             isLocked={isLocked}
-            isPreset={!!database.isPreset}
+            isKey={!!database.isKey}
             onAddProperty={handleAddProperty}
             onEditProperty={handleEditProperty}
             onDeleteProperty={handleDeleteProperty}

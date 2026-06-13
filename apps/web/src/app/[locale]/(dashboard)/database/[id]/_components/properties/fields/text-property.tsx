@@ -28,7 +28,7 @@ export function TextProperty({ value, readOnly, className, onChange, placeholder
 
     return (
       <div
-        className={`text-ink text-sm [&_a]:underline [&_a]:text-inherit ${className || "truncate max-w-50"}`}
+        className={`text-ink text-sm [&_a]:underline [&_a]:text-inherit ${className || "truncate max-w-full"}`}
         dangerouslySetInnerHTML={{ __html: stringValue }}
       />
     );

@@ -8,6 +8,9 @@ import { tradingJournalProperties } from "./databases/trading-journal.config";
 import { tradingSystemProperties } from "./databases/trading-system.config";
 import { routineLibraryProperties } from "./databases/routine-library.config";
 import { performanceReviewProperties } from "./databases/performance-review.config";
+import { learningTasksProperties } from "./databases/learning-tasks.config";
+import { economicEventsProperties } from "./databases/economic-events.config";
+import { economicReleasesProperties } from "./databases/economic-releases.config";
 import { seedsByDatabaseType } from "./seeds";
 import type { DatabaseTemplate, InitializationConfig, InitPropertyDef } from "./types";
 export type { InitializationConfig } from "./types";
@@ -18,6 +21,7 @@ const databases: DatabaseTemplate[] = [
     title: "Trading Journal",
     type: "trading-journal",
     icon: "icon:BookOpen",
+    isKey: true,
     sectionKey: "routine",
     seeds: seedsByDatabaseType["trading-journal"],
     properties: tradingJournalProperties,
@@ -69,6 +73,7 @@ const databases: DatabaseTemplate[] = [
     title: "Session Routine",
     type: "daily-routine",
     icon: "icon:CalendarCheck",
+    isKey: true,
     sectionKey: "routine",
     seeds: seedsByDatabaseType["daily-routine"],
     properties: dailyRoutineProperties,
@@ -102,6 +107,7 @@ const databases: DatabaseTemplate[] = [
     title: "Notes",
     type: "notes",
     icon: "icon:StickyNote",
+    isKey: true,
     sectionKey: "insight",
     seeds: seedsByDatabaseType["notes"],
     properties: notesProperties,
@@ -131,6 +137,7 @@ const databases: DatabaseTemplate[] = [
     title: "Mistakes",
     type: "mistakes",
     icon: "icon:TriangleAlert",
+    isKey: true,
     sectionKey: "insight",
     seeds: seedsByDatabaseType["mistakes"],
     properties: mistakesProperties,
@@ -210,6 +217,7 @@ const databases: DatabaseTemplate[] = [
     title: "Accounts",
     type: "accounts",
     icon: "icon:Wallet",
+    isKey: true,
     sectionKey: "settings",
     seeds: seedsByDatabaseType["accounts"],
     properties: accountsProperties,
@@ -246,6 +254,7 @@ const databases: DatabaseTemplate[] = [
     title: "Operations",
     type: "operations",
     icon: "icon:ArrowLeftRight",
+    isKey: true,
     sectionKey: "settings",
     seeds: seedsByDatabaseType["operations"],
     properties: operationsProperties,
@@ -287,6 +296,77 @@ const databases: DatabaseTemplate[] = [
     properties: tradingSystemProperties,
     templates: [{ name: "Default", isDefault: true, position: 0 }],
   },
+  {
+    name: "[DB] Learning & Tasks",
+    title: "Learning & Tasks",
+    type: "learning-tasks",
+    icon: "icon:GraduationCap",
+    sectionKey: "custom",
+    seeds: seedsByDatabaseType["learning-tasks"],
+    properties: learningTasksProperties,
+    templates: [{ name: "Default", isDefault: true, position: 0 }],
+    views: [
+      {
+        name: "All Tasks",
+        icon: "icon:LayoutList",
+      },
+      {
+        name: "By Status",
+        icon: "icon:Kanban",
+        groupBy: "Status",
+      },
+      {
+        name: "By Category",
+        icon: "icon:Folder",
+        groupBy: "Category",
+      },
+    ],
+  },
+  {
+    name: "[DB] Economic Events",
+    title: "Economic Events",
+    type: "economic-events",
+    icon: "icon:CalendarDays",
+    sectionKey: "calendar",
+    seeds: seedsByDatabaseType["economic-events"],
+    properties: economicEventsProperties,
+    templates: [{ name: "Default", isDefault: true, position: 0 }],
+    views: [
+      {
+        name: "Events List",
+        icon: "icon:LayoutList",
+      },
+      {
+        name: "High Impact",
+        icon: "icon:AlertTriangle",
+        filters: [
+          {
+            field: FilterField.PROPERTY,
+            propertyName: "Impact",
+            operator: FilterOperator.EQUALS,
+            value: "High",
+          } as any,
+        ],
+      },
+    ],
+  },
+  {
+    name: "[DB] Economic Releases",
+    title: "Economic Releases",
+    type: "economic-releases",
+    icon: "icon:Newspaper",
+    sectionKey: "calendar",
+    seeds: seedsByDatabaseType["economic-releases"],
+    properties: economicReleasesProperties,
+    templates: [{ name: "Default", isDefault: true, position: 0 }],
+    views: [
+      {
+        name: "Recent Releases",
+        icon: "icon:History",
+        sort: [{ field: SortField.PROPERTY, propertyName: "Date", direction: SortDirection.DESC } as any],
+      },
+    ],
+  },
 ];
 
 const defaultDatabaseProperties: InitPropertyDef[] = [
@@ -303,6 +383,8 @@ export const defaultInitializationConfig: InitializationConfig = {
     { key: "routine", name: "Routine", position: 0, icon: "icon:CalendarDays", color: "#818cf8" },
     { key: "insight", name: "Insight", position: 1, icon: "icon:Lightbulb", color: "#fbbf24" },
     { key: "settings", name: "Settings", position: 2, icon: "icon:Settings", color: "#a78bfa" },
+    { key: "custom", name: "Custom", position: 3, icon: "icon:Blocks", color: "#f43f5e" },
+    { key: "calendar", name: "Calendar", position: 4, icon: "icon:CalendarRange", color: "#10b981" },
   ],
   databases,
   defaultDatabaseProperties,

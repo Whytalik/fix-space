@@ -179,7 +179,7 @@
     "deleteRecordsDesc": "Це назавжди видалить {count, plural, one {# запис} few {# записи} other {# записів}}. Цю дію не можна скасувати."
   },
   "DatabaseEdit": {
-    "title": "Редагувати базу даних",
+    "title": "Назва",
     "general": "Загальні",
     "properties": "Властивості",
     "templates": "Шаблони",
@@ -197,8 +197,9 @@
     "internalName": "Внутрішня назва",
     "placeholderTitle": "напр. Журнал угод",
     "icon": "Іконка",
-    "title": "Назва",
-    "chooseIcon": "Вибрати іконку…"
+    "chooseIcon": "Вибрати іконку…",
+    "enableStats": "Включити в статистику",
+    "enableStatsDesc": "Показувати автоматичну аналітику для цієї бази на сторінці Статистики."
   },
   "PropertyEdit": {
     "properties": "Властивості",
@@ -210,13 +211,14 @@
     "noProperties": "Властивостей ще немає.",
     "deleteProperty": "Видалити властивість?",
     "deletePropertyDesc": "Це назавжди видалить властивість та всі її значення. Цю дію не можна скасувати.",
-    "deletePresetPropertyDesc": "Це системна властивість. Формули та автоматизації, що посилаються на неї, перестануть працювати. Цю дію не можна скасувати.",
+    "deleteKeyPropertyDesc": "Це системна властивість. Формули та автоматизації, що посилаються на неї, перестануть працювати. Цю дію не можна скасувати.",
     "deleteGroup": "Видалити групу?",
     "deleteGroupDesc": "Групу буде видалено, а всі її властивості стануть незгрупованими. Самі властивості не будуть видалені.",
     "delete": "Видалити"
   },
   "TemplateEdit": {
     "title": "Шаблони",
+    "general": "Загальні",
     "icon": "Іконка",
     "chooseIcon": "Оберіть іконку...",
     "addTemplate": "Додати шаблон",
@@ -247,6 +249,17 @@
     "cancel": "Скасувати",
     "create": "Створити",
     "save": "Зберегти",
+    "tokensInfoTitle": "Токени шаблону",
+    "tokensInfoDesc": "Використовуйте токени в шаблоні назви запису для автоматичного створення назв нових записів. Токени замінюються на фактичні значення в момент створення.",
+    "input": "Ввід",
+    "result": "Результат",
+    "tokens": {
+      "today": "Поточна дата у форматі ДД.ММ.РРРР",
+      "year": "Поточний рік",
+      "month": "Поточний місяць (01-12)",
+      "count": "Загальна кількість записів + 1",
+      "countWithValue": "Кількість записів, де Властивість дорівнює Значенню + 1"
+    },
     "template": "Шаблон",
     "content": "Вміст"
   },
@@ -258,6 +271,7 @@
     "type": "Тип",
     "change": "Змінити",
     "icon": "Іконка (необов'язково)",
+    "chooseIcon": "Вибрати іконку…",
     "name": "Назва",
     "namePlaceholder": "Назва властивості…",
     "group": "Група (необов'язково)",
@@ -270,7 +284,8 @@
     "cancel": "Скасувати",
     "addProperty": "Додати властивість",
     "chooseType": "виберіть тип",
-    "saveChanges": "Зберегти зміни"
+    "saveChanges": "Зберегти зміни",
+    "addPropertyTitle": "Додати властивість: {type}"
   },
   "AddDatabaseModal": {
     "addDatabase": "Нова база даних",
@@ -290,7 +305,6 @@
   "DatabaseHeader": {
     "edit": "Редагувати",
     "addItem": "Додати запис",
-    "preset": "Пресет",
     "import": "Імпорт CSV",
     "export": "Експорт CSV",
     "automations": "Автоматизації"
@@ -337,10 +351,7 @@
     "delete": "Видалити",
     "deleteDatabase": "Видалити базу даних",
     "deleteDatabaseDesc": "Цю базу даних та всі її записи буде остаточно видалено.",
-    "deletePresetDatabase": "Видалити системну базу даних?",
-    "deletePresetDatabaseDesc": "Це системна база даних. Від неї можуть залежати інші бази, формули та автоматизації. Всі записи буде остаточно видалено.",
     "deleting": "Видалення…",
-    "preset": "Пресет",
     "databaseDuplicated": "Базу даних успішно дубльовано."
   },
   "PropertyMeta": {
@@ -442,5 +453,54 @@
     "exporting": "Експортується…",
     "loading": "Завантаження…",
     "errorExport": "Помилка експорту. Спробуйте ще раз."
+  },
+  "PropertyConfig": {
+    "format": "Формат",
+    "decimalPlaces": "Десяткові знаки",
+    "currencySymbol": "Символ валюти",
+    "prefix": "Префікс",
+    "suffix": "Суфікс",
+    "defaultValue": "Значення за замовчуванням",
+    "defaultValueSeconds": "Значення за замовчуванням (секунди)",
+    "dateFormat": "Формат дати",
+    "includeTime": "Включити час",
+    "timeFormat": "Формат часу",
+    "defaultChecked": "Вибрано за замовчуванням",
+    "multiSelect": "Множинний вибір",
+    "multiSelectDesc": "Дозволити вибір кількох значень",
+    "categoriesOptions": "Категорії та варіанти",
+    "categoryLabelPlaceholder": "Назва категорії…",
+    "addOption": "Додати варіант",
+    "optionPlaceholder": "Варіант…",
+    "defaultOption": "Варіант за замовчуванням",
+    "relatedDatabase": "Пов'язана база даних",
+    "selectDatabase": "Вибрати базу даних",
+    "multipleValues": "Множинні значення",
+    "multipleValuesDesc": "Дозволити зв'язок з багатьма записами",
+    "mode": "Режим",
+    "modeCustom": "Вручну (Custom)",
+    "modeSource": "Автоматично (Rollup)",
+    "relationProperty": "Властивість зв'язку",
+    "selectRelation": "Вибрати зв'язок",
+    "targetProperty": "Цільова властивість",
+    "selectProperty": "Вибрати властивість",
+    "rollupType": "Тип агрегації",
+    "percentComplete": "Відсоток виконання (Status/Select)",
+    "percentChecked": "Відсоток вибраних (Checkbox)",
+    "average": "Середнє (Number)",
+    "sum": "Сума (Number)",
+    "count": "Кількість (Related Records)",
+    "minValue": "Мін. значення",
+    "maxValue": "Макс. значення",
+    "step": "Крок",
+    "showLabel": "Показувати назву",
+    "addCategory": "Додати категорію",
+    "defaultLabel": "За замовчуванням:",
+    "statusCategories": {
+      "todo": "Треба зробити",
+      "in_progress": "В процесі",
+      "done": "Готово"
+    },
+    "categoryPlaceholder": "Назва {category}…"
   }
 }

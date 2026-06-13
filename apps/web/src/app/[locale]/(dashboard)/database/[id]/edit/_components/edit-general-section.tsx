@@ -10,20 +10,24 @@ type EditGeneralSectionProps = {
   icon: string;
   title: string;
   isLocked: boolean;
+  enableStats: boolean;
   onIconChange: (value: string) => void;
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onTitleBlur: () => void;
   onIsLockedChange: (value: boolean) => void;
+  onEnableStatsChange: (value: boolean) => void;
 };
 
 export function EditGeneralSection({
   icon,
   title,
   isLocked,
+  enableStats,
   onIconChange,
   onTitleChange,
   onTitleBlur,
   onIsLockedChange,
+  onEnableStatsChange,
 }: EditGeneralSectionProps) {
   const [showIconPicker, setShowIconPicker] = useState(false);
   const iconButtonRef = useRef<HTMLButtonElement>(null);
@@ -97,6 +101,19 @@ export function EditGeneralSection({
             <p className="mt-0.5 type-hint">{t("isLockedDesc")}</p>
           </div>
           <Toggle value={isLocked} onChange={onIsLockedChange} />
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-stroke bg-elevated overflow-visible mt-4">
+        <div className="px-5 py-3 border-b border-stroke">
+          <h2 className="type-panel-title">{t("enableStats")}</h2>
+        </div>
+        <div className="px-5 py-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm text-ink">{t("enableStats")}</p>
+            <p className="mt-0.5 type-hint">{t("enableStatsDesc")}</p>
+          </div>
+          <Toggle value={enableStats} onChange={onEnableStatsChange} />
         </div>
       </div>
     </section>

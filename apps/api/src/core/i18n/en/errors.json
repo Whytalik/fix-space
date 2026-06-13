@@ -28,8 +28,8 @@
   "SPACE_NOT_FOUND": "Space not found",
   "DATABASE_NOT_FOUND": "Database not found",
   "DATABASE_NOT_FOUND_ID": "Database with id {id} not found",
-  "DATABASE_STRUCTURE_LOCKED": "Database structure is locked or it is a preset database and cannot be modified",
-  "CANNOT_DELETE_PRESET_DATABASE": "Cannot delete system database",
+  "DATABASE_STRUCTURE_LOCKED": "Database structure is locked and cannot be modified",
+  "CANNOT_DELETE_KEY_DATABASE": "Cannot delete a key database",
   "SECTION_NOT_FOUND": "Section not found in this space",
   "PROPERTY_NOT_FOUND": "Property not found",
   "PROPERTY_NOT_FOUND_ID": "Property with id {id} not found",
@@ -93,6 +93,5 @@
   "INTEGRATION_KEY_NOT_READ_ONLY": "API key must be read-only (enableTrading and enableWithdrawals must be disabled)",
   "INTEGRATION_SYNC_FAILED": "Synchronization failed for {name}: {error}",
   "INTEGRATION_NOT_LINKED_TO_SPACE": "Integration connection is not linked to any space.",
-  "UNKNOWN_PRESET_TYPE": "Unknown preset database type: {type}",
-  "PRESET_DATABASE_EXISTS": "A database of type \"{type}\" already exists"
+  "SPACE_LIMIT_REACHED": "Maximum number of spaces (5) reached"
 }

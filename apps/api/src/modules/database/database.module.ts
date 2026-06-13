@@ -9,12 +9,11 @@ import { DatabaseController } from "./database.controller";
 import { DatabaseDataModule } from "./database-data.module";
 import { DatabaseService } from "./database.service";
 import { DuplicateDatabaseUseCase } from "./providers/duplicate-database.usecase";
-import { PresetRestoreService } from "./providers/preset-restore.service";
 
 @Module({
   imports: [InitializationConfigModule, PropertyModule, SettingsModule, SpaceDataModule, TemplateModule, ViewModule, DatabaseDataModule],
   controllers: [DatabaseController],
-  providers: [DatabaseService, DuplicateDatabaseUseCase, PresetRestoreService],
-  exports: [DatabaseService, DatabaseDataModule, DuplicateDatabaseUseCase, PresetRestoreService],
+  providers: [DatabaseService, DuplicateDatabaseUseCase],
+  exports: [DatabaseService, DatabaseDataModule, DuplicateDatabaseUseCase],
 })
 export class DatabaseModule {}

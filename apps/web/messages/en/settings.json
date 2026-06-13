@@ -124,8 +124,6 @@
     "default": "Default",
     "defaultIcon": "Default icon",
     "chooseIcon": "Choose an icon…",
-    "showPresetIndicators": "Show preset indicators",
-    "showPresetIndicatorsDesc": "Display special icons for system-provided databases.",
     "saveChanges": "Save changes",
     "timeFormat": "Time format",
     "startOfWeek": "Start of week",

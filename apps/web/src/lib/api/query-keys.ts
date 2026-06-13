@@ -31,4 +31,11 @@ export const queryKeys = {
     detail: (id: string) => ["integrationConnections", id] as const,
     trades: (id: string, startDate: string, endDate: string) => ["integrationConnections", id, "trades", startDate, endDate] as const,
   },
+  statistics: {
+    trading: (from?: string, to?: string, compareFrom?: string, compareTo?: string) =>
+      ["statistics", "trading", { from, to, compareFrom, compareTo }] as const,
+    custom: (from?: string, to?: string) => ["statistics", "custom", { from, to }] as const,
+    overview: (spaceId?: string, from?: string, to?: string, compareFrom?: string, compareTo?: string) =>
+      ["statistics", "overview", { spaceId, from, to, compareFrom, compareTo }] as const,
+  },
 };

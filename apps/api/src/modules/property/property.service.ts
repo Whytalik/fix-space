@@ -149,11 +149,16 @@ export class PropertyService {
             recordId: record.id,
             propertyId: created.id,
             value: Prisma.DbNull,
-            computed: created.type === PropertyType.FORMULA,
+            computed:
+              created.type === PropertyType.FORMULA ||
+              (created.type === PropertyType.PROGRESS && (created.config as any)?.mode === "source"),
           })),
         });
 
-        if (created.type === PropertyType.FORMULA) {
+        if (
+          created.type === PropertyType.FORMULA ||
+          (created.type === PropertyType.PROGRESS && (created.config as any)?.mode === "source")
+        ) {
           for (const record of existingRecords) {
             await this.formulaRecalculator.recalculate(record.id, databaseId, transaction);
           }
@@ -322,7 +327,9 @@ export class PropertyService {
               where: { id: propertyValue.id },
               data: {
                 value: converted !== null && converted !== undefined ? (converted as Prisma.InputJsonValue) : Prisma.DbNull,
-                computed: updatePropertyDto.type === PropertyType.FORMULA,
+                computed:
+                  updatePropertyDto.type === PropertyType.FORMULA ||
+                  (updatePropertyDto.type === PropertyType.PROGRESS && (configToSave as any)?.mode === "source"),
               },
             });
           }),
@@ -359,7 +366,10 @@ export class PropertyService {
 
       const updated = await this.propertyRepo.update(id, updateData, transaction);
 
-      if (updated.type === PropertyType.FORMULA && (typeChanged || configChanged)) {
+      if (
+        (updated.type === PropertyType.FORMULA || (updated.type === PropertyType.PROGRESS && (updated.config as any)?.mode === "source")) &&
+        (typeChanged || configChanged)
+      ) {
         const records = await transaction.record.findMany({
           where: { databaseId: updated.databaseId },
           select: { id: true },
@@ -447,11 +457,16 @@ export class PropertyService {
             recordId: record.id,
             propertyId: created.id,
             value: Prisma.DbNull,
-            computed: created.type === PropertyType.FORMULA,
+            computed:
+              created.type === PropertyType.FORMULA ||
+              (created.type === PropertyType.PROGRESS && (created.config as any)?.mode === "source"),
           })),
         });
 
-        if (created.type === PropertyType.FORMULA) {
+        if (
+          created.type === PropertyType.FORMULA ||
+          (created.type === PropertyType.PROGRESS && (created.config as any)?.mode === "source")
+        ) {
           for (const record of existingRecords) {
             await this.formulaRecalculator.recalculate(record.id, existingProperty.databaseId, transaction);
           }

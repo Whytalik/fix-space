@@ -1,4 +1,4 @@
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -43,6 +43,7 @@ describe("DuplicateSpaceUseCase", () => {
     findByIdForDuplicate: jest.fn(),
     transaction: jest.fn((callback) => callback(prisma)),
     findUniqueSpaceName: jest.fn((name: string) => Promise.resolve(`${name} (copy)`)),
+    count: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -57,6 +58,7 @@ describe("DuplicateSpaceUseCase", () => {
     useCase = module.get<DuplicateSpaceUseCase>(DuplicateSpaceUseCase);
 
     jest.clearAllMocks();
+    mockSpaceRepo.count.mockResolvedValue(0);
   });
 
   describe("execute", () => {
@@ -362,6 +364,13 @@ describe("DuplicateSpaceUseCase", () => {
           name: "My Custom Name",
         }),
       });
+    });
+
+    it("TC-WS-U-006: should throw BadRequestException if space limit of 5 is reached", async () => {
+      mockSpaceRepo.count.mockResolvedValue(5);
+
+      await expect(useCase.execute("space-1", "user-1")).rejects.toThrow(BadRequestException);
+      expect(prisma.space.create).not.toHaveBeenCalled();
     });
   });
 });

@@ -11,13 +11,14 @@ const maxWidths = {
   md: "max-w-[520px]",
   lg: "max-w-[640px]",
   xl: "max-w-[860px]",
+  "2xl": "max-w-[1200px]",
 };
 
 interface ModalShellProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
   children: ReactNode;
   footer?: ReactNode;
   headerPrefix?: ReactNode;
@@ -33,7 +34,7 @@ export function ModalShell({ isOpen, onClose, title, size = "md", children, foot
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
       <div
-        className={`w-full ${maxWidths[size]} mx-4 max-h-[85vh] flex flex-col bg-surface border border-stroke rounded-2xl shadow-lg overflow-hidden`}
+        className={`w-full ${maxWidths[size]} mx-4 max-h-[85vh] flex flex-col bg-surface border border-stroke rounded-2xl shadow-lg overflow-hidden animate-fade-up`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-stroke shrink-0">

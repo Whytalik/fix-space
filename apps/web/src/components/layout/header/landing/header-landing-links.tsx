@@ -1,14 +1,15 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 const LINKS = [
-  { href: "#focus", label: "Focus" },
-  { href: "#workspace", label: "Workspace" },
-  { href: "#templates", label: "Templates" },
-  { href: "#workflow", label: "Workflow" },
-  { href: "#import", label: "Import" },
-];
+  { href: "#problem", key: "problem" },
+  { href: "#solution", key: "solution" },
+  { href: "#features", key: "features" },
+  { href: "#templates", key: "templates" },
+  { href: "#workflow", key: "workflow" },
+] as const;
 
 function scrollToSection(href: string) {
   document.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -16,6 +17,7 @@ function scrollToSection(href: string) {
 
 export function HeaderLandingLinks() {
   const [activeLink, setActiveLink] = useState("");
+  const t = useTranslations("LandingNav");
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -37,7 +39,7 @@ export function HeaderLandingLinks() {
 
   return (
     <nav className="hidden md:flex items-center gap-6">
-      {LINKS.map(({ href, label }) => (
+      {LINKS.map(({ href, key }) => (
         <button
           key={href}
           type="button"
@@ -46,7 +48,7 @@ export function HeaderLandingLinks() {
             activeLink === href ? "text-accent" : "text-ink-secondary hover:text-ink"
           }`}
         >
-          {label}
+          {t(key)}
         </button>
       ))}
     </nav>

@@ -30,11 +30,10 @@
     "loadingDate": "Loading date…",
     "closed": "Closed",
     "active": "Active",
-    "next": "Next session opens",
+    "next": "Next",
     "sessionIndicator": {
       "opensAt": "at"
     },
-    "next": "Next",
     "at": "at"
   },
   "Header": {
@@ -68,7 +67,8 @@
     "chooseColor": "Choose color",
     "sectionName": "Section name",
     "creating": "Creating...",
-    "addSectionBtn": "Add section"
+    "addSectionBtn": "Add section",
+    "statistics": "Statistics"
   },
   "ProfilePage": {
     "title": "Profile",
@@ -153,7 +153,77 @@
     "drawdownCurve": "Drawdown Curve",
     "maxDrawdown": "Max Drawdown",
     "dailyLimitUsage": "Daily Limit Usage",
-    "comparePeriod": "Compare Period"
+    "comparePeriod": "Compare Period",
+    "tabs": {
+      "trading": "Trading",
+      "custom": "Custom Reports"
+    },
+    "presets": {
+      "week": "This week",
+      "month": "This month",
+      "quarter": "This quarter",
+      "year": "This year",
+      "all": "All time"
+    },
+    "datePlaceholder": "Select date",
+    "compare": "Compare",
+    "breakdowns": "Breakdowns",
+    "loadError": "Failed to load statistics. Please try again.",
+    "retry": "Retry",
+    "emptyState": "No closed trades found for the selected period.",
+    "emptyStateHint": "Adjust the date filter or add closed trades to your Trading Journal.",
+    "noDataForPeriod": "No data for the selected period",
+    "customEmpty": "No databases connected to Custom Reports.",
+    "customEmptyHint": "Enable \"Include in Statistics\" in the database settings to see analytics here.",
+    "recordCount": "{count} records",
+    "trades": "trades",
+    "winRateShort": "WR",
+    "metrics": {
+      "totalTrades": "Total Trades",
+      "winRate": "Win Rate",
+      "profitFactor": "Profit Factor",
+      "totalPnl": "Total P&L",
+      "expectancy": "Expectancy",
+      "maxDrawdown": "Max Drawdown",
+      "avgWin": "Avg Win",
+      "avgLoss": "Avg Loss"
+    },
+    "overviewEmpty": "No key databases found.",
+    "overviewEmptyHint": "Your key databases will appear here once you have records.",
+    "activityCurve": "Activity",
+    "records": "records",
+    "avgLabel": "Avg. {name}",
+    "sumLabel": "Total {name}",
+    "keyDatabaseTypes": {
+      "trading-journal": "Trading Journal",
+      "daily-routine": "Daily Routine",
+      "routine-library": "Session Routine",
+      "notes": "Notes",
+      "mistakes": "Mistakes",
+      "performance-review": "Performance Review",
+      "accounts": "Accounts",
+      "operations": "Operations",
+      "trading-system": "Trading System"
+    },
+    "customize": "Customize",
+    "settings": {
+      "title": "Customize Statistics",
+      "databases": "Databases",
+      "sections": "Visible Sections",
+      "sectionActivity": "Activity & Charts",
+      "sectionActivityDesc": "Equity curve, activity timeline",
+      "sectionBreakdowns": "Breakdowns",
+      "sectionBreakdownsDesc": "Distribution by categories",
+      "sectionRatings": "Rating Averages",
+      "sectionRatingsDesc": "Average scores for rating fields",
+      "sectionNumbers": "Number Summaries",
+      "sectionNumbersDesc": "Totals and averages for number fields",
+      "propType": {
+        "rating": "Rating",
+        "number": "Number",
+        "select": "Select"
+      }
+    }
   },
   "NotFound": {
     "title": "Page not found",

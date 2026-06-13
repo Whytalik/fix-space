@@ -267,7 +267,7 @@ model Database {
   key                String?
   icon               String?
   position           Int      @default(0)
-  isPreset           Boolean  @default(false)
+  isKey              Boolean  @default(false)
   isLocked           Boolean  @default(false)
   enableStats        Boolean  @default(false)
   createdAt          DateTime @default(now())

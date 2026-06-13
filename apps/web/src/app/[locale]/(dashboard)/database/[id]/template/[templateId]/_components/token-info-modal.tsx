@@ -14,27 +14,27 @@ export function TokenInfoModal({ onClose }: TokenInfoModalProps) {
   const tokens = [
     {
       token: "{{today}}",
-      desc: "Current date in DD.MM.YYYY format",
+      desc: t("tokens.today"),
       example: { before: "Report {{today}}", after: "Report 12.05.2026" },
     },
     {
       token: "{{year}}",
-      desc: "Current year",
+      desc: t("tokens.year"),
       example: { before: "Yearly {{year}}", after: "Yearly 2026" },
     },
     {
       token: "{{month}}",
-      desc: "Current month index (01-12)",
+      desc: t("tokens.month"),
       example: { before: "M-{{month}}", after: "M-05" },
     },
     {
       token: "{{count}}",
-      desc: "Total record count in database + 1",
+      desc: t("tokens.count"),
       example: { before: "#{{count}}", after: "#157" },
     },
     {
       token: "{{count:Prop=Value}}",
-      desc: "Count of records where Prop equals Value + 1",
+      desc: t("tokens.countWithValue"),
       example: { before: "Order-{{count:Status=Paid}}", after: "Order-43" },
     },
   ];
@@ -53,12 +53,12 @@ export function TokenInfoModal({ onClose }: TokenInfoModalProps) {
               </div>
               <div className="flex items-center gap-3 text-xs bg-surface p-2.5 rounded-lg border border-stroke">
                 <div className="flex-1 min-w-0">
-                  <span className="block text-ink-muted mb-1 uppercase tracking-widest font-bold text-[9px]">Input</span>
+                  <span className="block text-ink-muted mb-1 uppercase tracking-widest font-bold text-xs">{t("input")}</span>
                   <span className="text-ink-secondary font-mono truncate block">{item.example.before}</span>
                 </div>
                 <ArrowRight size={14} className="text-ink-muted shrink-0 mt-3" />
                 <div className="flex-1 min-w-0">
-                  <span className="block text-ink-muted mb-1 uppercase tracking-widest font-bold text-[9px]">Result</span>
+                  <span className="block text-ink-muted mb-1 uppercase tracking-widest font-bold text-xs">{t("result")}</span>
                   <span className="text-ink font-mono truncate block">{item.example.after}</span>
                 </div>
               </div>

@@ -46,15 +46,30 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
   const [localWidths, setLocalWidths] = useState<Record<string, number>>({});
   const resizingStateRef = useRef<{ propId: string; startX: number; startWidth: number; minWidth: number } | null>(null);
   const currentResizedWidthRef = useRef<number>(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if (e.deltaY === 0) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
 
   const visibleProperties = useMemo(() => {
     return [...properties].filter((p) => !hiddenColumns.has(p.id)).sort((a, b) => a.position - b.position);
   }, [properties, hiddenColumns]);
 
   const getDefaultWidth = useCallback((prop: PropertyResponseDto) => {
-    let width = 24 + 16 + 8 + prop.name.length * 8 + 16;
-    if (prop.hint) width += 24;
-    return Math.max(120, width);
+    let width = 24 + 14 + 8 + prop.name.length * 7 + 16;
+    if (prop.hint) width += 20;
+    if (prop.integrationKey) width += 20;
+    return Math.max(80, width);
   }, []);
 
   const getPropWidth = useCallback(
@@ -67,6 +82,93 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
     [localWidths, columnWidths, getDefaultWidth],
   );
 
+  const totalColumnsWidth = useMemo(() => {
+    const checkboxWidth = 40;
+    const propsWidth = visibleProperties.reduce((sum, prop) => sum + getPropWidth(prop), 0);
+    return checkboxWidth + propsWidth;
+  }, [visibleProperties, getPropWidth]);
+  const getValueWidth = useCallback(
+    (value: unknown, prop: PropertyResponseDto) => {
+      if (value === null || value === undefined || value === "") return 0;
+
+      let baseWidth = 0;
+      switch (prop.type) {
+        case PropertyType.CHECKBOX:
+          baseWidth = 50;
+          break;
+        case PropertyType.RATING:
+          baseWidth = 100;
+          break;
+        case PropertyType.PROGRESS:
+          baseWidth = 152;
+          break;
+        case PropertyType.DATE:
+          baseWidth = 120;
+          break;
+        case PropertyType.RELATION: {
+          const ids = Array.isArray(value) ? (value as string[]) : [String(value)];
+          const relatedDbId = (prop.config as { relatedEntityId?: string } | null)?.relatedEntityId;
+          const relatedRecords = relatedDbId ? relatedRecordsMap[relatedDbId] : undefined;
+          if (relatedRecords) {
+            const names = ids.map((id) => relatedRecords.find((r) => r.id === id)?.name || "").filter(Boolean);
+            const totalTextLen = names.reduce((sum, n) => sum + n.length, 0);
+            baseWidth = ids.length * 32 + totalTextLen * 7 + 16;
+          } else {
+            baseWidth = ids.length * 50;
+          }
+          break;
+        }
+        case PropertyType.STATUS: {
+          const statusName = (value as { name?: string })?.name || String(value);
+          baseWidth = statusName.length * 7 + 40;
+          break;
+        }
+        case PropertyType.SELECT: {
+          const selectStr = Array.isArray(value) ? (value as string[]).join(", ") : String(value);
+          baseWidth = selectStr.length * 7 + 32;
+          break;
+        }
+        default:
+          baseWidth = String(value).length * 7 + 24;
+      }
+
+      if (prop.position === 0) {
+        baseWidth += 24;
+      }
+      return baseWidth;
+    },
+    [relatedRecordsMap],
+  );
+
+  const handleResizeDoubleClick = useCallback(
+    (e: React.MouseEvent, prop: PropertyResponseDto) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      let maxValWidth = 0;
+      records.forEach((record) => {
+        const propertyValue = record.values?.find((v) => v.propertyId === prop.id);
+        const isPrimary = prop.position === 0;
+        const rawValue = propertyValue?.value || (isPrimary ? record.name : undefined);
+        const value = isPrimary ? rawValue || t("untitled") : rawValue;
+        const width = getValueWidth(value, prop);
+        if (width > maxValWidth) {
+          maxValWidth = width;
+        }
+      });
+
+      const headerWidth = getDefaultWidth(prop);
+      const finalWidth = Math.max(headerWidth, maxValWidth);
+
+      setLocalWidths((prev) => ({ ...prev, [prop.id]: finalWidth }));
+
+      if (activeViewRef.current) {
+        const newColumnWidths = { ...(activeViewRef.current.columnWidths || {}), [prop.id]: finalWidth };
+        updateActiveView({ columnWidths: newColumnWidths }).catch(console.error);
+      }
+    },
+    [records, getDefaultWidth, getValueWidth, updateActiveView, t],
+  );
   const handleResizeStart = (e: React.MouseEvent, prop: PropertyResponseDto, currentWidth: number) => {
     e.preventDefault();
     e.stopPropagation();
@@ -192,9 +294,9 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
             >
               <div
                 className={cn(
-                  "flex items-center gap-2 min-w-0",
+                  "flex items-center min-w-0 gap-2",
+                  wrapCells ? "whitespace-normal" : "whitespace-nowrap",
                   isPrimary && "font-semibold text-ink",
-                  wrapCells ? "flex-wrap whitespace-normal" : "whitespace-nowrap",
                 )}
               >
                 {isPrimary && (
@@ -254,8 +356,11 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
       )}
 
       <div className="rounded-lg border border-stroke overflow-hidden shadow-sm bg-canvas">
-        <div className="overflow-x-auto no-scrollbar">
-          <table className="w-full text-sm border-separate border-spacing-0 table-fixed">
+        <div ref={scrollContainerRef} className="overflow-x-auto scrollbar">
+          <table
+            className="w-full text-sm border-separate border-spacing-0 table-fixed"
+            style={{ width: `max(100%, ${totalColumnsWidth}px)` }}
+          >
             <colgroup>
               <col className="w-10" />
               {visibleProperties.map((prop, idx) => (
@@ -297,6 +402,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                         resizingStateRef.current?.propId === prop.id ? "bg-accent opacity-100" : "opacity-0 group-hover/th:opacity-100",
                       )}
                       onMouseDown={(e) => handleResizeStart(e, prop, getPropWidth(prop))}
+                      onDoubleClick={(e) => handleResizeDoubleClick(e, prop)}
                     />
                   </th>
                 ))}

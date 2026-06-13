@@ -83,7 +83,7 @@ export function SpaceSettings() {
   }, [form, saveSettings]);
 
   const { mutate: setDefaultSpace, isPending: isSettingDefault } = useMutation({
-    mutationFn: (spaceId: string) => updateSpace(spaceId, { name: spaces.find((space) => space.id === spaceId)?.name ?? "" }),
+    mutationFn: (spaceId: string) => updateSpace(spaceId, { isDefault: true }),
     onSuccess: (updated) => {
       updateSpaceInList(updated);
       showToast(t("defaultUpdated"), "success");
@@ -377,19 +377,6 @@ export function SpaceSettings() {
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-1.5 pt-2">
-        <div className="flex items-center justify-between py-2 border-y border-stroke/50">
-          <div className="flex flex-col gap-0.5">
-            <label className="text-sm font-medium text-ink">{t("showPresetIndicators")}</label>
-            <p className="text-xs text-ink-muted">{t("showPresetIndicatorsDesc")}</p>
-          </div>
-          <Toggle
-            value={form.showPresetIndicators}
-            onChange={(value) => setForm((prev) => (prev ? { ...prev, showPresetIndicators: value } : prev))}
-          />
-        </div>
-      </div>
-
       {confirmDeleteId && (
         <ConfirmDialog
           title={t("deleteSpace")}

@@ -26,7 +26,7 @@ type EditPropertiesSectionProps = {
   properties: PropertyResponseDto[];
   databases?: DatabaseResponseDto[];
   isLocked?: boolean;
-  isPreset?: boolean;
+  isKey?: boolean;
   onAddProperty: () => void;
   onEditProperty: (property: PropertyResponseDto) => void;
   onDeleteProperty: (propId: string) => void;
@@ -38,7 +38,7 @@ export function EditPropertiesSection({
   properties,
   databases,
   isLocked,
-  isPreset,
+  isKey,
   onAddProperty,
   onEditProperty,
   onDeleteProperty,
@@ -390,7 +390,7 @@ export function EditPropertiesSection({
       {pendingDeletePropId && (
         <ConfirmDialog
           title={t("deleteProperty")}
-          description={isPreset ? t("deletePresetPropertyDesc") : t("deletePropertyDesc")}
+          description={isKey ? t("deleteKeyPropertyDesc") : t("deletePropertyDesc")}
           confirmLabel={t("delete")}
           variant="danger"
           onConfirm={handleDeleteProperty}

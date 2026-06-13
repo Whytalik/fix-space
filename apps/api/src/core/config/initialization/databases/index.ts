@@ -7,3 +7,6 @@ export { operationsProperties } from "./operations.config";
 export { tradingSystemProperties } from "./trading-system.config";
 export { routineLibraryProperties } from "./routine-library.config";
 export { performanceReviewProperties } from "./performance-review.config";
+export { learningTasksProperties } from "./learning-tasks.config";
+export { economicEventsProperties } from "./economic-events.config";
+export { economicReleasesProperties } from "./economic-releases.config";

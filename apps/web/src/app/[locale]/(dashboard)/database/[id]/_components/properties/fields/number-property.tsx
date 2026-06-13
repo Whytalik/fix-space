@@ -9,9 +9,10 @@ interface NumberPropertyProps {
   onChange?: (value: number | "") => void;
   placeholder?: string;
   ghost?: boolean;
+  className?: string;
 }
 
-export function NumberProperty({ value, config, readOnly, onChange, placeholder = "0", ghost }: NumberPropertyProps) {
+export function NumberProperty({ value, config, readOnly, onChange, placeholder = "0", ghost, className }: NumberPropertyProps) {
   function formatNumber(input: unknown) {
     if (input === null || input === undefined || input === "") return "";
     const parsed = Number(input);
@@ -37,7 +38,7 @@ export function NumberProperty({ value, config, readOnly, onChange, placeholder 
   if (readOnly) {
     const formatted = formatNumber(value);
     if (!formatted && formatted !== "0") return <span className="text-ink-muted">—</span>;
-    return <span className="text-ink font-mono tabular-nums text-sm truncate max-w-50">{formatted}</span>;
+    return <span className={`text-ink font-mono tabular-nums text-sm ${className || "truncate max-w-full"}`}>{formatted}</span>;
   }
 
   const numericValue = value === "" || value === undefined || value === null ? "" : Number(value);

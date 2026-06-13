@@ -1,4 +1,4 @@
-import type { AvailablePresetTypeDto, DatabaseResponseDto, DuplicateDatabaseDto, RestorePresetDatabaseDto } from "@fixspace/domain";
+import type { DatabaseResponseDto, DuplicateDatabaseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function updateDatabase(
@@ -13,6 +13,7 @@ export function updateDatabase(
     recordLimit?: number | null;
     useDefaultTemplate?: boolean;
     isLocked?: boolean;
+    enableStats?: boolean;
   },
 ) {
   return apiFetch<DatabaseResponseDto>(`/databases/${databaseId}`, {
@@ -25,17 +26,6 @@ export function createDatabase(spaceId: string, data: { name: string; title: str
   return apiFetch<DatabaseResponseDto>(`/databases`, {
     method: "POST",
     body: { ...data, spaceId },
-  });
-}
-
-export function getAvailablePresets() {
-  return apiFetch<AvailablePresetTypeDto[]>("/databases/available-preset-types");
-}
-
-export function restorePreset(data: RestorePresetDatabaseDto) {
-  return apiFetch<DatabaseResponseDto>("/databases/restore-preset", {
-    method: "POST",
-    body: data,
   });
 }
 

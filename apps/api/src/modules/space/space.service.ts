@@ -29,20 +29,32 @@ export class SpaceService {
       name: dto.name,
     });
 
+    const count = await this.spaceRepo.count(ownerId);
+    if (count >= 5) {
+      throw new BadRequestException(t("errors.SPACE_LIMIT_REACHED"));
+    }
+
     const { icon } = await this.settingsService.resolveDefaults(ownerId, SettingsCategory.SPACE, { icon: dto.icon });
 
-    const space = await this.spaceRepo.create(
-      {
-        name: dto.name,
-        icon,
-        isDefault: dto.isDefault ?? false,
-        ownerId,
-      },
-      sectionsInclude,
-    );
+    return this.spaceRepo.transaction(async (transaction) => {
+      if (dto.isDefault === true) {
+        await this.spaceRepo.updateMany({ ownerId, isDefault: true }, { isDefault: false }, transaction);
+      }
 
-    this.logger.log("Space created", { spaceId: space.id, ownerId });
-    return toSpaceResponseDto(space);
+      const space = await this.spaceRepo.create(
+        {
+          name: dto.name,
+          icon,
+          isDefault: dto.isDefault ?? false,
+          ownerId,
+        },
+        sectionsInclude,
+        transaction,
+      );
+
+      this.logger.log("Space created", { spaceId: space.id, ownerId });
+      return toSpaceResponseDto(space);
+    });
   }
 
   async findAll(ownerId: string): Promise<SpaceResponseDto[]> {
