@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM --platform=linux/amd64 ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     WINEARCH=win64 \
@@ -30,17 +30,17 @@ RUN wget -q "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" -
 RUN xvfb-run --auto-servernum sh -c " \
     export WINEDEBUG=-all; \
     echo 'Initializing Wine...' && \
-    timeout 120s wine64 wineboot --init && wineserver -w; \
+    timeout 300s wine wineboot --init && wineserver -w; \
     echo 'Setting Windows 10 version and disabling crash dialogs...' && \
-    wine64 reg add 'HKEY_CURRENT_USER\\Software\\Wine' /v Version /t REG_SZ /d 'win10' /f && \
-    wine64 reg add 'HKEY_CURRENT_USER\\Software\\Wine\\WineDbg' /v ShowCrashDialog /t REG_DWORD /d 0 /f && \
+    wine reg add 'HKEY_CURRENT_USER\\Software\\Wine' /v Version /t REG_SZ /d 'win10' /f && \
+    wine reg add 'HKEY_CURRENT_USER\\Software\\Wine\\WineDbg' /v ShowCrashDialog /t REG_DWORD /d 0 /f && \
     wineserver -w; \
     echo 'Installing Python for Windows...' && \
-    wine64 /tmp/py.exe /quiet InstallAllUsers=1 PrependPath=1 && wineserver -w; \
+    wine /tmp/py.exe /quiet InstallAllUsers=1 PrependPath=1 && wineserver -w; \
     echo 'Installing MetaTrader5 Python package...' && \
-    wine64 python -m pip install MetaTrader5 && wineserver -w; \
+    wine python -m pip install MetaTrader5 && wineserver -w; \
     echo 'Installing MetaTrader5 Terminal...' && \
-    wine64 /tmp/mt5.exe /auto && wineserver -w" && \
+    wine /tmp/mt5.exe /auto && wineserver -w" && \
     rm /tmp/py.exe /tmp/mt5.exe
 
 WORKDIR /app
