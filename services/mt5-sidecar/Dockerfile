@@ -22,7 +22,8 @@ RUN dpkg --add-architecture i386 && \
         wine-stable=9.0.0.0~jammy-1 \
         wine-stable-amd64=9.0.0.0~jammy-1 \
         wine-stable-i386=9.0.0.0~jammy-1 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /opt/wine-stable/bin/wine64 /usr/bin/wine
 
 RUN wget -q "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" -O /tmp/py.exe && \
     wget -q "https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe" -O /tmp/mt5.exe
@@ -30,17 +31,17 @@ RUN wget -q "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" -
 RUN xvfb-run --auto-servernum sh -c " \
     export WINEDEBUG=-all; \
     echo 'Initializing Wine...' && \
-    timeout 300s wine wineboot --init && wineserver -w; \
+    timeout 300s wine64 wineboot --init && wineserver -w; \
     echo 'Setting Windows 10 version and disabling crash dialogs...' && \
-    wine reg add 'HKEY_CURRENT_USER\\Software\\Wine' /v Version /t REG_SZ /d 'win10' /f && \
-    wine reg add 'HKEY_CURRENT_USER\\Software\\Wine\\WineDbg' /v ShowCrashDialog /t REG_DWORD /d 0 /f && \
+    wine64 reg add 'HKEY_CURRENT_USER\\Software\\Wine' /v Version /t REG_SZ /d 'win10' /f && \
+    wine64 reg add 'HKEY_CURRENT_USER\\Software\\Wine\\WineDbg' /v ShowCrashDialog /t REG_DWORD /d 0 /f && \
     wineserver -w; \
     echo 'Installing Python for Windows...' && \
-    wine /tmp/py.exe /quiet InstallAllUsers=1 PrependPath=1 && wineserver -w; \
+    wine64 /tmp/py.exe /quiet InstallAllUsers=1 PrependPath=1 && wineserver -w; \
     echo 'Installing MetaTrader5 Python package...' && \
-    wine python -m pip install MetaTrader5 && wineserver -w; \
+    wine64 python -m pip install MetaTrader5 && wineserver -w; \
     echo 'Installing MetaTrader5 Terminal...' && \
-    wine /tmp/mt5.exe /auto && wineserver -w" && \
+    wine64 /tmp/mt5.exe /auto && wineserver -w" && \
     rm /tmp/py.exe /tmp/mt5.exe
 
 WORKDIR /app
