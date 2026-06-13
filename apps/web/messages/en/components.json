@@ -1,6 +1,8 @@
 {
   "UI": {
-    "close": "Close"
+    "close": "Close",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "Search": {
     "placeholder": "Search records...",
@@ -11,7 +13,8 @@
   "NameIconColorModal": {
     "chooseIcon": "Choose icon",
     "chooseColor": "Choose color",
-    "nameLabel": "Name"
+    "nameLabel": "Name",
+    "descriptionLabel": "Description"
   },
   "AddSection": {
     "title": "New Section",
@@ -114,7 +117,16 @@
     "hideGroup": "Hide group"
   },
   "RelationInput": {
-    "searchRecords": "Search records…"
+    "searchRecords": "Search records…",
+    "loading": "Loading records…",
+    "dbDeleted": "DB deleted",
+    "targetDbDeleted": "Target database deleted",
+    "selectRecord": "Select record...",
+    "selectRecords": "Select records",
+    "noRecordsFound": "No records found",
+    "selectedCount": "{count} selected",
+    "applyChanges": "Apply Changes",
+    "untitled": "Untitled"
   },
   "IconPicker": {
     "searchIcons": "Search icons…",

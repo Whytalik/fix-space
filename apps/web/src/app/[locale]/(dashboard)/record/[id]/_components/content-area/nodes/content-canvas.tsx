@@ -20,7 +20,7 @@ interface ContentCanvasProps {
   onSelectColumn?: (rowId: string, columnId: string) => void;
 }
 
-function RowInsertZone({ index, isVisible }: { index: number; isVisible: boolean }) {
+function RowInsertZone({ index, isVisible, t }: { index: number; isVisible: boolean; t: (key: string) => string }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `row-insert-${index}`,
     data: { dropType: "row-insert", insertIndex: index },
@@ -38,7 +38,7 @@ function RowInsertZone({ index, isVisible }: { index: number; isVisible: boolean
           : "h-2 pointer-events-none"
       }`}
     >
-      {isVisible && isOver && <span className="text-xs font-medium text-accent select-none">Drop row here</span>}
+      {isVisible && isOver && <span className="text-xs font-medium text-accent select-none">{t("dropRowHere")}</span>}
     </div>
   );
 }
@@ -65,7 +65,7 @@ export function ContentCanvas({
     <div className={`p-8 min-h-full flex flex-col ${isEditing ? "bg-canvas-subtle" : "bg-canvas"}`}>
       <div className="max-w-4xl mx-auto w-full flex-1">
         <SortableContext items={editor.content.rows.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-          {isEditing && <RowInsertZone index={0} isVisible={isDraggingPanelRow ?? false} />}
+          {isEditing && <RowInsertZone index={0} isVisible={isDraggingPanelRow ?? false} t={t} />}
           {editor.content.rows.map((row, rowIdx) => (
             <Fragment key={row.id}>
               <ContentRow
@@ -83,7 +83,7 @@ export function ContentCanvas({
                 onSelectRow={onSelectRow}
                 onSelectColumn={onSelectColumn}
               />
-              {isEditing && <RowInsertZone index={rowIdx + 1} isVisible={isDraggingPanelRow ?? false} />}
+              {isEditing && <RowInsertZone index={rowIdx + 1} isVisible={isDraggingPanelRow ?? false} t={t} />}
             </Fragment>
           ))}
         </SortableContext>

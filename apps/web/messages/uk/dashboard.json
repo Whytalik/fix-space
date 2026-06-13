@@ -30,11 +30,10 @@
     "loadingDate": "Завантаження дати…",
     "closed": "Закрито",
     "active": "Активно",
-    "next": "Наступна сесія відкривається",
+    "next": "Наступна",
     "sessionIndicator": {
       "opensAt": "о"
     },
-    "next": "Наступна",
     "at": "о"
   },
   "Header": {
@@ -68,7 +67,8 @@
     "chooseColor": "Вибрати колір",
     "sectionName": "Назва секції",
     "creating": "Створення...",
-    "addSectionBtn": "Додати секцію"
+    "addSectionBtn": "Додати секцію",
+    "statistics": "Статистика"
   },
   "ProfilePage": {
     "title": "Профіль",
@@ -153,7 +153,77 @@
     "drawdownCurve": "Крива просадки",
     "maxDrawdown": "Максимальна просадка",
     "dailyLimitUsage": "Використання денного ліміту",
-    "comparePeriod": "Період порівняння"
+    "comparePeriod": "Порівняльний період",
+    "tabs": {
+      "trading": "Торгівля",
+      "custom": "Власні звіти"
+    },
+    "presets": {
+      "week": "Цей тиждень",
+      "month": "Цей місяць",
+      "quarter": "Квартал",
+      "year": "Цей рік",
+      "all": "Весь час"
+    },
+    "datePlaceholder": "Обрати дату",
+    "compare": "Порівняти",
+    "breakdowns": "Розбивки",
+    "loadError": "Не вдалося завантажити статистику. Спробуйте ще раз.",
+    "retry": "Повторити",
+    "emptyState": "За вибраний період не знайдено закритих угод.",
+    "emptyStateHint": "Змініть фільтр дат або додайте закриті угоди у Trading Journal.",
+    "noDataForPeriod": "Немає даних за вибраний період",
+    "customEmpty": "Жодну базу не підключено до Власних звітів.",
+    "customEmptyHint": "Увімкніть «Включити в статистику» в налаштуваннях бази даних.",
+    "recordCount": "{count} записів",
+    "trades": "угод",
+    "winRateShort": "WR",
+    "metrics": {
+      "totalTrades": "Кількість угод",
+      "winRate": "Win Rate",
+      "profitFactor": "Profit Factor",
+      "totalPnl": "Загальний P&L",
+      "expectancy": "Очікування",
+      "maxDrawdown": "Макс. просадка",
+      "avgWin": "Середній виграш",
+      "avgLoss": "Середній збиток"
+    },
+    "overviewEmpty": "Ключові бази даних не знайдено.",
+    "overviewEmptyHint": "Тут зʼявляться ваші ключові бази даних після додавання записів.",
+    "activityCurve": "Активність",
+    "records": "записів",
+    "avgLabel": "Сер. {name}",
+    "sumLabel": "Всього {name}",
+    "keyDatabaseTypes": {
+      "trading-journal": "Торговий журнал",
+      "daily-routine": "Денна рутина",
+      "routine-library": "Бібліотека рутин",
+      "notes": "Нотатки",
+      "mistakes": "Помилки",
+      "performance-review": "Огляд продуктивності",
+      "accounts": "Акаунти",
+      "operations": "Операції",
+      "trading-system": "Торгова система"
+    },
+    "customize": "Налаштувати",
+    "settings": {
+      "title": "Налаштування статистики",
+      "databases": "Бази даних",
+      "sections": "Видимі секції",
+      "sectionActivity": "Активність і графіки",
+      "sectionActivityDesc": "Крива капіталу, хронологія активності",
+      "sectionBreakdowns": "Розбивки",
+      "sectionBreakdownsDesc": "Розподіл за категоріями",
+      "sectionRatings": "Середні оцінки",
+      "sectionRatingsDesc": "Середні значення рейтингових полів",
+      "sectionNumbers": "Числові підсумки",
+      "sectionNumbersDesc": "Суми та середні для числових полів",
+      "propType": {
+        "rating": "Рейтинг",
+        "number": "Число",
+        "select": "Вибір"
+      }
+    }
   },
   "NotFound": {
     "title": "Сторінку не знайдено",

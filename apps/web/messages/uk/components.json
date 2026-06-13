@@ -1,6 +1,8 @@
 {
   "UI": {
-    "close": "Закрити"
+    "close": "Закрити",
+    "confirm": "Підтвердити",
+    "cancel": "Скасувати"
   },
   "Search": {
     "placeholder": "Пошук записів...",
@@ -11,7 +13,8 @@
   "NameIconColorModal": {
     "chooseIcon": "Вибрати іконку",
     "chooseColor": "Вибрати колір",
-    "nameLabel": "Назва"
+    "nameLabel": "Назва",
+    "descriptionLabel": "Опис"
   },
   "AddSection": {
     "title": "Нова секція",
@@ -114,7 +117,16 @@
     "hideGroup": "Сховати групу"
   },
   "RelationInput": {
-    "searchRecords": "Пошук записів…"
+    "searchRecords": "Пошук записів…",
+    "loading": "Завантаження записів…",
+    "dbDeleted": "БД видалено",
+    "targetDbDeleted": "Цільову базу даних видалено",
+    "selectRecord": "Вибрати запис...",
+    "selectRecords": "Вибір записів",
+    "noRecordsFound": "Записів не знайдено",
+    "selectedCount": "{count} вибрано",
+    "applyChanges": "Застосувати зміни",
+    "untitled": "Без назви"
   },
   "IconPicker": {
     "searchIcons": "Пошук іконок…",

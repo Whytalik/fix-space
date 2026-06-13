@@ -8,9 +8,10 @@ type FormulaPropertyProps = {
   readOnly?: boolean;
   value?: unknown;
   config?: FormulaPropertyConfig | null;
+  className?: string;
 };
 
-export function FormulaProperty({ readOnly, value, config }: FormulaPropertyProps) {
+export function FormulaProperty({ readOnly, value, config, className }: FormulaPropertyProps) {
   const { formatDate } = useDateFormat();
 
   if (readOnly) {
@@ -35,7 +36,7 @@ export function FormulaProperty({ readOnly, value, config }: FormulaPropertyProp
     }
 
     return (
-      <span className="type-body text-ink truncate max-w-50">
+      <span className={`type-body text-ink ${className || "truncate max-w-full"}`}>
         {Array.isArray(value) ? (value as unknown[]).join(", ") : String(value ?? "")}
       </span>
     );

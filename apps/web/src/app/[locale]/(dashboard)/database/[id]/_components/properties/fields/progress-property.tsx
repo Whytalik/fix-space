@@ -3,6 +3,7 @@
 import { useEscape } from "@/hooks/ui/use-escape";
 import { getPopoverStyle } from "@/utils/ui/popover";
 import type { ProgressPropertyConfig } from "@fixspace/domain";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -15,6 +16,7 @@ type ProgressPropertyProps = {
 };
 
 export function ProgressProperty({ value, readOnly, config, onChange, className = "" }: ProgressPropertyProps) {
+  const t = useTranslations("PropertyMeta");
   const [isEditing, setIsEditing] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -94,7 +96,7 @@ export function ProgressProperty({ value, readOnly, config, onChange, className 
             className="w-64 bg-elevated border border-stroke rounded-2xl shadow-xl p-4 flex flex-col gap-4 animate-fade-up z-[9999]"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">Progress</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-ink-muted">{t("progress.label")}</span>
               <span className="text-sm font-mono text-accent">{numericValue}</span>
             </div>
 

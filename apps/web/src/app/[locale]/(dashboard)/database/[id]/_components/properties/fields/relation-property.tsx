@@ -8,6 +8,7 @@ import { ModalShell } from "@/components/ui/overlays/modal-shell";
 import Link from "next/link";
 import type { RecordResponseDto } from "@fixspace/domain";
 import { cn } from "@/utils/ui/cn";
+import { useTranslations } from "next-intl";
 
 interface RelationPropertyProps {
   databaseId?: string;
@@ -28,6 +29,7 @@ export function RelationProperty({
   className,
   onChange,
 }: RelationPropertyProps) {
+  const t = useTranslations("RelationInput");
   const {
     data: fetchedRecords,
     isLoading: isQueryLoading,
@@ -62,7 +64,7 @@ export function RelationProperty({
   if (!databaseId || isError) {
     if (selectedIds.length === 0) return <span className="text-ink-muted">—</span>;
     return (
-      <div className={cn("flex flex-wrap gap-1.5 items-center", className)} title="Target database deleted">
+      <div className={cn("flex flex-wrap gap-1.5 items-center", className)} title={t("targetDbDeleted")}>
         {selectedIds.map((id) => (
           <span
             key={id}
@@ -71,13 +73,13 @@ export function RelationProperty({
             {id.slice(0, 8)}...
           </span>
         ))}
-        <span className="text-xs text-error italic opacity-80">(DB deleted)</span>
+        <span className="text-xs text-error italic opacity-80">({t("dbDeleted")})</span>
       </div>
     );
   }
 
   if (isLoading) {
-    return <span className="text-ink-muted text-xs animate-pulse italic">Loading records...</span>;
+    return <span className="text-ink-muted text-xs animate-pulse italic">{t("loading")}</span>;
   }
 
   const allRecords = records || [];
@@ -113,7 +115,7 @@ export function RelationProperty({
   const renderChips = () => {
     if (selectedRecords.length === 0) {
       if (readOnly) return <span className="text-ink-muted">—</span>;
-      return <span className="text-ink-muted text-xs italic">Select record...</span>;
+      return <span className="text-ink-muted text-xs italic">{t("selectRecord")}</span>;
     }
     return (
       <div className={cn("flex flex-wrap gap-1.5 items-center", className)}>
@@ -131,7 +133,7 @@ export function RelationProperty({
               <span className="shrink-0 opacity-70">
                 {record.icon ? <IconDisplay value={record.icon} size={12} /> : <FileText size={12} />}
               </span>
-              <span className="truncate max-w-[150px]">{record.name || "Untitled"}</span>
+              <span className="truncate max-w-[320px]">{record.name || t("untitled")}</span>
               {!readOnly && (
                 <button
                   type="button"
@@ -178,7 +180,7 @@ export function RelationProperty({
         {renderChips()}
       </div>
 
-      <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Select records" size="sm">
+      <ModalShell isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={t("selectRecords")} size="sm">
         <div className="flex flex-col h-[500px]">
           <div className="flex items-center gap-2 border-b border-stroke px-4 py-3">
             <Search size={16} className="text-ink-muted" />
@@ -186,7 +188,7 @@ export function RelationProperty({
               ref={inputRef}
               type="text"
               className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-muted"
-              placeholder="Search records..."
+              placeholder={t("searchRecords")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
@@ -200,7 +202,7 @@ export function RelationProperty({
           <div className="flex-1 overflow-y-auto p-2 scrollbar">
             {filteredOptions.length === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-sm text-ink-muted italic">No records found</p>
+                <p className="text-sm text-ink-muted italic">{t("noRecordsFound")}</p>
               </div>
             ) : (
               filteredOptions.map((record) => {
@@ -226,7 +228,7 @@ export function RelationProperty({
                     <span className="shrink-0 text-ink-muted">
                       {record.icon ? <IconDisplay value={record.icon} size={16} /> : <FileText size={16} />}
                     </span>
-                    <span className="truncate text-left flex-1">{record.name || "Untitled"}</span>
+                    <span className="truncate text-left flex-1">{record.name || t("untitled")}</span>
                     {!multiple && isSelected && <Check size={16} className="text-accent" />}
                   </button>
                 );
@@ -235,21 +237,23 @@ export function RelationProperty({
           </div>
           {multiple && (
             <div className="border-t border-stroke p-4 bg-surface/30 flex justify-between items-center gap-4">
-              <span className="text-xs text-ink-muted font-medium uppercase tracking-wider">{draftSelected.length} selected</span>
+              <span className="text-xs text-ink-muted font-medium uppercase tracking-wider">
+                {t("selectedCount", { count: draftSelected.length })}
+              </span>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 text-sm text-ink-secondary hover:text-ink transition-colors duration-150"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   type="button"
                   onClick={handleApply}
                   className="bg-accent text-white hover:bg-accent-hover text-sm font-bold px-6 py-2 rounded-lg transition-all duration-150 active:scale-95 shadow-md shadow-accent/20"
                 >
-                  Apply Changes
+                  {t("applyChanges")}
                 </button>
               </div>
             </div>

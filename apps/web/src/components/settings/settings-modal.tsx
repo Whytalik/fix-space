@@ -52,7 +52,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-[3px] bg-canvas/50" onClick={onClose}>
       <div
-        className="flex w-215 overflow-hidden rounded-2xl border border-stroke bg-elevated shadow-lg"
+        className="flex w-215 overflow-hidden rounded-2xl border border-stroke bg-elevated shadow-lg animate-fade-up"
         style={{ height: "min(800px, calc(100vh - 80px))" }}
         onClick={(e) => e.stopPropagation()}
       >

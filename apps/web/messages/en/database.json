@@ -179,7 +179,7 @@
     "deleteRecordsDesc": "This will permanently delete {count, plural, one {# record} other {# records}}. This action cannot be undone."
   },
   "DatabaseEdit": {
-    "title": "Edit Database",
+    "title": "Title",
     "general": "General",
     "properties": "Properties",
     "templates": "Templates",
@@ -197,8 +197,9 @@
     "internalName": "Internal name",
     "placeholderTitle": "e.g. Trading Journal",
     "icon": "Icon",
-    "title": "Title",
-    "chooseIcon": "Choose an icon…"
+    "chooseIcon": "Choose an icon…",
+    "enableStats": "Include in Statistics",
+    "enableStatsDesc": "Show auto-generated analytics for this database on the Statistics page."
   },
   "PropertyEdit": {
     "properties": "Properties",
@@ -210,13 +211,14 @@
     "noProperties": "No properties yet.",
     "deleteProperty": "Delete property?",
     "deletePropertyDesc": "This will permanently delete the property and all its values. This action cannot be undone.",
-    "deletePresetPropertyDesc": "This is a system property. Formulas and automations that reference it will stop working. This action cannot be undone.",
+    "deleteKeyPropertyDesc": "This is a system property. Formulas and automations that reference it will stop working. This action cannot be undone.",
     "deleteGroup": "Delete group?",
     "deleteGroupDesc": "The group will be removed and all its properties will become ungrouped. Properties themselves will not be deleted.",
     "delete": "Delete"
   },
   "TemplateEdit": {
     "title": "Templates",
+    "general": "General",
     "addTemplate": "Add template",
     "noTemplates": "No templates created yet.",
     "createFirst": "Create first template",
@@ -236,7 +238,7 @@
     "nameLabel": "Name",
     "namePlaceholder": "Name of the template as it appears in the list",
     "descriptionLabel": "Description",
-    "descriptionPlaceholder": "What is this template for?",
+    "descriptionPlaceholder": "Add a description for this template...",
     "namePatternLabel": "Auto-name Pattern",
     "namePatternPlaceholder": "e.g. {{today}} - {{count}}",
     "tokensTitle": "Available Tokens",
@@ -247,10 +249,18 @@
     "save": "Save",
     "tokensInfoTitle": "Template Tokens",
     "tokensInfoDesc": "Use tokens in the record name pattern to automatically generate names for new records. Tokens are replaced with actual values at the moment of creation.",
+    "input": "Input",
+    "result": "Result",
+    "tokens": {
+      "today": "Current date in DD.MM.YYYY format",
+      "year": "Current year",
+      "month": "Current month index (01-12)",
+      "count": "Total record count in database + 1",
+      "countWithValue": "Count of records where Prop equals Value + 1"
+    },
     "content": "Content",
     "icon": "Icon",
-    "chooseIcon": "Choose an icon…",
-    "descriptionPlaceholder": "Add a description for this template..."
+    "chooseIcon": "Choose an icon…"
   },
   "PropertyForm": {
     "newProperty": "New property",
@@ -260,6 +270,7 @@
     "type": "Type",
     "change": "Change",
     "icon": "Icon (optional)",
+    "chooseIcon": "Choose an icon…",
     "name": "Name",
     "namePlaceholder": "Property name…",
     "group": "Group (optional)",
@@ -272,7 +283,8 @@
     "cancel": "Cancel",
     "addProperty": "Add property",
     "chooseType": "choose type",
-    "saveChanges": "Save changes"
+    "saveChanges": "Save changes",
+    "addPropertyTitle": "Add {type} property"
   },
   "AddDatabaseModal": {
     "addDatabase": "New Database",
@@ -292,7 +304,6 @@
   "DatabaseHeader": {
     "edit": "Edit",
     "addItem": "Add Item",
-    "preset": "Preset",
     "import": "Import CSV",
     "export": "Export CSV"
   },
@@ -337,10 +348,7 @@
     "delete": "Delete",
     "deleteDatabase": "Delete database",
     "deleteDatabaseDesc": "This database and all its records will be permanently deleted.",
-    "deletePresetDatabase": "Delete system database?",
-    "deletePresetDatabaseDesc": "This is a system database. Other databases, formulas, and automations may depend on it. All records will be permanently deleted.",
     "deleting": "Deleting…",
-    "preset": "Preset",
     "databaseDuplicated": "Database duplicated successfully."
   },
   "PropertyMeta": {
@@ -380,7 +388,10 @@
       "label": "Duration",
       "description": "Time duration in hours and minutes"
     },
-    "rating": { "label": "Rating", "description": "Star rating from 1 to 5" },
+    "rating": {
+      "label": "Rating",
+      "description": "Star rating from 1 to 5"
+    },
     "progress": {
       "label": "Progress",
       "description": "Percentage progress bar"
@@ -439,5 +450,54 @@
     "exporting": "Exporting…",
     "loading": "Loading…",
     "errorExport": "Export failed. Please try again."
+  },
+  "PropertyConfig": {
+    "format": "Format",
+    "decimalPlaces": "Decimal places",
+    "currencySymbol": "Currency symbol",
+    "prefix": "Prefix",
+    "suffix": "Suffix",
+    "defaultValue": "Default value",
+    "defaultValueSeconds": "Default value (seconds)",
+    "dateFormat": "Date format",
+    "includeTime": "Include time",
+    "timeFormat": "Time format",
+    "defaultChecked": "Default checked",
+    "multiSelect": "Multi-select",
+    "multiSelectDesc": "Allow selecting multiple values",
+    "categoriesOptions": "Categories & options",
+    "categoryLabelPlaceholder": "Category label…",
+    "addOption": "Add option",
+    "optionPlaceholder": "Option…",
+    "defaultOption": "Default option",
+    "relatedDatabase": "Related database",
+    "selectDatabase": "Select database",
+    "multipleValues": "Multiple values",
+    "multipleValuesDesc": "Allow linking to many records",
+    "mode": "Mode",
+    "modeCustom": "Custom (Manual)",
+    "modeSource": "Source (Rollup)",
+    "relationProperty": "Relation Property",
+    "selectRelation": "Select relation",
+    "targetProperty": "Target Property",
+    "selectProperty": "Select property",
+    "rollupType": "Rollup Type",
+    "percentComplete": "Percent Complete (Status/Select)",
+    "percentChecked": "Percent Checked (Checkbox)",
+    "average": "Average (Number)",
+    "sum": "Sum (Number)",
+    "count": "Count (Related Records)",
+    "minValue": "Min Value",
+    "maxValue": "Max Value",
+    "step": "Step",
+    "showLabel": "Show label",
+    "addCategory": "Add category",
+    "defaultLabel": "Default:",
+    "statusCategories": {
+      "todo": "Todo",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
+    "categoryPlaceholder": "{category} label…"
   }
 }

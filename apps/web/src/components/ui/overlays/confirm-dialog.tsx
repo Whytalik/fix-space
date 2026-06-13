@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/primitives/actions/button";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
@@ -17,12 +18,16 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   variant = "default",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const t = useTranslations("UI");
+  const finalConfirmLabel = confirmLabel || t("confirm");
+  const finalCancelLabel = cancelLabel || t("cancel");
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onCancel();
@@ -44,10 +49,10 @@ export function ConfirmDialog({
         </div>
         <div className="flex items-center justify-end gap-2 px-5 pb-4">
           <Button variant="secondary" size="sm" onClick={onCancel}>
-            {cancelLabel}
+            {finalCancelLabel}
           </Button>
           <Button variant={variant === "danger" ? "danger" : "primary"} size="sm" onClick={onConfirm}>
-            {confirmLabel}
+            {finalConfirmLabel}
           </Button>
         </div>
       </div>

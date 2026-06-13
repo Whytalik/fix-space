@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useSidebarState(initialCollapsed = false, initialExpandedSections: string[] = []) {
+export function useSidebarState(initialCollapsed = false, initialExpandedSections: string[] = [], initialWidth = 250) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const [width, setWidth] = useState(initialWidth);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(initialExpandedSections));
   const [isMounted, setIsMounted] = useState(false);
 
@@ -37,6 +38,12 @@ export function useSidebarState(initialCollapsed = false, initialExpandedSection
     document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=31536000; SameSite=Lax`;
   }
 
+  function setCollapsedState(val: boolean) {
+    setCollapsed(val);
+    localStorage.setItem("sidebar-collapsed", String(val));
+    setCookie("sidebar-collapsed", String(val));
+  }
+
   function toggle() {
     setCollapsed((prev) => {
       const next = !prev;
@@ -44,6 +51,13 @@ export function useSidebarState(initialCollapsed = false, initialExpandedSection
       setCookie("sidebar-collapsed", String(next));
       return next;
     });
+  }
+
+  function changeWidth(newWidth: number) {
+    const clamped = Math.max(200, Math.min(500, newWidth));
+    setWidth(clamped);
+    localStorage.setItem("sidebar-width", String(clamped));
+    setCookie("sidebar-width", String(clamped));
   }
 
   function toggleSection(sectionId: string) {
@@ -61,8 +75,11 @@ export function useSidebarState(initialCollapsed = false, initialExpandedSection
   return {
     collapsed,
     toggle,
+    setCollapsedState,
     expandedSections,
     toggleSection,
     isMounted,
+    width,
+    changeWidth,
   };
 }

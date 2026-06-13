@@ -46,32 +46,24 @@ export function SpaceSwitcher({ collapsed = false }: SpaceSwitcherProps) {
 
   return (
     <>
-      {collapsed ? (
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className="flex items-center justify-center w-8 h-8 rounded-lg bg-surface hover:bg-elevated transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas"
-          title={space.name}
-        >
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className={`flex items-center w-full h-[36px] px-2 py-2 rounded-lg bg-surface hover:bg-elevated transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas ${collapsed ? "justify-center" : ""}`}
+        title={collapsed ? space.name : undefined}
+      >
+        <span className={`flex items-center gap-1.5 min-w-0 ${collapsed ? "justify-center" : "flex-1"}`}>
           <span className="shrink-0 flex items-center text-ink-secondary">
             {space.icon ? <IconDisplay value={space.icon} size={16} /> : <Globe size={16} />}
           </span>
-        </button>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className="flex items-center w-full px-2 py-2 rounded-lg bg-surface hover:bg-elevated transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-canvas"
-        >
-          <span className="flex items-center gap-1.5 min-w-0">
-            <span className="shrink-0 flex items-center text-ink-secondary">
-              {space.icon ? <IconDisplay value={space.icon} size={16} /> : <Globe size={16} />}
-            </span>
-            <span className="text-sm text-ink truncate">{space.name}</span>
+          {!collapsed && <span className="text-sm text-ink truncate">{space.name}</span>}
+        </span>
+        {!collapsed && (
+          <span className="shrink-0 flex items-center ml-auto">
+            <ChevronDown size={14} className="text-ink-muted" />
           </span>
-          <ChevronDown size={14} className="text-ink-muted shrink-0 ml-auto" />
-        </button>
-      )}
+        )}
+      </button>
 
       {isOpen &&
         mounted &&

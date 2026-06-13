@@ -72,7 +72,7 @@ export default function RecordPage() {
   return (
     <div className="flex-1 overflow-y-auto scrollbar animate-fade-up px-8 py-10">
       <div className="mb-8 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <span className="text-ink-muted shrink-0">
             {record?.icon ? <IconDisplay value={record.icon} size={28} /> : <FileText size={28} />}
           </span>

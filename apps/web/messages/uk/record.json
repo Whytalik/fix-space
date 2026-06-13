@@ -92,9 +92,12 @@
       "remove": "Видалити",
       "addCaption": "Додати підпис...",
       "uploadImage": "Завантажити зображення",
-      "uploadHint": "PNG, JPG, WebP · макс. 5 МБ · або вставте",
+      "chooseFile": "Вибрати файл",
+      "orPasteImage": "або вставте зображення",
+      "uploadHint": "PNG, JPG, WebP · макс. 5 МБ",
       "add": "Додати",
-      "pasteImage": "Вставити зображення (Ctrl+V)"
+      "pasteImage": "або вставте зображення (Ctrl+V)",
+      "heading": "Заголовок {level}..."
     }
   }
 }

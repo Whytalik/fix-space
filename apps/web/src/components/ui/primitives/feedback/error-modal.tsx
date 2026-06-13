@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/primitives/actions/button";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
@@ -11,6 +12,8 @@ interface ErrorModalProps {
 }
 
 export function ErrorModal({ messages, onClose }: ErrorModalProps) {
+  const t = useTranslations();
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -25,7 +28,7 @@ export function ErrorModal({ messages, onClose }: ErrorModalProps) {
         <div className="px-5 pt-5 pb-4 flex items-start gap-3">
           <AlertTriangle size={18} className="text-error shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-ink">Something went wrong</p>
+            <p className="text-sm font-semibold text-ink">{t("GlobalError.title")}</p>
             <ul className="mt-1.5 space-y-1 list-disc list-inside">
               {messages.map((message, i) => (
                 <li key={i} className="text-sm text-ink-secondary leading-relaxed">
@@ -37,7 +40,7 @@ export function ErrorModal({ messages, onClose }: ErrorModalProps) {
         </div>
         <div className="flex justify-center px-5 pb-5">
           <Button variant="secondary" size="sm" onClick={onClose}>
-            Close
+            {t("UI.close")}
           </Button>
         </div>
       </div>

@@ -92,9 +92,12 @@
       "remove": "Remove",
       "addCaption": "Add caption...",
       "uploadImage": "Upload image",
-      "uploadHint": "PNG, JPG, WebP · max 5 MB · or paste",
+      "chooseFile": "Choose file",
+      "orPasteImage": "or paste image",
+      "uploadHint": "PNG, JPG, WebP · max 5 MB",
       "add": "Add",
-      "pasteImage": "Paste image (Ctrl+V)"
+      "pasteImage": "or paste image (Ctrl+V)",
+      "heading": "Heading {level}..."
     }
   }
 }

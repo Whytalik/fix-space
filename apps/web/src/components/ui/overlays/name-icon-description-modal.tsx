@@ -101,7 +101,7 @@ export function NameIconDescriptionModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="type-field-label">Description</label>
+          <label className="type-field-label">{t("descriptionLabel")}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
