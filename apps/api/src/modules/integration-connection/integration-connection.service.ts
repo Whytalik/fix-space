@@ -225,6 +225,70 @@ export class IntegrationConnectionService {
     throw new BadRequestException(t("errors.INTEGRATION_NOT_LINKED_TO_SPACE"));
   }
 
+  async handleMT5Webhook(token: string, payload: any): Promise<{ success: boolean; imported: number; skipped: number }> {
+    this.logger.debug("Received MT5 webhook payload", { connectionId: payload.connectionId });
+
+    // Validate connection exists
+    const connection = await this.integrationRepo.findById(payload.connectionId);
+    if (!connection || connection.service !== IntegrationService.METATRADER5) {
+      throw new UnprocessableEntityException("Invalid connection ID");
+    }
+
+    // Validate the token against stored credentials (we store the MQL5 EA password/token as `apiToken`)
+    const credentials = decryptCredentials(connection.credentials as unknown as Record<string, string>);
+    if (credentials.apiToken !== token) {
+      throw new UnprocessableEntityException("Invalid token for this connection");
+    }
+
+    const spaceId = await this.ensureSpaceId(connection, connection.userId);
+    const serviceLabel = this.getServiceLabel(connection.service as IntegrationService);
+
+    // Filter and map trades
+    const trades: TradeData[] = payload.trades.map((t: any) => ({
+      sourcePositionId: t.sourcePositionId,
+      symbol: t.symbol,
+      direction: t.direction,
+      entryPrice: t.entryPrice,
+      exitPrice: t.exitPrice,
+      quantity: t.quantity,
+      grossPnL: t.grossPnL,
+      fees: t.fees,
+      netPnL: t.netPnL,
+      openTime: new Date(t.openTime),
+      closeTime: new Date(t.closeTime),
+      currency: t.currency,
+    }));
+
+    if (trades.length > 0) {
+      const persistResult = await this.syncRecordService.persistTrades(connection.userId, connection.id, serviceLabel, trades, spaceId);
+
+      let statusSignal: string | null = null;
+      if (persistResult.noJournal) {
+        statusSignal = "TRADING_JOURNAL_NOT_FOUND";
+      } else if (persistResult.missingProperties.length > 0) {
+        statusSignal = `MISSING_PROPERTIES:${persistResult.missingProperties.join(",")}`;
+      }
+
+      const updateData: Record<string, unknown> = { lastSyncAt: new Date() };
+      if (statusSignal) {
+        updateData.lastSyncError = statusSignal;
+        if (statusSignal === "TRADING_JOURNAL_NOT_FOUND") {
+          updateData.consecutiveFailures = (connection.consecutiveFailures ?? 0) + 1;
+        }
+      } else {
+        updateData.lastSyncError = null;
+        updateData.consecutiveFailures = 0;
+      }
+
+      await this.integrationRepo.update(connection.id, updateData as never);
+
+      return { success: true, imported: persistResult.created, skipped: persistResult.skipped };
+    }
+
+    await this.integrationRepo.update(connection.id, { lastSyncAt: new Date(), lastSyncError: null, consecutiveFailures: 0 } as never);
+    return { success: true, imported: 0, skipped: 0 };
+  }
+
   async triggerSync(id: string, userId: string, opts?: { startDate?: string; endDate?: string }): Promise<SyncResult> {
     this.logger.debug("Triggering manual sync", { id });
 

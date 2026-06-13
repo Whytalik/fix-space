@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Headers, HttpCode, HttpStatus, Param, Patch, Post, UnauthorizedException } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import {
   CreateIntegrationConnectionDto,
@@ -9,7 +9,9 @@ import {
   UpdateIntegrationConnectionDto,
 } from "@fixspace/domain";
 import { CurrentUser } from "../../core/auth/decorators/current-user.decorator";
+import { Public } from "../../core/auth/decorators/public.decorator";
 import { IntegrationConnectionService } from "./integration-connection.service";
+import { MT5WebhookDto } from "./dto/mt5-webhook.dto";
 
 @ApiTags("Integration Connections")
 @ApiBearerAuth("access-token")
@@ -99,5 +101,19 @@ export class IntegrationConnectionController {
   @ApiResponse({ status: 404, description: "Connection not found." })
   importTrades(@Param("id") id: string, @CurrentUser("userId") userId: string, @Body() dto: ImportTradesDto) {
     return this.integrationConnectionService.importTrades(id, userId, dto);
+  }
+
+  @Public()
+  @Post("mt5/webhook")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Webhook for receiving MT5 trades from MQL5 EA" })
+  @ApiBody({ type: MT5WebhookDto })
+  @ApiResponse({ status: 200, description: "Trades received successfully." })
+  @ApiResponse({ status: 401, description: "Unauthorized. Invalid token." })
+  async mt5Webhook(@Headers("x-api-key") token: string, @Body() dto: MT5WebhookDto) {
+    if (!token) {
+      throw new UnauthorizedException("Missing X-API-Key header");
+    }
+    return this.integrationConnectionService.handleMT5Webhook(token, dto);
   }
 }

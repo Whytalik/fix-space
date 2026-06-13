@@ -2,20 +2,13 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { IntegrationService } from "@fixspace/domain";
 import { IntegrationProvider } from "./integration.provider";
 import { BinanceProvider } from "./binance.provider";
-import { MetaTrader5Provider } from "./metatrader5.provider";
 
 @Injectable()
 export class IntegrationProviderFactory {
   private readonly providers: Map<IntegrationService, IntegrationProvider>;
 
-  constructor(
-    private readonly binanceProvider: BinanceProvider,
-    private readonly mt5Provider: MetaTrader5Provider,
-  ) {
-    this.providers = new Map<IntegrationService, IntegrationProvider>([
-      [IntegrationService.BINANCE, this.binanceProvider],
-      [IntegrationService.METATRADER5, this.mt5Provider],
-    ]);
+  constructor(private readonly binanceProvider: BinanceProvider) {
+    this.providers = new Map<IntegrationService, IntegrationProvider>([[IntegrationService.BINANCE, this.binanceProvider]]);
   }
 
   get(service: IntegrationService): IntegrationProvider {

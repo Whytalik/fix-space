@@ -9,7 +9,6 @@ import { IntegrationConnectionService } from "./integration-connection.service";
 import { IntegrationConnectionRepository } from "./repositories/integration-connection.repository";
 import { IntegrationProviderFactory } from "./providers/provider.factory";
 import { BinanceProvider } from "./providers/binance.provider";
-import { MetaTrader5Provider } from "./providers/metatrader5.provider";
 import { SyncRecordService } from "./sync-record.service";
 import { IntegrationSyncScheduler } from "./integration-sync.scheduler";
 import { SpaceModule } from "@/modules/space/space.module";
@@ -22,7 +21,6 @@ import { SpaceModule } from "@/modules/space/space.module";
     IntegrationConnectionRepository,
     IntegrationProviderFactory,
     BinanceProvider,
-    MetaTrader5Provider,
     SyncRecordService,
     IntegrationSyncScheduler,
   ],
