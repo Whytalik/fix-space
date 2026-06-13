@@ -23,19 +23,19 @@ RUN dpkg --add-architecture i386 && \
         wine-stable-i386=9.0.0.0~jammy-1 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN xvfb-run --auto-servernum sh -c "wine wineboot --init && wineserver -w"
+RUN xvfb-run --auto-servernum sh -c "wine64 wineboot --init && wineserver -w"
 
 RUN wget -q "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe" -O /tmp/py.exe && \
     xvfb-run --auto-servernum sh -c \
-        "wine /tmp/py.exe /quiet InstallAllUsers=1 PrependPath=1 && wineserver -w" && \
+        "wine64 /tmp/py.exe /quiet InstallAllUsers=1 PrependPath=1 && wineserver -w" && \
     rm /tmp/py.exe
 
 RUN xvfb-run --auto-servernum sh -c \
-    "wine python -m pip install MetaTrader5 && wineserver -w"
+    "wine64 python -m pip install MetaTrader5 && wineserver -w"
 
 RUN wget -q "https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe" -O /tmp/mt5.exe && \
     xvfb-run --auto-servernum sh -c \
-        "wine /tmp/mt5.exe /auto && wineserver -w" && \
+        "wine64 /tmp/mt5.exe /auto && wineserver -w" && \
     rm /tmp/mt5.exe
 
 WORKDIR /app
