@@ -7,7 +7,6 @@ import { DuplicationModal, type DuplicationOptions } from "@/components/ui/overl
 import { Badge } from "@/components/ui/primitives/display/badge";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { Spinner } from "@/components/ui/primitives/feedback/spinner";
-import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { useAppContext } from "@/context/app-context";
 import { useUIContext } from "@/context/ui-context";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

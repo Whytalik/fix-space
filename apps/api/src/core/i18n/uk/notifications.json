@@ -4,5 +4,7 @@
   "integration_sync_completed": "Синхронізацію завершено: {synced} нових угод, {skipped} дублікатів",
   "integration_sync_failed": "Синхронізація не вдалася: {error}",
   "integration_no_journal": "Інтеграція \"{service}\": базу даних «Торговий журнал» не знайдено. Будь ласка, створіть її для авто-імпорту.",
-  "integration_missing_properties": "Інтеграція \"{service}\": у вашому Торговому журналі відсутні деякі властивості для мапінгу ({properties}). Записи будуть створені з неповними даними."
+  "integration_missing_properties": "Інтеграція \"{service}\": у вашому Торговому журналі відсутні деякі властивості для мапінгу ({properties}). Записи будуть створені з неповними даними.",
+  "integration_created": "Integration Created",
+  "integration_failed": "Integration Failed"
 }

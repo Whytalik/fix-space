@@ -43,7 +43,6 @@
   "REGISTRATION_SUCCESS": "Реєстрація успішна. Будь ласка, перевірте свою пошту, щоб підтвердити акаунт.",
   "PASSWORD_RESET_GENERIC": "Якщо цей email зареєстровано, ви отримаєте посилання для скидання пароля.",
   "COOLDOWN_ACTIVE": "Будь ласка, зачекайте {seconds} сек перед запитом нового листа.",
-
   "DEV_USER_NOT_FOUND": "Користувача для {email} не знайдено — нічого скидати",
   "DEV_DATA_RESET": "Тестові дані для {email} видалено (каскадно)",
   "DEV_USER_VERIFIED": "Користувача {email} верифіковано",
@@ -94,5 +93,7 @@
   "INTEGRATION_KEY_NOT_READ_ONLY": "API ключ повинен бути лише для читання (enableTrading та enableWithdrawals мають бути вимкнені)",
   "INTEGRATION_SYNC_FAILED": "Синхронізація не вдалася для {name}: {error}",
   "INTEGRATION_NOT_LINKED_TO_SPACE": "Підключення інтеграції не привʼязане до жодного спейсу.",
-  "SPACE_LIMIT_REACHED": "Досягнуто ліміт просторів (5)"
+  "SPACE_LIMIT_REACHED": "Досягнуто ліміт просторів (5)",
+  "SNAPSHOT_NOT_FOUND": "SNAPSHOT NOT FOUND",
+  "RECORD_CONTENT_NOT_FOUND": "RECORD CONTENT NOT FOUND"
 }

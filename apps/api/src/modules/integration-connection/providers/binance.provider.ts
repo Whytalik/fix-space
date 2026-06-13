@@ -174,7 +174,9 @@ export class BinanceProvider implements IntegrationProvider {
               endTime: task.chunk.end,
               limit: 1000,
             })) as any[];
-          } catch {}
+          } catch (e) {
+            this.logger.debug("No orders found or error fetching orders", { symbol: task.symbol, error: e });
+          }
 
           return { trades: trades ?? [], orders, symbol: task.symbol, chunk: task.chunk };
         },

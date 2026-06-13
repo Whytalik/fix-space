@@ -34,7 +34,9 @@
     "sessionIndicator": {
       "opensAt": "at"
     },
-    "at": "at"
+    "at": "at",
+    "noSpace": "No space selected",
+    "noSpaceDesc": "Please select a space from the sidebar to view your dashboard."
   },
   "Header": {
     "logIn": "Log in",

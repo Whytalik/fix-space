@@ -93,5 +93,7 @@
   "INTEGRATION_KEY_NOT_READ_ONLY": "API key must be read-only (enableTrading and enableWithdrawals must be disabled)",
   "INTEGRATION_SYNC_FAILED": "Synchronization failed for {name}: {error}",
   "INTEGRATION_NOT_LINKED_TO_SPACE": "Integration connection is not linked to any space.",
-  "SPACE_LIMIT_REACHED": "Maximum number of spaces (5) reached"
+  "SPACE_LIMIT_REACHED": "Maximum number of spaces (5) reached",
+  "SNAPSHOT_NOT_FOUND": "SNAPSHOT NOT FOUND",
+  "RECORD_CONTENT_NOT_FOUND": "RECORD CONTENT NOT FOUND"
 }

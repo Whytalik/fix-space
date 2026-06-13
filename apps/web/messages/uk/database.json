@@ -138,7 +138,8 @@
     "day": "День",
     "week": "Тиждень",
     "month": "Місяць",
-    "year": "Рік"
+    "year": "Рік",
+    "locked": "Locked"
   },
   "SummaryMetrics": {
     "calculate": "Обчислити",

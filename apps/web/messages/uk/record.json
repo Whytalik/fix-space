@@ -28,16 +28,46 @@
       "add": "Додати",
       "structure": "Структура",
       "elements": "Елементи",
-      "history": "Історія"
+      "history": "Історія",
+      "rowLayouts": "Row Layouts",
+      "columns": "Columns",
+      "row": "Row",
+      "column": "Column",
+      "empty": "Empty",
+      "noHistory": "No History",
+      "rows": "Rows",
+      "viewVersion": "View Version",
+      "restore": "Restore"
     },
     "structure": {
       "row": "Рядок",
       "column": "Колонка",
-      "empty": "Канвас порожній"
+      "empty": "Канвас порожній",
+      "rowLayouts": "Row Layouts",
+      "columns": "Columns",
+      "noHistory": "No History",
+      "rows": "Rows",
+      "viewVersion": "View Version",
+      "restore": "Restore",
+      "elements": "Elements",
+      "add": "Add",
+      "structure": "Structure",
+      "history": "History"
     },
     "layout": {
       "rowLayouts": "Макети рядків",
-      "columns": "{count, plural, =1 {# колонка} other {# колонки}}"
+      "columns": "{count, plural, =1 {# колонка} other {# колонки}}",
+      "row": "Row",
+      "column": "Column",
+      "empty": "Empty",
+      "noHistory": "No History",
+      "rows": "Rows",
+      "viewVersion": "View Version",
+      "restore": "Restore",
+      "elements": "Elements",
+      "add": "Add",
+      "structure": "Structure",
+      "history": "History"
     },
     "elements": {
       "contentElements": "Елементи вмісту",
@@ -97,7 +127,25 @@
       "uploadHint": "PNG, JPG, WebP · макс. 5 МБ",
       "add": "Додати",
       "pasteImage": "або вставте зображення (Ctrl+V)",
-      "heading": "Заголовок {level}..."
-    }
+      "heading": "Заголовок {level}...",
+      "emptyCanvas": "Empty Canvas",
+      "compareVersions": "Compare Versions",
+      "viewVersion": "View Version",
+      "history": "History",
+      "inspector": {
+        "cancel": "Cancel"
+      },
+      "restore": "Restore"
+    },
+    "confirmApplyTemplateTitle": "Confirm Apply Template Title",
+    "confirmApplyTemplateDesc": "Confirm Apply Template Desc",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "rowLayouts": "Row Layouts",
+    "columns": "Columns",
+    "row": "Row",
+    "column": "Column",
+    "empty": "Empty",
+    "add": "Add"
   }
 }

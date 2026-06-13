@@ -27,18 +27,23 @@ export class Mt5Credentials {
   @IsString()
   service?: string;
 
-  @ApiProperty({ description: "MT5 account login", example: "12345678", required: true })
+  @ApiPropertyOptional({ description: "MT5 account login", example: "12345678" })
+  @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
-  @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
-  login: string;
+  login?: string;
 
-  @ApiProperty({ description: "MT5 account password (investor password recommended)", example: "password123", required: true })
+  @ApiPropertyOptional({ description: "MT5 account password", example: "password123" })
+  @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
-  @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
-  password: string;
+  password?: string;
 
-  @ApiProperty({ description: "MT5 server name", example: "ICMarkets-Demo", required: true })
+  @ApiPropertyOptional({ description: "MT5 server name", example: "ICMarkets-Demo" })
+  @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
-  @IsNotEmpty({ message: i18nValidationMessage<I18nTranslations>("validation.IS_NOT_EMPTY") })
-  server: string;
+  server?: string;
+
+  @ApiPropertyOptional({ description: "API token for webhook auth", example: "sk_..." })
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
+  apiToken?: string;
 }

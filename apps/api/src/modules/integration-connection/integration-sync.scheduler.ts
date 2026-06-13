@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from "@nestjs/common";
 import { SchedulerRegistry } from "@nestjs/schedule";
 import { CronJob } from "cron";
-import { IntegrationStatus } from "@fixspace/domain";
+import { IntegrationStatus, IntegrationService } from "@fixspace/domain";
 import { prisma } from "@fixspace/database";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { IntegrationConnectionService } from "./integration-connection.service";
@@ -37,6 +37,7 @@ export class IntegrationSyncScheduler implements OnModuleInit {
         where: {
           status: IntegrationStatus.ACTIVE,
           spaceId: { not: null },
+          service: { not: IntegrationService.METATRADER5 },
         },
       });
 

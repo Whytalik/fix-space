@@ -102,6 +102,22 @@ export class RecordRepository extends BaseRepository {
     });
   }
 
+  async findManyWithValuesBySourceIntegration(connectionId: string) {
+    return prisma.record.findMany({
+      where: {
+        sourceIntegrationId: connectionId,
+      },
+      include: {
+        values: {
+          include: {
+            property: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   async create(data: Prisma.RecordUncheckedCreateInput, transaction?: Prisma.TransactionClient) {
     return (transaction ?? prisma).record.create({ data });
   }

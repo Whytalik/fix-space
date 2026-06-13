@@ -138,7 +138,8 @@
     "day": "Day",
     "week": "Week",
     "month": "Month",
-    "year": "Year"
+    "year": "Year",
+    "locked": "Locked"
   },
   "SummaryMetrics": {
     "calculate": "Calculate",
@@ -260,7 +261,8 @@
     },
     "content": "Content",
     "icon": "Icon",
-    "chooseIcon": "Choose an icon…"
+    "chooseIcon": "Choose an icon…",
+    "template": "Шаблон"
   },
   "PropertyForm": {
     "newProperty": "New property",
@@ -305,13 +307,15 @@
     "edit": "Edit",
     "addItem": "Add Item",
     "import": "Import CSV",
-    "export": "Export CSV"
+    "export": "Export CSV",
+    "automations": "Автоматизації"
   },
   "TemplatePickerModal": {
     "chooseTemplate": "Choose a template",
     "chooseTemplateDesc": "Select a template to apply to the new record.",
     "noTemplate": "No template",
-    "default": "Default"
+    "default": "Default",
+    "applyTemplate": "Застосувати шаблон"
   },
   "TemplateEditModal": {
     "templateName": "Template name",

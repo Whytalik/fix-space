@@ -33,10 +33,6 @@ export const INTEGRATION_METADATA: Record<IntegrationService, IntegrationMetadat
     service: IntegrationService.METATRADER5,
     label: "MetaTrader 5",
     descriptionKey: "mt5Description",
-    fields: [
-      { id: "login", labelKey: "mt5Login", placeholderKey: "mt5LoginPlaceholder" },
-      { id: "password", labelKey: "mt5Password", placeholderKey: "mt5PasswordPlaceholder", type: "password" },
-      { id: "server", labelKey: "mt5Server", placeholderKey: "mt5ServerPlaceholder" },
-    ],
+    fields: [],
   },
 };

@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                      SyncBot.mq5 |
+//|                                                 FixSpaceSync.mq5 |
 //|                                  Copyright 2026, Fix Space Corp. |
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2026, Fix Space Corp."
@@ -12,6 +12,7 @@ input string   InpApiUrl      = "https://your-api.railway.app/api/integration-co
 input string   InpConnectionId = ""; // Fix Space Connection ID
 input string   InpApiToken    = ""; // Fix Space API Token
 input int      InpSyncTimer   = 30; // Sync interval in seconds
+input int      InpSyncDays    = 180; // Initial sync depth in days
 
 //--- Global variables
 datetime lastSyncTime = 0;
@@ -48,11 +49,11 @@ int OnInit()
       return(INIT_FAILED);
    }
 
-   // Initially, get deals from the last 7 days to seed the backend.
-   lastSyncTime = TimeCurrent() - (7 * 24 * 60 * 60);
+   // Initially, get deals from the last N days to seed the backend.
+   lastSyncTime = TimeCurrent() - (InpSyncDays * 24 * 60 * 60);
 
    EventSetTimer(InpSyncTimer);
-   Print("SyncBot initialized. Syncing every ", InpSyncTimer, " seconds.");
+   Print("FixSpaceSync initialized. Syncing every ", InpSyncTimer, " seconds.");
    
    return(INIT_SUCCEEDED);
 }
@@ -63,7 +64,7 @@ int OnInit()
 void OnDeinit(const int reason)
 {
    EventKillTimer();
-   Print("SyncBot deinitialized.");
+   Print("FixSpaceSync deinitialized.");
 }
 
 //+------------------------------------------------------------------+

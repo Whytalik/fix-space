@@ -134,6 +134,12 @@ importers:
       binance:
         specifier: ^3.5.10
         version: 3.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      class-transformer:
+        specifier: ^0.5.1
+        version: 0.5.1
+      class-validator:
+        specifier: ^0.14.3
+        version: 0.14.3
       cloudinary:
         specifier: ^2.10.0
         version: 2.10.0

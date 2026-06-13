@@ -28,16 +28,46 @@
       "add": "Add",
       "structure": "Structure",
       "elements": "Elements",
-      "history": "History"
+      "history": "History",
+      "rowLayouts": "Row Layouts",
+      "columns": "Columns",
+      "row": "Row",
+      "column": "Column",
+      "empty": "Empty",
+      "noHistory": "No History",
+      "rows": "Rows",
+      "viewVersion": "View Version",
+      "restore": "Restore"
     },
     "structure": {
       "row": "Row",
       "column": "Column",
-      "empty": "Canvas is empty"
+      "empty": "Canvas is empty",
+      "rowLayouts": "Row Layouts",
+      "columns": "Columns",
+      "noHistory": "No History",
+      "rows": "Rows",
+      "viewVersion": "View Version",
+      "restore": "Restore",
+      "elements": "Elements",
+      "add": "Add",
+      "structure": "Structure",
+      "history": "History"
     },
     "layout": {
       "rowLayouts": "Row Layouts",
-      "columns": "{count, plural, =1 {# column} other {# columns}}"
+      "columns": "{count, plural, =1 {# column} other {# columns}}",
+      "row": "Row",
+      "column": "Column",
+      "empty": "Empty",
+      "noHistory": "No History",
+      "rows": "Rows",
+      "viewVersion": "View Version",
+      "restore": "Restore",
+      "elements": "Elements",
+      "add": "Add",
+      "structure": "Structure",
+      "history": "History"
     },
     "elements": {
       "contentElements": "Content Elements",
@@ -97,7 +127,25 @@
       "uploadHint": "PNG, JPG, WebP · max 5 MB",
       "add": "Add",
       "pasteImage": "or paste image (Ctrl+V)",
-      "heading": "Heading {level}..."
-    }
+      "heading": "Heading {level}...",
+      "emptyCanvas": "Empty Canvas",
+      "compareVersions": "Compare Versions",
+      "viewVersion": "View Version",
+      "history": "History",
+      "inspector": {
+        "cancel": "Cancel"
+      },
+      "restore": "Restore"
+    },
+    "confirmApplyTemplateTitle": "Confirm Apply Template Title",
+    "confirmApplyTemplateDesc": "Confirm Apply Template Desc",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "rowLayouts": "Row Layouts",
+    "columns": "Columns",
+    "row": "Row",
+    "column": "Column",
+    "empty": "Empty",
+    "add": "Add"
   }
 }

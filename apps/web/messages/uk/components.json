@@ -126,7 +126,8 @@
     "noRecordsFound": "Записів не знайдено",
     "selectedCount": "{count} вибрано",
     "applyChanges": "Застосувати зміни",
-    "untitled": "Без назви"
+    "untitled": "Без назви",
+    "cancel": "Cancel"
   },
   "IconPicker": {
     "searchIcons": "Пошук іконок…",

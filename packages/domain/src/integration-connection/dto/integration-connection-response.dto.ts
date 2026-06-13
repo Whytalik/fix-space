@@ -69,6 +69,10 @@ export class IntegrationConnectionResponseDto {
   @Expose()
   updatedAt: Date;
 
+  @ApiProperty({ description: "Generated API token for MT5 webhook (only on creation)", required: false })
+  @Expose()
+  apiToken?: string;
+
   constructor(partial: Partial<IntegrationConnectionResponseDto>) {
     Object.assign(this, partial);
   }

@@ -26,6 +26,7 @@
     "docker:up:build": "docker compose up --build -d",
     "docker:down": "docker compose down",
     "sync:issues": "node scripts/sync-from-issues.js",
+    "install:bot": "node scripts/install-bot.js",
     "prepare": "node -e \"if(process.env.CI || process.env.NODE_ENV === 'production') process.exit(0); require('child_process').execSync('husky', {stdio: 'inherit'});\""
   },
   "devDependencies": {

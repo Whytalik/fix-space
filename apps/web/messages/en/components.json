@@ -126,7 +126,8 @@
     "noRecordsFound": "No records found",
     "selectedCount": "{count} selected",
     "applyChanges": "Apply Changes",
-    "untitled": "Untitled"
+    "untitled": "Untitled",
+    "cancel": "Cancel"
   },
   "IconPicker": {
     "searchIcons": "Search icons…",
@@ -184,7 +185,6 @@
     "deleting": "Deleting...",
     "sectionDuplicated": "Section duplicated successfully."
   },
-
   "EditActions": {
     "saving": "Saving…",
     "saveChanges": "Save changes",
