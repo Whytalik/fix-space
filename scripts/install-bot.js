@@ -1,18 +1,18 @@
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+import { existsSync, copyFileSync } from 'fs';
+import { resolve, join } from 'path';
+import { homedir } from 'os';
 
-const source = path.resolve(__dirname, '../mql5/Experts/FixSpaceSync.mq5');
+const source = resolve(__dirname, '../mql5/Experts/FixSpaceSync.mq5');
 
-const home = os.homedir();
+const home = homedir();
 const possiblePaths = [
-  path.join(home, 'Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Experts'),
-  path.join(home, 'Library/Application Support/com.metatrader.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Experts')
+  join(home, 'Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Experts'),
+  join(home, 'Library/Application Support/com.metatrader.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Experts')
 ];
 
 let target = null;
 for (const p of possiblePaths) {
-  if (fs.existsSync(p)) {
+  if (existsSync(p)) {
     target = p;
     break;
   }
@@ -23,9 +23,9 @@ if (!target) {
   process.exit(1);
 }
 
-const dest = path.join(target, 'FixSpaceSync.mq5');
+const dest = join(target, 'FixSpaceSync.mq5');
 try {
-  fs.copyFileSync(source, dest);
+  copyFileSync(source, dest);
   console.log(`Successfully copied FixSpaceSync.mq5 to ${dest}`);
 } catch (error) {
   console.error('Failed to copy file:', error);

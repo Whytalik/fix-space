@@ -22,13 +22,14 @@ packages/database/
 
 ### Generator
 
-Uses the Prisma 7 `prisma-client` generator, which produces a Rust-free client
-with faster queries and a smaller bundle than the legacy `@prisma/client` approach:
+Uses the Prisma 7 `prisma-client-js` generator, which produces a client
+configured for CJS module format and outputs it directly to the shared package directory:
 
 ```prisma
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/client"
+  provider     = "prisma-client-js"
+  output       = "../generated/client"
+  moduleFormat = "cjs"
 }
 ```
 
@@ -37,33 +38,32 @@ The generated client is output to `packages/database/generated/client/` and is
 
 ### Models
 
-| Model                    | Purpose                                               |
-| ------------------------ | ----------------------------------------------------- |
-| `User`                   | User accounts with email/username authentication      |
-| `RefreshToken`           | JWT refresh tokens with expiry and revocation support |
-| `EmailVerificationToken` | One-time tokens for email verification flow           |
-| `PasswordResetToken`     | One-time tokens for password reset flow               |
-| `GoogleAccount`          | Linked Google OAuth account per user                  |
-| `Settings`               | User-level key-value settings stored as JSON          |
-| `Notification`           | In-app notifications (SYSTEM, ALERT, INTEGRATION)     |
-| `IntegrationConnection`  | External broker/exchange API credentials              |
-| `Space`                  | Top-level workspace owned by a user                   |
-| `Section`                | Organisational groups within a space                  |
-| `Database`               | Typed data container within a space/section           |
-| `PropertyGroup`          | Named property groups with conditional visibility     |
-| `Property`               | Typed columns — see property types below              |
-| `Record`                 | Data rows within a database                           |
-| `PropertyValue`          | JSON values for individual record-property pairs      |
-| `RecordContent`          | Rich-text content (block JSON) attached to a record   |
-| `RecordContentSnapshot`  | Versioned snapshots of record content                 |
-| `Template`               | Pre-filled record template within a database          |
-| `TemplatePropertyValue`  | Default values for template properties                |
-| `View`                   | Saved view configurations (filters, sort, grouping)   |
-| `Automation`             | Server-side automation rules per database             |
-| `AutomationLog`          | Execution history for automations                     |
-| `ImportMapping`          | Saved CSV field-mapping presets                       |
-| `ImportHistory`          | CSV import job history per database                   |
-| `ContentBlockLibrary`    | Reusable content blocks (system presets + user-saved) |
+| Model                    | Purpose                                                         |
+| ------------------------ | --------------------------------------------------------------- |
+| `User`                   | User accounts with email/username authentication                |
+| `RefreshToken`           | JWT refresh tokens with expiry and revocation support           |
+| `EmailVerificationToken` | One-time tokens for email verification flow                     |
+| `PasswordResetToken`     | One-time tokens for password reset flow                         |
+| `GoogleAccount`          | Linked Google OAuth account per user                            |
+| `Settings`               | User-level key-value settings stored as JSON                    |
+| `Notification`           | In-app notifications (INFO, ERROR, AUTOMATION, INTEGRATION)     |
+| `IntegrationConnection`  | External broker/exchange API credentials (BINANCE, METATRADER5) |
+| `Space`                  | Top-level workspace owned by a user                             |
+| `Section`                | Organisational groups within a space                            |
+| `Database`               | Typed data container within a space/section                     |
+| `PropertyGroup`          | Named property groups with conditional visibility               |
+| `Property`               | Typed columns — see property types below                        |
+| `Record`                 | Data rows within a database                                     |
+| `PropertyValue`          | JSON values for individual record-property pairs                |
+| `RecordContent`          | Rich-text content (block JSON) attached to a record             |
+| `RecordContentSnapshot`  | Versioned snapshots of record content                           |
+| `Template`               | Pre-filled record template within a database                    |
+| `TemplatePropertyValue`  | Default values for template properties                          |
+| `View`                   | Saved view configurations (filters, sort, grouping)             |
+| `Automation`             | Server-side automation rules per database                       |
+| `AutomationLog`          | Execution history for automations                               |
+| `ImportMapping`          | Saved CSV field-mapping presets                                 |
+| `ImportHistory`          | CSV import job history per database                             |
 
 ### Property types
 
