@@ -1,0 +1,119 @@
+@startuml Auth_Sequence
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam sequence {
+  ArrowColor #000000
+  LifeLineBorderColor #000000
+  ParticipantBorderColor #000000
+  ParticipantBackgroundColor #FFFFFF
+}
+
+title Рис. 3.5. Діаграма послідовності процесу автентифікації та ротації токенів
+
+actor "Користувач" as User
+participant ":AuthForm\n(React)" as UI
+participant "apiClient\n(Next.js)" as API
+participant ":AuthController\n(NestJS)" as Controller
+participant ":AuthService\n(NestJS)" as Service
+participant ":TokenService\n(Core)" as Token
+database "PostgreSQL\n(Prisma)" as DB
+
+== Вхід у систему ==
+
+User -> UI : Введення email та пароля
+activate UI
+UI -> API : login(email, password)
+activate API
+API -> Controller : POST /auth/login
+activate Controller
+Controller -> Service : login(dto)
+activate Service
+
+Service -> DB : findUserByEmail(email)
+activate DB
+DB -->> Service : userFound
+deactivate DB
+
+Service -> Service : verifyPassword(plain, hash)
+note right: Використання bcrypt
+
+alt Пароль вірний
+    Service -> Token : generateAccessToken(userId)
+    activate Token
+    Token -->> Service : accessToken (JWT)
+    deactivate Token
+    
+    Service -> Token : createRefreshToken(userId)
+    activate Token
+    Token -> DB : saveTokenHash(userId, hash)
+    activate DB
+    DB -->> Token : OK
+    deactivate DB
+    Token -->> Service : refreshToken (Raw)
+    deactivate Token
+    
+    Service -->> Controller : { accessToken, refreshToken }
+    Controller -->> API : 200 OK\nSet-Cookie: refresh_token
+    API -->> UI : success
+    UI -->> User : Доступ до системи відкрито
+else Помилка авторизації
+    Service -->> Controller : throw UnauthorizedException
+    Controller -->> API : 401 Unauthorized
+    API -->> UI : error
+    UI -->> User : Повідомлення "Невірний логін або пароль"
+end
+
+deactivate Service
+deactivate Controller
+deactivate API
+deactivate UI
+
+== Оновлення сесії (Refresh) ==
+
+API -> Controller : POST /auth/refresh\nCookie: refresh_token
+activate API
+activate Controller
+Controller -> Service : refresh(refreshTokenRaw)
+activate Service
+
+Service -> Token : validateRefreshToken(raw)
+activate Token
+Token -> DB : findTokenByHash(hash)
+activate DB
+DB -->> Token : tokenRecord
+deactivate DB
+Token -->> Service : { userId, tokenId }
+deactivate Token
+
+alt Токен валідний
+    Service -> Token : rotateRefreshToken(tokenId)
+    activate Token
+    Token -> DB : revokeOld & createNew
+    activate DB
+    DB -->> Token : newRefreshToken
+    deactivate DB
+    Token -->> Service : newRefreshToken
+    deactivate Token
+    
+    Service -> Token : generateAccessToken(userId)
+    activate Token
+    Token -->> Service : newAccessToken
+    deactivate Token
+    
+    Service -->> Controller : { newAccessToken, newRefreshToken }
+    Controller -->> API : 200 OK\nSet-Cookie: new_refresh_token
+    API -->> UI : sessionUpdated
+else Токен невалідний/відкликаний
+    Service -->> Controller : throw UnauthorizedException
+    Controller -->> API : 401 Unauthorized
+    API -> API : redirectToLogin()
+end
+
+deactivate Service
+deactivate Controller
+deactivate API
+
+@enduml

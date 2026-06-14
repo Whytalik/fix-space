@@ -1,6 +1,74 @@
 # Unit Tests: Properties
 
-### [ ] TC-PROP-U-001: TextHandler — validateValue та convertFrom
+### [x] TC-PROP-U-019: PropertyService.create — NotFoundException коли база не знайдена
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `NotFoundException`.
+
+---
+
+### [x] TC-PROP-U-020: PropertyService.create — ForbiddenException коли база заблокована
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROP-U-021: PropertyService.create — ConflictException коли ім'я вже зайняте
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ConflictException`.
+
+---
+
+### [x] TC-PROP-U-022: PropertyService.create — BadRequestException при невалідній конфігурації
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `BadRequestException`.
+
+---
+
+### [x] TC-PROP-U-023: PropertyService.create — успішно створює властивість
 
 | Поле         | Значення           |
 | ------------ | ------------------ |
@@ -11,439 +79,501 @@
 | **Техніка**  | Statement Coverage |
 | **Priority** | P1                 |
 
-**Кроки:**
-
-1. `validateValue(null)` — рядок `null`
-2. `validateValue("hello")` — валідний рядок
-3. `convertFrom("  spaces  ")` — обрізка пробілів
-4. `isEmpty(null)` та `isEmpty("")`
-
 **Очікуваний результат:**
 
-- `validateValue(null)` → valid (null дозволений)
-- `convertFrom("  spaces  ")` → `"spaces"`
-- `isEmpty(null)` → `true`, `isEmpty("")` → `true`, `isEmpty("x")` → `false`
+- Повертається `PropertyResponseDto` з коректним `id`.
 
 ---
 
----
-
-### [ ] TC-PROP-U-002: NumberHandler — validateConfig формати та конвертація
-
-| Поле         | Значення       |
-| ------------ | -------------- |
-| **US**       | US-010         |
-| **Issue**    | #61            |
-| **TS**       | —              |
-| **Метод**    | Unit (Jest)    |
-| **Техніка**  | Boundary Value |
-| **Priority** | P1             |
-
-**Кроки:**
-
-1. `validateConfig({ format: "currency", decimalPlaces: 2 })` — валідний
-2. `validateConfig({ format: "unknown" })` — невалідний формат
-3. `validateConfig({ decimalPlaces: -1 })` — від'ємне значення
-4. `convertFrom("3.14")` — рядок у число
-
-**Очікуваний результат:**
-
-- Валідний конфіг → без помилок
-- `format: "unknown"` → помилка валідації
-- `decimalPlaces: -1` → помилка валідації
-- `convertFrom("3.14")` → `3.14` (number)
-
----
-
----
-
-### [ ] TC-PROP-U-003: DateHandler — validateValue ISO 8601 та convertFrom
-
-| Поле         | Значення          |
-| ------------ | ----------------- |
-| **US**       | US-010            |
-| **Issue**    | #62               |
-| **TS**       | —                 |
-| **Метод**    | Unit (Jest)       |
-| **Техніка**  | Equivalence Part. |
-| **Priority** | P1                |
-
-**Кроки:**
-
-1. `validateValue("2024-01-15")` — валідна дата
-2. `validateValue("not-a-date")` — невалідна
-3. `validateValue(null)` — null дозволений
-4. `convertFrom("2024-01-15T10:00:00Z")` → ISO рядок
-
-**Очікуваний результат:**
-
-- Валідна ISO дата → valid
-- `"not-a-date"` → помилка
-- `null` → valid (nullable)
-
----
-
----
-
-### [ ] TC-PROP-U-004: CheckboxHandler — boolean семантика та isNull
-
-| Поле         | Значення           |
-| ------------ | ------------------ |
-| **US**       | US-010             |
-| **Issue**    | #63                |
-| **TS**       | —                  |
-| **Метод**    | Unit (Jest)        |
-| **Техніка**  | Statement Coverage |
-| **Priority** | P1                 |
-
-**Кроки:**
-
-1. `validateValue(true)` та `validateValue(false)`
-2. `validateValue(null)` — null як "не відмічено"
-3. `isEmpty(null)` — семантика
-
-**Очікуваний результат:**
-
-- `true` та `false` → valid
-- `null` → valid (інтерпретується як `false`)
-- `isEmpty(null)` → `false` (null — це валідний unchecked стан)
-
----
-
----
-
-### [ ] TC-PROP-U-005: SelectHandler — validateConfig options та filter operators
+### [x] TC-PROP-U-024: PropertyService.findAll — виставляє isBroken=true для розбитих relation
 
 | Поле         | Значення        |
 | ------------ | --------------- |
 | **US**       | US-010          |
-| **Issue**    | #65             |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P2              |
+
+**Очікуваний результат:**
+
+- `config.isBroken === true` коли `databaseRepo.exists` повертає `false`.
+
+---
+
+### [x] TC-PROP-U-025: PropertyService.findOne — NotFoundException коли властивість не знайдена
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
 | **TS**       | —               |
 | **Метод**    | Unit (Jest)     |
 | **Техніка**  | Branch Coverage |
 | **Priority** | P1              |
 
-**Кроки:**
-
-1. `validateConfig({ options: [{ id: "1", label: "A" }] })` — валідний
-2. `validateConfig({ options: [] })` — порожній список
-3. `getFilterOperators()` — перевірити наявність IN та NOT_IN
-
 **Очікуваний результат:**
 
-- Конфіг з options → valid
-- `getFilterOperators()` містить `FilterOperator.IN` та `FilterOperator.NOT_IN`
+- Викидається `NotFoundException`.
 
 ---
 
----
-
-### [ ] TC-PROP-U-006: StatusHandler — три категорії та validateConfig
+### [x] TC-PROP-U-026: PropertyService.findOne — повертає DTO
 
 | Поле         | Значення           |
 | ------------ | ------------------ |
 | **US**       | US-010             |
+| **Issue**    | #60                |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P2                 |
+
+**Очікуваний результат:**
+
+- Повертається `PropertyResponseDto`.
+
+---
+
+### [x] TC-PROP-U-027: PropertyService.update — NotFoundException коли властивість не знайдена
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `NotFoundException`.
+
+---
+
+### [x] TC-PROP-U-028: PropertyService.update — ForbiddenException коли база заблокована
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROP-U-029: PropertyService.update — ForbiddenException при перейменуванні Name
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROP-U-030: PropertyService.update — ConflictException коли нова назва зайнята
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ConflictException`.
+
+---
+
+### [x] TC-PROP-U-031: PropertyService.update — оновлює і повертає DTO
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-010             |
+| **Issue**    | #60                |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P1                 |
+
+**Очікуваний результат:**
+
+- Повертається оновлений `PropertyResponseDto`.
+
+---
+
+### [x] TC-PROP-U-032: PropertyService.remove — NotFoundException коли властивість не знайдена
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `NotFoundException`.
+
+---
+
+### [x] TC-PROP-U-033: PropertyService.remove — ForbiddenException при видаленні Name
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROP-U-034: PropertyService.remove — ForbiddenException при видаленні isProtected
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROP-U-035: PropertyService.remove — видаляє властивість
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-010             |
+| **Issue**    | #60                |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P1                 |
+
+**Очікуваний результат:**
+
+- `propertyRepo.delete("p-1")` викликається.
+
+---
+
+### [x] TC-PROP-U-036: PropertyService.previewFormula — обчислює і повертає результат
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-034             |
 | **Issue**    | #66                |
 | **TS**       | —                  |
 | **Метод**    | Unit (Jest)        |
 | **Техніка**  | Statement Coverage |
-| **Priority** | P1                 |
-
-**Кроки:**
-
-1. `validateConfig` з опціями категорій `todo`, `in_progress`, `complete`
-2. `validateConfig` без обов'язкової категорії → помилка
-3. `getFilterOperators()` — наявність IN/NOT_IN
+| **Priority** | P2                 |
 
 **Очікуваний результат:**
 
-- Всі 3 категорії → valid
-- Відсутня категорія → помилка валідації
+- `formulaEngine.evaluate` викликається, `result.result === 42`.
 
 ---
 
----
-
-### [ ] TC-PROP-U-007: RelationHandler — validateConfig relatedEntityId
-
-| Поле         | Значення           |
-| ------------ | ------------------ |
-| **US**       | US-010             |
-| **Issue**    | #67                |
-| **TS**       | —                  |
-| **Метод**    | Unit (Jest)        |
-| **Техніка**  | Statement Coverage |
-| **Priority** | P1                 |
-
-**Кроки:**
-
-1. `validateConfig({ relatedEntityId: "uuid-123" })` — валідний
-2. `validateConfig({})` — відсутній `relatedEntityId`
-3. `getFilterOperators()` — наявність IN/NOT_IN
-
-**Очікуваний результат:**
-
-- З `relatedEntityId` → valid
-- Без `relatedEntityId` → помилка (обов'язкове поле)
-
----
-
----
-
-### [ ] TC-PROP-U-008: RatingHandler — maxStars межі та validateValue
-
-| Поле         | Значення       |
-| ------------ | -------------- |
-| **US**       | US-010         |
-| **Issue**    | #68            |
-| **TS**       | —              |
-| **Метод**    | Unit (Jest)    |
-| **Техніка**  | Boundary Value |
-| **Priority** | P1             |
-
-**Кроки:**
-
-1. `validateConfig({ maxStars: 5 })` — валідний
-2. `validateConfig({ maxStars: 0 })` та `validateConfig({ maxStars: 11 })` — межі
-3. `validateValue(3)` при `maxStars: 5` — в діапазоні
-4. `validateValue(6)` при `maxStars: 5` — поза діапазоном
-
-**Очікуваний результат:**
-
-- `maxStars: 0` → помилка; `maxStars: 11` → помилка
-- `validateValue(6)` при `maxStars: 5` → помилка
-
----
-
----
-
-### [ ] TC-PROP-U-009: ProgressHandler — min, max, step та validateValue
-
-| Поле         | Значення       |
-| ------------ | -------------- |
-| **US**       | US-010         |
-| **Issue**    | #69            |
-| **TS**       | —              |
-| **Метод**    | Unit (Jest)    |
-| **Техніка**  | Boundary Value |
-| **Priority** | P1             |
-
-**Кроки:**
-
-1. `validateConfig({ min: 0, max: 100, step: 1 })` — валідний
-2. `validateConfig({ min: 50, max: 10 })` — min > max
-3. `validateValue(50)` в діапазоні `[0, 100]` → valid
-4. `validateValue(101)` → поза діапазоном
-
-**Очікуваний результат:**
-
-- `min > max` → помилка
-- `validateValue(101)` при `max: 100` → помилка
-
----
-
----
-
-### [ ] TC-PROP-U-010: DurationHandler — секунди як ціле число
-
-| Поле         | Значення           |
-| ------------ | ------------------ |
-| **US**       | US-010             |
-| **Issue**    | #64                |
-| **TS**       | —                  |
-| **Метод**    | Unit (Jest)        |
-| **Техніка**  | Statement Coverage |
-| **Priority** | P1                 |
-
-**Кроки:**
-
-1. `validateValue(3600)` — ціле число секунд
-2. `validateValue(3.5)` — дробове → помилка
-3. `validateValue(-1)` — від'ємне → помилка
-4. `convertFrom("3600")` — рядок → number
-
-**Очікуваний результат:**
-
-- `3600` → valid; `3.5` та `-1` → помилка
-- `convertFrom("3600")` → `3600` (integer)
-
----
-
----
-
-### [ ] TC-PROP-U-011: FormulaHandler — read-only stub
-
-| Поле         | Значення           |
-| ------------ | ------------------ |
-| **US**       | US-010             |
-| **Issue**    | —                  |
-| **TS**       | —                  |
-| **Метод**    | Unit (Jest)        |
-| **Техніка**  | Statement Coverage |
-| **Priority** | P1                 |
-
-**Кроки:**
-
-1. `validateValue(<будь-яке значення>)` — завжди valid (computed поле)
-2. `isEmpty(<будь-яке значення>)` — завжди `false`
-
-**Очікуваний результат:**
-
-- `validateValue` не кидає помилок для жодного вхідного значення
-- `isEmpty` → `false` (формула завжди вважається заповненою)
-
----
-
----
-
-### [ ] TC-PROP-U-013: PropertyTypeRegistry — резолвить коректний хендлер для кожного типу
-
-| Поле         | Значення           |
-| ------------ | ------------------ |
-| **US**       | US-010             |
-| **Issue**    | —                  |
-| **TS**       | —                  |
-| **Метод**    | Unit (Jest)        |
-| **Техніка**  | Statement Coverage |
-| **Priority** | P1                 |
-
-**Кроки:**
-
-1. Для кожного з 11 типів викликати `registry.getHandler(type)`
-2. Перевірити що повернений об'єкт є інстансом відповідного Handler-класу
-3. `registry.getHandler("UNKNOWN")` → `NotFoundException`
-
-**Очікуваний результат:**
-
-- `PropertyType.TEXT` → `TextHandler`, ..., `PropertyType.PROGRESS` → `ProgressHandler`
-- Невідомий тип → `NotFoundException`
-
----
-
----
-
----
-
-### [ ] TC-PROP-U-014: PropertyService.create — Створення властивості з правильними параметрами
-
-| Поле         | Значення           |
-| ------------ | ------------------ |
-| **US**       | US-011             |
-| **Issue**    | —                  |
-| **TS**       | —                  |
-| **Метод**    | Unit (Jest)        |
-| **Техніка**  | Statement Coverage |
-| **Priority** | P1                 |
-
-**Кроки:**
-
-1. Викликати `PropertyService.create()` з валідними параметрами.
-2. Перевірити, що `PropertyRepository.create` викликається з правильними аргументами.
-3. Перевірити повернення `PropertyResponseDto`.
-
-**Очікуваний результат:**
-
-- Властивість успішно створена та повернуто DTO.
-
----
-
----
-
-### [ ] TC-PROP-U-015: PropertyService.findOne — Помилка у разі відсутності властивості
+### [x] TC-PROP-U-037: PropertyService.duplicate — NotFoundException коли властивість не знайдена
 
 | Поле         | Значення        |
 | ------------ | --------------- |
-| **US**       | US-011          |
-| **Issue**    | —               |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P2              |
+
+**Очікуваний результат:**
+
+- Викидається `NotFoundException`.
+
+---
+
+### [x] TC-PROP-U-038: PropertyService.duplicate — ForbiddenException коли база заблокована
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P2              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROP-U-039: PropertyService.duplicate — створює копію з суфіксом '(copy)'
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-010             |
+| **Issue**    | #60                |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P2                 |
+
+**Очікуваний результат:**
+
+- `propertyRepo.create` викликається з `name: "Status (copy)"`.
+
+---
+
+## PropertyGroupService
+
+### [x] TC-PROPG-U-001: PropertyGroupService.findAllByDatabase — NotFoundException коли база не знайдена
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
 | **TS**       | —               |
 | **Метод**    | Unit (Jest)     |
 | **Техніка**  | Branch Coverage |
 | **Priority** | P1              |
 
-**Кроки:**
-
-1. Налаштувати `PropertyRepository.findOne` так, щоб він повертав `null`.
-2. Викликати `PropertyService.findOne(id)`.
-3. Перевірити, що викидається `NotFoundException`.
-
 **Очікуваний результат:**
 
-- Виклик призводить до викидання `NotFoundException`.
+- Викидається `NotFoundException`.
 
 ---
 
----
-
-### [ ] TC-PROP-U-016: PropertyService — Відкат транзакції при виникненні помилки
+### [x] TC-PROPG-U-002: PropertyGroupService.findAllByDatabase — повертає всі групи
 
 | Поле         | Значення           |
 | ------------ | ------------------ |
-| **US**       | US-011             |
-| **Issue**    | —                  |
+| **US**       | US-010             |
+| **Issue**    | #60                |
 | **TS**       | —                  |
 | **Метод**    | Unit (Jest)        |
 | **Техніка**  | Statement Coverage |
-| **Priority** | P1                 |
-
-**Кроки:**
-
-1. Налаштувати мок репозиторію або Prisma клієнта на успішне виконання першої частини транзакції (наприклад, створення запису).
-2. Налаштувати мок репозиторію так, щоб наступний крок транзакції або супутня дія викликали виняток/помилку.
-3. Викликати відповідний метод сервісу/usecase в транзакції.
-4. Перевірити, що всі зміни, виконані в межах транзакції, відкочуються і помилка прокидається вище.
+| **Priority** | P2                 |
 
 **Очікуваний результат:**
 
-- Транзакція відміняється (rollback).
-- Жодні проміжні зміни не зберігаються в базі даних.
-- Метод прокидає відповідну помилку.
+- Масив з одним `PropertyGroupResponseDto`.
 
 ---
 
----
-
-### [ ] TC-PROP-U-017: PropertyService — Обмеження доступу до ресурсу, який не належить користувачу
+### [x] TC-PROPG-U-003: PropertyGroupService.create — NotFoundException коли база не знайдена
 
 | Поле         | Значення        |
 | ------------ | --------------- |
-| **US**       | US-011          |
-| **Issue**    | —               |
+| **US**       | US-010          |
+| **Issue**    | #60             |
 | **TS**       | —               |
 | **Метод**    | Unit (Jest)     |
 | **Техніка**  | Branch Coverage |
 | **Priority** | P1              |
 
-**Кроки:**
-
-1. Налаштувати мок репозиторію для повернення ресурсу, де `ownerId` відрізняється від ID поточного користувача.
-2. Викликати метод сервісу для доступу або модифікації цього ресурсу від імені поточного користувача.
-3. Перевірити, що метод викидає `ForbiddenException`.
-
 **Очікуваний результат:**
 
-- Метод повертає `ForbiddenException` та не виконує операцію.
+- Викидається `NotFoundException`.
 
 ---
 
----
+### [x] TC-PROPG-U-004: PropertyGroupService.create — ForbiddenException коли база заблокована
 
-### [ ] TC-PROP-U-018: PropertyService — Обробка помилки дублювання унікальних полів
-
-| Поле         | Значення       |
-| ------------ | -------------- |
-| **US**       | US-011         |
-| **Issue**    | —              |
-| **TS**       | —              |
-| **Метод**    | Unit (Jest)    |
-| **Техніка**  | Error Guessing |
-| **Priority** | P1             |
-
-**Кроки:**
-
-1. Налаштувати мок репозиторію для імітації порушення унікального обмеження у БД (наприклад, унікального імені чи email).
-2. Викликати відповідний метод створення або оновлення сервісу.
-3. Перевірити, що метод перехоплює помилку репозиторію та викидає `ConflictException`.
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
 
 **Очікуваний результат:**
 
-- Метод повертає `ConflictException` із повідомленням про помилку дублювання.
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROPG-U-005: PropertyGroupService.create — створює та повертає групу
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-010             |
+| **Issue**    | #60                |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P1                 |
+
+**Очікуваний результат:**
+
+- `groupRepo.create` викликається, повертається `PropertyGroupResponseDto`.
+
+---
+
+### [x] TC-PROPG-U-006: PropertyGroupService.update — NotFoundException коли група не знайдена
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `NotFoundException`.
+
+---
+
+### [x] TC-PROPG-U-007: PropertyGroupService.update — ForbiddenException коли не власник бази
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROPG-U-008: PropertyGroupService.update — ForbiddenException коли база заблокована
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROPG-U-009: PropertyGroupService.update — оновлює та повертає групу
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-010             |
+| **Issue**    | #60                |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P1                 |
+
+**Очікуваний результат:**
+
+- `groupRepo.update` викликається, повертається оновлений `PropertyGroupResponseDto`.
+
+---
+
+### [x] TC-PROPG-U-010: PropertyGroupService.remove — NotFoundException коли група не знайдена
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `NotFoundException`.
+
+---
+
+### [x] TC-PROPG-U-011: PropertyGroupService.remove — ForbiddenException коли не власник
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROPG-U-012: PropertyGroupService.remove — ForbiddenException коли база заблокована
+
+| Поле         | Значення        |
+| ------------ | --------------- |
+| **US**       | US-010          |
+| **Issue**    | #60             |
+| **TS**       | —               |
+| **Метод**    | Unit (Jest)     |
+| **Техніка**  | Branch Coverage |
+| **Priority** | P1              |
+
+**Очікуваний результат:**
+
+- Викидається `ForbiddenException`.
+
+---
+
+### [x] TC-PROPG-U-013: PropertyGroupService.remove — видаляє групу
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-010             |
+| **Issue**    | #60                |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P1                 |
+
+**Очікуваний fрезультат:**
+
+- `groupRepo.delete("g-1")` викликається.

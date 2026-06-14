@@ -17,9 +17,14 @@ skinparam componentArrowColor #2563eb
 skinparam rectangleBackgroundColor #FFFFFF
 skinparam rectangleBorderColor #2563eb
 
+top to bottom direction
+
 title Контекстна діаграма системи
 
 actor "Трейдер" as User
+
+User -[hidden]down-> System_Box
+System_Box -[hidden]down-> External_Box
 
 rectangle "FIX Space" as System_Box #E3F2FD {
   component "FIX Space\nWeb Application" as System
@@ -30,10 +35,7 @@ rectangle "Зовнішні системи" as External_Box #FFF9C4 {
   component "Resend API\n(Email Service)" as Resend
   component "Cloudinary API\n(Storage Service)" as Cloudinary
   component "Binance API" as Binance
-  component "Bybit API" as Bybit
-  component "OKX API" as OKX
   component "MT5 Server" as MT5
-  component "cTrader API" as cTrader
 }
 
 User --> System : Реєстрація, вхід,\nуправління просторами,\nробота з базами даних,\nаналітика трейдингу
@@ -47,9 +49,6 @@ System ..> Resend : Email-розсилка:\nверифікація, скида�
 System ..> Cloudinary : Збереження медіафайлів\nта аватарів користувача
 
 System ..> Binance : Імпорт даних\nпро торгівлю
-System ..> Bybit : Імпорт даних\nпро торгівлю
-System ..> OKX : Імпорт даних\nпро торгівлю
 System ..> MT5 : Синхронізація\nугод та історії
-System ..> cTrader : Синхронізація\nугод та історії
 
 @enduml

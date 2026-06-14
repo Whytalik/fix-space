@@ -1,6 +1,6 @@
 # Unit Tests: Statistics
 
-### [ ] TC-STAT-U-001: StatisticsService — розрахунок ключових торгових метрик (Win Rate, Profit Factor, Expectancy)
+### [x] TC-STAT-U-001: StatisticsService — розрахунок ключових торгових метрик (Win Rate, Profit Factor, Expectancy)
 
 | Поле         | Значення          |
 | ------------ | ----------------- |
@@ -27,7 +27,7 @@
 
 ---
 
-### [ ] TC-STAT-U-002: StatisticsService — розрахунок Drawdown та Drawdown-кривої
+### [x] TC-STAT-U-002: StatisticsService — розрахунок Drawdown та Drawdown-кривої
 
 | Поле         | Значення       |
 | ------------ | -------------- |
@@ -53,7 +53,7 @@
 
 ---
 
-### [ ] TC-STAT-U-003: StatisticsService — розбивка за SELECT та STATUS властивостями (Breakdown)
+### [x] TC-STAT-U-003: StatisticsService — розбивка за SELECT та STATUS властивостями (Breakdown)
 
 | Поле         | Значення           |
 | ------------ | ------------------ |
@@ -80,7 +80,7 @@
 
 ---
 
-### [ ] TC-STAT-U-004: StatisticsService — генерація аналітики для Власних звітів кастомних баз
+### [x] TC-STAT-U-004: StatisticsService — генерація аналітики для Власних звітів кастомних баз
 
 | Поле         | Значення        |
 | ------------ | --------------- |
@@ -106,7 +106,7 @@
 
 ---
 
-### [ ] TC-STAT-U-005: StatisticsService — фільтрація записів за часовим діапазоном
+### [x] TC-STAT-U-005: StatisticsService — фільтрація записів за часовим діапазоном
 
 | Поле         | Значення       |
 | ------------ | -------------- |
@@ -135,7 +135,7 @@
 
 ---
 
-### [ ] TC-STAT-U-006: StatisticsService — Відкат транзакції при виникненні помилки
+### [x] TC-STAT-U-006: StatisticsService — Відкат транзакції при виникненні помилки
 
 | Поле         | Значення           |
 | ------------ | ------------------ |
@@ -163,7 +163,7 @@
 
 ---
 
-### [ ] TC-STAT-U-007: StatisticsService — Обмеження доступу до ресурсу, який не належить користувачу
+### [x] TC-STAT-U-007: StatisticsService — Обмеження доступу до ресурсу, який не належить користувачу
 
 | Поле         | Значення        |
 | ------------ | --------------- |

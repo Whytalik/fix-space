@@ -24,6 +24,11 @@ package "Зовнішні сервіси" as Ext_Box #FFF9C4 {
   component "Google OAuth 2.0" as Google
   component "Resend API\n(Email Service)" as Resend
   component "Cloudinary API\n(Storage Service)" as Cloudinary
+  component "Trading Platforms\n(Binance, MT5)" as Trading
+}
+
+package "Термінал MT5" as MT5_Box #F8F9FA {
+  component "FixSpaceSync.mq5\n(Expert Advisor)" as EA
 }
 
 package "Клієнт (Next.js 16, порт 3001)" as Client_Box #FFFFFF {
@@ -46,11 +51,13 @@ package "Сервер (NestJS 11, порт 3000)" as Server_Box {
     component "View" as View
     component "Automation" as Automation
     component "Integration" as Integration
+    component "Statistics" as Statistics
   }
 
   package "Інфраструктура" as Infra_Box #E8F5E9 {
     component "Mail\n(Resend SDK)" as Mail
     component "Storage\n(Cloudinary SDK)" as Storage
+    component "Cache\n(Redis / ioredis)" as Cache
     component "JWT Guard" as JWTGuard
     component "Throttler" as Throttler
     component "Exception Filter" as Filter
@@ -62,23 +69,29 @@ package "Data Access" as Data_Box #F8F9FA {
 }
 
 database "PostgreSQL 16" as DB
+database "Redis 7" as RedisDB
 
-Ext_Box -[hidden]right-> Client_Box
+Ext_Box -[hidden]down-> Client_Box
+Client_Box -[hidden]down-> Server_Box
+Server_Box -[hidden]down-> Data_Box
+Data_Box -[hidden]down-> DB
 
 UI --> State
 State --> Client
 
 Client ..> Server_Box : HTTPS / REST
+EA ..> Server_Box : HTTPS / REST (Sync)
 
 Server_Box ..> Prisma : Виклики ORM
+Server_Box ..> RedisDB : Кешування даних
 
 Prisma ..> DB : SQL
 
 Google <.. Auth : OAuth 2.0
-
 Resend <.. Mail : Email delivery
-
 Cloudinary <.. Storage : Image upload
+Trading <.. Integration : API calls
 User ..> Storage : Save/remove avatar
+Modules_Box ..> Cache : Використання кешу
 
 @enduml

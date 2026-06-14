@@ -260,7 +260,7 @@ db:migrate: [generate] → генерація клієнта перед мігр
 
 JWT дозволяє **stateless верифікацію** на рівні API: сервер перевіряє підпис токена без звернення до БД на кожен запит. Тільки refresh-токен перевіряється через БД (tokenHash) — для ротації та відкликання.
 
-Access token (15 хв) в HTTP-only cookie — захист від XSS. Refresh token (30 днів) теж в HTTP-only cookie + hashed в БД — захист від крадіжки. Детальніше про це — у security-моделі [security.md §2](./security.md).
+Access token (15 хв) в HTTP-only cookie — захист від XSS. Refresh token (7 днів) теж в HTTP-only cookie + hashed в БД — захист від крадіжки. Детальніше про це — у security-моделі [security.md §2](./security.md).
 
 ### Чому bcryptjs, а не argon2
 

@@ -1,5 +1,4 @@
 import type { Config } from "jest";
-import type { Config as ConfigNamespace } from "@jest/types";
 // @ts-ignore
 import nextJest from "next/jest";
 
@@ -16,6 +15,7 @@ const config: Config = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  testPathIgnorePatterns: ["/node_modules/", "<rootDir>/.next/", "<rootDir>/e2e/"],
 };
 
 export default createJestConfig(config);

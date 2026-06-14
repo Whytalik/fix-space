@@ -1,0 +1,51 @@
+@startuml Layered_Architecture
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam nodesep 30
+skinparam ranksep 40
+
+skinparam componentBackgroundColor #FFFFFF
+skinparam componentBorderColor #2563eb
+skinparam componentArrowColor #2563eb
+skinparam databaseBackgroundColor #FFFFFF
+skinparam databaseBorderColor #2563eb
+
+left to right direction
+
+title Багатошарова архітектура серверної частини
+
+package "Шар представлення" as L1 #E3F2FD {
+  component "Controllers" as Controllers
+}
+
+package "Шар бізнес-логіки" as L2 #E8F5E9 {
+  component "Services" as Services
+}
+
+package "Шар доступу до даних" as L3 #FFF9C4 {
+  component "Repositories" as Repositories
+}
+
+package "Шар інфраструктури" as L4 #F8F9FA {
+  component "Prisma ORM" as Prisma
+}
+
+package "База даних" as L5 #F8F9FA {
+  database "PostgreSQL 16" as PgDB
+}
+
+L1 -[hidden]right-> L2
+L2 -[hidden]right-> L3
+L3 -[hidden]right-> L4
+L4 -[hidden]right-> L5
+
+Controllers -right-> Services : Виклик методів\nсервісів
+Services -right-> Repositories : Доступ до\nданих
+Repositories -right-> Prisma : ORM-запити
+Prisma -right-> PgDB : SQL
+
+@enduml

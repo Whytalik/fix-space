@@ -9,12 +9,9 @@
   },
   "scripts": {
     "dev": "turbo run dev",
-    "dev:api": "cross-env NODE_ENV=development turbo run dev --filter=@fixspace/api",
-    "build": "turbo run build",
-    "start:prod": "cross-env NODE_ENV=production node apps/api/dist/main.js",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
-    "test:integration": "docker compose --profile test up -d --wait db-test && pnpm --filter @fixspace/api test:e2e",
+    "test:integration": "docker compose --profile test up -d --wait db-test && pnpm --filter @fixspace/api test:integration",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "db:migrate:dev": "turbo run db:migrate:dev",
@@ -25,7 +22,6 @@
     "docker:up": "docker compose up -d",
     "docker:up:build": "docker compose up --build -d",
     "docker:down": "docker compose down",
-    "sync:issues": "node scripts/sync-from-issues.js",
     "install:bot": "node scripts/install-bot.js",
     "prepare": "node -e \"if(process.env.CI || process.env.NODE_ENV === 'production') process.exit(0); require('child_process').execSync('husky', {stdio: 'inherit'});\""
   },
@@ -35,6 +31,7 @@
     "@eslint/js": "^9.39.2",
     "@fixspace/eslint-config": "workspace:*",
     "@fixspace/typescript-config": "workspace:*",
+    "@types/node": "^22.19.3",
     "@typescript-eslint/eslint-plugin": "^8.57.1",
     "@typescript-eslint/parser": "^8.57.1",
     "@typescript/native-preview": "7.0.0-dev.20260524.1",
@@ -44,14 +41,15 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.0.5",
     "prettier": "^3.2.5",
-    "prisma": "latest",
+    "prisma": "7.8.0",
+    "rimraf": "^5.0.10",
     "tsx": "4.19.1",
     "turbo": "^2.8.0",
-    "typescript": "6.0.2"
+    "typescript": "6.0.3"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.2.0",
-    "@prisma/client": "latest"
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "7.8.0"
   },
   "pnpm": {
     "overrides": {
@@ -74,6 +72,10 @@
     "node": ">=18"
   },
   "lint-staged": {
-    "**/*.{ts,tsx,md,json}": "prettier --write"
+    "**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{md,json}": "prettier --write"
   }
 }
