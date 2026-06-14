@@ -21,10 +21,7 @@ services:
       - '6379:6379'
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-}
-    command: >
-      sh -c "[ -n \"$$REDIS_PASSWORD\" ]
-        && redis-server --requirepass $$REDIS_PASSWORD
-        || redis-server"
+    command: sh -c "[ -n \"$$REDIS_PASSWORD\" ] && redis-server --requirepass $$REDIS_PASSWORD || redis-server"
     healthcheck:
       test: ["CMD-SHELL", "redis-cli $${REDIS_PASSWORD:+-a $$REDIS_PASSWORD} ping"]
       interval: 5s

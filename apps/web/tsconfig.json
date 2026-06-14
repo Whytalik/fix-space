@@ -1,6 +1,7 @@
 {
   "extends": "@fixspace/typescript-config/nextjs.json",
   "compilerOptions": {
+    "rootDir": ".",
     "plugins": [
       {
         "name": "next"

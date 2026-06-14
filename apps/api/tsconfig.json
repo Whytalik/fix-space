@@ -1,7 +1,7 @@
 {
   "extends": "@fixspace/typescript-config/nestjs.json",
   "include": ["src/**/*"],
-  "exclude": ["src/modules/_disabled/**/*"],
+  "exclude": ["src/modules/_disabled/**/*", "**/*.spec.ts"],
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist",

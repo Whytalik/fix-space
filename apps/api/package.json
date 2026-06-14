@@ -11,10 +11,13 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:integration": "jest --config ./test/jest-integration.json --passWithNoTests",
-    "test:e2e": "pnpm test:integration",
+    "test:integration": "jest --config ./test/jest.integration.config.js --passWithNoTests",
+    "test:seed:load": "tsx test/load/seed-load-user.ts",
+    "test:load": "artillery run test/load/artillery.yml",
+    "test:load:report": "artillery run test/load/artillery.yml --output test/load/report.json && node -e \"const f=require('fs'),r=JSON.parse(f.readFileSync('test/load/report.json','utf8')).aggregate.summaries['http.response_time'];console.log('median: '+r.median+'ms | p95: '+r.p95+'ms | mean: '+r.mean+'ms | requests: '+r.count);\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
-    "format": "prettier --write \"{src,apps,libs,test}/**/*.ts\""
+    "format": "prettier --write \"{src,apps,libs,test}/**/*.ts\"",
+    "backfill:icons": "tsx scripts/backfill-property-icons.ts"
   },
   "dependencies": {
     "@fixspace/database": "workspace:^",
@@ -40,6 +43,7 @@
     "cron": "^4.4.0",
     "csv-parse": "^6.2.1",
     "csv-stringify": "^6.7.0",
+    "helmet": "^8.2.0",
     "ioredis": "^5.11.1",
     "jsep": "^1.4.0",
     "multer": "^2.1.1",
@@ -72,6 +76,7 @@
     "@types/passport-google-oauth20": "^2.0.16",
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^6.0.3",
+    "artillery": "^2.0.33",
     "eslint": "^9.39.2",
     "jest": "^29.7.0",
     "source-map-support": "^0.5.21",

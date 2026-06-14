@@ -80,7 +80,7 @@ jobs:
         run: pnpm turbo test -- --coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5
+        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe 
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
