@@ -1,5 +1,5 @@
 import type { Config } from "jest";
-// @ts-ignore
+// @ts-expect-error — next/jest lacks type declarations
 import nextJest from "next/jest";
 
 const createJestConfig = nextJest({

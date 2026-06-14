@@ -3,9 +3,10 @@
   "compilerOptions": {
     "allowJs": true,
     "paths": {
-      "*": ["./src/*"]
+      "@/*": ["./*"]
     },
     "rootDir": "src",
+    "baseUrl": "src",
     "esModuleInterop": true,
     "incremental": false,
     "outDir": "dist",

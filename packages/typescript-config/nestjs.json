@@ -5,7 +5,7 @@
     "allowSyntheticDefaultImports": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": false,
+    "forceConsistentCasingInFileNames": true,
     "incremental": false,
     "module": "CommonJS",
     "ignoreDeprecations": "6.0",

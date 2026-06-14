@@ -19,22 +19,17 @@ services:
     image: redis:7-alpine
     ports:
       - '6379:6379'
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    command: >
+      sh -c "[ -n \"$$REDIS_PASSWORD\" ]
+        && redis-server --requirepass $$REDIS_PASSWORD
+        || redis-server"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli $${REDIS_PASSWORD:+-a $$REDIS_PASSWORD} ping"]
       interval: 5s
       timeout: 5s
       retries: 5
-
-  mt5-sidecar:
-    profiles:
-      - full
-    build:
-      context: ./services/mt5-sidecar
-      dockerfile: Dockerfile
-    environment:
-      - MT5_SIDECAR_TOKEN=${MT5_SIDECAR_TOKEN:-}
-    ports:
-      - '8000:8000'
 
   api:
     profiles:
@@ -46,15 +41,14 @@ services:
       - .env
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/fixspace?schema=public
-      - JWT_SECRET=${JWT_SECRET:-super-secret-key-for-diploma-project}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-super-refresh-secret-key-for-diploma-project}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
       - PORT=3000
       - NODE_ENV=production
-      - COOKIE_SECURE=false
-      - MT5_SIDECAR_URL=http://mt5-sidecar:8000
-      - MT5_SIDECAR_TOKEN=${MT5_SIDECAR_TOKEN:-}
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
     ports:
       - '3000:3000'
     depends_on:
@@ -62,8 +56,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      mt5-sidecar:
-        condition: service_started
 
   web:
     profiles:
@@ -72,7 +64,7 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        - NEXT_PUBLIC_API_URL=http://localhost:3000
+        - NEXT_PUBLIC_API_URL=/api
     environment:
       - PORT=3001
       - NODE_ENV=production
@@ -81,6 +73,12 @@ services:
       - '3001:3001'
     depends_on:
       - api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   db-test:
     profiles:
