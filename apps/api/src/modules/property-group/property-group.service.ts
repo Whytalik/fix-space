@@ -16,6 +16,22 @@ export class PropertyGroupService {
     this.logger.setContext(PropertyGroupService.name);
   }
 
+  async findAllByDatabase(databaseId: string, userId: string): Promise<PropertyGroupResponseDto[]> {
+    this.logger.debug("Fetching property groups", { databaseId });
+    const database = await this.databaseRepo.findDatabaseByOwner(databaseId, userId);
+    if (!database) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
+
+    let groups = await this.groupRepo.findAllByDatabase(databaseId);
+
+    if (groups.length === 0) {
+      const general = await this.groupRepo.create({ databaseId, name: "General", position: 0 });
+      this.logger.log("Auto-created General group", { databaseId, groupId: general.id });
+      groups = [general];
+    }
+
+    return groups.map((group) => new PropertyGroupResponseDto(group as unknown as Partial<PropertyGroupResponseDto>));
+  }
+
   async create(databaseId: string, createDto: CreatePropertyGroupDto, userId: string): Promise<PropertyGroupResponseDto> {
     this.logger.debug("Creating property group", { databaseId });
 

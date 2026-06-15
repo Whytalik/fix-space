@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
+import { I18nService } from "nestjs-i18n";
 
 import { NotificationType, Prisma } from "@fixspace/database";
 import {
@@ -62,6 +63,7 @@ export class AutomationService {
     private readonly notificationService: NotificationService,
     private readonly databaseRepo: DatabaseRepository,
     private readonly recordRepo: RecordRepository,
+    private readonly i18nService: I18nService,
   ) {
     this.logger.setContext(AutomationService.name);
   }
@@ -69,8 +71,8 @@ export class AutomationService {
   async create(dto: CreateAutomationDto, userId: string): Promise<AutomationResponseDto> {
     this.logger.debug("Creating automation", { databaseId: dto.databaseId, name: dto.name });
 
-    const db = await this.databaseRepo.findDatabaseByOwner(dto.databaseId, userId);
-    if (!db) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
+    const database = await this.databaseRepo.findDatabaseByOwner(dto.databaseId, userId);
+    if (!database) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
 
     const count = await this.automationRepo.countByDatabase(dto.databaseId);
     if (count >= 10) throw new BadRequestException(t("errors.AUTOMATION_LIMIT_EXCEEDED"));
@@ -96,8 +98,8 @@ export class AutomationService {
   async findAll(databaseId: string, userId: string): Promise<AutomationResponseDto[]> {
     this.logger.debug("Finding automations", { databaseId });
 
-    const db = await this.databaseRepo.findDatabaseByOwner(databaseId, userId);
-    if (!db) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
+    const database = await this.databaseRepo.findDatabaseByOwner(databaseId, userId);
+    if (!database) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
 
     const entities = await this.automationRepo.findAllByDatabase(databaseId);
     return entities.map((entity) => new AutomationResponseDto(entity as unknown as Partial<AutomationResponseDto>));
@@ -227,18 +229,25 @@ export class AutomationService {
     const automation = await this.automationRepo.findById(automationId);
     if (!automation?.active) return;
 
-    const db = await this.databaseRepo.findWithSpace(automation.databaseId);
-    if (!db) {
-      await this.automationRepo.createLog({
-        automationId,
-        sourceRecordId: null,
-        status: AutomationStatus.SKIPPED,
-        result: "skipped: database not found",
-      });
+    const database = await this.databaseRepo.findWithSpace(automation.databaseId);
+    if (!database) {
+      try {
+        await this.automationRepo.createLog({
+          automationId,
+          sourceRecordId: null,
+          status: AutomationStatus.SKIPPED,
+          result: "skipped: database not found",
+        });
+      } catch (err) {
+        this.logger.warn("Could not create automation log (possibly parent automation was deleted)", {
+          automationId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
       return;
     }
 
-    const userId = db.space.ownerId;
+    const userId = database.space.ownerId;
     const dummyRecord: RecordForAutomation = { id: "", databaseId: automation.databaseId };
     const actions = (automation.actions as unknown as AutomationAction[]) || [];
     const results: string[] = [];
@@ -255,7 +264,10 @@ export class AutomationService {
         const result = await this.executeAction(action, dummyRecord, userId);
         results.push(result.message);
         if (result.link && !notificationLink) notificationLink = result.link;
-        if (result.skipped) status = AutomationStatus.SKIPPED;
+        if (result.skipped) {
+          status = AutomationStatus.SKIPPED;
+          break;
+        }
       }
     } catch (err: unknown) {
       status = AutomationStatus.FAILURE;
@@ -264,12 +276,19 @@ export class AutomationService {
       this.logger.error("Scheduled automation action failed", { automationId, error: errorMessage });
     }
 
-    await this.automationRepo.createLog({
-      automationId,
-      sourceRecordId: null,
-      status,
-      result: results.join("; "),
-    });
+    try {
+      await this.automationRepo.createLog({
+        automationId,
+        sourceRecordId: null,
+        status,
+        result: results.join("; "),
+      });
+    } catch (err) {
+      this.logger.warn("Could not create automation log (possibly parent automation was deleted)", {
+        automationId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
 
     await this.sendAutomationNotification(userId, automation.name, status, notificationLink);
     this.logger.log("Scheduled automation run completed", { automationId, status });
@@ -309,12 +328,19 @@ export class AutomationService {
       this.logger.error("Automation action failed", { automationId: automation.id, error: errorMessage });
     }
 
-    await this.automationRepo.createLog({
-      automationId: automation.id,
-      sourceRecordId: record.id,
-      status,
-      result: results.join("; "),
-    });
+    try {
+      await this.automationRepo.createLog({
+        automationId: automation.id,
+        sourceRecordId: record.id,
+        status,
+        result: results.join("; "),
+      });
+    } catch (err) {
+      this.logger.warn("Could not create automation log (possibly parent automation was deleted)", {
+        automationId: automation.id,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
 
     await this.sendAutomationNotification(userId, automation.name, status, notificationLink);
     this.logger.log("Automation run completed", { automationId: automation.id, status });
@@ -365,16 +391,26 @@ export class AutomationService {
     const newRecord = await this.recordService.create(action.databaseId, { databaseId: action.databaseId, name: "Untitled" }, userId, {
       skipAutomations: true,
     });
-    for (const mapping of action.fieldMappings ?? []) {
-      const resolvedValue = this.automationEngine.resolveValue(mapping, record);
-      if (resolvedValue !== null && resolvedValue !== undefined) {
-        await this.propertyValueService.create(
-          newRecord.id,
-          { recordId: newRecord.id, propertyId: mapping.targetPropertyId, value: resolvedValue },
-          userId,
-          { skipAutomations: true },
-        );
+    try {
+      for (const mapping of action.fieldMappings ?? []) {
+        const resolvedValue = this.automationEngine.resolveValue(mapping, record);
+        if (resolvedValue !== null && resolvedValue !== undefined) {
+          await this.propertyValueService.create(
+            newRecord.id,
+            { recordId: newRecord.id, propertyId: mapping.targetPropertyId, value: resolvedValue },
+            userId,
+            { skipAutomations: true },
+          );
+        }
       }
+    } catch (error) {
+      await this.recordRepo.delete(newRecord.id).catch((deleteError: unknown) => {
+        this.logger.warn("Could not roll back partially created record", {
+          recordId: newRecord.id,
+          error: deleteError instanceof Error ? deleteError.message : String(deleteError),
+        });
+      });
+      throw error;
     }
     return { skipped: false, message: `created record in database "${dbDisplay}"`, link: `/database/${action.databaseId}` };
   }
@@ -412,12 +448,14 @@ export class AutomationService {
 
   private async sendAutomationNotification(userId: string, automationName: string, status: AutomationStatus, link?: string): Promise<void> {
     const notificationType = status === AutomationStatus.FAILURE ? NotificationType.ERROR : NotificationType.AUTOMATION;
-    const text =
+    const key =
       status === AutomationStatus.SUCCESS
-        ? `Automation "${automationName}" ran successfully`
+        ? "notifications.automation_success"
         : status === AutomationStatus.FAILURE
-          ? `Automation "${automationName}" failed`
-          : `Automation "${automationName}" was skipped`;
+          ? "notifications.automation_failure"
+          : "notifications.automation_skipped";
+
+    const text = this.i18nService.t(key, { lang: "en", args: { name: automationName } });
 
     try {
       await this.notificationService.create(userId, notificationType, text, link);

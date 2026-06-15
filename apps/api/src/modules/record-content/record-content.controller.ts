@@ -23,8 +23,8 @@ import {
 } from "@fixspace/domain";
 import { memoryStorage } from "multer";
 
-import { RequireOwnership } from "../../core/auth/decorators/required-ownership.decorator";
-import { ResourceOwnerGuard } from "../../core/auth/guards/resource-owner.guard";
+import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
 
 import { RecordContentService } from "./record-content.service";
 
@@ -40,8 +40,9 @@ export class RecordContentController {
   @ApiOperation({ summary: "Get record content" })
   @ApiParam({ name: "recordId", type: String })
   @ApiResponse({ status: 200, description: "Content found.", type: RecordContentResponseDto })
-  @ApiResponse({ status: 404, description: "Record not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Record not found." })
   getContent(@Param("recordId") recordId: string) {
     return this.recordContentService.findByRecordId(recordId);
   }
@@ -53,8 +54,9 @@ export class RecordContentController {
   @ApiParam({ name: "recordId", type: String })
   @ApiBody({ type: UpdateRecordContentDto })
   @ApiResponse({ status: 200, description: "Content updated.", type: RecordContentResponseDto })
-  @ApiResponse({ status: 404, description: "Record not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Record not found." })
   updateContent(@Param("recordId") recordId: string, @Body() updateRecordContentDto: UpdateRecordContentDto) {
     return this.recordContentService.update(recordId, updateRecordContentDto);
   }
@@ -65,8 +67,9 @@ export class RecordContentController {
   @ApiOperation({ summary: "Get record content snapshots (history)" })
   @ApiParam({ name: "recordId", type: String })
   @ApiResponse({ status: 200, description: "Snapshots found.", type: [RecordContentSnapshotResponseDto] })
-  @ApiResponse({ status: 404, description: "Record not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Record not found." })
   getSnapshots(@Param("recordId") recordId: string) {
     return this.recordContentService.getSnapshots(recordId);
   }
@@ -79,8 +82,9 @@ export class RecordContentController {
   @ApiParam({ name: "recordId", type: String })
   @ApiParam({ name: "snapshotId", type: String })
   @ApiResponse({ status: 200, description: "Content restored.", type: RecordContentResponseDto })
-  @ApiResponse({ status: 404, description: "Record or snapshot not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Record or snapshot not found." })
   restoreSnapshot(@Param("recordId") recordId: string, @Param("snapshotId") snapshotId: string) {
     return this.recordContentService.restoreFromSnapshot(recordId, snapshotId);
   }
@@ -103,6 +107,7 @@ export class RecordContentController {
   })
   @ApiResponse({ status: 200, description: "Image uploaded.", type: ContentImageResponseDto })
   @ApiResponse({ status: 400, description: "Invalid file type or file too large." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
   uploadImage(@Param("recordId") recordId: string, @UploadedFile(new ParseFilePipe({ fileIsRequired: true })) file: Express.Multer.File) {
     return this.recordContentService.uploadImage(recordId, file);

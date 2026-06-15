@@ -3,6 +3,8 @@ import { Prisma } from "@fixspace/database";
 interface FilterUndefinedOptions<T extends Record<string, unknown>, J extends Record<string, unknown>, N extends Record<string, unknown>> {
   fields?: T;
   jsonFields?: J;
+  /** Fields where both `null` and `""` (empty string) are coerced to `null` in the DB.
+   *  Use this only for optional text fields that the UI clears by sending an empty string. */
   nullableFields?: N;
 }
 

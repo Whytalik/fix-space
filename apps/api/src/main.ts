@@ -4,6 +4,7 @@ import { NestFactory, Reflector } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 import * as path from "path";
 import "reflect-metadata";
 
@@ -39,6 +40,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup("api/docs", app, document);
 
+  app.use(helmet());
   app.use(cookieParser());
   app.use((req: any, res: any, next: any) => {
     const [pathPart, queryPart] = req.url.split("?");

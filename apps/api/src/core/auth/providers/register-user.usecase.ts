@@ -4,7 +4,7 @@ import { DEFAULT_USER_SETTINGS, RegisterUserDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
 import { hashPassword } from "@/common/utils/password";
-import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
+import { SettingsCategory } from "@fixspace/domain";
 import { SettingsService } from "@/modules/settings/settings.service";
 import { MailService } from "../../mail/mail.service";
 import { TokenService } from "../token.service";

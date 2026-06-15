@@ -33,7 +33,7 @@ export class TemplateRepository extends BaseRepository {
     return (transaction ?? prisma).template.count({ where: { databaseId } });
   }
 
-  async findUniqueTemplateName(baseName: string, databaseId: string, transaction?: Prisma.TransactionClient): Promise<string> {
+  async findUniqueTemplateName(baseName: string, databaseId: string, transaction?: Prisma.TransactionClient) {
     let name = `${baseName} (Copy)`;
     let exists = await (transaction ?? prisma).template.findFirst({ where: { name, databaseId } });
     let counter = 1;
@@ -76,6 +76,12 @@ export class TemplateRepository extends BaseRepository {
   async findDefaultInDatabase(databaseId: string, transaction?: Prisma.TransactionClient) {
     return (transaction ?? prisma).template.findFirst({
       where: { databaseId, isDefault: true },
+    });
+  }
+
+  async findByNameInDatabase(databaseId: string, name: string) {
+    return prisma.template.findFirst({
+      where: { databaseId, name },
     });
   }
 

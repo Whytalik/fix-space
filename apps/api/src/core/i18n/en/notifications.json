@@ -6,5 +6,8 @@
   "integration_no_journal": "Integration \"{service}\": Trading Journal database not found. Please create one to enable auto-import.",
   "integration_missing_properties": "Integration \"{service}\": Some mapped properties are missing in your Trading Journal ({properties}). Records will be created with partial data.",
   "integration_created": "Integration Created",
-  "integration_failed": "Integration Failed"
+  "integration_failed": "Integration Failed",
+  "automation_success": "Automation \"{name}\" ran successfully",
+  "automation_failure": "Automation \"{name}\" failed",
+  "automation_skipped": "Automation \"{name}\" was skipped"
 }

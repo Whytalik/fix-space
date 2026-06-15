@@ -13,7 +13,8 @@ export async function parseNamePattern(pattern: string, databaseId: string, tran
 
   result = result.replace(/{{\s*day\s*}}/gi, day);
   result = result.replace(/{{\s*today\s*}}/gi, `${day}.${month}.${year}`);
-  result = result.replace(/{{\s*month\s*}}/gi, monthName);
+  result = result.replace(/{{\s*month\s*}}/gi, month);
+  result = result.replace(/{{\s*month_name\s*}}/gi, monthName);
   result = result.replace(/{{\s*month_num\s*}}/gi, month);
   result = result.replace(/{{\s*year\s*}}/gi, year);
   result = result.replace(/{{\s*quarter\s*}}/gi, quarter);

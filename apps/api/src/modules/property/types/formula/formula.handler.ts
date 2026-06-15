@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import {
+  compileFormula,
   DEFAULT_FORMULA_PROPERTY,
   FilterOperator,
   FormulaPresetName,
@@ -30,6 +31,10 @@ export class FormulaHandler implements PropertyConfigHandler, PropertyValueHandl
     if (config.type === FormulaType.PRESET) {
       if (!config.presetName || !Object.values(FormulaPresetName).includes(config.presetName as FormulaPresetName)) {
         errors.push(`presetName must be one of: ${Object.values(FormulaPresetName).join(", ")}`);
+      } else {
+        const compiled = compileFormula(config.presetName as FormulaPresetName, (config.uiState as Record<string, unknown>) ?? {});
+        config.expression = compiled.expression;
+        config.resultType = compiled.resultType;
       }
     }
 
@@ -37,7 +42,7 @@ export class FormulaHandler implements PropertyConfigHandler, PropertyValueHandl
       errors.push("expression is required and must be a non-empty string");
     } else {
       try {
-        this.formulaEngine.validateExpression(config.expression);
+        this.formulaEngine.validateExpression(config.expression as string);
       } catch (error) {
         errors.push(`Invalid formula expression: ${(error as Error).message}`);
       }

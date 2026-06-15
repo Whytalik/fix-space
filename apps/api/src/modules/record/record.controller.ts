@@ -33,6 +33,7 @@ export class RecordController {
   @ApiBody({ type: CreateRecordDto })
   @ApiResponse({ status: 201, description: "Record created successfully." })
   @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Database not found." })
   create(@CurrentUser("userId") userId: string, @Body() createRecordDto: CreateRecordDto) {
     return this.recordService.create(createRecordDto.databaseId, createRecordDto, userId);
@@ -43,6 +44,7 @@ export class RecordController {
   @ApiQuery({ name: "spaceId", type: String, description: "Workspace ID" })
   @ApiQuery({ name: "q", type: String, description: "Search query string" })
   @ApiResponse({ status: 200, description: "Search results.", type: [SpaceSearchResultDto] })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   search(@Query("spaceId") spaceId: string, @Query("q") q: string, @CurrentUser("userId") userId: string): Promise<SpaceSearchResultDto[]> {
     return this.searchRecordsUseCase.execute(spaceId, userId, q);
   }
@@ -57,6 +59,7 @@ export class RecordController {
   @ApiQuery({ name: "filterLogic", enum: FilterLogic, required: false, description: "Filter logic (AND/OR)" })
   @ApiQuery({ name: "search", type: String, required: false, description: "Text search within records" })
   @ApiResponse({ status: 200, description: "List of records." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Database not found." })
   findAll(
     @Query("databaseId") databaseId: string,
@@ -92,8 +95,9 @@ export class RecordController {
   @ApiOperation({ summary: "Get record by ID" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Record found." })
-  @ApiResponse({ status: 404, description: "Record not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Record not found." })
   findOne(@Param("id") id: string) {
     return this.recordService.findOne(id);
   }
@@ -108,8 +112,9 @@ export class RecordController {
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: UpdateRecordDto })
   @ApiResponse({ status: 200, description: "Record updated." })
-  @ApiResponse({ status: 404, description: "Record not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Record not found." })
   update(@Param("id") id: string, @Body() updateRecordDto: UpdateRecordDto) {
     return this.recordService.update(id, updateRecordDto);
   }
@@ -123,8 +128,9 @@ export class RecordController {
   @ApiOperation({ summary: "Delete record" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Record deleted." })
-  @ApiResponse({ status: 404, description: "Record not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Record not found." })
   remove(@Param("id") id: string) {
     return this.recordService.remove(id);
   }
@@ -139,8 +145,9 @@ export class RecordController {
   @ApiOperation({ summary: "Duplicate a record with all its property values" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 201, description: "Record duplicated successfully." })
-  @ApiResponse({ status: 404, description: "Record not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Record not found." })
   duplicate(@Param("id") id: string) {
     return this.recordService.duplicate(id);
   }
@@ -156,8 +163,9 @@ export class RecordController {
   @ApiParam({ name: "id", type: String })
   @ApiParam({ name: "templateId", type: String })
   @ApiResponse({ status: 200, description: "Template applied successfully.", type: RecordResponseDto })
-  @ApiResponse({ status: 404, description: "Record or template not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Record or template not found." })
   applyTemplate(@Param("id") id: string, @Param("templateId") templateId: string) {
     return this.recordService.applyTemplate(id, templateId);
   }

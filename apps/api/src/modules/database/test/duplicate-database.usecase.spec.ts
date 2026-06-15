@@ -17,11 +17,11 @@ jest.mock("@fixspace/database", () => ({
     },
     property: { create: jest.fn() },
     record: { create: jest.fn() },
-    propertyValue: { create: jest.fn() },
+    propertyValue: { create: jest.fn(), createMany: jest.fn().mockResolvedValue({ count: 0 }) },
     view: { create: jest.fn() },
     automation: { create: jest.fn() },
     template: { create: jest.fn() },
-    templatePropertyValue: { create: jest.fn() },
+    templatePropertyValue: { create: jest.fn(), createMany: jest.fn().mockResolvedValue({ count: 0 }) },
     $transaction: jest.fn((callback: (tx: unknown) => unknown) => callback(prisma)),
   },
 }));
@@ -41,9 +41,9 @@ describe("DuplicateDatabaseUseCase", () => {
 
   const mockDatabaseRepo = {
     findByIdForDuplicate: jest.fn(),
+    findByNameInSpace: jest.fn().mockResolvedValue(null),
+    findUniqueName: jest.fn((baseName: string) => Promise.resolve(`${baseName} (Copy)`)),
     transaction: jest.fn((callback) => callback(prisma)),
-    findUniqueSlug: jest.fn((baseSlug: string) => Promise.resolve(`${baseSlug}_copy`)),
-    findUniqueTitle: jest.fn((baseTitle: string) => Promise.resolve(`${baseTitle} (Copy)`)),
   };
 
   beforeEach(async () => {
@@ -61,17 +61,16 @@ describe("DuplicateDatabaseUseCase", () => {
   });
 
   describe("execute", () => {
-    it("TC-DB-U-006: should throw NotFoundException when source database not found", async () => {
+    it("TC-DB-U-011: should throw NotFoundException when source database not found", async () => {
       mockDatabaseRepo.findByIdForDuplicate.mockResolvedValue(null);
 
       await expect(useCase.execute("nonexistent")).rejects.toThrow(NotFoundException);
     });
 
-    it("TC-DB-U-006: should duplicate database with properties, records, and values", async () => {
+    it("TC-DB-U-012: should duplicate database with properties, records, and values", async () => {
       const sourceDb = {
         id: "db-1",
         name: "original-db",
-        title: "Original DB",
         icon: "📊",
         spaceId: "space-1",
         sectionId: "sec-1",
@@ -114,7 +113,6 @@ describe("DuplicateDatabaseUseCase", () => {
       const newDb = {
         id: "db-2",
         name: "original-db-copy",
-        title: "Original DB (copy)",
         icon: "📊",
         spaceId: "space-1",
         sectionId: "sec-1",
@@ -134,15 +132,15 @@ describe("DuplicateDatabaseUseCase", () => {
         data: expect.objectContaining({
           spaceId: "space-1",
           sectionId: "sec-1",
-          title: expect.stringContaining("Original DB"),
+          name: expect.stringContaining("original-db"),
         }),
       });
       expect(prisma.property.create).toHaveBeenCalled();
       expect(prisma.record.create).toHaveBeenCalled();
-      expect(prisma.propertyValue.create).toHaveBeenCalled();
+      expect(prisma.propertyValue.createMany).toHaveBeenCalled();
     });
 
-    it("TC-DB-U-006: should map property IDs correctly for record values", async () => {
+    it("TC-DB-U-013: should map property IDs correctly for record values", async () => {
       const sourceDb = {
         id: "db-1",
         name: "source-db",
@@ -189,12 +187,14 @@ describe("DuplicateDatabaseUseCase", () => {
 
       await useCase.execute("db-1", "user-1", { includeRecords: true });
 
-      expect(prisma.propertyValue.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({
-          recordId: "rec-2",
-          propertyId: "prop-2",
-          value: "value",
-        }),
+      expect(prisma.propertyValue.createMany).toHaveBeenCalledWith({
+        data: expect.arrayContaining([
+          expect.objectContaining({
+            recordId: "rec-2",
+            propertyId: "prop-2",
+            value: "value",
+          }),
+        ]),
       });
     });
   });

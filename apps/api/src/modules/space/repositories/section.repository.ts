@@ -45,7 +45,7 @@ export class SectionRepository extends BaseRepository {
     });
   }
 
-  async findUniqueSectionName(baseName: string, spaceId: string, transaction?: Prisma.TransactionClient): Promise<string> {
+  async findUniqueSectionName(baseName: string, spaceId: string, transaction?: Prisma.TransactionClient) {
     let name = `${baseName} (Copy)`;
     let exists = await (transaction ?? prisma).section.findFirst({ where: { name, spaceId } });
     let counter = 1;

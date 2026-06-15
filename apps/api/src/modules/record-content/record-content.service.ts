@@ -63,10 +63,11 @@ export class RecordContentService {
 
       let recordContentId: string;
       let shouldCreateSnapshot = false;
+      let createdContent: Awaited<ReturnType<RecordContentRepository["create"]>> | null = null;
 
       if (!existing) {
-        const created = await this.recordContentRepo.create({ recordId, content: dto.content as unknown as Prisma.InputJsonValue }, tx);
-        recordContentId = created.id;
+        createdContent = await this.recordContentRepo.create({ recordId, content: dto.content as unknown as Prisma.InputJsonValue }, tx);
+        recordContentId = createdContent.id;
         shouldCreateSnapshot = true;
       } else {
         recordContentId = existing.id;
@@ -83,7 +84,7 @@ export class RecordContentService {
         await this.manageSnapshots(recordContentId, dto.content as unknown as Prisma.InputJsonValue, tx);
       }
 
-      const final = await this.recordContentRepo.findByRecordId(recordId, tx);
+      const final = createdContent ?? (await this.recordContentRepo.findByRecordId(recordId, tx));
       return new RecordContentResponseDto({
         ...final!,
         content: final!.content as unknown as ContentSchema,
@@ -114,13 +115,12 @@ export class RecordContentService {
     this.logger.debug("Restoring record content from snapshot", { recordId, snapshotId });
 
     const result = await this.recordContentRepo.transaction(async (tx) => {
-      const snapshot = await this.recordContentRepo.findSnapshotById(snapshotId);
+      const snapshot = await this.recordContentRepo.findSnapshotById(snapshotId, tx);
       if (!snapshot) throw new NotFoundException(t("errors.SNAPSHOT_NOT_FOUND"));
 
       const recordContent = await this.recordContentRepo.findByRecordId(recordId, tx);
-      if (!recordContent || recordContent.id !== snapshot.recordContentId) {
-        throw new NotFoundException(t("errors.RECORD_CONTENT_NOT_FOUND"));
-      }
+      if (!recordContent) throw new NotFoundException(t("errors.RECORD_CONTENT_NOT_FOUND"));
+      if (recordContent.id !== snapshot.recordContentId) throw new NotFoundException(t("errors.SNAPSHOT_NOT_FOUND"));
 
       await this.recordContentRepo.update(recordId, { content: snapshot.content as Prisma.InputJsonValue, lastEditedAt: new Date() }, tx);
 

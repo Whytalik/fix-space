@@ -3,6 +3,7 @@ import { Prisma } from "@fixspace/database";
 import { CreateTemplatePropertyValueDto, TemplatePropertyValueResponseDto, UpdateTemplatePropertyValueDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
 import { PropertyTypeRegistry } from "@/modules/property/types";
 import { TemplateRepository } from "@/modules/template/repositories/template.repository";
 import { PropertyRepository } from "@/modules/property/repositories/property.repository";
@@ -29,13 +30,13 @@ export class TemplatePropertyValueService {
     const template = await this.templateRepo.findByIdWithOwner(createDto.templateId, userId);
 
     if (!template) {
-      throw new NotFoundException(`Template with id ${createDto.templateId} not found`);
+      throw new NotFoundException(t("errors.TEMPLATE_NOT_FOUND"));
     }
 
     const property = await this.propertyRepo.findById(createDto.propertyId);
 
     if (!property) {
-      throw new NotFoundException(`Property with id ${createDto.propertyId} not found`);
+      throw new NotFoundException(t("errors.PROPERTY_NOT_FOUND_ID", { id: createDto.propertyId }));
     }
 
     if (property.databaseId !== template.databaseId) {
@@ -43,7 +44,7 @@ export class TemplatePropertyValueService {
         propertyDatabaseId: property.databaseId,
         templateDatabaseId: template.databaseId,
       });
-      throw new ConflictException("Property does not belong to the same database as the template");
+      throw new ConflictException(t("errors.PROPERTY_NOT_BELONG_TO_DATABASE"));
     }
 
     const { handler, config } = this.typeRegistry.resolveHandlerAndConfig(property);
@@ -52,7 +53,7 @@ export class TemplatePropertyValueService {
 
     const valueErrors = handler.validateValue(rawValue, config);
     if (valueErrors) {
-      throw new BadRequestException(`Invalid value for property type ${property.type}: ${valueErrors.join("; ")}`);
+      throw new BadRequestException(t("errors.INVALID_PROPERTY_VALUE", { type: property.type, errors: valueErrors.join("; ") }));
     }
 
     const formattedValue = handler.formatValue(rawValue, config);
@@ -82,7 +83,7 @@ export class TemplatePropertyValueService {
     const value = await this.templatePropertyValueRepo.findById(id);
 
     if (!value) {
-      throw new NotFoundException(`Template property value with id ${id} not found`);
+      throw new NotFoundException(t("errors.TEMPLATE_PROPERTY_VALUE_NOT_FOUND_ID", { id }));
     }
 
     return new TemplatePropertyValueResponseDto(value as unknown as Partial<TemplatePropertyValueResponseDto>);
@@ -94,7 +95,7 @@ export class TemplatePropertyValueService {
     const existing = await this.templatePropertyValueRepo.findById(id);
 
     if (!existing) {
-      throw new NotFoundException(`Template property value with id ${id} not found`);
+      throw new NotFoundException(t("errors.TEMPLATE_PROPERTY_VALUE_NOT_FOUND_ID", { id }));
     }
 
     let formattedValue: unknown = undefined;
@@ -104,7 +105,7 @@ export class TemplatePropertyValueService {
 
       const valueErrors = handler.validateValue(updateDto.value, config);
       if (valueErrors) {
-        throw new BadRequestException(`Invalid value for property type ${existing.property.type}: ${valueErrors.join("; ")}`);
+        throw new BadRequestException(t("errors.INVALID_PROPERTY_VALUE", { type: existing.property.type, errors: valueErrors.join("; ") }));
       }
 
       formattedValue = handler.formatValue(updateDto.value, config);
@@ -126,7 +127,7 @@ export class TemplatePropertyValueService {
     const existing = await this.templatePropertyValueRepo.findById(id);
 
     if (!existing) {
-      throw new NotFoundException(`Template property value with id ${id} not found`);
+      throw new NotFoundException(t("errors.TEMPLATE_PROPERTY_VALUE_NOT_FOUND_ID", { id }));
     }
 
     const result = await this.templatePropertyValueRepo.delete(id);

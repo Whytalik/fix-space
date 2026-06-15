@@ -7,7 +7,7 @@ import { t } from "@/common/utils/i18n.helper";
 
 type JwtPayload = {
   sub: string;
-  username: string;
+  username?: string;
 };
 
 @Injectable()
@@ -24,12 +24,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: JwtPayload) {
-    if (!payload?.sub || !payload?.username) {
+    if (!payload?.sub) {
       throw new UnauthorizedException(t("errors.INVALID_TOKEN_PAYLOAD"));
     }
     return {
       userId: payload.sub,
-      username: payload.username,
+      username: payload.username ?? "",
     };
   }
 }

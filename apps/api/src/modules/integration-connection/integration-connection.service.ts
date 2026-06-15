@@ -11,19 +11,23 @@ import {
   UpdateIntegrationConnectionDto,
 } from "@fixspace/domain";
 import { NotificationType, IntegrationStatus as DbIntegrationStatus, prisma } from "@fixspace/database";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { t } from "../../common/utils/i18n.helper";
+import { I18nContext, I18nService } from "nestjs-i18n";
+import { randomBytes } from "crypto";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
+import { CacheService } from "@/core/cache/cache.service";
+import { NotificationService } from "@/modules/notification/notification.service";
+import { RecordRepository } from "@/modules/record/repositories/record.repository";
+import { RecordService } from "@/modules/record/record.service";
+import { InitializeUserSpaceUseCase } from "@/modules/space/providers/initialize-user-space.usecase";
+import { toIntegrationConnectionResponse } from "./utils/to-integration-connection-response.util";
 import { decryptCredentials, encryptCredentials } from "./utils/credentials.util";
 import { MT5WebhookDto } from "./dto/mt5-webhook.dto";
 import { IntegrationConnectionRepository } from "./repositories/integration-connection.repository";
 import { IntegrationProviderFactory } from "./providers/provider.factory";
-import { NotificationService } from "../notification/notification.service";
-import { RecordService } from "../record/record.service";
-import { RecordRepository } from "../record/repositories/record.repository";
 import { SyncRecordService } from "./sync-record.service";
-import { CacheService } from "../../core/cache/cache.service";
 import type { SyncResult, TradeData } from "./providers/integration.provider";
-import { InitializeUserSpaceUseCase } from "../space/providers/initialize-user-space.usecase";
 
 @Injectable()
 export class IntegrationConnectionService {
@@ -37,6 +41,7 @@ export class IntegrationConnectionService {
     private readonly recordRepo: RecordRepository,
     private readonly cacheService: CacheService,
     private readonly initializeUserSpaceUseCase: InitializeUserSpaceUseCase,
+    private readonly i18nService: I18nService,
   ) {
     this.logger.setContext(IntegrationConnectionService.name);
   }
@@ -45,7 +50,7 @@ export class IntegrationConnectionService {
     this.logger.debug("Listing integration connections", { userId });
     const connections = await this.integrationRepo.findAllByUser(userId);
     return connections.map((connection) => {
-      const response = new IntegrationConnectionResponseDto(connection as unknown as Partial<IntegrationConnectionResponseDto>);
+      const response = toIntegrationConnectionResponse(connection);
       if (connection.service === IntegrationService.METATRADER5 && connection.credentials) {
         try {
           const decrypted = decryptCredentials(connection.credentials as unknown as Record<string, string>) as any;
@@ -63,7 +68,7 @@ export class IntegrationConnectionService {
     const connection = await this.integrationRepo.findByOwner(id, userId);
     if (!connection) throw new NotFoundException(t("errors.INTEGRATION_CONNECTION_NOT_FOUND"));
 
-    const response = new IntegrationConnectionResponseDto(connection as unknown as Partial<IntegrationConnectionResponseDto>);
+    const response = toIntegrationConnectionResponse(connection);
     if (connection.service === IntegrationService.METATRADER5 && connection.credentials) {
       try {
         const decrypted = decryptCredentials(connection.credentials as unknown as Record<string, string>) as any;
@@ -98,7 +103,7 @@ export class IntegrationConnectionService {
     if (dto.service === IntegrationService.METATRADER5) {
       if (!dto.credentials) dto.credentials = {} as any;
       if (!(dto.credentials as any).apiToken) {
-        (dto.credentials as any).apiToken = `sk_${Math.random().toString(36).slice(2, 10)}${Math.random().toString(36).slice(2, 10)}`;
+        (dto.credentials as any).apiToken = `sk_${randomBytes(12).toString("hex")}`;
       }
     }
 
@@ -128,7 +133,7 @@ export class IntegrationConnectionService {
     );
 
     this.logger.log("Integration connection created (Pending)", { connectionId: connection.id, service: dto.service });
-    const response = new IntegrationConnectionResponseDto(connection as unknown as Partial<IntegrationConnectionResponseDto>);
+    const response = toIntegrationConnectionResponse(connection);
     if (dto.service === IntegrationService.METATRADER5) {
       response.apiToken = (dto.credentials as any).apiToken;
     }
@@ -185,33 +190,40 @@ export class IntegrationConnectionService {
 
     if (dto.credentials !== undefined) {
       dto.credentials = trimCredentials(dto.credentials as unknown as Record<string, unknown>) as any;
-      const provider = this.providerFactory.get(connection.service as IntegrationService);
-      const validation = await provider.validateCredentials(dto.credentials);
-      if (!validation.valid) {
-        throw new BadRequestException(
-          t("errors.INTEGRATION_CREDENTIALS_INVALID", { service: connection.service, error: validation.error }),
-        );
+      if (connection.service !== IntegrationService.METATRADER5) {
+        const provider = this.providerFactory.get(connection.service as IntegrationService);
+        const validation = await provider.validateCredentials(dto.credentials);
+        if (!validation.valid) {
+          throw new BadRequestException(
+            t("errors.INTEGRATION_CREDENTIALS_INVALID", { service: connection.service, error: validation.error }),
+          );
+        }
       }
     }
 
     const encryptedCredentials =
       dto.credentials !== undefined ? encryptCredentials(dto.credentials as unknown as Record<string, unknown>) : undefined;
 
-    const updated = await this.integrationRepo.update(id, {
-      name: dto.name,
-      spaceId: spaceIdToUpdate,
-      credentials: encryptedCredentials,
-      status: dto.status as DbIntegrationStatus | undefined,
-      syncInterval: dto.syncInterval,
-      marketType: dto.marketType,
-      externalAccountId: dto.externalAccountId,
-      lastSyncError: dto.lastSyncError,
-      consecutiveFailures: dto.consecutiveFailures,
-    });
+    const updated = await this.integrationRepo.update(
+      id,
+      filterUndefined({
+        fields: {
+          name: dto.name,
+          spaceId: spaceIdToUpdate,
+          status: dto.status as DbIntegrationStatus | undefined,
+          syncInterval: dto.syncInterval,
+          marketType: dto.marketType,
+          externalAccountId: dto.externalAccountId,
+          lastSyncError: dto.lastSyncError,
+          consecutiveFailures: dto.consecutiveFailures,
+          credentials: encryptedCredentials as any,
+        },
+      }) as never,
+    );
 
     this.logger.log("Integration connection updated", { connectionId: id });
     await this.cacheService.deletePattern(`trades_cache:${id}:*`);
-    return new IntegrationConnectionResponseDto(updated as unknown as Partial<IntegrationConnectionResponseDto>);
+    return toIntegrationConnectionResponse(updated);
   }
 
   async delete(id: string, userId: string): Promise<void> {
@@ -264,12 +276,12 @@ export class IntegrationConnectionService {
 
     const connection = await this.integrationRepo.findById(payload.connectionId);
     if (!connection || connection.service !== IntegrationService.METATRADER5) {
-      throw new UnprocessableEntityException("Invalid connection ID");
+      throw new UnprocessableEntityException(t("errors.INTEGRATION_INVALID_CONNECTION_ID"));
     }
 
     const credentials = decryptCredentials(connection.credentials as unknown as Record<string, string>);
     if (credentials.apiToken !== token) {
-      throw new UnprocessableEntityException("Invalid token for this connection");
+      throw new UnprocessableEntityException(t("errors.INTEGRATION_INVALID_TOKEN"));
     }
 
     const spaceId = await this.ensureSpaceId(connection, connection.userId);
@@ -326,6 +338,12 @@ export class IntegrationConnectionService {
     return { success: true, imported: 0, skipped: 0 };
   }
 
+  private safeTranslate(key: string, args?: Record<string, unknown>): string {
+    const ctx = I18nContext.current();
+    if (ctx) return ctx.t(key, { args });
+    return this.i18nService.t(key, { lang: "en", args });
+  }
+
   async triggerSync(id: string, userId: string, opts?: { startDate?: string; endDate?: string }): Promise<SyncResult> {
     this.logger.debug("Triggering manual sync", { id });
 
@@ -348,7 +366,7 @@ export class IntegrationConnectionService {
       await this.notificationService.create(
         userId,
         NotificationType.INTEGRATION,
-        t("notifications.integration_failed", { service: serviceLabel }),
+        this.safeTranslate("notifications.integration_failed", { service: serviceLabel }),
         "/settings",
       );
       await this.integrationRepo.update(id, { status: DbIntegrationStatus.ERROR, lastSyncError: result.errors[0] });
@@ -372,7 +390,7 @@ export class IntegrationConnectionService {
         await this.notificationService.create(
           userId,
           NotificationType.INTEGRATION,
-          t("notifications.integration_no_journal", { service: serviceLabel }),
+          this.safeTranslate("notifications.integration_no_journal", { service: serviceLabel }),
           "/settings",
         );
       } else {
@@ -380,7 +398,7 @@ export class IntegrationConnectionService {
         await this.notificationService.create(
           userId,
           NotificationType.INTEGRATION,
-          t("notifications.integration_missing_properties", { service: serviceLabel, properties }),
+          this.safeTranslate("notifications.integration_missing_properties", { service: serviceLabel, properties }),
           "/settings",
         );
       }

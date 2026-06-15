@@ -1,10 +1,13 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { prisma } from "@fixspace/database";
 import { AppLogger } from "@/common/logger/app-logger.service";
+import { t } from "@/common/utils/i18n.helper";
 import { parseDurationToMs } from "./utils/cookie.helper";
 import { generateRandomToken, hashToken } from "./utils/token.helper";
+
+export type RevokeSessionResult = "revoked" | "already_revoked" | "not_found";
 
 export interface TokenPayload {
   userId: string;
@@ -39,8 +42,8 @@ export class TokenService {
     return { userId: record.userId, tokenId: record.id };
   }
 
-  generateAccessToken(userId: string, username: string): string {
-    const payload = { sub: userId, username };
+  generateAccessToken(userId: string): string {
+    const payload = { sub: userId };
     return this.jwtService.sign(payload);
   }
 
@@ -92,6 +95,39 @@ export class TokenService {
     });
 
     this.logger.log("All refresh tokens revoked for user", { userId });
+  }
+
+  async findActiveSessions(userId: string) {
+    return prisma.refreshToken.findMany({
+      where: { userId, revokedAt: null, expiresAt: { gt: new Date() } },
+      select: { id: true, tokenHash: true, createdAt: true, expiresAt: true },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async revokeSessionById(tokenId: string, userId: string): Promise<RevokeSessionResult> {
+    const session = await prisma.refreshToken.findFirst({
+      where: { id: tokenId, userId },
+      select: { revokedAt: true },
+    });
+
+    if (!session) return "not_found";
+    if (session.revokedAt !== null) return "already_revoked";
+
+    await prisma.refreshToken.update({
+      where: { id: tokenId },
+      data: { revokedAt: new Date() },
+    });
+
+    return "revoked";
+  }
+
+  verifyAccessToken(token: string): void {
+    try {
+      this.jwtService.verify(token);
+    } catch {
+      throw new UnauthorizedException(t("errors.UNAUTHORIZED"));
+    }
   }
 
   async createVerificationToken(userId: string): Promise<string> {

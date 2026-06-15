@@ -120,7 +120,7 @@ describe("SectionService", () => {
         expect(sectionRepo.create).toHaveBeenCalledWith(expect.objectContaining({ name: "New Section", position: 4 }), prisma);
       });
 
-      it("TC-SEC-U-002: should use position 0 when no sections exist", async () => {
+      it("TC-SEC-U-008: should use position 0 when no sections exist", async () => {
         mockSectionRepo.findLastPosition.mockResolvedValue(null);
         mockSectionRepo.create.mockResolvedValue({ id: "sec-1", name: "First Section", position: 0 });
 
@@ -160,7 +160,7 @@ describe("SectionService", () => {
         ).rejects.toThrow(BadRequestException);
       });
 
-      it("TC-SEC-U-005: should throw BadRequestException when UPDATE has no id", async () => {
+      it("TC-SEC-U-009: should throw BadRequestException when UPDATE has no id", async () => {
         await expect(
           service.processOperations(prisma as unknown as Prisma.TransactionClient, "space-1", [
             { operation: SectionOperationType.UPDATE, update: { name: "New Name" } },
@@ -168,7 +168,7 @@ describe("SectionService", () => {
         ).rejects.toThrow(BadRequestException);
       });
 
-      it("TC-SEC-U-005: should throw BadRequestException when section belongs to different space", async () => {
+      it("TC-SEC-U-010: should throw BadRequestException when section belongs to different space", async () => {
         mockSectionRepo.findById.mockResolvedValue({
           id: "sec-1",
           name: "Section",
@@ -183,7 +183,7 @@ describe("SectionService", () => {
         ).rejects.toThrow(BadRequestException);
       });
 
-      it("TC-SEC-U-003: should throw NotFoundException when section not found", async () => {
+      it("TC-SEC-U-011: should throw NotFoundException when section not found", async () => {
         mockSectionRepo.findById.mockResolvedValue(null);
 
         await expect(
@@ -211,13 +211,13 @@ describe("SectionService", () => {
         expect(sectionRepo.delete).toHaveBeenCalledWith("sec-1", prisma);
       });
 
-      it("TC-SEC-U-005: should throw BadRequestException when DELETE has no id", async () => {
+      it("TC-SEC-U-012: should throw BadRequestException when DELETE has no id", async () => {
         await expect(
           service.processOperations(prisma as unknown as Prisma.TransactionClient, "space-1", [{ operation: SectionOperationType.DELETE }]),
         ).rejects.toThrow(BadRequestException);
       });
 
-      it("TC-SEC-U-004: should throw NotFoundException when section not found", async () => {
+      it("TC-SEC-U-013: should throw NotFoundException when section not found", async () => {
         mockSectionRepo.findById.mockResolvedValue(null);
 
         await expect(

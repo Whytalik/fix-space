@@ -1,7 +1,7 @@
 import { prisma } from "@fixspace/database";
 import type { SpaceResponseDto } from "@fixspace/domain";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { BadRequestException, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import { AppLogger } from "@/common/logger/app-logger.service";
@@ -11,6 +11,7 @@ import { InitializeUserSpaceUseCase } from "@/modules/space/providers/initialize
 import { MailService } from "../../mail/mail.service";
 import { AuthService } from "../auth.service";
 import { TokenService } from "../token.service";
+import { hashToken } from "../utils/token.helper";
 
 jest.mock("@fixspace/database", () => ({
   prisma: {
@@ -62,6 +63,9 @@ describe("AuthService", () => {
       | "createPasswordResetToken"
       | "validatePasswordResetToken"
       | "revokeAllUserRefreshTokens"
+      | "findActiveSessions"
+      | "revokeSessionById"
+      | "verifyAccessToken"
     >
   > = {
     generateAccessToken: jest.fn(),
@@ -74,6 +78,9 @@ describe("AuthService", () => {
     createPasswordResetToken: jest.fn(),
     validatePasswordResetToken: jest.fn(),
     revokeAllUserRefreshTokens: jest.fn(),
+    findActiveSessions: jest.fn(),
+    revokeSessionById: jest.fn(),
+    verifyAccessToken: jest.fn(),
   };
 
   const mockMailService = {
@@ -176,6 +183,7 @@ describe("AuthService", () => {
       email: "user@example.com",
       icon: null,
       isVerified: true,
+      hasPassword: true,
       createdAt: new Date(),
     };
 
@@ -207,6 +215,72 @@ describe("AuthService", () => {
       const result = await service.logout(token);
       expect(mockTokenService.revokeRefreshToken).toHaveBeenCalledWith(token);
       expect(result).toHaveProperty("clearCookies", true);
+    });
+  });
+
+  describe("logoutAll — TC-AUTH-U-023", () => {
+    it("TC-AUTH-U-023: should revoke all refresh tokens and set clearCookies", async () => {
+      mockTokenService.revokeAllUserRefreshTokens.mockResolvedValue(undefined);
+
+      const result = await service.logoutAll("user-1");
+
+      expect(mockTokenService.revokeAllUserRefreshTokens).toHaveBeenCalledWith("user-1");
+      expect(result).toHaveProperty("clearCookies", true);
+      expect(result).toHaveProperty("message");
+    });
+  });
+
+  describe("getSessions", () => {
+    const currentRawToken = "current_raw_token";
+    const sessions = [
+      { id: "rt-1", tokenHash: hashToken(currentRawToken), createdAt: new Date("2024-01-01"), expiresAt: new Date("2024-01-08") },
+      { id: "rt-2", tokenHash: "other-hash", createdAt: new Date("2024-01-02"), expiresAt: new Date("2024-01-09") },
+    ];
+
+    it("should return sessions list with isCurrent=true for the active session — no DB call for token lookup", async () => {
+      mockTokenService.findActiveSessions.mockResolvedValue(sessions);
+
+      const result = await service.getSessions("user-1", currentRawToken);
+
+      expect(result).toHaveLength(2);
+      expect(mockTokenService.validateRefreshToken).not.toHaveBeenCalled();
+      const current = result.find((session) => session.id === "rt-1");
+      const other = result.find((session) => session.id === "rt-2");
+      expect(current?.isCurrent).toBe(true);
+      expect(other?.isCurrent).toBe(false);
+    });
+
+    it("should return sessions with isCurrent=false when no refresh token provided", async () => {
+      mockTokenService.findActiveSessions.mockResolvedValue(sessions);
+
+      const result = await service.getSessions("user-1");
+
+      expect(result.every((session) => !session.isCurrent)).toBe(true);
+    });
+  });
+
+  describe("revokeSession", () => {
+    it("TC-AUTH-U-024: should revoke session successfully when it belongs to the user", async () => {
+      mockTokenService.revokeSessionById.mockResolvedValue("revoked");
+
+      const result = await service.revokeSession("user-1", "rt-1");
+
+      expect(mockTokenService.revokeSessionById).toHaveBeenCalledWith("rt-1", "user-1");
+      expect(result).toHaveProperty("message");
+    });
+
+    it("TC-AUTH-U-025: should return success for an already-revoked own session (idempotent)", async () => {
+      mockTokenService.revokeSessionById.mockResolvedValue("already_revoked");
+
+      const result = await service.revokeSession("user-1", "rt-1");
+
+      expect(result).toHaveProperty("message");
+    });
+
+    it("TC-AUTH-U-026: should throw NotFoundException when session not found or belongs to another user", async () => {
+      mockTokenService.revokeSessionById.mockResolvedValue("not_found");
+
+      await expect(service.revokeSession("user-1", "rt-999")).rejects.toThrow(NotFoundException);
     });
   });
 

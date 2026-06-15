@@ -1,7 +1,22 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CreatePropertyDto, FormulaPropertyConfig, PropertyResponseDto, UpdatePropertyDto } from "@fixspace/domain";
 import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
+import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
+import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
 import { t } from "@/common/utils/i18n.helper";
 import { PropertyService } from "./property.service";
 
@@ -17,6 +32,7 @@ export class PropertyController {
   @ApiBody({ type: CreatePropertyDto })
   @ApiResponse({ status: 201, description: "Property created successfully.", type: PropertyResponseDto })
   @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Database not found." })
   create(
     @CurrentUser("userId")
@@ -34,6 +50,7 @@ export class PropertyController {
   @ApiOperation({ summary: "Get all properties in a database" })
   @ApiQuery({ name: "databaseId", type: String, description: "Database ID" })
   @ApiResponse({ status: 200, description: "List of properties.", type: [PropertyResponseDto] })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Database not found." })
   findAll(
     @Query("databaseId")
@@ -48,6 +65,7 @@ export class PropertyController {
   @ApiOperation({ summary: "Get property by ID" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Property found.", type: PropertyResponseDto })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Property not found." })
   findOne(
     @Param("id") id: string,
@@ -58,10 +76,14 @@ export class PropertyController {
   }
 
   @Patch(":id")
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({ model: "property", ownerPath: ["database", "space", "ownerId"] })
   @ApiOperation({ summary: "Update property" })
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: UpdatePropertyDto })
   @ApiResponse({ status: 200, description: "Property updated.", type: PropertyResponseDto })
+  @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Property not found." })
   update(
     @Param("id") id: string,
@@ -78,6 +100,7 @@ export class PropertyController {
   @ApiOperation({ summary: "Duplicate property" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 201, description: "Property duplicated.", type: PropertyResponseDto })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Property not found." })
   duplicate(
     @Param("id") id: string,
@@ -92,6 +115,8 @@ export class PropertyController {
   @ApiOperation({ summary: "Preview formula result against the first database record" })
   @ApiBody({ type: Object })
   @ApiResponse({ status: 200, description: "Formula preview result." })
+  @ApiResponse({ status: 400, description: "Invalid formula." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   previewFormulaForDatabase(@Body() body: { databaseId: string; config: FormulaPropertyConfig }) {
     return this.propertyService.previewFormulaForDatabase(body.databaseId, body.config);
   }
@@ -102,16 +127,22 @@ export class PropertyController {
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: Object })
   @ApiResponse({ status: 200, description: "Formula preview successful." })
+  @ApiResponse({ status: 400, description: "Invalid formula." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
+  @ApiResponse({ status: 404, description: "Property not found." })
   preview(@Param("id") id: string, @Body() body: { config: FormulaPropertyConfig; recordValues: Record<string, unknown> }) {
     return this.propertyService.previewFormula(id, body.config, body.recordValues);
   }
 
   @Delete(":id")
+  @UseGuards(ResourceOwnerGuard)
+  @RequireOwnership({ model: "property", ownerPath: ["database", "space", "ownerId"] })
   @ApiOperation({ summary: "Delete property" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Property deleted." })
-  @ApiResponse({ status: 404, description: "Property not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Property not found." })
   remove(
     @Param("id") id: string,
     @CurrentUser("userId")

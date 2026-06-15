@@ -65,8 +65,11 @@ export class DuplicateSpaceUseCase {
           const newDatabase = await transaction.database.create({
             data: {
               name: database.name,
-              title: database.title,
+              type: database.type,
+              key: database.key,
               icon: database.icon,
+              isKey: database.isKey,
+              isLocked: database.isLocked,
               spaceId: newSpace.id,
               sectionId: (() => {
                 if (!database.sectionId || options.includeSections === false) return null;
@@ -103,7 +106,6 @@ export class DuplicateSpaceUseCase {
                   content: template.content as Prisma.InputJsonValue,
                   isDefault: template.isDefault,
                   position: template.position,
-                  config: template.config as Prisma.InputJsonValue,
                   databaseId: newDatabase.id,
                 },
               });
@@ -129,7 +131,6 @@ export class DuplicateSpaceUseCase {
                 data: {
                   name: automation.name,
                   trigger: automation.trigger,
-                  condition: automation.condition as Prisma.InputJsonValue,
                   actions: automation.actions as Prisma.InputJsonValue,
                   active: automation.active,
                   config: automation.config as Prisma.InputJsonValue,

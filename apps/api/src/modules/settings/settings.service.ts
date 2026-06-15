@@ -1,23 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import {
-  DEFAULT_DATABASE_SETTINGS,
-  DEFAULT_RECORD_SETTINGS,
-  DEFAULT_SECTION_SETTINGS,
-  DEFAULT_SPACE_SETTINGS,
-  DEFAULT_TEMPLATE_SETTINGS,
-  DEFAULT_VIEW_SETTINGS,
-} from "@fixspace/domain";
+import { DEFAULT_SECTION_SETTINGS, DEFAULT_SETTINGS_MAP, ICON_KEY_MAP, SettingsCategory, type IconCategory } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
-import { SettingsCategory } from "./constants/settings.constants";
 import { SettingsRepository } from "./repositories/settings.repository";
-
-type IconCategory =
-  | SettingsCategory.DATABASE
-  | SettingsCategory.RECORD
-  | SettingsCategory.SECTION
-  | SettingsCategory.SPACE
-  | SettingsCategory.TEMPLATE
-  | SettingsCategory.VIEW;
 
 @Injectable()
 export class SettingsService {
@@ -33,9 +17,7 @@ export class SettingsService {
 
     const dbSettings = await this.settingsRepo.findMany(userId, category);
 
-    const result = {
-      ...defaultValues,
-    };
+    const result = { ...defaultValues };
 
     for (const setting of dbSettings) {
       if (setting.key in result) {
@@ -51,21 +33,19 @@ export class SettingsService {
   async updateSettings<T extends object>(userId: string, category: SettingsCategory, updateDto: Partial<T>, defaultValues: T): Promise<T> {
     this.logger.debug("Updating settings", { userId, category });
 
-    const operations = Object.entries({
-      ...updateDto,
-    }).map(([key, value]) => {
-      const defaultValue = defaultValues[key as keyof T];
+    await this.settingsRepo.transaction(async (tx) => {
+      for (const [key, value] of Object.entries(updateDto)) {
+        const defaultValue = defaultValues[key as keyof T];
 
-      const isEqual = JSON.stringify(value) === JSON.stringify(defaultValue);
+        const isEqual = JSON.stringify(value) === JSON.stringify(defaultValue);
 
-      if (isEqual) {
-        return this.settingsRepo.deleteMany(userId, key, category);
+        if (isEqual) {
+          await this.settingsRepo.deleteMany(userId, key, category, tx);
+        } else {
+          await this.settingsRepo.upsert(userId, key, category, value, tx);
+        }
       }
-
-      return this.settingsRepo.upsert(userId, key, category, value);
     });
-
-    await this.settingsRepo.runTransaction(operations);
 
     this.logger.log("Settings updated", { userId, category });
 
@@ -73,20 +53,11 @@ export class SettingsService {
   }
 
   async getDefaultIcon(userId: string, category: IconCategory): Promise<string> {
-    switch (category) {
-      case SettingsCategory.DATABASE:
-        return (await this.getSettings(userId, category, DEFAULT_DATABASE_SETTINGS)).defaultDatabaseIcon;
-      case SettingsCategory.RECORD:
-        return (await this.getSettings(userId, category, DEFAULT_RECORD_SETTINGS)).defaultRecordIcon;
-      case SettingsCategory.SECTION:
-        return (await this.getSettings(userId, category, DEFAULT_SECTION_SETTINGS)).defaultSectionIcon;
-      case SettingsCategory.SPACE:
-        return (await this.getSettings(userId, category, DEFAULT_SPACE_SETTINGS)).defaultSpaceIcon;
-      case SettingsCategory.TEMPLATE:
-        return (await this.getSettings(userId, category, DEFAULT_TEMPLATE_SETTINGS)).defaultTemplateIcon;
-      case SettingsCategory.VIEW:
-        return (await this.getSettings(userId, category, DEFAULT_VIEW_SETTINGS)).defaultViewIcon;
-    }
+    const defaults = DEFAULT_SETTINGS_MAP[category];
+    const iconKey = ICON_KEY_MAP[category];
+    const settings = await this.getSettings(userId, category, defaults);
+
+    return (settings as Record<string, string>)[iconKey] ?? "";
   }
 
   async resolveDefaults(
@@ -94,7 +65,7 @@ export class SettingsService {
     category: SettingsCategory,
     provided: { icon?: string; color?: string } = {},
   ): Promise<{ icon: string; color?: string }> {
-    const result: { icon: string; color?: string } = { ...provided } as any;
+    const result: { icon: string; color?: string } = { icon: "", ...provided };
 
     if (!result.icon) {
       result.icon = await this.getDefaultIcon(userId, category as IconCategory);

@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { InitializationConfigModule } from "@/core/config/initialization/initialization-config.module";
+import { AutomationModule } from "@/modules/automation/automation.module";
 import { DatabaseModule } from "@/modules/database/database.module";
 import { PropertyModule } from "@/modules/property/property.module";
 import { PropertyValueModule } from "@/modules/property-value/property-value.module";
@@ -26,6 +27,7 @@ import { SpaceService } from "./space.service";
     InitializationConfigModule,
     SettingsModule,
     ViewModule,
+    AutomationModule,
     SpaceDataModule,
   ],
   controllers: [SpaceController],

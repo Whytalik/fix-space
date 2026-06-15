@@ -2,6 +2,7 @@ import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
+import { I18nService } from "nestjs-i18n";
 
 import { AutomationActionType, AutomationStatus, AutomationTrigger } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
@@ -82,6 +83,10 @@ describe("AutomationService", () => {
     create: jest.fn(),
   };
 
+  const mockI18nService = {
+    t: jest.fn().mockReturnValue("translated text"),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -95,6 +100,7 @@ describe("AutomationService", () => {
         { provide: DatabaseRepository, useValue: mockDatabaseRepo },
         { provide: RecordRepository, useValue: mockRecordRepo },
         { provide: AppLogger, useValue: mockLogger },
+        { provide: I18nService, useValue: mockI18nService },
       ],
     }).compile();
 

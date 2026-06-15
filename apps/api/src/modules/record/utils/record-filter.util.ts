@@ -1,6 +1,6 @@
 import { type Prisma } from "@fixspace/database";
 import type { RecordFilterDto } from "@fixspace/domain";
-import { FilterField, FilterOperator, PropertyType } from "@fixspace/domain";
+import { DatePreset, FilterField, FilterOperator, PropertyType } from "@fixspace/domain";
 
 export type RecordWithValues = Prisma.RecordGetPayload<{
   include: {
@@ -31,6 +31,40 @@ function compareDates(dateValue: Date | null, filterDateValue: Date | null, oper
       return dateTimestamp >= filterTimestamp;
     default:
       return true;
+  }
+}
+
+function getDatePresetRange(preset: DatePreset): { start: Date; end: Date } {
+  const now = new Date();
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(now);
+  end.setHours(23, 59, 59, 999);
+
+  switch (preset) {
+    case DatePreset.TODAY:
+      return { start, end };
+    case DatePreset.THIS_WEEK: {
+      const day = start.getDay();
+      const diff = day === 0 ? 6 : day - 1;
+      start.setDate(start.getDate() - diff);
+      end.setDate(start.getDate() + 6);
+      return { start, end };
+    }
+    case DatePreset.THIS_MONTH:
+      start.setDate(1);
+      end.setMonth(end.getMonth() + 1, 0);
+      return { start, end };
+    case DatePreset.THIS_QUARTER: {
+      const q = Math.floor(start.getMonth() / 3);
+      start.setMonth(q * 3, 1);
+      end.setMonth(q * 3 + 3, 0);
+      return { start, end };
+    }
+    case DatePreset.THIS_YEAR:
+      start.setMonth(0, 1);
+      end.setMonth(11, 31);
+      return { start, end };
   }
 }
 
@@ -76,6 +110,32 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
   }
 
   const propertyId = filter.propertyId as string;
+
+  if (propertyId === "name" || propertyId === "Name") {
+    const textValue = record.name !== null ? String(record.name).toLowerCase() : "";
+    const filterTextValue = value !== null ? String(value).toLowerCase() : "";
+    switch (operator) {
+      case FilterOperator.EQUALS:
+        return textValue === filterTextValue;
+      case FilterOperator.NOT_EQUALS:
+        return textValue !== filterTextValue;
+      case FilterOperator.CONTAINS:
+        return textValue.includes(filterTextValue);
+      case FilterOperator.NOT_CONTAINS:
+        return !textValue.includes(filterTextValue);
+      case FilterOperator.STARTS_WITH:
+        return textValue.startsWith(filterTextValue);
+      case FilterOperator.ENDS_WITH:
+        return textValue.endsWith(filterTextValue);
+      case FilterOperator.IS_EMPTY:
+        return textValue === "";
+      case FilterOperator.IS_NOT_EMPTY:
+        return textValue !== "";
+      default:
+        return false;
+    }
+  }
+
   const rawValue = getPropertyValue(record, propertyId);
   const propertyType = getPropertyType(record, propertyId);
 
@@ -139,6 +199,12 @@ export function matchesFilter(record: RecordWithValues, filter: RecordFilterDto)
     }
 
     case PropertyType.DATE: {
+      if (filter.preset) {
+        const range = getDatePresetRange(filter.preset);
+        const dateValue = rawValue !== null ? new Date(rawValue as string) : null;
+        if (!dateValue || !isValidDate(dateValue)) return false;
+        return dateValue >= range.start && dateValue <= range.end;
+      }
       const dateValue = rawValue !== null ? new Date(rawValue as string) : null;
       const filterDateValue = value !== null ? new Date(String(value)) : null;
       const isEmpty = checkEmpty(rawValue);

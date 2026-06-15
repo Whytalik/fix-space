@@ -41,19 +41,25 @@ export class MailService implements OnModuleInit {
 
     if (!smtpHost) {
       this.logger.log("No SMTP_HOST or RESEND_API_KEY configured, creating Ethereal test account");
-      const testAccount = await nodemailer.createTestAccount();
+      try {
+        const testAccount = await nodemailer.createTestAccount();
 
-      this.transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
-      });
+        this.transporter = nodemailer.createTransport({
+          host: "smtp.ethereal.email",
+          port: 587,
+          secure: false,
+          auth: {
+            user: testAccount.user,
+            pass: testAccount.pass,
+          },
+        });
 
-      this.logger.log(`Ethereal test account created: ${testAccount.user} (emails will be captured at https://ethereal.email)`);
+        this.logger.log(`Ethereal test account created: ${testAccount.user} (emails will be captured at https://ethereal.email)`);
+      } catch (error) {
+        this.logger.warn("Failed to create Ethereal test account — mail service unavailable", {
+          error: (error as Error).message,
+        });
+      }
     } else {
       this.transporter = nodemailer.createTransport({
         host: smtpHost,
@@ -231,7 +237,10 @@ export class MailService implements OnModuleInit {
       } catch (error) {
         this.logger.error(`Failed to send verification email to ${to} via SMTP`, { error: (error as Error).message });
       }
+      return;
     }
+
+    this.logger.error(`Mail service unavailable — verification email to ${to} was NOT sent`);
   }
 
   async sendPasswordResetEmail(to: string, token: string): Promise<void> {
@@ -283,7 +292,10 @@ export class MailService implements OnModuleInit {
       } catch (error) {
         this.logger.error(`Failed to send password reset email to ${to} via SMTP`, { error: (error as Error).message });
       }
+      return;
     }
+
+    this.logger.error(`Mail service unavailable — password reset email to ${to} was NOT sent`);
   }
 
   async sendPasswordChangeNotification(to: string): Promise<void> {
@@ -324,7 +336,10 @@ export class MailService implements OnModuleInit {
           error: (error as Error).message,
         });
       }
+      return;
     }
+
+    this.logger.error(`Mail service unavailable — password change notification to ${to} was NOT sent`);
   }
 
   async sendAccountDeletionNotification(to: string): Promise<void> {
@@ -365,6 +380,9 @@ export class MailService implements OnModuleInit {
           error: (error as Error).message,
         });
       }
+      return;
     }
+
+    this.logger.error(`Mail service unavailable — account deletion notification to ${to} was NOT sent`);
   }
 }

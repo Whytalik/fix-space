@@ -18,19 +18,19 @@ export class TemplatePropertyValueRepository extends BaseRepository {
     });
   }
 
-  async upsert(templateId: string, propertyId: string, value: Prisma.InputJsonValue) {
-    return prisma.templatePropertyValue.upsert({
+  async upsert(templateId: string, propertyId: string, value: Prisma.InputJsonValue, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).templatePropertyValue.upsert({
       where: { templateId_propertyId: { templateId, propertyId } },
       update: { value },
       create: { templateId, propertyId, value },
     });
   }
 
-  async update(id: string, data: Prisma.TemplatePropertyValueUpdateInput) {
-    return prisma.templatePropertyValue.update({ where: { id }, data });
+  async update(id: string, data: Prisma.TemplatePropertyValueUpdateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).templatePropertyValue.update({ where: { id }, data });
   }
 
-  async delete(id: string) {
-    return prisma.templatePropertyValue.delete({ where: { id } });
+  async delete(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).templatePropertyValue.delete({ where: { id } });
   }
 }

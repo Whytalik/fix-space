@@ -9,6 +9,9 @@
       { "tsconfig": "<rootDir>/../tsconfig.integration.json" }
     ]
   },
+  "maxWorkers": 1,
+  "globalSetup": "./utils/global-setup.ts",
+  "globalTeardown": "./utils/global-teardown.ts",
   "collectCoverage": false,
   "moduleNameMapper": {
     "^@fixspace/database$": "<rootDir>/../../../packages/database/src/client.ts",

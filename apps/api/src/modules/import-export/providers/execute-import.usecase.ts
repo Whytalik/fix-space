@@ -1,19 +1,30 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PropertyType } from "@fixspace/domain";
 import { ImportErrorRowDto, ImportResultResponseDto } from "@fixspace/domain";
-import { Prisma, NotificationType } from "@fixspace/database";
+import { Prisma, NotificationType, type Property } from "@fixspace/database";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
 import { PropertyTypeRegistry } from "@/modules/property/types";
 import { NotificationService } from "@/modules/notification/notification.service";
 import { parseCsvBuffer, validateCsvFile } from "../utils/csv-parser.util";
 import { convertCsvValue } from "../utils/csv-value-converter.util";
+import { extractAllowedValues } from "../utils/csv-select-options.util";
 import { ImportExportRepository } from "../repositories/import-export.repository";
 
 const EXCLUDED_TYPES = new Set<PropertyType>([PropertyType.RELATION, PropertyType.FORMULA]);
+const OPTION_TYPES = new Set<PropertyType>([PropertyType.SELECT, PropertyType.STATUS]);
+
+const CLOSED_KEYWORDS = ["clos", "закрит", "завершен", "done", "finish", "complet"];
+
+function findClosedOption(allowedValues: string[]): string | undefined {
+  return allowedValues.find((v) => CLOSED_KEYWORDS.some((kw) => v.toLowerCase().includes(kw)));
+}
 
 export interface ExecuteImportOptions {
   maxRows?: number;
+  addUnknownOptionPropertyIds?: string[];
+  partialImport?: boolean;
+  templateId?: string;
 }
 
 @Injectable()
@@ -42,13 +53,20 @@ export class ExecuteImportUseCase {
     if (!database) throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
 
     const properties = await this.repo.findPropertiesByDatabase(databaseId);
-    const propertyMap = new Map(properties.map((property) => [property.id, property]));
+    let propertyMap = new Map(properties.map((property) => [property.id, property]));
+
+    if (options.addUnknownOptionPropertyIds?.length) {
+      propertyMap = await this.patchUnknownOptions(file, mapping, propertyMap, new Set(options.addUnknownOptionPropertyIds));
+    }
 
     const { rows } = parseCsvBuffer(file.buffer);
+
+    const { templateId } = options;
 
     const validData: Array<{
       name: string;
       databaseId: string;
+      templateId?: string;
       values: Array<{ propertyId: string; value: Prisma.InputJsonValue }>;
     }> = [];
     const errors: ImportErrorRowDto[] = [];
@@ -74,14 +92,15 @@ export class ExecuteImportUseCase {
         if (!property) continue;
         if (EXCLUDED_TYPES.has(property.type as PropertyType)) continue;
 
-        const converted = convertCsvValue(rawValue, property.type as PropertyType);
+        const { handler, config } = this.typeRegistry.resolveHandlerAndConfig(property);
+        const allowedValues = extractAllowedValues(property.type as PropertyType, config);
+        const converted = convertCsvValue(rawValue, property.type as PropertyType, allowedValues);
         if (!converted.valid) {
-          rowErrors.push(`${property.name}: ${converted.reason}`);
+          rowErrors.push(`${property.name}: ${t(`errors.${converted.error.code}`, converted.error.args)}`);
           continue;
         }
 
         if (converted.value !== null) {
-          const { handler, config } = this.typeRegistry.resolveHandlerAndConfig(property);
           const validationErrors = handler.validateValue(converted.value, config);
           if (validationErrors?.length) {
             rowErrors.push(`${property.name}: ${validationErrors.join(", ")}`);
@@ -95,11 +114,25 @@ export class ExecuteImportUseCase {
         }
       }
 
-      if (rowErrors.length > 0) {
-        errors.push(new ImportErrorRowDto({ rowIndex: i + 1, reason: rowErrors.join("; ") }));
+      const coveredPropertyIds = new Set(valuesToCreate.map((v) => v.propertyId));
+      for (const [, property] of propertyMap) {
+        if (property.type !== (PropertyType.STATUS as string)) continue;
+        if (coveredPropertyIds.has(property.id)) continue;
+        const allowedValues = extractAllowedValues(PropertyType.STATUS, property.config as Record<string, unknown>);
+        const closedValue = findClosedOption(allowedValues);
+        if (closedValue) valuesToCreate.push({ propertyId: property.id, value: closedValue as Prisma.InputJsonValue });
+      }
+
+      const uniqueValues = Array.from(new Map(valuesToCreate.map((v) => [v.propertyId, v])).values());
+
+      if (rowErrors.length > 0 && !options.partialImport) {
+        errors.push(new ImportErrorRowDto({ rowIndex: i + 1, reason: rowErrors.join("\n") }));
         skipped++;
       } else {
-        validData.push({ databaseId, name: recordName, values: valuesToCreate });
+        if (rowErrors.length > 0) {
+          errors.push(new ImportErrorRowDto({ rowIndex: i + 1, reason: rowErrors.join("\n") }));
+        }
+        validData.push({ databaseId, name: recordName, templateId, values: uniqueValues });
       }
     }
 
@@ -122,5 +155,57 @@ export class ExecuteImportUseCase {
     );
 
     return new ImportResultResponseDto({ imported: validData.length, skipped, errors });
+  }
+
+  private async patchUnknownOptions(
+    file: Express.Multer.File,
+    mapping: Record<string, string>,
+    propertyMap: Map<string, Property>,
+    allowedPropertyIds: Set<string>,
+  ) {
+    const { rows } = parseCsvBuffer(file.buffer);
+
+    const unknownByProperty = new Map<string, Set<string>>();
+
+    for (const row of rows) {
+      for (const [csvColumn, propertyId] of Object.entries(mapping)) {
+        if (propertyId === "__name__") continue;
+        const property = propertyMap.get(propertyId);
+        if (!property || !OPTION_TYPES.has(property.type as PropertyType)) continue;
+        if (!allowedPropertyIds.has(propertyId)) continue;
+
+        const rawValue = (row[csvColumn] ?? "").trim();
+        if (!rawValue) continue;
+
+        const allowedValues = extractAllowedValues(property.type as PropertyType, property.config as Record<string, unknown>);
+        if (allowedValues.length > 0 && !allowedValues.includes(rawValue)) {
+          if (!unknownByProperty.has(propertyId)) unknownByProperty.set(propertyId, new Set());
+          unknownByProperty.get(propertyId)!.add(rawValue);
+        }
+      }
+    }
+
+    for (const [propertyId, newValues] of unknownByProperty) {
+      const property = propertyMap.get(propertyId)!;
+      const config = structuredClone(property.config) as Record<string, unknown>;
+      const categories = config.categories as Array<Record<string, unknown>>;
+      if (!categories?.length) continue;
+
+      const targetCategory = categories[0]!;
+      const options = targetCategory.options as Array<Record<string, unknown>>;
+
+      for (const value of newValues) {
+        if (property.type === PropertyType.SELECT) {
+          options.push({ value });
+        } else {
+          options.push({ name: value, color: "#6B7280" });
+        }
+      }
+
+      const updated = await this.repo.updatePropertyConfig(propertyId, config);
+      propertyMap.set(propertyId, updated);
+    }
+
+    return propertyMap;
   }
 }

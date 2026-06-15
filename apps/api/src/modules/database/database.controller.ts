@@ -1,5 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
-import { HttpCode, HttpStatus } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CreateDatabaseDto, DatabaseResponseDto, DuplicateDatabaseDto, UpdateDatabaseDto } from "@fixspace/domain";
 import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
@@ -23,9 +22,10 @@ export class DatabaseController {
   @ApiBody({ type: CreateDatabaseDto })
   @ApiResponse({ status: 201, description: "Database created successfully.", type: DatabaseResponseDto })
   @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
+  @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
   @ApiResponse({ status: 404, description: "Workspace not found." })
   create(@CurrentUser("userId") userId: string, @Body() createDatabaseDto: CreateDatabaseDto) {
-    createDatabaseDto.isKey = false;
     return this.databaseService.create(createDatabaseDto.spaceId, createDatabaseDto, userId);
   }
 
@@ -33,6 +33,7 @@ export class DatabaseController {
   @ApiOperation({ summary: "Get all databases in a workspace" })
   @ApiQuery({ name: "spaceId", type: String, description: "Workspace ID" })
   @ApiResponse({ status: 200, description: "List of databases.", type: [DatabaseResponseDto] })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Workspace not found." })
   findAll(@Query("spaceId") spaceId: string, @CurrentUser("userId") userId: string) {
     return this.databaseService.findAll(spaceId, userId);
@@ -47,8 +48,9 @@ export class DatabaseController {
   @ApiOperation({ summary: "Get database by ID" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Database found.", type: DatabaseResponseDto })
-  @ApiResponse({ status: 404, description: "Database not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Database not found." })
   findOne(@Param("id") id: string) {
     return this.databaseService.findOne(id);
   }
@@ -63,8 +65,10 @@ export class DatabaseController {
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: UpdateDatabaseDto })
   @ApiResponse({ status: 200, description: "Database updated.", type: DatabaseResponseDto })
-  @ApiResponse({ status: 404, description: "Database not found." })
+  @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Database not found." })
   update(@Param("id") id: string, @Body() updateDatabaseDto: UpdateDatabaseDto) {
     return this.databaseService.update(id, updateDatabaseDto);
   }
@@ -80,8 +84,9 @@ export class DatabaseController {
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: DuplicateDatabaseDto })
   @ApiResponse({ status: 201, description: "Database duplicated.", type: DatabaseResponseDto })
-  @ApiResponse({ status: 404, description: "Database not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Database not found." })
   duplicate(@CurrentUser("userId") userId: string, @Param("id") id: string, @Body() duplicateDatabaseDto: DuplicateDatabaseDto) {
     return this.duplicateDatabaseUseCase.execute(id, userId, duplicateDatabaseDto);
   }
@@ -96,7 +101,9 @@ export class DatabaseController {
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Database deleted.", type: DatabaseResponseDto })
   @ApiResponse({ status: 400, description: "Cannot delete key database." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Database not found." })
   remove(@Param("id") id: string) {
     return this.databaseService.remove(id);
   }

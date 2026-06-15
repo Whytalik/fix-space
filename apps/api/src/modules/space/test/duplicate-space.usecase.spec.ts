@@ -62,13 +62,13 @@ describe("DuplicateSpaceUseCase", () => {
   });
 
   describe("execute", () => {
-    it("TC-WS-U-005: should throw NotFoundException when source space not found", async () => {
+    it("TC-WS-U-017: should throw NotFoundException when source space not found", async () => {
       mockSpaceRepo.findByIdForDuplicate.mockResolvedValue(null);
 
       await expect(useCase.execute("nonexistent", "user-1")).rejects.toThrow(NotFoundException);
     });
 
-    it("TC-WS-U-005: should duplicate space with sections, databases, properties, templates, and records", async () => {
+    it("TC-WS-U-018: should duplicate space with sections, databases, properties, templates, and records", async () => {
       const sourceSpace = {
         id: "space-1",
         name: "Original Space",
@@ -191,7 +191,7 @@ describe("DuplicateSpaceUseCase", () => {
       expect(prisma.templatePropertyValue.create).toHaveBeenCalled();
     });
 
-    it("TC-WS-U-005: should preserve relationships between duplicated entities", async () => {
+    it("TC-WS-U-019: should preserve relationships between duplicated entities", async () => {
       const sourceSpace = {
         id: "space-1",
         name: "Space",
@@ -327,7 +327,7 @@ describe("DuplicateSpaceUseCase", () => {
       });
     });
 
-    it("TC-WS-U-005: should use custom name when provided", async () => {
+    it("TC-WS-U-020: should use custom name when provided", async () => {
       const sourceSpace = {
         id: "space-1",
         name: "Original",
@@ -366,7 +366,7 @@ describe("DuplicateSpaceUseCase", () => {
       });
     });
 
-    it("TC-WS-U-006: should throw BadRequestException if space limit of 5 is reached", async () => {
+    it("TC-WS-U-021: should throw BadRequestException if space limit of 5 is reached", async () => {
       mockSpaceRepo.count.mockResolvedValue(5);
 
       await expect(useCase.execute("space-1", "user-1")).rejects.toThrow(BadRequestException);

@@ -1,7 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { randomInt } from "crypto";
 import { prisma } from "@fixspace/database";
 import { LoginUserDto } from "@fixspace/domain";
+import { SessionResponseDto } from "@fixspace/domain";
 import { GoogleUser } from "./strategies/google.strategy";
+import { hashToken } from "./utils/token.helper";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { t } from "@/common/utils/i18n.helper";
 import { MailService } from "../mail/mail.service";
@@ -69,7 +72,7 @@ export class AuthService {
       await this.initializeUserSpaceUseCase.initialize(user.id, user.username);
     }
 
-    const accessToken = this.tokenService.generateAccessToken(user.id, user.username);
+    const accessToken = this.tokenService.generateAccessToken(user.id);
     const refreshToken = await this.tokenService.createRefreshToken(user.id);
 
     this.logger.log("Login successful", {
@@ -98,7 +101,7 @@ export class AuthService {
     const user = await this.userService.findById(validated.userId);
 
     const newRefreshToken = await this.tokenService.rotateRefreshToken(validated.tokenId, validated.userId);
-    const newAccessToken = this.tokenService.generateAccessToken(user.id, user.username);
+    const newAccessToken = this.tokenService.generateAccessToken(user.id);
 
     this.logger.log("Token refreshed successfully", { userId: user.id });
 
@@ -120,6 +123,54 @@ export class AuthService {
       message: t("errors.LOGOUT_SUCCESS"),
       clearCookies: true,
     };
+  }
+
+  async logoutAll(userId: string) {
+    this.logger.debug("Logging out all sessions", { userId });
+    await this.tokenService.revokeAllUserRefreshTokens(userId);
+
+    this.logger.log("All sessions terminated", { userId });
+
+    return {
+      message: t("errors.LOGOUT_SUCCESS"),
+      clearCookies: true,
+    };
+  }
+
+  async getSessions(userId: string, currentRefreshTokenRaw?: string): Promise<SessionResponseDto[]> {
+    this.logger.debug("Fetching sessions", { userId });
+
+    const sessions = await this.tokenService.findActiveSessions(userId);
+
+    const currentHash = currentRefreshTokenRaw ? hashToken(currentRefreshTokenRaw) : null;
+
+    return sessions.map(
+      (session) =>
+        new SessionResponseDto({
+          id: session.id,
+          createdAt: session.createdAt,
+          expiresAt: session.expiresAt,
+          isCurrent: currentHash !== null && session.tokenHash === currentHash,
+        }),
+    );
+  }
+
+  async revokeSession(userId: string, tokenId: string): Promise<{ message: string }> {
+    this.logger.debug("Revoking session", { userId, tokenId });
+
+    const result = await this.tokenService.revokeSessionById(tokenId, userId);
+
+    if (result === "not_found") {
+      throw new NotFoundException(t("errors.SESSION_NOT_FOUND"));
+    }
+
+    this.logger.log("Session revoked", { userId, tokenId });
+    return { message: t("errors.LOGOUT_SUCCESS") };
+  }
+
+  setSession(accessToken: string): { accessToken: string } {
+    this.tokenService.verifyAccessToken(accessToken);
+    return { accessToken };
   }
 
   async verifyEmail(token: string) {
@@ -248,7 +299,7 @@ export class AuthService {
     return { message: t("errors.PASSWORD_RESET_SUCCESS") };
   }
 
-  async loginWithGoogle(googleUser: GoogleUser) {
+  async loginWithGoogle(googleUser: GoogleUser, appUrl: string) {
     this.logger.debug("Google OAuth login attempt", { email: googleUser.email });
 
     const existingGoogleAccount = await prisma.googleAccount.findUnique({
@@ -327,7 +378,7 @@ export class AuthService {
       await this.initializeUserSpaceUseCase.initialize(user.id, user.username);
     }
 
-    const accessToken = this.tokenService.generateAccessToken(user.id, user.username);
+    const accessToken = this.tokenService.generateAccessToken(user.id);
     const refreshToken = await this.tokenService.createRefreshToken(user.id);
 
     this.logger.log("Google OAuth login successful", { userId: user.id });
@@ -336,6 +387,7 @@ export class AuthService {
       message: t("errors.LOGIN_SUCCESS"),
       accessToken,
       refreshToken,
+      redirectUrl: `${appUrl}?token=${encodeURIComponent(accessToken)}`,
     };
   }
 
@@ -351,7 +403,7 @@ export class AuthService {
     if (!existingUser) return baseUsername;
 
     for (let attempt = 0; attempt < 10; attempt++) {
-      const suffix = Math.floor(1000 + Math.random() * 9000).toString();
+      const suffix = String(1000 + randomInt(9000));
       const candidate = `${baseUsername}_${suffix}`;
       const taken = await prisma.user.findUnique({ where: { username: candidate } });
       if (!taken) return candidate;

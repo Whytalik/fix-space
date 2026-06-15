@@ -8,12 +8,16 @@ import { AppLogger } from "./app-logger.service";
 
 const SENSITIVE_KEYS = new Set(["password", "passwordHash", "token", "secret", "refreshToken", "accessToken"]);
 
-function sanitizeBody(body: Record<string, unknown>): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(body)) {
-    result[key] = SENSITIVE_KEYS.has(key) ? "[REDACTED]" : value;
+function sanitizeBody(body: unknown): unknown {
+  if (Array.isArray(body)) return body.map(sanitizeBody);
+  if (body !== null && typeof body === "object") {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+      result[key] = SENSITIVE_KEYS.has(key) ? "[REDACTED]" : sanitizeBody(value);
+    }
+    return result;
   }
-  return result;
+  return body;
 }
 
 function colorMethod(method: string): string {
@@ -74,21 +78,31 @@ export class LoggingInterceptor implements NestInterceptor {
 
     this.logger.log(`\x1b[32m➜\x1b[0m  [${colorMethod(method)}] ${url}`);
 
-    const parsedBody = (body as Record<string, unknown>) || {};
+    const parsedBody = (body as Record<string, unknown>) ?? {};
     if (Object.keys(parsedBody).length > 0) {
-      this.logger.debug(`🔍 Body: \x1b[90m${JSON.stringify(sanitizeBody(parsedBody))}\x1b[0m`);
+      try {
+        this.logger.debug(`🔍 Body: \x1b[90m${JSON.stringify(sanitizeBody(parsedBody))}\x1b[0m`);
+      } catch {
+        this.logger.debug("🔍 Body: [unserializable]");
+      }
     }
 
-    const now = Date.now();
+    const startTime = requestContext?.startTime ?? Date.now();
+
+    const logCompletion = (status: number) => {
+      const duration = Date.now() - startTime;
+      const icon = status < 400 ? `\x1b[32m✔\x1b[0m` : `\x1b[31m✖\x1b[0m`;
+      this.logger.log(`${icon}  [${colorMethod(method)}] ${url} ${colorStatus(status)} (${colorDuration(duration)})`);
+    };
 
     return next.handle().pipe(
       tap({
         next: () => {
           const response = context.switchToHttp().getResponse<Response>();
-          const duration = Date.now() - now;
-          const status = response.statusCode;
-          const icon = status < 400 ? `\x1b[32m✔\x1b[0m` : `\x1b[31m✖\x1b[0m`;
-          this.logger.log(`${icon}  [${colorMethod(method)}] ${url} ${colorStatus(status)} (${colorDuration(duration)})`);
+          logCompletion(response.statusCode);
+        },
+        error: () => {
+          logCompletion(500);
         },
       }),
     );

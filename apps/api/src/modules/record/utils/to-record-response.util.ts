@@ -1,11 +1,15 @@
-import type { Prisma } from "@fixspace/database";
 import { RecordResponseDto } from "@fixspace/domain";
 
-export function toRecordResponseDto(
-  record: Prisma.RecordGetPayload<{ include: { values: true } }> | Record<string, unknown>,
-): RecordResponseDto {
+export function toRecordResponseDto(record: Record<string, unknown>): RecordResponseDto {
+  const rawValues = (record.values ?? []) as Array<Record<string, unknown>>;
   return new RecordResponseDto({
     ...record,
-    values: (record.values ?? []) as RecordResponseDto["values"],
+    values: rawValues.map((value) => {
+      const propertyRecord = value.property as Record<string, unknown> | undefined;
+      return {
+        ...value,
+        propertyName: (propertyRecord?.name as string | undefined) ?? (value.propertyName as string | undefined),
+      };
+    }) as RecordResponseDto["values"],
   });
 }

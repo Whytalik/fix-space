@@ -40,8 +40,30 @@ export class AutomationEngine {
 
   resolveValue(descriptor: { valueType: string; value?: unknown; fieldRef?: string }, triggerRecord?: RecordForAutomation): unknown {
     switch (descriptor.valueType) {
-      case ValueType.FIXED:
-        return descriptor.value ?? null;
+      case ValueType.FIXED: {
+        const value = descriptor.value;
+        if (typeof value !== "string") return value ?? null;
+
+        if (value.startsWith("{{relative:") || value.startsWith("$relative:")) {
+          const rawOffset = (value.split(":")[1] ?? "").replace("}}", "").trim();
+          const offset = rawOffset !== "" ? parseInt(rawOffset, 10) : NaN;
+          if (!isNaN(offset)) {
+            const date = new Date();
+            date.setDate(date.getDate() + offset);
+            return date.toISOString().split("T")[0];
+          }
+          return null;
+        }
+        if (value === "{{tomorrow}}" || value === "$tomorrow") {
+          const date = new Date();
+          date.setDate(date.getDate() + 1);
+          return date.toISOString().split("T")[0];
+        }
+        if (value === "{{today}}" || value === "{{date}}" || value === "$today" || value === "$date") {
+          return new Date().toISOString().split("T")[0];
+        }
+        return value ?? null;
+      }
       case ValueType.TODAY:
         return new Date().toISOString().split("T")[0];
       case ValueType.FIELD_REF:
@@ -115,6 +137,9 @@ export class AutomationEngine {
 
   private isBetween(value: unknown, start: unknown, end: unknown): boolean {
     if (this.isEmpty(value) || this.isEmpty(start) || this.isEmpty(end)) return false;
+    if (typeof value === "number" && typeof start === "number" && typeof end === "number") {
+      return value >= start && value <= end;
+    }
     const v = String(value);
     return v >= String(start) && v <= String(end);
   }

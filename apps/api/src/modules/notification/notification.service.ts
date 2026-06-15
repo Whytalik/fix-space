@@ -63,13 +63,14 @@ export class NotificationService {
 
   async create(userId: string, type: PrismaNotificationType, text: string, link?: string): Promise<NotificationResponseDto> {
     this.logger.debug("Creating notification", { userId, type });
-    const currentCount = await this.notificationRepo.countByUserId(userId);
-    if (currentCount >= this.MAX_NOTIFICATIONS) {
-      const toDelete = currentCount - this.MAX_NOTIFICATIONS + 1;
-      await this.notificationRepo.deleteOldest(userId, toDelete);
-    }
-
-    const notification = await this.notificationRepo.create(userId, type, text, link);
+    const notification = await this.notificationRepo.transaction(async (tx) => {
+      const currentCount = await this.notificationRepo.countByUserId(userId, tx);
+      if (currentCount >= this.MAX_NOTIFICATIONS) {
+        const toDelete = currentCount - this.MAX_NOTIFICATIONS + 1;
+        await this.notificationRepo.deleteOldest(userId, toDelete, tx);
+      }
+      return this.notificationRepo.create(userId, type, text, link, tx);
+    });
     this.logger.log("Notification created", { userId, type });
     return new NotificationResponseDto({
       ...notification,

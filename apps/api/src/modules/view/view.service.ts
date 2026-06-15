@@ -1,9 +1,10 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
-import { Prisma } from "@fixspace/database";
+import { Prisma, prisma } from "@fixspace/database";
 import { CreateViewDto, UpdateViewDto, ViewResponseDto } from "@fixspace/domain";
 import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
-import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
+import { SettingsCategory } from "@fixspace/domain";
 import { SettingsService } from "@/modules/settings/settings.service";
 import { ViewRepository } from "./repositories/view.repository";
 import { toViewResponseDto } from "./utils/to-view-response.util";
@@ -18,8 +19,16 @@ export class ViewService {
     this.logger.setContext(ViewService.name);
   }
 
-  async findAll(databaseId: string): Promise<ViewResponseDto[]> {
+  async findAll(databaseId: string, userId?: string): Promise<ViewResponseDto[]> {
     this.logger.debug("Finding all views for database", { databaseId });
+    if (userId) {
+      const database = await prisma.database.findFirst({
+        where: { id: databaseId, space: { ownerId: userId } },
+      });
+      if (!database) {
+        throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
+      }
+    }
     const views = await this.viewRepo.findAllByDatabase(databaseId);
     return views.map(toViewResponseDto);
   }
@@ -44,10 +53,14 @@ export class ViewService {
       icon: dto.icon,
     });
 
+    const config: Record<string, unknown> = {};
+    if (dto.columnSummaries) config.columnSummaries = dto.columnSummaries;
+
     const view = await this.viewRepo.create({
       databaseId,
       name: dto.name,
       icon: effectiveIcon,
+      position: dto.position ?? count,
       isLocked: dto.isLocked ?? false,
       pageSize: dto.pageSize ?? 50,
       recordLimit: dto.recordLimit,
@@ -61,6 +74,7 @@ export class ViewService {
       columnWidths: (dto.columnWidths as any) ?? {},
       textWrap: dto.textWrap ?? false,
       searchQuery: dto.searchQuery,
+      config: Object.keys(config).length > 0 ? (config as Prisma.InputJsonValue) : undefined,
     });
 
     this.logger.log("View created", { viewId: view.id, databaseId });
@@ -76,7 +90,14 @@ export class ViewService {
 
     if (existing.isLocked && dto.isLocked !== false) {
       const hasFunctionalChanges =
-        dto.filters !== undefined || dto.sort !== undefined || dto.groupBy !== undefined || dto.pageSize !== undefined;
+        dto.filters !== undefined ||
+        dto.filterLogic !== undefined ||
+        dto.sort !== undefined ||
+        dto.groupBy !== undefined ||
+        dto.pageSize !== undefined ||
+        dto.recordLimit !== undefined ||
+        dto.hiddenColumns !== undefined ||
+        dto.searchQuery !== undefined;
       if (hasFunctionalChanges) {
         throw new ForbiddenException(t("errors.VIEW_LOCKED"));
       }
@@ -87,24 +108,30 @@ export class ViewService {
     if (dto.hiddenGroups) config.hiddenGroups = dto.hiddenGroups;
     if (dto.columnSummaries) config.columnSummaries = dto.columnSummaries;
 
-    const updated = await this.viewRepo.update(id, {
-      name: dto.name,
-      icon: dto.icon,
-      isLocked: dto.isLocked,
-      pageSize: dto.pageSize,
-      recordLimit: dto.recordLimit,
-      useDefaultTemplate: dto.useDefaultTemplate,
-      defaultTemplateId: dto.defaultTemplateId,
-      filters: (dto.filters as unknown as Prisma.InputJsonValue) ?? undefined,
-      filterLogic: dto.filterLogic,
-      sort: (dto.sort as unknown as Prisma.InputJsonValue) ?? undefined,
-      groupBy: dto.groupBy,
-      hiddenColumns: dto.hiddenColumns,
-      columnWidths: (dto.columnWidths as unknown as Prisma.InputJsonValue) ?? undefined,
-      textWrap: dto.textWrap,
-      searchQuery: dto.searchQuery,
-      config: Object.keys(config).length > 0 ? (config as Prisma.InputJsonValue) : undefined,
-    });
+    const updateData = filterUndefined({
+      fields: {
+        name: dto.name,
+        icon: dto.icon,
+        position: dto.position,
+        isLocked: dto.isLocked,
+        pageSize: dto.pageSize,
+        recordLimit: dto.recordLimit,
+        useDefaultTemplate: dto.useDefaultTemplate,
+        defaultTemplateId: dto.defaultTemplateId,
+        filterLogic: dto.filterLogic,
+        groupBy: dto.groupBy,
+        hiddenColumns: dto.hiddenColumns,
+        textWrap: dto.textWrap,
+        searchQuery: dto.searchQuery,
+      },
+      jsonFields: {
+        filters: dto.filters as unknown as Prisma.InputJsonValue,
+        sort: dto.sort as unknown as Prisma.InputJsonValue,
+        columnWidths: dto.columnWidths as unknown as Prisma.InputJsonValue,
+        config: Object.keys(config).length > 0 ? (config as Prisma.InputJsonValue) : undefined,
+      },
+    }) as Prisma.ViewUncheckedUpdateInput;
+    const updated = await this.viewRepo.update(id, updateData);
 
     this.logger.log("View updated", { id });
     return toViewResponseDto(updated);
@@ -126,6 +153,13 @@ export class ViewService {
 
     this.logger.log("View deleted", { id });
     return toViewResponseDto(deleted);
+  }
+
+  async reorder(databaseId: string, viewOrders: { id: string; position: number }[]): Promise<ViewResponseDto[]> {
+    this.logger.debug("Reordering views", { databaseId });
+    await Promise.all(viewOrders.map(({ id, position }) => this.viewRepo.update(id, { position })));
+    this.logger.log("Views reordered", { databaseId, count: viewOrders.length });
+    return this.findAll(databaseId);
   }
 
   async duplicate(id: string): Promise<ViewResponseDto> {

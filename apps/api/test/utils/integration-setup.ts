@@ -11,7 +11,7 @@ import { AppModule } from "../../src/app.module";
 import { GlobalExceptionFilter } from "../../src/common/filters/global-exception.filter";
 import { AppLogger } from "../../src/common/logger/app-logger.service";
 import { MailService } from "../../src/core/mail/mail.service";
-import { InitializeUserSpaceUseCase } from "../../src/modules/space/providers/initialize-user-space.usecase";
+import type { InitializeUserSpaceUseCase } from "../../src/modules/space/providers/initialize-user-space.usecase";
 
 export const INTEGRATION_EMAIL_MARKER = "integration-test";
 
@@ -36,12 +36,24 @@ export const mockInitializeUserSpaceUseCase: Record<keyof InitializeUserSpaceUse
   createAndSeed: jest.fn(),
 };
 
-export async function setupIntegrationApp() {
+const NOOP_APP = {
+  close: async () => {},
+  getHttpServer: () => null,
+} as unknown as INestApplication;
+
+export async function setupIntegrationApp(): Promise<{
+  app: INestApplication;
+  agent: ReturnType<typeof supertest.agent>;
+  moduleRef?: unknown;
+}> {
+  const sharedUrl = process.env.INTEGRATION_SERVER_URL;
+  if (sharedUrl) {
+    return { app: NOOP_APP, agent: supertest.agent(sharedUrl) };
+  }
+
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(MailService)
     .useValue(mockMailService)
-    .overrideProvider(InitializeUserSpaceUseCase)
-    .useValue(mockInitializeUserSpaceUseCase)
     .compile();
 
   const app = moduleRef.createNestApplication();
@@ -58,6 +70,7 @@ export async function setupIntegrationApp() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   const appLogger = app.get(AppLogger);
   app.useGlobalFilters(new I18nValidationExceptionFilter({ detailedErrors: true }), new GlobalExceptionFilter(appLogger));
+  app.enableShutdownHooks();
 
   await app.init();
   const agent = supertest.agent(app.getHttpServer() as Parameters<typeof supertest.agent>[0]);
@@ -68,15 +81,55 @@ export async function setupIntegrationApp() {
 export async function cleanupIntegrationApp(app?: INestApplication, marker = INTEGRATION_EMAIL_MARKER) {
   try {
     await prisma.user.deleteMany({ where: { email: { contains: marker } } });
-    // eslint-disable-next-line no-empty
   } catch {
-  } finally {
-    if (app) {
-      await app.close();
-    }
-    await prisma.$disconnect();
-    if (pool) {
-      await pool.end();
-    }
+    // ignore
   }
+
+  if (process.env.INTEGRATION_SERVER_URL) {
+    try {
+      await prisma.$disconnect();
+    } catch {
+      // ignore
+    }
+    return;
+  }
+
+  if (app) {
+    await app.close();
+  }
+  await prisma.$disconnect();
+  if (pool) {
+    await pool.end();
+  }
+}
+
+export function getServer(app: INestApplication): string | ReturnType<INestApplication["getHttpServer"]> {
+  return process.env.INTEGRATION_SERVER_URL ?? app.getHttpServer();
+}
+export async function getSharedMailCalls(method?: string): Promise<Array<{ method: string; args: unknown[] }>> {
+  const url = process.env.INTEGRATION_SERVER_URL;
+  if (!url) {
+    const allCalls: Array<{ method: string; args: unknown[] }> = [];
+    for (const [key, mock] of Object.entries(mockMailService)) {
+      if (!method || key === method) {
+        for (const callArgs of (mock as jest.Mock).mock.calls) {
+          allCalls.push({ method: key, args: callArgs as unknown[] });
+        }
+      }
+    }
+    return allCalls;
+  }
+
+  const res = await supertest.default(url).get("/_test/mail");
+  const calls = res.body as Array<{ method: string; args: unknown[] }>;
+  return method ? calls.filter((c) => c.method === method) : calls;
+}
+
+export async function clearSharedMailCalls(): Promise<void> {
+  const url = process.env.INTEGRATION_SERVER_URL;
+  if (!url) {
+    jest.clearAllMocks();
+    return;
+  }
+  await supertest.default(url).delete("/_test/mail");
 }

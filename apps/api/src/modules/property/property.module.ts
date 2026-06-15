@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ViewModule } from "@/modules/view/view.module";
 import { DatabaseDataModule } from "@/modules/database/database-data.module";
+import { PropertyGroupRepository } from "@/modules/property-group/repositories/property-group.repository";
 import { PropertyController } from "./property.controller";
 import { PropertyDataModule } from "./property-data.module";
 import { PropertyService } from "./property.service";
@@ -41,6 +42,7 @@ const handlers = [
   controllers: [PropertyController],
   providers: [
     PropertyService,
+    PropertyGroupRepository,
     PropertyTypeRegistry,
     FormulaEngine,
     FormulaRecalculator,

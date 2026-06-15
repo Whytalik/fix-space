@@ -1,8 +1,6 @@
 import { Injectable } from "@nestjs/common";
-
 import { Prisma, prisma } from "@fixspace/database";
-
-import { BaseRepository } from "../../../common/utils/base.repository";
+import { BaseRepository } from "@/common/utils/base.repository";
 
 @Injectable()
 export class RecordContentRepository extends BaseRepository {
@@ -37,8 +35,8 @@ export class RecordContentRepository extends BaseRepository {
     });
   }
 
-  async findSnapshotById(id: string) {
-    return prisma.recordContentSnapshot.findUnique({
+  async findSnapshotById(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).recordContentSnapshot.findUnique({
       where: { id },
     });
   }

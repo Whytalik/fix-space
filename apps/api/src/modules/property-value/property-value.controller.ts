@@ -18,6 +18,7 @@ export class PropertyValueController {
   @ApiBody({ type: CreatePropertyValueDto })
   @ApiResponse({ status: 201, description: "Property value created.", type: PropertyValueResponseDto })
   @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Record or property not found." })
   create(@CurrentUser("userId") userId: string, @Body() createPropertyValueDto: CreatePropertyValueDto) {
     return this.propertyValueService.create(createPropertyValueDto.recordId, createPropertyValueDto, userId);
@@ -27,6 +28,7 @@ export class PropertyValueController {
   @ApiOperation({ summary: "Get all property values for a record" })
   @ApiQuery({ name: "recordId", type: String, description: "Record ID" })
   @ApiResponse({ status: 200, description: "List of property values.", type: [PropertyValueResponseDto] })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   findAll(@Query("recordId") recordId: string, @CurrentUser("userId") userId: string) {
     return this.propertyValueService.findAll(recordId, userId);
   }
@@ -40,8 +42,9 @@ export class PropertyValueController {
   @ApiOperation({ summary: "Get property value by ID" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Property value found.", type: PropertyValueResponseDto })
-  @ApiResponse({ status: 404, description: "Property value not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Property value not found." })
   findOne(@Param("id") id: string) {
     return this.propertyValueService.findOne(id);
   }
@@ -56,8 +59,9 @@ export class PropertyValueController {
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: UpdatePropertyValueDto })
   @ApiResponse({ status: 200, description: "Property value updated.", type: PropertyValueResponseDto })
-  @ApiResponse({ status: 404, description: "Property value not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Property value not found." })
   update(@Param("id") id: string, @Body() updatePropertyValueDto: UpdatePropertyValueDto, @CurrentUser("userId") userId: string) {
     return this.propertyValueService.update(id, updatePropertyValueDto, userId);
   }
@@ -71,8 +75,9 @@ export class PropertyValueController {
   @ApiOperation({ summary: "Delete property value" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Property value deleted." })
-  @ApiResponse({ status: 404, description: "Property value not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Property value not found." })
   remove(@Param("id") id: string) {
     return this.propertyValueService.remove(id);
   }

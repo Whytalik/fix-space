@@ -19,6 +19,59 @@ export interface PropertyBreakdown {
   records: { value: string | null; netPnl: number; outcome: string | null }[];
 }
 
+export interface GenericRecord {
+  date: Date | null;
+  ratingValues: { propertyId: string; value: number }[];
+  numberValues: { propertyId: string; value: number }[];
+  selectValues: { propertyId: string; value: string | null }[];
+}
+
+export interface DatabaseProperties {
+  id: string;
+  name: string;
+  type: string;
+  integrationKey: string | null;
+}
+
+function parseDateSafe(raw: unknown): Date | null {
+  if (!raw || typeof raw !== "string") return null;
+  const date = new Date(raw);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+function parseNumberSafe(raw: unknown): number | null {
+  if (raw === null || raw === undefined) return null;
+  const num = Number(raw);
+  return isNaN(num) ? null : num;
+}
+
+function getValue(values: { propertyId: string; value: unknown }[], propId: string | undefined): unknown {
+  if (!propId) return null;
+  return values.find((v) => v.propertyId === propId)?.value ?? null;
+}
+
+export function toTradeRecords(
+  records: { id: string; values: { propertyId: string; value: unknown }[] }[],
+  exitDateProp: { id: string } | undefined,
+  netPnlProp: { id: string } | undefined,
+  outcomeProp: { id: string } | undefined,
+): TradeRecord[] {
+  return records
+    .map((record) => {
+      const exitDateRaw = getValue(record.values, exitDateProp?.id);
+      const exitDate = parseDateSafe(exitDateRaw);
+      if (!exitDate) return null;
+
+      const netPnlRaw = getValue(record.values, netPnlProp?.id);
+      const netPnl = parseNumberSafe(netPnlRaw) ?? 0;
+      const outcome =
+        typeof getValue(record.values, outcomeProp?.id) === "string" ? (getValue(record.values, outcomeProp?.id) as string) : null;
+
+      return { exitDate, netPnl, outcome } satisfies TradeRecord;
+    })
+    .filter((t): t is TradeRecord => t !== null);
+}
+
 export function emptyMetrics(): TradingMetricsDto {
   return {
     totalTrades: 0,
@@ -40,8 +93,8 @@ export function emptyMetrics(): TradingMetricsDto {
 export function computeMetrics(trades: TradeRecord[]): TradingMetricsDto {
   if (trades.length === 0) return emptyMetrics();
 
-  const wins = trades.filter((t) => t.outcome === "Win");
-  const losses = trades.filter((t) => t.outcome === "Loss");
+  const wins = trades.filter((t) => t.outcome?.toLowerCase() === "win");
+  const losses = trades.filter((t) => t.outcome?.toLowerCase() === "loss");
 
   const grossProfit = wins.reduce((sum, t) => sum + t.netPnl, 0);
   const grossLoss = Math.abs(losses.reduce((sum, t) => sum + t.netPnl, 0));
@@ -108,7 +161,7 @@ export function computeBreakdowns(data: PropertyBreakdown[]): BreakdownGroupDto[
 
     const items: BreakdownItemDto[] = Array.from(groups.entries())
       .map(([label, group]) => {
-        const wins = group.filter((t) => t.outcome === "Win").length;
+        const wins = group.filter((t) => t.outcome?.toLowerCase() === "win").length;
         const totalPnl = group.reduce((s, t) => s + t.netPnl, 0);
         return {
           label,
@@ -124,14 +177,37 @@ export function computeBreakdowns(data: PropertyBreakdown[]): BreakdownGroupDto[
   });
 }
 
+export function computeCountOnlyBreakdowns(data: PropertyBreakdown[]): BreakdownGroupDto[] {
+  return data.map((prop) => {
+    const groups = new Map<string, number>();
+
+    for (const row of prop.records) {
+      const label = row.value ?? "—";
+      groups.set(label, (groups.get(label) ?? 0) + 1);
+    }
+
+    const items: BreakdownItemDto[] = Array.from(groups.entries())
+      .map(([label, count]) => ({
+        label,
+        count,
+        winRate: 0,
+        avgPnl: 0,
+        totalPnl: 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    return { propertyName: prop.propertyName, items };
+  });
+}
+
 function round(value: number, decimals: number): number {
   const factor = Math.pow(10, decimals);
   return Math.round(value * factor) / factor;
 }
 
 export function filterByDateRange(trades: TradeRecord[], from?: string, to?: string): TradeRecord[] {
-  const fromDate = from ? new Date(from) : null;
-  const toDate = to ? new Date(to) : null;
+  const fromDate = from ? parseDateSafe(from) : null;
+  const toDate = to ? parseDateSafe(to) : null;
   return trades.filter((t) => {
     if (fromDate && t.exitDate < fromDate) return false;
     if (toDate && t.exitDate > toDate) return false;
@@ -139,16 +215,9 @@ export function filterByDateRange(trades: TradeRecord[], from?: string, to?: str
   });
 }
 
-export interface GenericRecord {
-  date: Date | null;
-  ratingValues: { propertyId: string; value: number }[];
-  numberValues: { propertyId: string; value: number }[];
-  selectValues: { propertyId: string; value: string | null }[];
-}
-
 export function filterGenericByDateRange(records: GenericRecord[], from?: string, to?: string): GenericRecord[] {
-  const fromDate = from ? new Date(from) : null;
-  const toDate = to ? new Date(to) : null;
+  const fromDate = from ? parseDateSafe(from) : null;
+  const toDate = to ? parseDateSafe(to) : null;
   return records.filter((r) => {
     if (!r.date) return true;
     if (fromDate && r.date < fromDate) return false;

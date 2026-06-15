@@ -4,7 +4,7 @@ import { BaseRepository } from "@/common/utils/base.repository";
 
 @Injectable()
 export class UserRepository extends BaseRepository {
-  async findByEmail(email: string): Promise<Omit<User, "passwordHash"> | null> {
+  async findByEmail(email: string) {
     return prisma.user.findUnique({
       where: { email },
       select: { id: true, email: true, username: true, icon: true, isVerified: true, createdAt: true },

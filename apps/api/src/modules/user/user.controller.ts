@@ -13,7 +13,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { ChangePasswordDto, DeleteAccountDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
+import { ChangePasswordDto, DeleteAccountDto, SetPasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
 import { memoryStorage } from "multer";
 import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
 import { UserService } from "./user.service";
@@ -77,14 +77,24 @@ export class UserController {
     return this.userService.removeAvatar(userId);
   }
 
+  @Post("me/password")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Set password for OAuth-only account" })
+  @ApiBody({ type: SetPasswordDto })
+  @ApiResponse({ status: 200, description: "Password set successfully." })
+  @ApiResponse({ status: 400, description: "Password already set." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
+  setPassword(@CurrentUser("userId") userId: string, @Body() dto: SetPasswordDto) {
+    return this.userService.setPassword(userId, dto);
+  }
+
   @Patch("me/password")
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Change current user password" })
   @ApiBody({ type: ChangePasswordDto })
   @ApiResponse({ status: 200, description: "Password changed successfully." })
   @ApiResponse({ status: 400, description: "Validation error." })
-  @ApiResponse({ status: 401, description: "Current password is incorrect." })
-  @ApiResponse({ status: 401, description: "Unauthorized." })
+  @ApiResponse({ status: 401, description: "Current password is incorrect or unauthorized." })
   changePassword(@CurrentUser("userId") userId: string, @Body() changePasswordDto: ChangePasswordDto) {
     return this.userService.changePassword(userId, changePasswordDto);
   }

@@ -11,8 +11,10 @@ export class RequestContextMiddleware implements NestMiddleware {
   }
 
   useHandler(req: Request, res: Response, next: (error?: any) => void) {
+    const rawRequestId = req.headers["x-request-id"];
+    const clientRequestId = Array.isArray(rawRequestId) ? rawRequestId[0] : rawRequestId;
     const context: RequestContext = {
-      requestId: (req.headers["x-request-id"] as string) || randomUUID(),
+      requestId: clientRequestId ?? randomUUID(),
       method: req.method,
       url: req.originalUrl,
       startTime: Date.now(),

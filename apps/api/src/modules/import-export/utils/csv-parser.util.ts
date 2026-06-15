@@ -29,6 +29,7 @@ export function parseCsvBuffer(buffer: Buffer, previewOnly = false): ParsedCsvRe
       trim: true,
       bom: true,
       relax_column_count: true,
+      delimiter: [",", ";", "\t"],
     }) as string[][];
 
     if (rawRecords.length === 0) {
