@@ -1,5 +1,5 @@
 import { PropertyType } from "@fixspace/domain";
-import { colors, DATE_CONFIG } from "../constants";
+import { colors, DATE_CONFIG, PAIR_CATEGORIES } from "../constants";
 import type { InitPropertyDef } from "../types";
 
 export const notesProperties: InitPropertyDef[] = [
@@ -8,42 +8,63 @@ export const notesProperties: InitPropertyDef[] = [
     type: PropertyType.TEXT,
     position: 0,
     hint: "Короткий заголовок, що відображає суть інсайту або уроку.",
-    group: "General",
   },
   {
     name: "Date",
     type: PropertyType.DATE,
     position: 1,
+    icon: "icon:Calendar",
     config: DATE_CONFIG,
     hint: "Дата фіксації ідеї. Допомагає відстежувати вашу еволюцію.",
-    group: "General",
   },
   {
     name: "Category",
     type: PropertyType.SELECT,
     position: 2,
+    icon: "icon:Tag",
     config: {
       isMultiSelect: true,
       categories: [
         {
-          label: "Mistake Categories",
+          label: "Topics",
           options: [
-            { value: "Preparation", color: colors.blue },
+            { value: "Strategy", color: colors.blue },
+            { value: "Analysis", color: colors.purple },
             { value: "Execution", color: colors.amber },
-            { value: "Management", color: colors.purple },
-            { value: "Exit", color: colors.red },
-            { value: "Psychology", color: colors.pink },
+            { value: "Risk Management", color: colors.green },
+            { value: "Rules", color: colors.pink },
+            { value: "Psychology", color: colors.red },
           ],
         },
       ],
     },
-    hint: "Групування за темою для зручного навчання.",
-    group: "General",
+    hint: "Тема нотатки для зручної фільтрації та повторення.",
+  },
+  {
+    name: "Status",
+    type: PropertyType.SELECT,
+    position: 3,
+    icon: "icon:List",
+    config: {
+      isMultiSelect: false,
+      categories: [
+        {
+          label: "Status",
+          options: [
+            { value: "Draft", color: colors.gray },
+            { value: "Active", color: colors.blue },
+            { value: "Archived", color: colors.amber },
+          ],
+        },
+      ],
+    },
+    hint: "Актуальність нотатки. Draft — незавершена думка, Active — діюче правило, Archived — застаріле.",
   },
   {
     name: "Confidence",
     type: PropertyType.SELECT,
-    position: 3,
+    position: 4,
+    icon: "icon:TrendingUp",
     config: {
       isMultiSelect: false,
       categories: [
@@ -59,12 +80,12 @@ export const notesProperties: InitPropertyDef[] = [
       ],
     },
     hint: "Рівень впевненості: від здогадки до патерна.",
-    group: "General",
   },
   {
     name: "Source",
     type: PropertyType.SELECT,
-    position: 4,
+    position: 5,
+    icon: "icon:BookMarked",
     config: {
       isMultiSelect: true,
       categories: [
@@ -74,20 +95,24 @@ export const notesProperties: InitPropertyDef[] = [
             { value: "Trade Loss", color: colors.red },
             { value: "Trade Win", color: colors.green },
             { value: "Book", color: colors.blue },
-            { value: "Mentor", color: colors.purple },
-            { value: "Backtest", color: colors.pink },
+            { value: "Video", color: colors.purple },
+            { value: "Course", color: colors.pink },
+            { value: "Mentor", color: colors.gold },
+            { value: "Research", color: colors.amber },
+            { value: "Community", color: colors.brown },
+            { value: "Backtest", color: colors.gray },
             { value: "Journal Review", color: colors.gray },
           ],
         },
       ],
     },
-    hint: "Звідки ви взяли цей інсайт (помилка, книга, ментор).",
-    group: "General",
+    hint: "Звідки ви взяли цей інсайт (помилка, книга, ментор, курс тощо).",
   },
   {
     name: "Market Regime",
     type: PropertyType.SELECT,
-    position: 5,
+    position: 6,
+    icon: "icon:ChartLine",
     config: {
       isMultiSelect: true,
       categories: [
@@ -104,53 +129,67 @@ export const notesProperties: InitPropertyDef[] = [
       ],
     },
     hint: "Тип ринку, за якого цей інсайт є актуальним.",
-    group: "General",
   },
   {
-    name: "Status",
+    name: "Rating",
+    type: PropertyType.RATING,
+    position: 7,
+    icon: "icon:Star",
+    config: { maxStars: 5, allowHalf: true },
+    hint: "Важливість інсайту від 1 до 5. Допомагає пріоритизувати повторення.",
+  },
+  {
+    name: "Pair",
     type: PropertyType.SELECT,
-    position: 6,
+    position: 8,
+    icon: "icon:TrendingUp",
     config: {
-      isMultiSelect: false,
-      categories: [
-        {
-          label: "Status",
-          options: [
-            { value: "Active", color: colors.blue },
-            { value: "Archived", color: colors.gray },
-          ],
-        },
-      ],
+      isMultiSelect: true,
+      categories: PAIR_CATEGORIES,
     },
-    hint: "Актуальність нотатки. Дозволяє архівувати старі правила.",
-    group: "General",
+    hint: "Інструмент(и), до яких застосовується цей інсайт.",
+  },
+  {
+    name: "Times Applied",
+    type: PropertyType.FORMULA,
+    position: 9,
+    config: {
+      type: "CUSTOM",
+      expression: "COUNT({{Trading Journal}})",
+      resultType: "NUMBER",
+    },
+    hint: "Кількість угод, у яких цей інсайт був застосований.",
   },
   {
     name: "Last Used",
     type: PropertyType.FORMULA,
-    position: 7,
+    position: 10,
     config: {
       type: "CUSTOM",
       expression: "MAX(MAP({{Trading Journal}}, '{{trading-journal.Entry Date}}'))",
       resultType: "DATE",
     },
     hint: "Дата, коли ви востаннє посилалися на цей інсайт в угодах.",
-    group: "General",
   },
   {
     name: "Trading Journal",
     type: PropertyType.RELATION,
-    position: 8,
-    config: { sourceDatabaseType: "trading-journal", multiple: true },
+    position: 11,
+    config: { sourceDatabaseType: "trading-journal", multiple: true, reversePropertyName: "Notes" },
     hint: "Угоди, у яких цей інсайт був застосований або помічений.",
-    group: "Relations",
+  },
+  {
+    name: "Mistakes",
+    type: PropertyType.RELATION,
+    position: 12,
+    config: { sourceDatabaseType: "mistakes", multiple: true },
+    hint: "Помилки, що породили або підкріплюють цей інсайт.",
   },
   {
     name: "Daily Routines",
     type: PropertyType.RELATION,
-    position: 9,
+    position: 14,
     config: { sourceDatabaseType: "daily-routine", multiple: true },
     hint: "Сесії, під час яких з'явилася ця нотатка.",
-    group: "Relations",
   },
 ];

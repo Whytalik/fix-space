@@ -29,27 +29,27 @@ export const DIRECTION_OPTIONS = [
 ];
 
 export const STRUCTURE_OPTIONS = [
-  { value: "FVG", color: colors.blue },
-  { value: "SNR", color: colors.purple },
-  { value: "Fractal", color: colors.amber },
-  { value: "Premium DR", color: colors.green },
-  { value: "Discount DR", color: colors.red },
+  { value: "FVG", color: colors.blue, icon: "icon:Layers" },
+  { value: "SNR", color: colors.purple, icon: "icon:SeparatorHorizontal" },
+  { value: "Fractal", color: colors.amber, icon: "icon:GitBranch" },
+  { value: "Premium DR", color: colors.green, icon: "icon:ArrowDownToLine" },
+  { value: "Discount DR", color: colors.red, icon: "icon:ArrowUpFromLine" },
 ];
 
 export const PAIR_CATEGORIES = [
   {
     label: "Forex",
     options: [
-      { value: "EURUSD", color: colors.blue },
-      { value: "GBPUSD", color: colors.purple },
-      { value: "USDJPY", color: colors.amber },
-      { value: "EURJPY", color: colors.green },
-      { value: "GBPJPY", color: colors.pink },
+      { value: "EURUSD", color: colors.blue, icon: "icon:DollarSign" },
+      { value: "GBPUSD", color: colors.purple, icon: "icon:PoundSterling" },
+      { value: "USDJPY", color: colors.amber, icon: "icon:CircleDot" },
+      { value: "EURJPY", color: colors.green, icon: "icon:CircleDot" },
+      { value: "GBPJPY", color: colors.pink, icon: "icon:CircleDot" },
     ],
   },
   {
     label: "Commodity",
-    options: [{ value: "XAUUSD", color: colors.gold }],
+    options: [{ value: "XAUUSD", color: colors.gold, icon: "icon:CircleDot" }],
   },
 ];
 
@@ -57,11 +57,11 @@ export const TOPIC_CATEGORIES = [
   {
     label: "Topic",
     options: [
-      { value: "Entry", color: colors.blue },
-      { value: "Exit", color: colors.red },
-      { value: "Risk Management", color: colors.amber },
-      { value: "Psychology", color: colors.purple },
-      { value: "Analysis", color: colors.green },
+      { value: "Entry", color: colors.blue, icon: "icon:ArrowRightFromLine" },
+      { value: "Exit", color: colors.red, icon: "icon:ArrowLeftFromLine" },
+      { value: "Risk Management", color: colors.amber, icon: "icon:Shield" },
+      { value: "Psychology", color: colors.purple, icon: "icon:Heart" },
+      { value: "Analysis", color: colors.green, icon: "icon:Search" },
     ],
   },
 ];
