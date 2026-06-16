@@ -20,6 +20,9 @@ export enum FormulaPresetName {
   PLANNED_RR = "PLANNED_RR",
   RISK_PCT_BALANCE = "RISK_PCT_BALANCE",
   RULE_COMPLIANCE = "RULE_COMPLIANCE",
+  SUBTRACT = "SUBTRACT",
+  SUM_FIELDS = "SUM_FIELDS",
+  FIELD_COMPARE = "FIELD_COMPARE",
 }
 
 export class FormulaPropertyConfig {

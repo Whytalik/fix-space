@@ -75,10 +75,10 @@ export class UpdatePropertyDto {
   @Type(() => VisibilityConditionDto)
   visibilityCondition?: VisibilityConditionDto | null;
 
-  @ApiProperty({ description: "Property group ID", example: "group_1", required: false })
+  @ApiProperty({ description: "Property group ID", example: "group_1", required: false, nullable: true })
   @IsOptional()
   @IsString({ message: i18nValidationMessage<I18nTranslations>("validation.IS_STRING") })
-  groupId?: string;
+  groupId?: string | null;
 
   @ApiProperty({ description: "Property type-specific configuration", required: false })
   @IsOptional()

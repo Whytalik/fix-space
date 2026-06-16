@@ -127,6 +127,31 @@ export function compileFormula(presetName: FormulaPresetName, uiState: Record<st
       };
     }
 
+    case FormulaPresetName.SUBTRACT: {
+      const fieldA = toFieldKey((uiState.fieldA as string) ?? "");
+      const fieldB = toFieldKey((uiState.fieldB as string) ?? "");
+      return { expression: `${fieldA} - ${fieldB}`, resultType: PropertyType.NUMBER };
+    }
+
+    case FormulaPresetName.SUM_FIELDS: {
+      const fields = (uiState.fields as string[]) ?? [];
+      if (fields.length === 0) return { expression: "0", resultType: PropertyType.NUMBER };
+      return { expression: fields.map(toFieldKey).join(" + "), resultType: PropertyType.NUMBER };
+    }
+
+    case FormulaPresetName.FIELD_COMPARE: {
+      const fieldA = toFieldKey((uiState.fieldA as string) ?? "");
+      const fieldB = toFieldKey((uiState.fieldB as string) ?? "");
+      const rawOperator = (uiState.operator as string) ?? "==";
+      const operator = ALLOWED_COMPARISON_OPERATORS.has(rawOperator) ? rawOperator : "==";
+      const thenLabel = ((uiState.thenLabel as string) ?? "").replace(/'/g, "\\'");
+      const elseLabel = ((uiState.elseLabel as string) ?? "").replace(/'/g, "\\'");
+      return {
+        expression: `IF(${fieldA} ${operator} ${fieldB}, '${thenLabel}', '${elseLabel}')`,
+        resultType: PropertyType.TEXT,
+      };
+    }
+
     default:
       return { expression: "", resultType: PropertyType.TEXT };
   }
