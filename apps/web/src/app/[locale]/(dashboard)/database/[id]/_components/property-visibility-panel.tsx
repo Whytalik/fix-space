@@ -8,7 +8,7 @@ import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useFloatingPanel } from "@/hooks/ui/use-floating-panel";
 import { useTranslations } from "next-intl";
-import type { PropertyType } from "@fixspace/domain/enums";
+import type { PropertyType } from "@fixspace/domain";
 
 export function PropertyVisibilityPanelContent() {
   const { properties, activeView, setHiddenColumns, isViewLocked, relativeDates, setRelativeDates } = useDatabaseContext();
@@ -62,7 +62,7 @@ export function PropertyVisibilityPanelContent() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search properties..."
+            placeholder={t("searchPlaceholder")}
             className="w-full bg-surface border border-stroke rounded-lg pl-9 pr-3 py-1.5 text-sm outline-none focus:border-accent/50 transition-colors duration-150"
           />
           {search && (
@@ -105,7 +105,7 @@ export function PropertyVisibilityPanelContent() {
               <div
                 key={prop.id}
                 className={`flex items-center gap-3 px-2 py-2 rounded-lg transition-colors duration-150 ${
-                  isProtected ? "opacity-70 cursor-default" : "hover:bg-canvas-subtle cursor-pointer"
+                  isProtected ? "opacity-70 cursor-default" : "hover:bg-hover cursor-pointer"
                 }`}
                 onClick={() => toggleProperty(prop.id, isProtected)}
               >

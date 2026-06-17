@@ -1,4 +1,4 @@
-import { PropertyType } from "@fixspace/domain/enums";
+import { PropertyType } from "@fixspace/domain";
 import { Calendar, CheckSquare, Clock, FileText, Hash, Link2, List, Sigma, Star, Tag, TrendingUp } from "lucide-react";
 
 interface PropertyIconProps {

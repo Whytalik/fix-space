@@ -4,40 +4,47 @@ import { PropertyIcon } from "../../_components/properties/ui/property-icon";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { DatabaseResponseDto } from "@fixspace/domain";
-import { Check, ChevronDown, ChevronRight, GripVertical, Link2, Pencil, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Eye, GripVertical, Link2, Pencil, Settings, Trash2, X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import type { GroupItem, PropItem } from "./property-list.utils";
 import { getConfigSummary } from "./property-list.utils";
 import { PropertyHint } from "../../_components/properties/ui/property-hint";
 
 export type GroupHeaderProps = {
   item: GroupItem;
+  displayName?: string;
   count: number;
   isCollapsed: boolean;
   isEditing: boolean;
   editValue: string;
   isLocked?: boolean;
+  hasVisibilityCondition?: boolean;
   onToggleCollapse: () => void;
   onEditStart: () => void;
   onEditChange: (value: string) => void;
   onEditConfirm: () => void;
   onEditCancel: () => void;
   onDelete: () => void;
+  onSettings?: () => void;
 };
 
 export function GroupHeader({
   item,
+  displayName,
   count,
   isCollapsed,
   isEditing,
   editValue,
   isLocked,
+  hasVisibilityCondition,
   onToggleCollapse,
   onEditStart,
   onEditChange,
   onEditConfirm,
   onEditCancel,
   onDelete,
+  onSettings,
 }: GroupHeaderProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -92,10 +99,20 @@ export function GroupHeader({
         </>
       ) : (
         <>
-          <span className="flex-1 text-xs font-semibold uppercase tracking-widest text-ink-secondary">{item.name}</span>
+          <span className="flex-1 text-xs font-semibold uppercase tracking-widest text-ink-secondary">{displayName ?? item.name}</span>
+          {hasVisibilityCondition && <Eye size={12} className="text-accent shrink-0" />}
           <span className="text-xs text-ink-muted tabular-nums">{count}</span>
           {!isLocked && (
             <>
+              {onSettings && (
+                <button
+                  type="button"
+                  onClick={onSettings}
+                  className="text-ink-muted hover:text-ink shrink-0 transition-colors duration-150"
+                >
+                  <Settings size={14} />
+                </button>
+              )}
               <button type="button" onClick={onEditStart} className="text-ink-muted hover:text-ink shrink-0 transition-colors duration-150">
                 <Pencil size={14} />
               </button>
@@ -119,6 +136,7 @@ export type PropertyRowProps = {
 };
 
 export function PropertyRow({ item, databases, isLocked, onEdit, onDelete }: PropertyRowProps) {
+  const t = useTranslations("PropertyEdit");
   const isProtected = item.prop.isProtected || item.prop.name === "Name";
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -147,7 +165,7 @@ export function PropertyRow({ item, databases, isLocked, onEdit, onDelete }: Pro
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className={`text-sm ${prop.isVisible === false ? "text-ink-muted" : "text-ink"}`}>{prop.name}</span>
           {prop.integrationKey && (
-            <span title="Automated by integration" className="flex items-center">
+            <span title={t("automatedByIntegration")} className="flex items-center">
               <Link2 size={12} className="text-accent shrink-0" />
             </span>
           )}

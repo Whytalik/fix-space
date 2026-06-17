@@ -1,6 +1,6 @@
 import type { PropertyResponseDto } from "@fixspace/domain";
 import { FormulaPresetName } from "@fixspace/domain";
-import { PropertyType } from "@fixspace/domain/enums";
+import { PropertyType } from "@fixspace/domain";
 
 export interface PresetMeta {
   name: string;
@@ -82,5 +82,26 @@ export const PRESET_META: Record<FormulaPresetName, PresetMeta> = {
     nameKey: "presets.RULE_COMPLIANCE.name",
     descriptionKey: "presets.RULE_COMPLIANCE.description",
     isAvailable: (props) => props.some((p) => p.type === PropertyType.CHECKBOX),
+  },
+  [FormulaPresetName.SUBTRACT]: {
+    name: "Різниця",
+    description: "Віднімає одне числове поле від іншого (A − B)",
+    nameKey: "presets.SUBTRACT.name",
+    descriptionKey: "presets.SUBTRACT.description",
+    isAvailable: hasN(PropertyType.NUMBER, 2),
+  },
+  [FormulaPresetName.SUM_FIELDS]: {
+    name: "Сума полів",
+    description: "Складає кілька числових полів",
+    nameKey: "presets.SUM_FIELDS.name",
+    descriptionKey: "presets.SUM_FIELDS.description",
+    isAvailable: hasN(PropertyType.NUMBER, 2),
+  },
+  [FormulaPresetName.FIELD_COMPARE]: {
+    name: "Порівняння полів",
+    description: "Порівнює два поля й повертає текстову мітку",
+    nameKey: "presets.FIELD_COMPARE.name",
+    descriptionKey: "presets.FIELD_COMPARE.description",
+    isAvailable: () => true,
   },
 };

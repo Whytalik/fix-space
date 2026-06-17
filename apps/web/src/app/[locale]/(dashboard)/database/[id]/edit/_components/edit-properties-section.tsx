@@ -3,6 +3,11 @@
 import { PropertyIcon } from "../../_components/properties/ui/property-icon";
 import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
 import { Button } from "@/components/ui/primitives/actions/button";
+import { createPropertyGroup, deletePropertyGroup, getPropertyGroups, updatePropertyGroup } from "@/lib/api/property-group";
+import { queryKeys } from "@/lib/api/query-keys";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useUIContext } from "@/context/ui-context";
+import { GroupSettingsModal } from "./group-settings-modal";
 import {
   closestCenter,
   DndContext,
@@ -23,6 +28,7 @@ import { GroupHeader, PropertyRow } from "./property-list-items";
 import { useTranslations } from "next-intl";
 
 type EditPropertiesSectionProps = {
+  databaseId: string;
   properties: PropertyResponseDto[];
   databases?: DatabaseResponseDto[];
   isLocked?: boolean;
@@ -31,10 +37,11 @@ type EditPropertiesSectionProps = {
   onEditProperty: (property: PropertyResponseDto) => void;
   onDeleteProperty: (propId: string) => void;
   onPropertiesChange: (updated: PropertyResponseDto[]) => void;
-  onPropertyUpdate: (id: string, data: Partial<{ position: number; group: string | null; isVisible: boolean }>) => void;
+  onPropertyUpdate: (id: string, data: Partial<{ position: number; groupId: string | null; isVisible: boolean }>) => void;
 };
 
 export function EditPropertiesSection({
+  databaseId,
   properties,
   databases,
   isLocked,
@@ -57,6 +64,31 @@ export function EditPropertiesSection({
   const newGroupInputRef = useRef<HTMLInputElement>(null);
   const wasCollapsedRef = useRef(false);
   const t = useTranslations("PropertyEdit");
+  const [settingsGroupName, setSettingsGroupName] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { showError } = useUIContext();
+
+  const { data: propertyGroups = [] } = useQuery({
+    queryKey: queryKeys.propertyGroups.all(databaseId),
+    queryFn: () => getPropertyGroups(databaseId),
+    enabled: !!databaseId,
+  });
+
+  const { mutateAsync: createGroupMutation } = useMutation({
+    mutationFn: (name: string) => createPropertyGroup(databaseId, name),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.propertyGroups.all(databaseId) }),
+  });
+
+  const { mutate: renameGroupMutation } = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) => updatePropertyGroup(id, { name }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.propertyGroups.all(databaseId) }),
+    onError: showError,
+  });
+
+  const { mutate: deleteGroupMutation } = useMutation({
+    mutationFn: (id: string) => deletePropertyGroup(id),
+    onError: showError,
+  });
 
   const prevPropsRef = useRef(properties);
   useEffect(() => {
@@ -142,10 +174,11 @@ export function EditPropertiesSection({
     for (const property of updated) {
       const orig = origMap.get(property.id);
       if (!orig) continue;
-      if (orig.position !== property.position || orig.group !== property.group) {
+      if (orig.position !== property.position || orig.groupName !== property.groupName) {
+        const resolvedGroupId = property.groupName ? (propertyGroups.find((group) => group.name === property.groupName)?.id ?? null) : null;
         onPropertyUpdate(property.id, {
           ...(orig.position !== property.position ? { position: property.position } : {}),
-          ...(orig.group !== property.group ? { group: property.group ?? null } : {}),
+          ...(orig.groupName !== property.groupName ? { groupId: resolvedGroupId } : {}),
         });
       }
     }
@@ -171,6 +204,11 @@ export function EditPropertiesSection({
     if (!trimmed || trimmed === oldName) return;
     if (flatItems.some((item) => item.kind === "group" && (item as GroupItem).name === trimmed)) return;
 
+    const existingGroup = propertyGroups.find((group) => group.name === oldName);
+    if (existingGroup) {
+      renameGroupMutation({ id: existingGroup.id, name: trimmed });
+    }
+
     const newItems = flatItems.map((item) =>
       item.id === `group:${oldName}` ? { kind: "group" as const, id: `group:${trimmed}`, name: trimmed } : item,
     );
@@ -183,21 +221,19 @@ export function EditPropertiesSection({
       });
     }
     setFlatItems(newItems);
-    const updated = flatItemsToProperties(newItems);
-    onPropertiesChange(updated);
-
-    for (const property of updated) {
-      if (property.group === trimmed && properties.find((existingProperty) => existingProperty.id === property.id)?.group === oldName) {
-        onPropertyUpdate(property.id, { group: trimmed });
-      }
-    }
+    onPropertiesChange(flatItemsToProperties(newItems));
   }
 
   function handleDeleteGroup(name: string) {
-    const orphans = flatItems.filter((item) => item.kind === "property" && ((item as PropItem).prop.group ?? "") === name);
+    const existingGroup = propertyGroups.find((group) => group.name === name);
+    if (existingGroup) {
+      deleteGroupMutation(existingGroup.id);
+    }
+
+    const orphans = flatItems.filter((item) => item.kind === "property" && ((item as PropItem).prop.groupName ?? "") === name);
     const newItems = [
       ...flatItems.filter(
-        (item) => item.id !== `group:${name}` && !(item.kind === "property" && ((item as PropItem).prop.group ?? "") === name),
+        (item) => item.id !== `group:${name}` && !(item.kind === "property" && ((item as PropItem).prop.groupName ?? "") === name),
       ),
       ...orphans,
     ];
@@ -207,17 +243,11 @@ export function EditPropertiesSection({
       return next;
     });
     setFlatItems(newItems);
-    const updated = flatItemsToProperties(newItems);
-    onPropertiesChange(updated);
-
-    for (const property of updated) {
-      if (!property.group && properties.find((existingProperty) => existingProperty.id === property.id)?.group === name) {
-        onPropertyUpdate(property.id, { group: null });
-      }
-    }
+    onPropertiesChange(flatItemsToProperties(newItems));
+    queryClient.invalidateQueries({ queryKey: queryKeys.propertyGroups.all(databaseId) });
   }
 
-  function handleAddGroup() {
+  async function handleAddGroup() {
     const trimmed = newGroupName.trim();
     if (!trimmed) return;
     if (flatItems.some((item) => item.kind === "group" && (item as GroupItem).name === trimmed)) {
@@ -225,7 +255,12 @@ export function EditPropertiesSection({
       setAddingGroup(false);
       return;
     }
-    setFlatItems((prev) => [...prev, { kind: "group", id: `group:${trimmed}`, name: trimmed }]);
+    try {
+      await createGroupMutation(trimmed);
+      setFlatItems((prev) => [...prev, { kind: "group", id: `group:${trimmed}`, name: trimmed }]);
+    } catch (error) {
+      showError(error);
+    }
     setNewGroupName("");
     setAddingGroup(false);
   }
@@ -246,7 +281,7 @@ export function EditPropertiesSection({
   let totalProps = 0;
   for (const item of flatItems) {
     if (item.kind === "property") {
-      const group = (item as PropItem).prop.group ?? "";
+      const group = (item as PropItem).prop.groupName ?? "";
       groupCountMap.set(group, (groupCountMap.get(group) ?? 0) + 1);
       totalProps++;
     }
@@ -331,24 +366,28 @@ export function EditPropertiesSection({
                   const groupItem = item as GroupItem;
                   const isGeneral = groupItem.name === "General";
                   const hasProtected = properties.some(
-                    (p) => (p.group === groupItem.name || (!p.group && isGeneral)) && (p.isProtected || p.name === "Name"),
+                    (p) => (p.groupName === groupItem.name || (!p.groupName && isGeneral)) && (p.isProtected || p.name === "Name"),
                   );
 
+                  const existingGroup = propertyGroups.find((group) => group.name === groupItem.name);
                   return (
                     <GroupHeader
                       key={groupItem.id}
                       item={groupItem}
+                      displayName={isGeneral ? t("general") : undefined}
                       count={groupCountMap.get(groupItem.name) ?? 0}
                       isCollapsed={collapsedGroups.has(groupItem.name)}
                       isEditing={editingGroupId === groupItem.id}
                       editValue={editGroupValue}
                       isLocked={isLocked || (isGeneral && hasProtected)}
+                      hasVisibilityCondition={!!existingGroup?.visibility}
                       onToggleCollapse={() => handleToggleCollapse(groupItem.name)}
                       onEditStart={() => handleEditStart(groupItem.id, groupItem.name)}
                       onEditChange={setEditGroupValue}
                       onEditConfirm={() => handleRenameGroup(groupItem.name)}
                       onEditCancel={() => setEditingGroupId(null)}
                       onDelete={() => setPendingDeleteGroupName(groupItem.name)}
+                      onSettings={() => setSettingsGroupName(groupItem.name)}
                     />
                   );
                 }
@@ -408,6 +447,15 @@ export function EditPropertiesSection({
             setPendingDeleteGroupName(null);
           }}
           onCancel={() => setPendingDeleteGroupName(null)}
+        />
+      )}
+      {settingsGroupName && (
+        <GroupSettingsModal
+          groupName={settingsGroupName}
+          databaseId={databaseId}
+          propertyGroups={propertyGroups}
+          properties={properties}
+          onClose={() => setSettingsGroupName(null)}
         />
       )}
     </section>

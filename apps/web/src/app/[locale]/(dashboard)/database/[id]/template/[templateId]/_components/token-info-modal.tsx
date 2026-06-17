@@ -28,12 +28,17 @@ export function TokenInfoModal({ onClose }: TokenInfoModalProps) {
       example: { before: "M-{{month}}", after: "M-05" },
     },
     {
+      token: "{{month_name}}",
+      desc: t("tokens.month_name"),
+      example: { before: "M-{{month_name}}", after: "M-May" },
+    },
+    {
       token: "{{count}}",
       desc: t("tokens.count"),
       example: { before: "#{{count}}", after: "#157" },
     },
     {
-      token: "{{count:Prop=Value}}",
+      token: "{{count:Prop=Val}}",
       desc: t("tokens.countWithValue"),
       example: { before: "Order-{{count:Status=Paid}}", after: "Order-43" },
     },

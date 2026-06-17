@@ -1,5 +1,6 @@
 "use client";
 
+import { NumberInput } from "@/components/ui/primitives/inputs/number-input";
 import type { NumberPropertyConfig } from "@fixspace/domain";
 
 interface NumberPropertyProps {
@@ -49,32 +50,37 @@ export function NumberProperty({ value, config, readOnly, onChange, placeholder 
       {config?.format === "currency" && config.currencySymbol && (
         <span className="text-ink-muted text-xs shrink-0">{config.currencySymbol}</span>
       )}
-      <input
-        type="number"
-        className={
-          ghost
-            ? "bg-transparent border-0 outline-none p-0 text-sm text-ink font-mono tabular-nums flex-1 min-w-0 w-full placeholder:text-ink-muted appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-            : "field-input flex-1 min-w-0"
-        }
-        value={numericValue}
-        step={config?.format === "integer" ? "1" : "any"}
-        onKeyDown={(e) => {
-          if (config?.format === "integer" && (e.key === "." || e.key === ",")) {
-            e.preventDefault();
-          }
-        }}
-        onChange={(e) => {
-          const rawInput = e.target.value;
-          if (rawInput === "") {
-            onChange?.("");
-          } else {
-            let parsed = Number(rawInput);
-            if (config?.format === "integer") parsed = Math.round(parsed);
-            onChange?.(parsed);
-          }
-        }}
-        placeholder={placeholder}
-      />
+      {ghost ? (
+        <input
+          type="number"
+          className="bg-transparent border-0 outline-none p-0 text-sm text-ink font-mono tabular-nums flex-1 min-w-0 w-full placeholder:text-ink-muted appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          value={numericValue}
+          step={config?.format === "integer" ? "1" : "any"}
+          onKeyDown={(e) => {
+            if (config?.format === "integer" && (e.key === "." || e.key === ",")) e.preventDefault();
+          }}
+          onChange={(e) => {
+            const rawInput = e.target.value;
+            if (rawInput === "") onChange?.("");
+            else {
+              let parsed = Number(rawInput);
+              if (config?.format === "integer") parsed = Math.round(parsed);
+              onChange?.(parsed);
+            }
+          }}
+          placeholder={placeholder}
+        />
+      ) : (
+        <NumberInput
+          value={numericValue === "" ? null : Number(numericValue)}
+          onChange={(v) => {
+            if (v === null) onChange?.("");
+            else onChange?.(config?.format === "integer" ? Math.round(v) : v);
+          }}
+          placeholder={placeholder}
+          step={config?.format === "integer" ? 1 : undefined}
+        />
+      )}
       {config?.format === "percentage" && <span className="text-ink-muted text-xs shrink-0">%</span>}
       {config?.suffix && <span className="text-ink-muted text-xs shrink-0">{config.suffix}</span>}
     </div>

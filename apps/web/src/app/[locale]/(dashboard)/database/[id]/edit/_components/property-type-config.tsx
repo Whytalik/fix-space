@@ -2,7 +2,10 @@
 
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { Toggle } from "@/components/ui/primitives/inputs/toggle";
-import { IconDisplay } from "@/components/ui/icons/icon-display";
+import { CheckboxInput } from "@/components/ui/primitives/inputs/checkbox-input";
+import { TextInput } from "@/components/ui/primitives/inputs/text-input";
+import { NumberInput } from "@/components/ui/primitives/inputs/number-input";
+
 import { IconPicker } from "@/components/ui/icons/icon-picker";
 import type {
   DatabaseResponseDto,
@@ -16,8 +19,7 @@ import type {
   RelationPropertyConfig,
 } from "@fixspace/domain";
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
   DATA_FORMATS_VALUES,
   DEFAULT_STATUS_PROPERTY,
@@ -26,8 +28,8 @@ import {
   PropertyType,
   STATUS_OPTION_COLOR_VALUES,
   TIME_FORMATS_VALUES,
-} from "@fixspace/domain/enums";
-import { Image as ImageIcon, Plus, Trash2, X, GripVertical } from "lucide-react";
+} from "@fixspace/domain";
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { FormulaConfig } from "./properties/formula-config";
@@ -40,6 +42,9 @@ type PropertyTypeConfigProps = {
   isViewMode: boolean;
   onPatch: (patch: Record<string, unknown>) => void;
 };
+
+import { CategoryItem } from "./select-option-item";
+import { StatusOptionItem } from "./status-option-item";
 
 export function PropertyTypeConfig({ type, config, properties, databases, onPatch }: PropertyTypeConfigProps) {
   const t = useTranslations("PropertyConfig");
@@ -219,162 +224,6 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
     });
   }
 
-  function CategoryItem({ category, categoryIndex }: { category: SelectCategory; categoryIndex: number }) {
-    const { setNodeRef, listeners, transform, transition, isDragging } = useSortable({ id: category.label });
-    const style: React.CSSProperties = {
-      transform: transform ? CSS.Transform.toString(transform) : undefined,
-      transition,
-      opacity: isDragging ? 0.4 : undefined,
-      zIndex: isDragging ? 10 : undefined,
-    };
-
-    return (
-      <div ref={setNodeRef} style={style} className="rounded-lg border border-stroke overflow-hidden">
-        <div className="flex items-center gap-2 px-3 py-2 bg-surface">
-          <button type="button" className="cursor-grab text-ink-muted shrink-0" {...listeners}>
-            <GripVertical size={14} />
-          </button>
-          <input
-            type="text"
-            value={category.label}
-            onChange={(e) => updateSelectCategoryLabel(categoryIndex, e.target.value)}
-            placeholder="Category label…"
-            className="flex-1 text-xs font-medium bg-transparent outline-none text-ink placeholder:text-ink-muted"
-          />
-          <button
-            type="button"
-            onClick={() => removeSelectCategory(categoryIndex)}
-            className="text-ink-muted hover:text-error shrink-0 transition-colors duration-150"
-          >
-            <Trash2 size={12} />
-          </button>
-        </div>
-        <SortableContext items={category.options.map((option) => option.value)} strategy={verticalListSortingStrategy}>
-          {(category.options as SelectOption[]).map((option, optionIndex) => (
-            <SelectOptionItem key={option.value} categoryIndex={categoryIndex} optionIndex={optionIndex} option={option} />
-          ))}
-        </SortableContext>
-        <button
-          type="button"
-          onClick={() => addSelectOption(categoryIndex)}
-          className="w-full flex items-center gap-1.5 px-3 py-1.5 border-t border-stroke text-xs text-ink-muted hover:text-ink hover:bg-surface/50 transition-colors duration-150"
-        >
-          <Plus size={11} /> Add option
-        </button>
-      </div>
-    );
-  }
-
-  function SelectOptionItem({ categoryIndex, optionIndex, option }: { categoryIndex: number; optionIndex: number; option: SelectOption }) {
-    const { setNodeRef, listeners, transform, transition, isDragging } = useSortable({ id: option.value });
-    const style: React.CSSProperties = {
-      transform: transform ? CSS.Transform.toString(transform) : undefined,
-      transition,
-      opacity: isDragging ? 0.4 : undefined,
-      zIndex: isDragging ? 10 : undefined,
-    };
-
-    return (
-      <div ref={setNodeRef} style={style} className="flex items-center gap-2 px-3 py-1.5 border-t border-stroke bg-elevated">
-        <button type="button" className="cursor-grab text-ink-muted shrink-0" {...listeners}>
-          <GripVertical size={14} />
-        </button>
-        {option.color && <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: option.color }} />}
-        <button
-          type="button"
-          onClick={(e) => setIconPickerState({ element: e.currentTarget, categoryIndex, optionIndex, propType: "select" })}
-          className="w-5 h-5 flex items-center justify-center rounded hover:bg-surface shrink-0 transition-colors duration-150"
-        >
-          {option.icon ? <IconDisplay value={option.icon} size={12} /> : <ImageIcon size={11} className="text-ink-muted" />}
-        </button>
-        <input
-          type="text"
-          value={option.value}
-          onChange={(e) => updateSelectOption(categoryIndex, optionIndex, e.target.value)}
-          placeholder="Option…"
-          className="flex-1 text-xs bg-transparent outline-none text-ink placeholder:text-ink-muted"
-        />
-        <div className="flex items-center gap-0.5">
-          {STATUS_OPTION_COLOR_VALUES.map((color) => (
-            <button
-              key={color}
-              type="button"
-              onClick={() => updateSelectOptionColor(categoryIndex, optionIndex, color as StatusOptionColor)}
-              className={`w-3 h-3 rounded-full transition-transform hover:scale-110 ${option.color === color ? "ring-1 ring-offset-1 ring-ink scale-110" : ""}`}
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={() => removeSelectOption(categoryIndex, optionIndex)}
-          className="text-ink-muted hover:text-error shrink-0 transition-colors duration-150"
-        >
-          <X size={11} />
-        </button>
-      </div>
-    );
-  }
-
-  function StatusOptionItem({
-    categoryIndex,
-    optionIndex,
-    option,
-  }: {
-    categoryIndex: number;
-    optionIndex: number;
-    option: StatusCategoryConfig["options"][number];
-  }) {
-    const { setNodeRef, listeners, transform, transition, isDragging } = useSortable({ id: option.name });
-    const style: React.CSSProperties = {
-      transform: transform ? CSS.Transform.toString(transform) : undefined,
-      transition,
-      opacity: isDragging ? 0.4 : undefined,
-      zIndex: isDragging ? 10 : undefined,
-    };
-
-    return (
-      <div ref={setNodeRef} style={style} className="flex items-center gap-2 px-3 py-1.5 border-t border-stroke bg-elevated">
-        <button type="button" className="cursor-grab text-ink-muted shrink-0" {...listeners}>
-          <GripVertical size={14} />
-        </button>
-        <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: option.color }} />
-        <button
-          type="button"
-          onClick={(e) => setIconPickerState({ element: e.currentTarget, categoryIndex, optionIndex, propType: "status" })}
-          className="w-5 h-5 flex items-center justify-center rounded hover:bg-surface shrink-0 transition-colors duration-150"
-        >
-          {option.icon ? <IconDisplay value={option.icon} size={12} /> : <ImageIcon size={11} className="text-ink-muted" />}
-        </button>
-        <input
-          type="text"
-          value={option.name}
-          onChange={(e) => updateStatusOptionName(categoryIndex, optionIndex, e.target.value)}
-          placeholder="Option…"
-          className="flex-1 text-xs bg-transparent outline-none text-ink placeholder:text-ink-muted"
-        />
-        <div className="flex items-center gap-0.5">
-          {STATUS_OPTION_COLOR_VALUES.map((color) => (
-            <button
-              key={color}
-              type="button"
-              onClick={() => updateStatusOptionColor(categoryIndex, optionIndex, color as StatusOptionColor)}
-              className={`w-3 h-3 rounded-full transition-transform hover:scale-110 ${option.color === color ? "ring-1 ring-offset-1 ring-ink scale-110" : ""}`}
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={() => removeStatusOption(categoryIndex, optionIndex)}
-          className="text-ink-muted hover:text-error shrink-0 transition-colors duration-150"
-        >
-          <X size={11} />
-        </button>
-      </div>
-    );
-  }
-
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   function addStatusOption(categoryIndex: number) {
@@ -454,75 +303,50 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
         <div className="flex flex-col gap-4">
           <div>
             <p className="type-field-label mb-1">{t("format")}</p>
-            <select
+            <Combobox
+              options={NUMBER_FORMAT_VALUES.map((f) => ({ value: f, label: f.charAt(0).toUpperCase() + f.slice(1) }))}
               value={String(config.format ?? "float")}
-              onChange={(e) => onPatch({ format: e.target.value })}
-              className="field-input w-full"
-            >
-              {NUMBER_FORMAT_VALUES.map((format) => (
-                <option key={format} value={format}>
-                  {format.charAt(0).toUpperCase() + format.slice(1)}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => onPatch({ format: value })}
+            />
           </div>
           {(config.format === "float" || config.format === "currency" || config.format === "percentage") && (
             <div>
               <p className="type-field-label mb-1">{t("decimalPlaces")}</p>
-              <input
-                type="number"
+              <NumberInput
+                value={Number(config.decimalPlaces ?? 2)}
+                onChange={(v) => onPatch({ decimalPlaces: v ?? 0 })}
                 min={0}
                 max={10}
-                value={Number(config.decimalPlaces ?? 2)}
-                onChange={(e) => onPatch({ decimalPlaces: Number(e.target.value) })}
-                className="field-input w-full"
               />
             </div>
           )}
           {config.format === "currency" && (
             <div>
               <p className="type-field-label mb-1">{t("currencySymbol")}</p>
-              <input
-                type="text"
-                maxLength={4}
-                value={String(config.currencySymbol ?? "$")}
-                onChange={(e) => onPatch({ currencySymbol: e.target.value })}
-                className="field-input w-full"
-              />
+              <TextInput value={String(config.currencySymbol ?? "$")} onChange={(v) => onPatch({ currencySymbol: v })} />
             </div>
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="type-field-label mb-1">{t("prefix")}</p>
-              <input
-                type="text"
-                maxLength={10}
+              <TextInput
                 value={String(config.prefix ?? "")}
-                onChange={(e) => onPatch({ prefix: e.target.value })}
-                className="field-input w-full"
-                placeholder="e.g. ≈"
+                onChange={(v) => onPatch({ prefix: v })}
+                placeholder={t("prefixPlaceholder")}
               />
             </div>
             <div>
               <p className="type-field-label mb-1">{t("suffix")}</p>
-              <input
-                type="text"
-                maxLength={10}
+              <TextInput
                 value={String(config.suffix ?? "")}
-                onChange={(e) => onPatch({ suffix: e.target.value })}
-                className="field-input w-full"
-                placeholder="e.g. kg"
+                onChange={(v) => onPatch({ suffix: v })}
+                placeholder={t("suffixPlaceholder")}
               />
             </div>
           </div>
           <div>
             <p className="type-field-label mb-1">{t("defaultValue")}</p>
-            <input
-              type="number"
-              value={Number(config.defaultValue ?? 0)}
-              onChange={(e) => onPatch({ defaultValue: Number(e.target.value) })}
-              className="field-input w-full"
-            />
+            <NumberInput value={Number(config.defaultValue ?? 0)} onChange={(v) => onPatch({ defaultValue: v ?? 0 })} />
           </div>
         </div>
       );
@@ -532,17 +356,11 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
         <div className="flex flex-col gap-4">
           <div>
             <p className="type-field-label mb-1">{t("dateFormat")}</p>
-            <select
+            <Combobox
+              options={DATA_FORMATS_VALUES.map((f) => ({ value: f, label: f }))}
               value={String(config.format ?? DATA_FORMATS_VALUES[0])}
-              onChange={(e) => onPatch({ format: e.target.value })}
-              className="field-input w-full"
-            >
-              {DATA_FORMATS_VALUES.map((format) => (
-                <option key={format} value={format}>
-                  {format}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => onPatch({ format: value })}
+            />
           </div>
           <label className="flex items-center justify-between gap-4">
             <p className="text-sm text-ink">{t("includeTime")}</p>
@@ -551,17 +369,11 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
           {Boolean(config.includeTime) && (
             <div>
               <p className="type-field-label mb-1">{t("timeFormat")}</p>
-              <select
+              <Combobox
+                options={TIME_FORMATS_VALUES.map((f) => ({ value: f, label: f }))}
                 value={String(config.timeFormat ?? TIME_FORMATS_VALUES[0])}
-                onChange={(e) => onPatch({ timeFormat: e.target.value })}
-                className="field-input w-full"
-              >
-                {TIME_FORMATS_VALUES.map((format) => (
-                  <option key={format} value={format}>
-                    {format}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => onPatch({ timeFormat: value })}
+              />
             </div>
           )}
         </div>
@@ -591,7 +403,20 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
               <p className="type-field-label">{t("categoriesOptions")}</p>
               <SortableContext items={selectCategories.map((category) => category.label)} strategy={verticalListSortingStrategy}>
                 {selectCategories.map((category, categoryIndex) => (
-                  <CategoryItem key={category.label} category={category} categoryIndex={categoryIndex} />
+                  <CategoryItem
+                    key={categoryIndex}
+                    category={category}
+                    categoryIndex={categoryIndex}
+                    onUpdateLabel={(label) => updateSelectCategoryLabel(categoryIndex, label)}
+                    onRemove={() => removeSelectCategory(categoryIndex)}
+                    onAddOption={() => addSelectOption(categoryIndex)}
+                    onUpdateOption={(optionIndex, value) => updateSelectOption(categoryIndex, optionIndex, value)}
+                    onRemoveOption={(optionIndex) => removeSelectOption(categoryIndex, optionIndex)}
+                    onUpdateOptionColor={(optionIndex, color) => updateSelectOptionColor(categoryIndex, optionIndex, color)}
+                    onOpenIconPicker={(element, optionIndex) =>
+                      setIconPickerState({ element, categoryIndex, optionIndex, propType: "select" })
+                    }
+                  />
                 ))}
               </SortableContext>
               <button
@@ -599,7 +424,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
                 onClick={addSelectCategory}
                 className="self-start flex items-center gap-1.5 text-xs text-ink-muted hover:text-ink transition-colors duration-150"
               >
-                <Plus size={12} /> Add category
+                <Plus size={12} /> {t("addCategory")}
               </button>
             </div>
           </DndContext>
@@ -622,47 +447,43 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
         <div className="flex flex-col gap-5">
           <div>
             <p className="type-field-label mb-1">{t("defaultOption")}</p>
-            <select
+            <Combobox
+              options={allStatusOptions.map((name) => ({ value: name, label: name }))}
               value={String(config.defaultOption ?? "")}
-              onChange={(e) => onPatch({ defaultOption: e.target.value })}
-              className="field-input w-full"
-            >
-              {allStatusOptions.map((optionName) => (
-                <option key={optionName} value={optionName}>
-                  {optionName}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => onPatch({ defaultOption: value })}
+              nullable
+            />
           </div>
 
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             {statusCategories.map((category, categoryIndex) => (
               <div key={category.category}>
-                <input
-                  type="text"
+                <TextInput
+                  size="sm"
                   value={category.label ?? ""}
-                  onChange={(e) => updateStatusCategoryLabel(categoryIndex, e.target.value)}
+                  onChange={(v) => updateStatusCategoryLabel(categoryIndex, v)}
                   placeholder={t("categoryPlaceholder", { category: t(`statusCategories.${category.category}`) })}
-                  className="text-tiny font-semibold uppercase tracking-widest text-ink mb-2 w-full bg-transparent outline-none placeholder:text-ink-muted"
                 />
-                <div className="flex items-center gap-2 mb-2 text-xs text-ink-muted">
-                  <span>{t("defaultLabel")}</span>
-                  <select
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs text-ink-muted shrink-0">{t("defaultLabel")}</span>
+                  <Combobox
+                    options={category.options.map((option) => ({ value: option.name, label: option.name }))}
                     value={category.defaultOption ?? ""}
-                    onChange={(e) => updateStatusCategoryDefaultOption(categoryIndex, e.target.value)}
-                    className="bg-surface rounded px-1 py-0.5"
-                  >
-                    {category.options.map((option) => (
-                      <option key={option.name} value={option.name}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(value) => updateStatusCategoryDefaultOption(categoryIndex, value)}
+                    nullable
+                  />
                 </div>
                 <div className="rounded-lg border border-stroke overflow-hidden">
                   <SortableContext items={category.options.map((option) => option.name)} strategy={verticalListSortingStrategy}>
                     {category.options.map((option, optionIndex) => (
-                      <StatusOptionItem key={option.name} categoryIndex={categoryIndex} optionIndex={optionIndex} option={option} />
+                      <StatusOptionItem
+                        key={optionIndex}
+                        option={option}
+                        onUpdateName={(name) => updateStatusOptionName(categoryIndex, optionIndex, name)}
+                        onRemove={() => removeStatusOption(categoryIndex, optionIndex)}
+                        onUpdateColor={(color) => updateStatusOptionColor(categoryIndex, optionIndex, color)}
+                        onOpenIconPicker={(element) => setIconPickerState({ element, categoryIndex, optionIndex, propType: "status" })}
+                      />
                     ))}
                   </SortableContext>
                   <button
@@ -697,7 +518,7 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
             <p className="type-field-label mb-1">{t("relatedDatabase")}</p>
             <div className="mt-1">
               <Combobox
-                options={databases.map((database) => ({ value: database.id, label: database.title ?? database.name }))}
+                options={databases.map((database) => ({ value: database.id, label: database.name, icon: database.icon }))}
                 value={String(config.relatedEntityId ?? "")}
                 onChange={(value) => onPatch({ relatedEntityId: value || undefined })}
                 placeholder={t("selectDatabase")}
@@ -720,27 +541,15 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
         <div className="flex flex-col gap-4">
           <div>
             <p className="type-field-label mb-1">{t("format")}</p>
-            <select
+            <Combobox
+              options={DURATION_FORMAT_VALUES.map((f) => ({ value: f, label: f }))}
               value={String(config.format ?? "HH:mm")}
-              onChange={(e) => onPatch({ format: e.target.value })}
-              className="field-input w-full"
-            >
-              {DURATION_FORMAT_VALUES.map((format) => (
-                <option key={format} value={format}>
-                  {format}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => onPatch({ format: value })}
+            />
           </div>
           <div>
             <p className="type-field-label mb-1">{t("defaultValueSeconds")}</p>
-            <input
-              type="number"
-              min={0}
-              value={Number(config.defaultValue ?? 0)}
-              onChange={(e) => onPatch({ defaultValue: Number(e.target.value) })}
-              className="field-input w-full"
-            />
+            <NumberInput value={Number(config.defaultValue ?? 0)} onChange={(v) => onPatch({ defaultValue: v ?? 0 })} min={0} />
           </div>
         </div>
       );
@@ -761,10 +570,13 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
         <div className="flex flex-col gap-4">
           <div>
             <p className="type-field-label mb-1">{t("mode")}</p>
-            <select
+            <Combobox
+              options={[
+                { value: "custom", label: t("modeCustom") },
+                { value: "source", label: t("modeSource") },
+              ]}
               value={progressConfig.mode || "custom"}
-              onChange={(e) => {
-                const mode = e.target.value;
+              onChange={(mode) => {
                 onPatch({
                   mode,
                   relationPropertyId: mode === "source" ? relationProperties[0]?.id : undefined,
@@ -772,21 +584,17 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
                   rollupType: mode === "source" ? "percent_complete" : undefined,
                 });
               }}
-              className="field-input w-full"
-            >
-              <option value="custom">{t("modeCustom")}</option>
-              <option value="source">{t("modeSource")}</option>
-            </select>
+            />
           </div>
 
           {progressConfig.mode === "source" ? (
             <>
               <div>
                 <p className="type-field-label mb-1">{t("relationProperty")}</p>
-                <select
+                <Combobox
+                  options={[{ value: "", label: t("selectRelation") }, ...relationProperties.map((p) => ({ value: p.id, label: p.name }))]}
                   value={selectedRelationId}
-                  onChange={(e) => {
-                    const relId = e.target.value;
+                  onChange={(relId) => {
                     const relatedProperty = relationProperties.find((p) => p.id === relId);
                     const rDbId = (relatedProperty?.config as RelationPropertyConfig)?.relatedEntityId;
                     const relatedDatabase = databases.find((db) => db.id === rDbId) as DatabaseWithProperties | undefined;
@@ -795,48 +603,38 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
                       targetPropertyId: relatedDatabase?.properties?.[0]?.id || undefined,
                     });
                   }}
-                  className="field-input w-full"
-                >
-                  <option value="">{t("selectRelation")}</option>
-                  {relationProperties.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
+                  nullable
+                />
               </div>
 
               <div>
                 <p className="type-field-label mb-1">{t("targetProperty")}</p>
-                <select
+                <Combobox
+                  options={[
+                    { value: "", label: t("selectProperty") },
+                    ...targetProperties.map((p) => ({ value: p.id, label: `${p.name} (${p.type})` })),
+                  ]}
                   value={progressConfig.targetPropertyId || ""}
-                  onChange={(e) => onPatch({ targetPropertyId: e.target.value || undefined })}
-                  className="field-input w-full"
+                  onChange={(value) => onPatch({ targetPropertyId: value || undefined })}
                   disabled={!selectedRelationId}
-                >
-                  <option value="">{t("selectProperty")}</option>
-                  {targetProperties.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.type})
-                    </option>
-                  ))}
-                </select>
+                  nullable
+                />
               </div>
 
               <div>
                 <p className="type-field-label mb-1">{t("rollupType")}</p>
-                <select
+                <Combobox
+                  options={[
+                    { value: "percent_complete", label: t("percentComplete") },
+                    { value: "percent_checked", label: t("percentChecked") },
+                    { value: "average", label: t("average") },
+                    { value: "sum", label: t("sum") },
+                    { value: "count", label: t("count") },
+                  ]}
                   value={progressConfig.rollupType || "percent_complete"}
-                  onChange={(e) => onPatch({ rollupType: e.target.value })}
-                  className="field-input w-full"
+                  onChange={(value) => onPatch({ rollupType: value })}
                   disabled={!progressConfig.targetPropertyId}
-                >
-                  <option value="percent_complete">{t("percentComplete")}</option>
-                  <option value="percent_checked">{t("percentChecked")}</option>
-                  <option value="average">{t("average")}</option>
-                  <option value="sum">{t("sum")}</option>
-                  <option value="count">{t("count")}</option>
-                </select>
+                />
               </div>
             </>
           ) : (
@@ -844,49 +642,45 @@ export function PropertyTypeConfig({ type, config, properties, databases, onPatc
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <p className="type-field-label mb-1">{t("minValue")}</p>
-                  <input
-                    type="number"
-                    value={progressConfig.minValue ?? 0}
-                    onChange={(e) => onPatch({ minValue: Number(e.target.value) })}
-                    className="field-input w-full"
-                  />
+                  <NumberInput value={progressConfig.minValue ?? 0} onChange={(v) => onPatch({ minValue: v ?? 0 })} />
                 </div>
                 <div>
                   <p className="type-field-label mb-1">{t("maxValue")}</p>
-                  <input
-                    type="number"
-                    value={progressConfig.maxValue ?? 100}
-                    onChange={(e) => onPatch({ maxValue: Number(e.target.value) })}
-                    className="field-input w-full"
-                  />
+                  <NumberInput value={progressConfig.maxValue ?? 100} onChange={(v) => onPatch({ maxValue: v ?? 100 })} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <p className="type-field-label mb-1">{t("step")}</p>
-                  <input
-                    type="number"
-                    min={0.000001}
-                    value={progressConfig.step ?? 1}
-                    onChange={(e) => onPatch({ step: Number(e.target.value) })}
-                    className="field-input w-full"
-                  />
+                  <NumberInput value={progressConfig.step ?? 1} onChange={(v) => onPatch({ step: v ?? 1 })} min={0.000001} />
                 </div>
-                <label className="flex items-center gap-2 mt-6 select-none cursor-pointer">
-                  <input
-                    type="checkbox"
+                <div className="flex items-center gap-2 mt-6">
+                  <CheckboxInput
                     checked={Boolean(progressConfig.showLabel ?? true)}
-                    onChange={(e) => onPatch({ showLabel: e.target.checked })}
-                    className="h-4 w-4 rounded border-stroke text-accent focus:ring-accent"
+                    onChange={(checked) => onPatch({ showLabel: checked })}
                   />
                   <span className="text-sm text-ink-secondary">{t("showLabel")}</span>
-                </label>
+                </div>
               </div>
             </>
           )}
         </div>
       );
     }
+
+    case PropertyType.RATING:
+      return (
+        <div className="flex flex-col gap-4">
+          <div>
+            <p className="type-field-label mb-1">{t("maxStars")}</p>
+            <NumberInput value={Number(config.maxStars ?? 5)} onChange={(v) => onPatch({ maxStars: v ?? 5 })} min={1} max={10} />
+          </div>
+          <label className="flex items-center justify-between gap-4">
+            <p className="text-sm text-ink">{t("allowHalf")}</p>
+            <Toggle value={Boolean(config.allowHalf ?? true)} onChange={(v) => onPatch({ allowHalf: v })} />
+          </label>
+        </div>
+      );
 
     case PropertyType.FORMULA:
       return <FormulaConfig config={config as unknown as FormulaPropertyConfig} properties={properties} onPatch={onPatch} />;

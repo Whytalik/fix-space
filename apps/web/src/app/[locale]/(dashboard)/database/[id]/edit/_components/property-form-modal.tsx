@@ -1,23 +1,27 @@
 "use client";
 
 import { PropertyIcon } from "../../_components/properties/ui/property-icon";
-import { IconDisplay } from "@/components/ui/icons/icon-display";
-import { IconPicker } from "@/components/ui/icons/icon-picker";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
+import { TextInput } from "@/components/ui/primitives/inputs/text-input";
+import { FormField } from "@/components/ui/form/form-field";
+import { IconPickerField } from "@/components/ui/form/icon-picker-field";
 import { useEscape } from "@/hooks/ui/use-escape";
 import { useMutation } from "@tanstack/react-query";
 import { parseApiError } from "@/lib/api/client";
 import { createProperty, updateProperty } from "@/lib/api/property";
 import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain";
-import { PropertyType } from "@fixspace/domain/enums";
+import { PropertyType } from "@fixspace/domain";
 import { ArrowLeft, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { PropertyTypeConfig } from "./property-type-config";
+import { VisibilityConditionEditor } from "./visibility-condition-editor";
 import { getDefaultConfig, getTypeMeta, TYPE_ORDER } from "@/utils/property/property-type-meta";
 import { useTranslations } from "next-intl";
-import { PropertyHint } from "../../_components/properties/ui/property-hint";
+import type { VisibilityConditionDto } from "@fixspace/domain";
+
+const TYPES_WITHOUT_CONFIG: PropertyType[] = [PropertyType.TEXT];
 
 type PropertyFormModalProps = {
   mode: "create" | "edit" | "view";
@@ -47,14 +51,16 @@ export function PropertyFormModal({
   const isProtected = property?.isProtected || property?.name === "Name";
   const [name, setName] = useState(property?.name ?? "");
   const [hint, setHint] = useState(property?.hint ?? "");
-  const [group, setGroup] = useState(isProtected ? "General" : (property?.group ?? ""));
+  const [hintOpen, setHintOpen] = useState(Boolean(property?.hint));
+  const [group, setGroup] = useState(isProtected ? "General" : (property?.groupName ?? ""));
   const [icon, setIcon] = useState(property?.icon ?? "");
-  const [showIconPicker, setShowIconPicker] = useState(false);
-  const iconButtonRef = useRef<HTMLButtonElement>(null);
   const [config, setConfig] = useState<Record<string, unknown>>(
     (property?.config as unknown as Record<string, unknown>) ?? getDefaultConfig(property?.type ?? PropertyType.TEXT),
   );
   const [selectedType, setSelectedType] = useState<PropertyType>(property?.type ?? PropertyType.TEXT);
+  const [visibilityCondition, setVisibilityCondition] = useState<VisibilityConditionDto | null>(
+    (property?.visibilityCondition as VisibilityConditionDto | null | undefined) ?? null,
+  );
 
   const isViewMode = mode === "view";
   const isEditingProtected = isProtected && mode === "edit";
@@ -85,18 +91,21 @@ export function PropertyFormModal({
     error: mutationError,
   } = useMutation({
     mutationFn: async () => {
+      const resolvedCondition = visibilityCondition?.dependsOnPropertyName ? visibilityCondition : null;
       const payload = {
         name: name.trim(),
         hint: hint.trim() || undefined,
         group: group.trim() || undefined,
         icon: icon || undefined,
         config,
+        visibilityCondition: resolvedCondition,
       };
       if (mode === "create") {
         return createProperty(databaseId, {
           ...payload,
           type: selectedType,
           position: 9999,
+          visibilityCondition: resolvedCondition ?? undefined,
         });
       } else {
         return updateProperty(property!.id, { ...payload, type: selectedType });
@@ -164,154 +173,123 @@ export function PropertyFormModal({
   return createPortal(
     <div className={backdropClass} onClick={onClose}>
       <div
-        className="w-130 max-h-[85vh] bg-elevated border border-stroke rounded-2xl shadow-lg flex flex-col overflow-hidden"
+        className="w-150 max-h-[85vh] bg-elevated border border-stroke rounded-2xl shadow-lg flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-stroke shrink-0">
+        <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-stroke shrink-0">
           {mode === "create" && (
             <button
               type="button"
               onClick={() => setStep(1)}
               className="text-ink-muted hover:text-ink transition-colors duration-150 shrink-0"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={15} />
             </button>
           )}
-          <PropertyIcon type={selectedType} size={15} className="text-ink-muted shrink-0" />
-          <h2 className="type-modal-title flex-1">
-            {mode === "create"
-              ? t("addPropertyTitle", { type: typeMeta[selectedType].label })
-              : mode === "view"
-                ? t("viewProperty")
-                : t("editProperty")}
-          </h2>
+          <PropertyIcon type={selectedType} size={13} className="text-ink-muted shrink-0" />
+          <span className="text-sm text-ink-secondary flex-1 min-w-0 truncate">{typeMeta[selectedType].label}</span>
+          {mode === "edit" && !isProtected && (
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="text-xs text-accent hover:underline shrink-0 transition-colors duration-150"
+            >
+              {t("change")}
+            </button>
+          )}
           <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink transition-colors duration-150 shrink-0">
-            <X size={16} />
+            <X size={15} />
           </button>
         </div>
 
         <div
-          className={`flex-1 overflow-y-auto no-scrollbar px-5 py-5 flex flex-col gap-6${isViewMode ? " pointer-events-none opacity-70" : ""}`}
+          className={`flex-1 overflow-y-auto no-scrollbar px-5 py-4 flex flex-col gap-4${isViewMode ? " pointer-events-none opacity-60" : ""}`}
         >
-          <div className="flex flex-col gap-4">
-            <p className="text-sm font-semibold text-ink border-b border-stroke pb-2 text-center">{t("general")}</p>
+          <FormField
+            id="property-name"
+            label={t("name")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSubmit();
+            }}
+            placeholder={t("namePlaceholder")}
+            autoFocus={!isViewMode}
+          />
 
-            {mode === "edit" && (
-              <div>
-                <label className="type-field-label">{t("type")}</label>
-                <div className="flex items-center justify-between mt-1">
-                  <div className="flex items-center gap-2 text-sm text-ink">
-                    <PropertyIcon type={selectedType} size={14} className="text-ink-muted shrink-0" />
-                    <span>{typeMeta[selectedType].label}</span>
-                  </div>
+          <div className="flex items-start gap-4">
+            <div className="shrink-0">
+              <p className="type-form-label mb-1.5">{t("icon")}</p>
+              <IconPickerField value={icon || undefined} onChange={setIcon} placeholder={t("chooseIcon")} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="type-form-label mb-1.5">{t("group")}</p>
+              <Combobox
+                options={existingGroups.map((groupName) => ({ value: groupName, label: groupName }))}
+                value={group}
+                onChange={setGroup}
+                placeholder={t("groupPlaceholder")}
+                freeText={!isEditingProtected}
+                nullable={!isEditingProtected}
+                disabled={isEditingProtected}
+              />
+            </div>
+          </div>
+
+          {hintOpen || hint ? (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="type-form-label">{t("hint")}</p>
+                {!hint && (
                   <button
                     type="button"
-                    onClick={() => setStep(1)}
-                    className="text-xs text-accent hover:underline transition-colors duration-150 shrink-0"
+                    onClick={() => setHintOpen(false)}
+                    className="text-ink-muted hover:text-ink transition-colors duration-150"
                   >
-                    {t("change")}
+                    <X size={12} />
                   </button>
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label className="type-field-label">{t("icon")}</label>
-              <div className="relative mt-1">
-                <button
-                  ref={iconButtonRef}
-                  type="button"
-                  onClick={() => setShowIconPicker((value) => !value)}
-                  className="flex items-center gap-2 rounded-lg border border-stroke bg-canvas px-3 py-2 text-sm text-ink hover:border-accent transition-colors duration-150"
-                >
-                  {icon ? (
-                    <>
-                      <IconDisplay value={icon} size={16} />
-                      <span className="text-ink-secondary text-xs">{icon.startsWith("icon:") ? icon.slice(5) : icon}</span>
-                    </>
-                  ) : (
-                    <span className="text-ink-muted text-xs">{t("chooseIcon")}</span>
-                  )}
-                </button>
-                {showIconPicker && (
-                  <IconPicker
-                    value={icon}
-                    onChange={(value) => {
-                      setIcon(value);
-                      setShowIconPicker(false);
-                    }}
-                    onClose={() => setShowIconPicker(false)}
-                    anchorEl={iconButtonRef.current}
-                  />
                 )}
               </div>
+              <TextInput value={hint} onChange={setHint} placeholder={t("hintPlaceholder")} />
             </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setHintOpen(true)}
+              className="self-start text-xs text-ink-muted hover:text-ink-secondary transition-colors duration-150"
+            >
+              + {t("addHint")}
+            </button>
+          )}
 
-            <div>
-              <label className="type-field-label flex items-center gap-2">
-                <span>
-                  {t("name")} <span className="text-error">*</span>
-                </span>
-                {hint && <PropertyHint hint={hint} />}
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSubmit();
-                }}
-                placeholder={t("namePlaceholder")}
-                className="field-input w-full mt-1"
-                autoFocus={!isViewMode}
+          {!TYPES_WITHOUT_CONFIG.includes(selectedType) && (
+            <div className="flex flex-col gap-4 border-t border-stroke-subtle pt-4">
+              <PropertyTypeConfig
+                type={selectedType}
+                config={config}
+                properties={properties}
+                databases={databases}
+                isViewMode={isViewMode}
+                onPatch={patchConfig}
               />
             </div>
+          )}
 
-            <div>
-              <label className="type-field-label">{t("group")}</label>
-              <div className="mt-1">
-                <Combobox
-                  options={existingGroups.map((group) => ({ value: group, label: group }))}
-                  value={group}
-                  onChange={setGroup}
-                  placeholder={t("groupPlaceholder")}
-                  freeText={!isEditingProtected}
-                  nullable={!isEditingProtected}
-                  disabled={isEditingProtected}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="type-field-label">{t("hint")}</label>
-              <input
-                type="text"
-                value={hint}
-                onChange={(e) => setHint(e.target.value)}
-                placeholder={t("hintPlaceholder")}
-                className="field-input w-full mt-1"
+          {!isProtected && (
+            <div className="border-t border-stroke-subtle pt-4">
+              <VisibilityConditionEditor
+                value={visibilityCondition}
+                properties={properties}
+                currentPropertyId={property?.id}
+                onChange={setVisibilityCondition}
               />
             </div>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <p className="text-sm font-semibold text-ink border-b border-stroke pb-2 text-center">
-              {typeMeta[selectedType].label} {t("settings")}
-            </p>
-            <PropertyTypeConfig
-              type={selectedType}
-              config={config}
-              properties={properties}
-              databases={databases}
-              isViewMode={isViewMode}
-              onPatch={patchConfig}
-            />
-          </div>
+          )}
         </div>
 
         {error && <p className="px-5 pb-2 text-xs text-error shrink-0">{error}</p>}
 
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-stroke shrink-0">
+        <div className="flex items-center justify-end gap-2 px-5 py-3.5 border-t border-stroke shrink-0">
           {isViewMode ? (
             <Button size="sm" onClick={() => onSwitchToEdit?.()}>
               {t("edit")}

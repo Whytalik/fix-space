@@ -1,17 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import type { FormulaPropertyConfig, PropertyResponseDto } from "@fixspace/domain";
 import { FormulaType } from "@fixspace/domain";
 import type { FormulaPresetName } from "@fixspace/domain";
 import { ChevronLeft } from "lucide-react";
-import { previewFormulaForDatabase } from "@/lib/api/property";
 import { PRESET_META } from "./formula-presets.meta";
 import { FormulaWizard } from "./formula-wizard";
-import { FormulaCustomBuilder } from "./formula-custom-builder";
 
 type FormulaConfigProps = {
   config: FormulaPropertyConfig;
@@ -19,35 +15,19 @@ type FormulaConfigProps = {
   onPatch: (patch: Partial<FormulaPropertyConfig>) => void;
 };
 
-type View = "gallery" | "wizard" | "custom";
+type View = "gallery" | "wizard";
 
 export function FormulaConfig({ config, properties, onPatch }: FormulaConfigProps) {
   const t = useTranslations("Formula");
-  const params = useParams<{ id: string }>();
-  const databaseId = params?.id ?? "";
 
   const [view, setView] = useState<View>(() => {
     if (config.presetName) return "wizard";
-    if (config.type === FormulaType.CUSTOM) return "custom";
     return "gallery";
-  });
-
-  const { data: preview } = useQuery({
-    queryKey: ["formula-preview", databaseId, config.expression, config.resultType],
-    queryFn: () => previewFormulaForDatabase(databaseId, config as unknown as Record<string, unknown>),
-    enabled: !!databaseId && !!config.expression,
-    staleTime: 5000,
-    retry: false,
   });
 
   function selectPreset(preset: FormulaPresetName) {
     onPatch({ type: FormulaType.PRESET, presetName: preset, uiState: {}, expression: "" });
     setView("wizard");
-  }
-
-  function goToCustom() {
-    onPatch({ type: FormulaType.CUSTOM, presetName: undefined, uiState: {}, expression: "" });
-    setView("custom");
   }
 
   function goBack() {
@@ -77,14 +57,6 @@ export function FormulaConfig({ config, properties, onPatch }: FormulaConfigProp
             );
           })}
         </div>
-        <button
-          type="button"
-          onClick={goToCustom}
-          className="flex flex-col gap-1 p-4 bg-surface border-2 border-dashed border-stroke rounded-2xl text-left hover:border-accent hover:bg-accent-muted transition-colors duration-150"
-        >
-          <p className="type-form-label text-ink">{t("gallery.customFormula")}</p>
-          <p className="type-hint">{t("gallery.customFormulaDesc")}</p>
-        </button>
       </div>
     );
   }
@@ -101,18 +73,6 @@ export function FormulaConfig({ config, properties, onPatch }: FormulaConfigProp
       </button>
 
       {view === "wizard" && <FormulaWizard config={config} properties={properties} onPatch={onPatch} />}
-      {view === "custom" && <FormulaCustomBuilder config={config} properties={properties} onPatch={onPatch} />}
-
-      {preview !== undefined && config.expression && (
-        <div className="pt-3 border-t border-stroke">
-          <p className="type-hint uppercase tracking-widest mb-2">{preview.isSample ? t("gallery.previewSample") : t("gallery.preview")}</p>
-          <div className="px-3 py-2 bg-canvas rounded-lg border border-stroke">
-            <p className="font-mono text-sm text-ink">
-              {preview.result === null || preview.result === undefined ? "—" : String(preview.result)}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
