@@ -1,4 +1,4 @@
-import type { ChangePasswordDto, DeleteAccountDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
+import type { ChangePasswordDto, DeleteAccountDto, SetPasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function getMe() {
@@ -19,6 +19,13 @@ export function deleteMe(payload: DeleteAccountDto) {
   });
 }
 
+export function setPassword(payload: SetPasswordDto) {
+  return apiFetch<{ message: string }>("/users/me/password", {
+    method: "POST",
+    body: payload,
+  });
+}
+
 export function changePassword(payload: ChangePasswordDto) {
   return apiFetch<{ message: string }>("/users/me/password", {
     method: "PATCH",
@@ -26,7 +33,7 @@ export function changePassword(payload: ChangePasswordDto) {
   });
 }
 
-export function uploadAvatar(file: File) {
+export function uploadAvatar(file: File | Blob) {
   const form = new FormData();
   form.append("avatar", file);
   return apiFetch<UserResponseDto>("/users/me/avatar", { method: "POST", body: form });

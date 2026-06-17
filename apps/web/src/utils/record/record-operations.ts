@@ -1,4 +1,4 @@
-import { FilterField, FilterOperator, PropertyType, SortDirection, SortField } from "@fixspace/domain/enums";
+import { DatePreset, FilterField, FilterOperator, PropertyType, SortDirection, SortField } from "@fixspace/domain";
 import type { RecordResponseDto, RecordFilterDto, RecordSortDto, PropertyResponseDto } from "@fixspace/domain";
 
 export function getPropertyValue(record: RecordResponseDto, propertyId: string): unknown {
@@ -30,6 +30,41 @@ function compareDates(dateValue: Date | null, filterDateValue: Date | null, oper
       return dateTimestamp >= filterTimestamp;
     default:
       return true;
+  }
+}
+
+function getDatePresetRange(preset: DatePreset): { start: Date; end: Date } {
+  const now = new Date();
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(now);
+  end.setHours(23, 59, 59, 999);
+  switch (preset) {
+    case DatePreset.TODAY:
+      return { start, end };
+    case DatePreset.THIS_WEEK: {
+      const day = start.getDay();
+      const diff = day === 0 ? 6 : day - 1;
+      start.setDate(start.getDate() - diff);
+      end.setDate(start.getDate() + 6);
+      return { start, end };
+    }
+    case DatePreset.THIS_MONTH:
+      start.setDate(1);
+      end.setMonth(end.getMonth() + 1, 0);
+      return { start, end };
+    case DatePreset.THIS_QUARTER: {
+      const q = Math.floor(start.getMonth() / 3);
+      start.setMonth(q * 3, 1);
+      end.setMonth(q * 3 + 3, 0);
+      return { start, end };
+    }
+    case DatePreset.THIS_YEAR:
+      start.setMonth(0, 1);
+      end.setMonth(11, 31);
+      return { start, end };
+    default:
+      return { start, end };
   }
 }
 
@@ -125,6 +160,12 @@ export function matchesFilter(record: RecordResponseDto, filter: RecordFilterDto
     }
 
     case PropertyType.DATE: {
+      if (filter.preset) {
+        const range = getDatePresetRange(filter.preset as DatePreset);
+        const dateValue = rawValue !== null ? new Date(rawValue as string) : null;
+        if (!dateValue || isNaN(dateValue.getTime())) return false;
+        return dateValue >= range.start && dateValue <= range.end;
+      }
       const dateValue = rawValue !== null ? new Date(rawValue as string) : null;
       const filterDateValue = value !== null ? new Date(String(value)) : null;
       switch (operator) {

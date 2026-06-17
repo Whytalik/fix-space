@@ -7,7 +7,6 @@ import { useFloatingPanel } from "@/hooks/ui/use-floating-panel";
 import { getPopoverStyle } from "@/utils/ui/popover";
 import { createPortal } from "react-dom";
 import dayjs from "dayjs";
-
 interface DatePickerPopupProps {
   value: string | null;
   onChange: (value: string | null) => void;
@@ -17,7 +16,13 @@ interface DatePickerPopupProps {
 }
 
 export function DatePickerPopup({ value, onChange, onClose, anchorEl, includeTime }: DatePickerPopupProps) {
-  const [date, setDate] = useState(value ? dayjs(value).toDate() : new Date());
+  const [date, setDate] = useState(() => {
+    if (value) {
+      const parsed = dayjs(value);
+      return parsed.isValid() ? parsed.toDate() : new Date();
+    }
+    return new Date();
+  });
   const containerRef = useRef<HTMLDivElement>(null);
 
   useFloatingPanel(containerRef, onClose, anchorEl);
@@ -25,7 +30,7 @@ export function DatePickerPopup({ value, onChange, onClose, anchorEl, includeTim
   const portalStyle = anchorEl ? getPopoverStyle(anchorEl) : undefined;
 
   const handleSave = () => {
-    onChange(date.toISOString());
+    onChange(dayjs(date).toISOString());
     onClose();
   };
 

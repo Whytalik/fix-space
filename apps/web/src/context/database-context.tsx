@@ -1,9 +1,9 @@
 "use client";
 
 import { usePropertiesQuery } from "@/hooks/api/use-properties-query";
-import { useRecordsQuery } from "@/hooks/api/use-records-query";
+import { useInfiniteRecordsQuery } from "@/hooks/api/use-records-query";
 import { useViewsQuery } from "@/hooks/api/use-views-query";
-import { useCreateView, useDeleteView, useDuplicateView, useUpdateView } from "@/hooks/api/use-view-mutations";
+import { useCreateView, useDeleteView, useDuplicateView, useReorderViews, useUpdateView } from "@/hooks/api/use-view-mutations";
 import { queryKeys } from "@/lib/api/query-keys";
 import { useQueryClient } from "@tanstack/react-query";
 import { getRecords } from "@/lib/api/record";
@@ -17,8 +17,8 @@ import type {
   RecordSortDto,
   ViewResponseDto,
 } from "@fixspace/domain";
-import type { SummaryMetric } from "@fixspace/domain/enums";
-import { FilterLogic, GroupField, PropertyType } from "@fixspace/domain/enums";
+import type { SummaryMetric } from "@fixspace/domain";
+import { FilterLogic, GroupField, PropertyType } from "@fixspace/domain";
 
 export interface GroupEntry {
   key: string;
@@ -37,6 +37,7 @@ interface DatabaseContextValue {
   database: DatabaseResponseDto | null;
   properties: PropertyResponseDto[];
   records: RecordResponseDto[];
+  allRecords: RecordResponseDto[];
   allFilteredRecords: RecordResponseDto[];
   relatedRecordsMap: Record<string, RecordResponseDto[] | null>;
   isLoading: boolean;
@@ -68,6 +69,7 @@ interface DatabaseContextValue {
   updateActiveView: (data: Partial<ViewResponseDto>) => Promise<void>;
   deleteView: (viewId: string) => Promise<void>;
   duplicateView: (viewId: string) => Promise<ViewResponseDto>;
+  reorderViews: (viewOrders: { id: string; position: number }[]) => Promise<ViewResponseDto[]>;
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
   setSearch: (value: string) => void;
@@ -83,10 +85,11 @@ interface DatabaseContextValue {
   setColumnSummary: (propertyId: string, metric: SummaryMetric | null) => void;
 }
 
-const DatabaseContext = createContext<DatabaseContextValue>({
+export const DatabaseContext = createContext<DatabaseContextValue>({
   database: null,
   properties: [],
   records: [],
+  allRecords: [],
   allFilteredRecords: [],
   relatedRecordsMap: {},
   isLoading: false,
@@ -118,6 +121,7 @@ const DatabaseContext = createContext<DatabaseContextValue>({
   updateActiveView: async () => {},
   deleteView: async () => {},
   duplicateView: async () => ({}) as ViewResponseDto,
+  reorderViews: async () => [] as ViewResponseDto[],
   setPage: () => {},
   setPageSize: () => {},
   setSearch: () => {},
@@ -153,7 +157,33 @@ async function fetchRelatedRecords(props: PropertyResponseDto[]): Promise<Record
   return Object.fromEntries(entries);
 }
 
-export function DatabaseProvider({ children, databaseId: propId }: { children: React.ReactNode; databaseId?: string }) {
+interface DatabaseProviderProps {
+  children: React.ReactNode;
+  databaseId?: string;
+  views?: ViewResponseDto[];
+  activeViewId?: string | null;
+  skipStateUpdate?: boolean;
+  onActiveViewChange?: (viewId: string) => void;
+  onViewUpdate?: (viewId: string, data: Partial<ViewResponseDto>) => Promise<void>;
+  onViewCreate?: (name: string) => Promise<ViewResponseDto>;
+  onViewDelete?: (viewId: string) => Promise<void>;
+  onViewDuplicate?: (viewId: string) => Promise<ViewResponseDto>;
+  onViewsReorder?: (viewOrders: { id: string; position: number }[]) => Promise<ViewResponseDto[]>;
+}
+
+export function DatabaseProvider({
+  children,
+  databaseId: propId,
+  views: manualViews,
+  activeViewId: manualActiveViewId,
+  skipStateUpdate = false,
+  onActiveViewChange: manualOnActiveViewChange,
+  onViewUpdate: manualOnViewUpdate,
+  onViewCreate: manualOnViewCreate,
+  onViewDelete: manualOnViewDelete,
+  onViewDuplicate: manualOnViewDuplicate,
+  onViewsReorder: manualOnViewsReorder,
+}: DatabaseProviderProps) {
   const params = useParams<{ id?: string }>();
   const databaseId = propId ?? params.id ?? "";
   const { databases, isLoading: appLoading, updateDatabaseInSpace, setCurrentDatabaseId } = useAppContext();
@@ -171,19 +201,36 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
   } = usePropertiesQuery(databaseId, { enabled: !appLoading && !!databaseId });
 
   const {
-    data: allRecords = [],
+    data: pagesData,
     isLoading: isRecsLoading,
     error: recsError,
-  } = useRecordsQuery(databaseId, { enabled: !appLoading && !!databaseId });
+  } = useInfiniteRecordsQuery(databaseId, { enabled: !appLoading && !!databaseId });
 
-  const { data: views = [], isLoading: isViewsLoading } = useViewsQuery(databaseId, { enabled: !appLoading && !!databaseId });
+  const allRecords = useMemo(() => {
+    if (!pagesData) return [];
+    return pagesData.pages.flatMap((page) => page.data);
+  }, [pagesData]);
+
+  const { data: remoteViews = [], isLoading: isViewsLoading } = useViewsQuery(databaseId, {
+    enabled: !appLoading && !!databaseId && !manualViews,
+  });
+
+  const views = manualViews ?? remoteViews;
 
   const createViewMutation = useCreateView(databaseId);
   const updateViewMutation = useUpdateView(databaseId);
   const deleteViewMutation = useDeleteView(databaseId);
   const duplicateViewMutation = useDuplicateView(databaseId);
+  const reorderViewsMutation = useReorderViews(databaseId);
 
-  const [activeViewId, setActiveViewIdState] = useState<string | null>(null);
+  const storageKey = databaseId ? `active-view:${databaseId}` : null;
+  const [activeViewIdState, setActiveViewIdState] = useState<string | null>(() => {
+    if (!databaseId || typeof window === "undefined") return null;
+    return sessionStorage.getItem(`active-view:${databaseId}`) ?? null;
+  });
+
+  const activeViewId = manualActiveViewId !== undefined ? manualActiveViewId : activeViewIdState;
+
   const [relatedRecordsMap, setRelatedRecordsMap] = useState<Record<string, RecordResponseDto[] | null>>({});
 
   const [search, setSearch] = useState(initialSearch);
@@ -212,19 +259,24 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
     (data: Record<string, unknown>) => {
       if (!activeView || isViewLocked) return;
 
+      if (manualOnViewUpdate) {
+        manualOnViewUpdate(activeView.id, data);
+        return;
+      }
+
       if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
 
       syncTimeoutRef.current = setTimeout(() => {
         updateViewMutation.mutate({ viewId: activeView.id, data });
       }, 1000);
     },
-    [activeView, isViewLocked, updateViewMutation],
+    [activeView, isViewLocked, updateViewMutation, manualOnViewUpdate],
   );
 
   useEffect(() => {
-    if (databaseId) setCurrentDatabaseId(databaseId);
+    if (databaseId && !skipStateUpdate) setCurrentDatabaseId(databaseId);
     return () => setCurrentDatabaseId(null);
-  }, [databaseId, setCurrentDatabaseId]);
+  }, [databaseId, skipStateUpdate, setCurrentDatabaseId]);
 
   const isInitialLoad = useRef(true);
   const activeViewRef = useRef(activeView);
@@ -339,10 +391,15 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
 
   const setHiddenColumns = useCallback(
     (columns: string[]) => {
-      if (isViewLocked) return;
+      if (isViewLocked || !activeView) return;
+      if (!manualViews) {
+        queryClient.setQueryData<ViewResponseDto[]>(queryKeys.views.all(databaseId), (old) =>
+          old ? old.map((v) => (v.id === activeView.id ? { ...v, hiddenColumns: columns } : v)) : old,
+        );
+      }
       syncViewToServer({ hiddenColumns: columns });
     },
-    [isViewLocked, syncViewToServer],
+    [isViewLocked, activeView, databaseId, queryClient, syncViewToServer, manualViews],
   );
 
   const setPageSize = useCallback(
@@ -356,15 +413,13 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
 
   const setColumnSummary = useCallback(
     (propertyId: string, metric: SummaryMetric | null) => {
-      setColumnSummariesState((prev) => {
-        const next = { ...prev };
-        if (metric) next[propertyId] = metric;
-        else delete next[propertyId];
-        syncViewToServer({ columnSummaries: next });
-        return next;
-      });
+      const next = { ...columnSummaries };
+      if (metric) next[propertyId] = metric;
+      else delete next[propertyId];
+      setColumnSummariesState(next);
+      syncViewToServer({ columnSummaries: next });
     },
-    [syncViewToServer],
+    [syncViewToServer, columnSummaries],
   );
 
   const setGroup = useCallback(
@@ -384,67 +439,111 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
   const setGroupColor = useCallback(
     (key: string, color: string) => {
       if (isViewLocked) return;
-      setGroupColorsState((prev) => {
-        const next = { ...prev, [key]: color };
-        syncViewToServer({ groupColors: next });
-        return next;
-      });
+      const next = { ...groupColors, [key]: color };
+      setGroupColorsState(next);
+      syncViewToServer({ groupColors: next });
     },
-    [isViewLocked, syncViewToServer],
+    [isViewLocked, syncViewToServer, groupColors],
   );
 
   const toggleHiddenGroup = useCallback(
     (key: string) => {
       if (isViewLocked) return;
-      setHiddenGroups((prev) => {
-        const next = new Set(prev);
-        if (next.has(key)) next.delete(key);
-        else next.add(key);
-        syncViewToServer({ hiddenGroups: Array.from(next) });
-        return next;
-      });
+      const next = new Set(hiddenGroups);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      setHiddenGroups(next);
+      syncViewToServer({ hiddenGroups: Array.from(next) });
     },
-    [isViewLocked, syncViewToServer],
+    [isViewLocked, syncViewToServer, hiddenGroups],
   );
 
-  const setActiveView = useCallback((viewId: string) => {
-    setActiveViewIdState(viewId);
-  }, []);
+  const setActiveView = useCallback(
+    (viewId: string) => {
+      if (manualOnActiveViewChange) {
+        manualOnActiveViewChange(viewId);
+        return;
+      }
+      const view = views.find((v) => v.id === viewId) ?? null;
+      setActiveViewIdState(viewId);
+      if (storageKey) sessionStorage.setItem(storageKey, viewId);
+      if (view) {
+        setSortsState(view.sort || []);
+        setFiltersState(view.filters || []);
+        setFilterLogicState(view.filterLogic || FilterLogic.AND);
+        setWrapCellsState(view.textWrap || false);
+        setRelativeDatesState(view.relativeDates || false);
+        setPageSizeState(view.pageSize || DEFAULT_PAGE_SIZE);
+        setColumnSummariesState(view.columnSummaries || {});
+        setGroupColorsState(view.groupColors || {});
+        setHiddenGroups(new Set(view.hiddenGroups || []));
+        setGroupState(view.groupBy ? { field: GroupField.PROPERTY, propertyId: view.groupBy } : null);
+        setSearch(view.searchQuery || "");
+        setPage(1);
+      }
+    },
+    [storageKey, views, manualOnActiveViewChange],
+  );
 
   const createView = useCallback(
     async (name: string) => {
-      const res = await createViewMutation.mutateAsync({ name, databaseId });
+      if (manualOnViewCreate) {
+        return await manualOnViewCreate(name);
+      }
+      const res = await createViewMutation.mutateAsync({ name });
       setActiveViewIdState(res.id);
       return res;
     },
-    [databaseId, createViewMutation],
+    [createViewMutation, manualOnViewCreate],
   );
 
   const updateActiveView = useCallback(
     async (data: Record<string, unknown>) => {
       if (!activeView) return;
+      if (manualOnViewUpdate) {
+        await manualOnViewUpdate(activeView.id, data);
+        return;
+      }
       await updateViewMutation.mutateAsync({ viewId: activeView.id, data });
     },
-    [activeView, updateViewMutation],
+    [activeView, updateViewMutation, manualOnViewUpdate],
   );
 
   const deleteView = useCallback(
     async (viewId: string) => {
+      if (manualOnViewDelete) {
+        await manualOnViewDelete(viewId);
+        return;
+      }
       await deleteViewMutation.mutateAsync(viewId);
       if (activeViewId === viewId) {
         setActiveViewIdState(null);
       }
     },
-    [activeViewId, deleteViewMutation],
+    [activeViewId, deleteViewMutation, manualOnViewDelete],
   );
 
   const duplicateView = useCallback(
     async (viewId: string) => {
+      if (manualOnViewDuplicate) {
+        return await manualOnViewDuplicate(viewId);
+      }
       const res = await duplicateViewMutation.mutateAsync(viewId);
       setActiveViewIdState(res.id);
       return res;
     },
-    [duplicateViewMutation],
+    [duplicateViewMutation, manualOnViewDuplicate],
+  );
+
+  const reorderViewsFn = useCallback(
+    async (viewOrders: { id: string; position: number }[]) => {
+      if (manualOnViewsReorder) {
+        return await manualOnViewsReorder(viewOrders);
+      }
+      const res = await reorderViewsMutation.mutateAsync(viewOrders);
+      return res;
+    },
+    [reorderViewsMutation, manualOnViewsReorder],
   );
 
   const filteredRecords = useMemo(() => {
@@ -484,13 +583,25 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
     return result;
   }, [allRecords, search, filters, filterLogic, properties, sorts]);
 
+  const effectivePageSize = useMemo(() => {
+    return activeView?.recordLimit || pageSize;
+  }, [pageSize, activeView?.recordLimit]);
+
   const total = filteredRecords.length;
 
   const records = useMemo(() => {
     if (group) return filteredRecords;
-    const start = (page - 1) * pageSize;
-    return filteredRecords.slice(start, start + pageSize);
-  }, [filteredRecords, page, pageSize, group]);
+    const start = (page - 1) * effectivePageSize;
+    return filteredRecords.slice(start, start + effectivePageSize);
+  }, [filteredRecords, page, effectivePageSize, group]);
+
+  const maxPage = Math.max(1, Math.ceil(total / effectivePageSize));
+
+  useEffect(() => {
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [page, maxPage]);
 
   const groupedRecords = useMemo<GroupEntry[] | null>(() => {
     if (!group) return null;
@@ -574,13 +685,14 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
         database,
         properties,
         records,
+        allRecords,
         allFilteredRecords: filteredRecords,
         relatedRecordsMap,
         isLoading,
         error,
         total,
         page,
-        pageSize,
+        pageSize: effectivePageSize,
         search,
         sorts,
         filters,
@@ -605,6 +717,7 @@ export function DatabaseProvider({ children, databaseId: propId }: { children: R
         updateActiveView,
         deleteView,
         duplicateView,
+        reorderViews: reorderViewsFn,
         setPage,
         setPageSize,
         setSearch: handleSetSearch,

@@ -54,6 +54,15 @@
     "propertyPlaceholder": "— select a property —",
     "databasePlaceholder": "— select a database —",
     "noRelationFields": "— no RELATION fields —",
+    "dateValue": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "relative": "Relative",
+      "custom": "Custom date",
+      "in": "in",
+      "ago": "ago",
+      "days": "days"
+    },
     "templates": {
       "dateOnChange": {
         "name": "Set date on change",

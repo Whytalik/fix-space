@@ -17,7 +17,8 @@
     "features": "Бази даних",
     "templates": "Шаблони",
     "workflow": "Процес",
-    "import": "Імпорт"
+    "import": "Імпорт",
+    "selectLanguage": "Вибрати мову"
   },
   "Footer": {
     "diplomaProject": "Дипломний проєкт"

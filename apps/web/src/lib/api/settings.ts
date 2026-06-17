@@ -9,6 +9,32 @@ import type {
 } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
+export type UISettingsCategory =
+  | "profile"
+  | "space"
+  | "database"
+  | "template"
+  | "record"
+  | "section"
+  | "appearance"
+  | "integration"
+  | "view";
+
+export function uiCategoryToApi(category: UISettingsCategory): string | undefined {
+  const map: Record<UISettingsCategory, string | undefined> = {
+    profile: "user",
+    space: "space",
+    database: "database",
+    template: "template",
+    record: "record",
+    section: "section",
+    view: "view",
+    appearance: undefined,
+    integration: undefined,
+  };
+  return map[category];
+}
+
 export function getUserSettings() {
   return apiFetch<UserSettings>("/settings/user");
 }

@@ -32,7 +32,7 @@ export function Breadcrumbs() {
         className="flex items-center gap-1.5 text-ink-secondary hover:text-ink transition-colors duration-150"
       >
         <IconDisplay value={database.icon || "📄"} size={14} />
-        <span className="type-nav-label truncate max-w-[200px] font-medium text-inherit">{database.title || database.name}</span>
+        <span className="type-nav-label truncate max-w-[200px] font-medium text-inherit">{database.name}</span>
       </Link>
 
       {record && (

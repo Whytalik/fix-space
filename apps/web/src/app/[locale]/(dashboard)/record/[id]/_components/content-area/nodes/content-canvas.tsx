@@ -62,8 +62,8 @@ export function ContentCanvas({
   });
 
   return (
-    <div className={`p-8 min-h-full flex flex-col ${isEditing ? "bg-canvas-subtle" : "bg-canvas"}`}>
-      <div className="max-w-4xl mx-auto w-full flex-1">
+    <div className={`${isEditing ? "p-8 bg-surface" : "py-8 bg-canvas"} min-h-full flex flex-col`}>
+      <div className="w-full flex-1">
         <SortableContext items={editor.content.rows.map((r) => r.id)} strategy={verticalListSortingStrategy}>
           {isEditing && <RowInsertZone index={0} isVisible={isDraggingPanelRow ?? false} t={t} />}
           {editor.content.rows.map((row, rowIdx) => (

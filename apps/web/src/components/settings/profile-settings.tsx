@@ -2,17 +2,19 @@
 
 import type { UserResponseDto, UserSettings } from "@fixspace/domain";
 import { useAppContext } from "@/context/app-context";
-import { changePassword, updateMe } from "@/lib/api/user";
+import { changePassword, setPassword, updateMe } from "@/lib/api/user";
+import { logoutAll, getSessions, revokeSession } from "@/lib/api/auth";
 import { updateUserSettings } from "@/lib/api/settings";
 import { parseApiError } from "@/lib/api/client";
 import { AvatarUpload } from "@/components/ui/primitives/display/avatar-upload";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { FormField } from "@/components/ui/form/form-field";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
-import { Select } from "@/components/ui/primitives/inputs/select";
+
 import { DeleteAccountModal } from "@/components/settings/delete-account-modal";
 import { useUserSettingsQuery } from "@/hooks/api/use-user-settings-query";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/api/query-keys";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
@@ -72,6 +74,7 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [logoutAllSuccess, setLogoutAllSuccess] = useState(false);
 
   const { mutate: updateProfile, isPending: isUpdating } = useMutation({
     mutationFn: (newUsername: string) => updateMe({ username: newUsername }),
@@ -93,6 +96,25 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
     updateProfile(username.trim());
   }
 
+  const { mutate: doLogoutAll, isPending: isLoggingOutAll } = useMutation({
+    mutationFn: logoutAll,
+    onSuccess: () => {
+      setLogoutAllSuccess(true);
+      queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all() });
+    },
+  });
+
+  const { data: sessions, isLoading: isLoadingSessions } = useQuery({
+    queryKey: queryKeys.sessions.all(),
+    queryFn: getSessions,
+    enabled: activeTab === "security",
+  });
+
+  const { mutate: doRevokeSession, variables: revokingId } = useMutation({
+    mutationFn: (id: string) => revokeSession(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.sessions.all() }),
+  });
+
   const { mutate: changeUserPassword, isPending: isChangingPassword } = useMutation({
     mutationFn: (data: { currentPassword: string; newPassword: string }) => changePassword(data),
     onSuccess: () => {
@@ -101,6 +123,21 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+    },
+    onError: (error) => {
+      setPasswordError(parseApiError(error));
+      setPasswordSuccess(false);
+    },
+  });
+
+  const { mutate: doSetPassword, isPending: isSettingPassword } = useMutation({
+    mutationFn: (data: { password: string }) => setPassword(data),
+    onSuccess: () => {
+      setPasswordSuccess(true);
+      setPasswordError(null);
+      setNewPassword("");
+      setConfirmPassword("");
+      updateUser({ ...user!, hasPassword: true });
     },
     onError: (error) => {
       setPasswordError(parseApiError(error));
@@ -120,6 +157,20 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
       return;
     }
     changeUserPassword({ currentPassword, newPassword });
+  }
+
+  function handleSetPassword() {
+    setPasswordError(null);
+    setPasswordSuccess(false);
+    if (!newPassword || !confirmPassword) {
+      setPasswordError(t("allFieldsRequired"));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError(t("passwordsNotMatch"));
+      return;
+    }
+    doSetPassword({ password: newPassword });
   }
 
   function handleAvatarUpdate(updated: UserResponseDto) {
@@ -211,9 +262,9 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm text-ink-secondary">{t("dateFormat")}</label>
-            <Select
+            <Combobox
               value={datetimeForm.dateFormat}
-              onChange={(e) => setDatetimeForm((prev) => (prev ? { ...prev, dateFormat: e.target.value } : prev))}
+              onChange={(value) => setDatetimeForm((prev) => (prev ? { ...prev, dateFormat: value } : prev))}
               options={[
                 { value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
                 { value: "MM/DD/YYYY", label: "MM/DD/YYYY" },
@@ -247,48 +298,139 @@ export function ProfileSettings({ compact = false }: ProfileSettingsProps) {
 
       {activeTab === "security" && (
         <div className="flex flex-col gap-4">
-          <FormField
-            id="current-password"
-            label={t("currentPassword")}
-            type="password"
-            value={currentPassword}
-            onChange={(e) => {
-              setCurrentPassword(e.target.value);
-              setPasswordError(null);
-              setPasswordSuccess(false);
-            }}
-            placeholder={t("placeholderCurrentPassword")}
-          />
-          <FormField
-            id="new-password"
-            label={t("newPassword")}
-            type="password"
-            value={newPassword}
-            onChange={(e) => {
-              setNewPassword(e.target.value);
-              setPasswordError(null);
-              setPasswordSuccess(false);
-            }}
-            placeholder={t("placeholderNewPassword")}
-          />
-          <FormField
-            id="confirm-password"
-            label={t("confirmPassword")}
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              setPasswordError(null);
-              setPasswordSuccess(false);
-            }}
-            placeholder={t("placeholderConfirmPassword")}
-          />
-          {passwordError && <p className="text-sm text-error">{passwordError}</p>}
-          {passwordSuccess && <p className="text-sm text-success">{t("passwordChanged")}</p>}
-          <div className="flex justify-end">
-            <Button onClick={handleChangePassword} disabled={isChangingPassword}>
-              {isChangingPassword ? t("changing") : t("changePassword")}
-            </Button>
+          {!user?.hasPassword ? (
+            <>
+              <p className="text-sm text-ink-secondary">{t("setPasswordDesc")}</p>
+              <FormField
+                id="new-password"
+                label={t("newPassword")}
+                type="password"
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  setPasswordError(null);
+                  setPasswordSuccess(false);
+                }}
+                placeholder={t("placeholderNewPassword")}
+              />
+              <FormField
+                id="confirm-password"
+                label={t("confirmPassword")}
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setPasswordError(null);
+                  setPasswordSuccess(false);
+                }}
+                placeholder={t("placeholderConfirmPassword")}
+              />
+              {passwordError && <p className="text-sm text-error">{passwordError}</p>}
+              {passwordSuccess && <p className="text-sm text-success">{t("passwordSet")}</p>}
+              <div className="flex justify-end">
+                <Button onClick={handleSetPassword} disabled={isSettingPassword}>
+                  {isSettingPassword ? t("settingPassword") : t("setPassword")}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <FormField
+                id="current-password"
+                label={t("currentPassword")}
+                type="password"
+                value={currentPassword}
+                onChange={(e) => {
+                  setCurrentPassword(e.target.value);
+                  setPasswordError(null);
+                  setPasswordSuccess(false);
+                }}
+                placeholder={t("placeholderCurrentPassword")}
+              />
+              <FormField
+                id="new-password"
+                label={t("newPassword")}
+                type="password"
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  setPasswordError(null);
+                  setPasswordSuccess(false);
+                }}
+                placeholder={t("placeholderNewPassword")}
+              />
+              <FormField
+                id="confirm-password"
+                label={t("confirmPassword")}
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setPasswordError(null);
+                  setPasswordSuccess(false);
+                }}
+                placeholder={t("placeholderConfirmPassword")}
+              />
+              {passwordError && <p className="text-sm text-error">{passwordError}</p>}
+              {passwordSuccess && <p className="text-sm text-success">{t("passwordChanged")}</p>}
+              <div className="flex justify-end">
+                <Button onClick={handleChangePassword} disabled={isChangingPassword}>
+                  {isChangingPassword ? t("changing") : t("changePassword")}
+                </Button>
+              </div>
+            </>
+          )}
+
+          <hr className="my-2 border-stroke" />
+
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-ink-secondary">{t("logoutAllDevicesDesc")}</p>
+            <div className="flex items-center gap-3 pt-1">
+              <Button variant="secondary" onClick={() => doLogoutAll()} loading={isLoggingOutAll}>
+                {isLoggingOutAll ? t("loggingOutAll") : t("logoutAllDevices")}
+              </Button>
+              {logoutAllSuccess && <span className="text-sm text-success">{t("logoutAllSuccess")}</span>}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h3 className="type-form-label text-ink-secondary uppercase">{t("activeSessions")}</h3>
+            {isLoadingSessions ? (
+              <div className="py-2 text-sm text-ink-muted">{t("loggingOutAll")}</div>
+            ) : !sessions?.length ? (
+              <p className="text-sm text-ink-muted">{t("noOtherSessions")}</p>
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {sessions.map((session) => (
+                  <li
+                    key={session.id}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-stroke bg-surface px-3 py-2"
+                  >
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-sm text-ink">
+                        {t("sessionStarted")}: {new Date(session.createdAt).toLocaleDateString()}
+                        {session.isCurrent && (
+                          <span className="ml-2 rounded-full bg-accent-muted px-2 py-0.5 text-xs text-accent">{t("sessionCurrent")}</span>
+                        )}
+                      </span>
+                      <span className="text-xs text-ink-muted">
+                        {t("sessionExpires")}: {new Date(session.expiresAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {!session.isCurrent && (
+                      <button
+                        type="button"
+                        className="text-xs text-error transition-colors duration-150 hover:text-error/80 disabled:opacity-50"
+                        disabled={revokingId === session.id}
+                        onClick={() => doRevokeSession(session.id)}
+                      >
+                        {revokingId === session.id ? t("sessionRevoking") : t("sessionRevoke")}
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <hr className="my-2 border-stroke" />

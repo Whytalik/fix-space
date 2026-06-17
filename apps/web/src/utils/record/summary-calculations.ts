@@ -1,4 +1,4 @@
-import { PropertyType, SummaryMetric } from "@fixspace/domain/enums";
+import { PropertyType, SummaryMetric } from "@fixspace/domain";
 import type { RecordResponseDto } from "@fixspace/domain";
 
 export function calculateSummary(

@@ -6,9 +6,11 @@ import { usePropertiesQuery } from "@/hooks/api/use-properties-query";
 import { PageLoader } from "@/components/ui/primitives/feedback/page-loader";
 import { useAppContext } from "@/context/app-context";
 import { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateRecord } from "@/lib/api/record";
-import { RecordPropertyList } from "./_components/property-list";
+import { getPropertyGroups } from "@/lib/api/property-group";
+import { queryKeys } from "@/lib/api/query-keys";
+import { PropertyList } from "@/components/database/property-list";
 import { RecordTemplateMenu } from "./_components/record-template-menu";
 import { useTranslations } from "next-intl";
 import { FileText, PenLine } from "lucide-react";
@@ -31,6 +33,12 @@ export default function RecordPage() {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   const { data: properties = [], isLoading: isPropertiesLoading } = usePropertiesQuery(record?.databaseId || "", {
+    enabled: !!record?.databaseId,
+  });
+
+  const { data: propertyGroups = [] } = useQuery({
+    queryKey: queryKeys.propertyGroups.all(record?.databaseId ?? ""),
+    queryFn: () => getPropertyGroups(record!.databaseId),
     enabled: !!record?.databaseId,
   });
 
@@ -101,8 +109,8 @@ export default function RecordPage() {
         <div className="lg:col-span-3 space-y-8">
           <section>
             <div className="card p-4">
-              <DatabaseProvider databaseId={record?.databaseId}>
-                <RecordPropertyList properties={properties} record={record!} />
+              <DatabaseProvider databaseId={record?.databaseId} skipStateUpdate={true}>
+                <PropertyList properties={properties} entity={record!} mode="record" propertyGroups={propertyGroups} />
               </DatabaseProvider>
             </div>
           </section>
@@ -139,7 +147,7 @@ export default function RecordPage() {
             {t("editLayout")}
           </Link>
         </div>
-        <ContentArea editor={contentEditor} mode="view" />
+        <ContentArea editor={contentEditor} mode="view" recordId={id} />
       </section>
     </div>
   );

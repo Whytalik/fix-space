@@ -17,7 +17,8 @@
     "features": "Databases",
     "templates": "Templates",
     "workflow": "Process",
-    "import": "Import"
+    "import": "Import",
+    "selectLanguage": "Select language"
   },
   "Footer": {
     "diplomaProject": "Diploma project"

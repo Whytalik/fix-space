@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/primitives/display/card";
 import { useRouter } from "@/i18n/navigation";
 import type { WorkflowStep } from "@fixspace/domain";
-import { Check, Plus, Lock, ChevronRight, Loader2 } from "lucide-react";
+import { Check, Plus, Lock, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTemplatesQuery } from "@/hooks/api/use-templates-query";
 import { createRecord } from "@/lib/api/record";
@@ -16,48 +16,42 @@ interface DailyWorkflowProps {
 export function DailyWorkflow({ steps }: DailyWorkflowProps) {
   const t = useTranslations("Dashboard");
   const completedCount = steps.filter((s) => s.isCompleted).length;
-  const progressPercent = Math.min((completedCount / (steps.length - 1)) * 100, 100);
 
   return (
     <Card className="w-full relative overflow-hidden">
-      <div className="flex flex-col gap-6 relative z-10">
+      <div className="flex flex-col gap-5 relative z-10">
         <div className="flex items-center justify-between">
-          <h2 className="type-panel-title">{t("dailyWorkflowTitle")}</h2>
-          <span className="text-sm font-medium text-ink-secondary">
+          <h2 className="text-lg font-bold text-ink tracking-tight">{t("dailyWorkflowTitle")}</h2>
+          <span className="text-[11px] font-mono uppercase tracking-widest text-ink-secondary bg-canvas/50 px-3 py-1.5 rounded-lg border border-stroke/50">
             {t("completedSteps", { completed: completedCount, total: steps.length })}
           </span>
         </div>
 
-        <div className="relative flex justify-between items-start">
-          <div className="absolute top-5 left-[12.5%] right-[12.5%] h-0.5 bg-border -z-10" />
-          <div
-            className="absolute top-5 left-[12.5%] h-0.5 bg-accent -z-10 transition-all duration-500 ease-in-out"
-            style={{ width: `${progressPercent * 0.75}%` }}
-          />
+        <div className="relative">
+          <div className="flex justify-between items-start gap-2">
+            {steps.map((step, idx) => {
+              const isUnlocked = idx === 0 || (steps[idx - 1]?.isCompleted ?? false);
 
-          {steps.map((step, idx) => {
-            const isUnlocked = idx === 0 || (steps[idx - 1]?.isCompleted ?? false);
+              const stepKeyMap: Record<string, string> = {
+                "Plan Routine": "planRoutine",
+                "Execute Trade": "executeTrade",
+                "Reflect & Notes": "reflectNotes",
+                "Reflect Notes": "reflectNotes",
+                "Log Mistakes": "logMistakes",
+              };
+              const translationKey = stepKeyMap[step.name] || step.name;
 
-            const stepKeyMap: Record<string, string> = {
-              "Plan Routine": "planRoutine",
-              "Execute Trade": "executeTrade",
-              "Reflect & Notes": "reflectNotes",
-              "Reflect Notes": "reflectNotes",
-              "Log Mistakes": "logMistakes",
-            };
-            const translationKey = stepKeyMap[step.name] || step.name;
-
-            return (
-              <WorkflowStepNode
-                key={step.name}
-                step={step}
-                stepDisplayName={t(translationKey as Parameters<typeof t>[0])}
-                idx={idx}
-                isUnlocked={isUnlocked}
-                totalSteps={steps.length}
-              />
-            );
-          })}
+              return (
+                <WorkflowStepNode
+                  key={step.name}
+                  step={step}
+                  stepDisplayName={t(translationKey as Parameters<typeof t>[0])}
+                  isUnlocked={isUnlocked}
+                  isLast={idx === steps.length - 1}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
     </Card>
@@ -67,15 +61,13 @@ export function DailyWorkflow({ steps }: DailyWorkflowProps) {
 function WorkflowStepNode({
   step,
   stepDisplayName,
-  idx,
   isUnlocked,
-  totalSteps,
+  isLast,
 }: {
   step: WorkflowStep;
   stepDisplayName: string;
-  idx: number;
   isUnlocked: boolean;
-  totalSteps: number;
+  isLast: boolean;
 }) {
   const t = useTranslations("Dashboard");
   const router = useRouter();
@@ -98,96 +90,87 @@ function WorkflowStepNode({
     }
   }
 
-  function handleNodeClick(e: React.MouseEvent) {
-    if (!isUnlocked || !step.databaseId) {
-      e.preventDefault();
-      return;
-    }
-
-    if (step.isCompleted) {
-      return;
-    }
-
-    e.preventDefault();
-    setShowPicker(true);
-  }
+  const status: "completed" | "active" | "locked" = step.isCompleted ? "completed" : isUnlocked ? "active" : "locked";
 
   return (
     <>
-      <div
-        onClick={(e) => {
-          if (step.databaseId && isUnlocked && step.isCompleted) {
-            router.push(`/database/${step.databaseId}`);
-          } else {
-            handleNodeClick(e as React.MouseEvent);
-          }
-        }}
-        className={`flex flex-col items-center group flex-1 relative ${step.databaseId && isUnlocked ? "cursor-pointer" : "cursor-default"}`}
-      >
-        {idx < totalSteps - 1 && (
-          <div
-            className={`absolute top-[10px] -right-3 sm:-right-4 w-5 h-5 flex items-center justify-center bg-canvas rounded-full border z-0 transition-colors
-            ${step.isCompleted ? "border-accent text-accent" : "border-border text-border"}`}
-          >
-            <ChevronRight size={12} strokeWidth={3} />
-          </div>
+      <div className="relative flex flex-col items-center flex-1 min-w-0">
+        {!isLast && (
+          <>
+            <div className="absolute top-5 left-1/2 w-[calc(100%+8px)] h-1 bg-stroke -z-10" />
+            <div
+              className={`absolute top-5 left-1/2 w-[calc(100%+8px)] h-1 -z-10 transition-colors duration-500 ease-in-out ${step.isCompleted ? "bg-accent" : "bg-transparent"}`}
+            />
+          </>
         )}
 
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 z-10
-          ${
-            step.isCompleted
-              ? "bg-success text-white shadow-[0_0_12px_rgba(var(--color-success),0.4)]"
-              : isUnlocked
-                ? "bg-surface border-2 border-accent text-accent shadow-[0_0_8px_rgba(var(--color-accent),0.3)] group-hover:bg-accent group-hover:text-white"
-                : "bg-surface border-2 border-border text-ink-muted/50"
-          }`}
+          onClick={() => {
+            if (status === "completed" && step.databaseId) {
+              router.push(`/database/${step.databaseId}`);
+            } else if (status === "active") {
+              setShowPicker(true);
+            }
+          }}
+          className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shrink-0 z-10
+            ${
+              status === "completed"
+                ? "bg-success cursor-pointer"
+                : status === "active"
+                  ? "bg-surface border-2 border-accent text-accent cursor-pointer"
+                  : "bg-surface border-2 border-stroke cursor-default"
+            }`}
         >
           {isCreating ? (
-            <Loader2 size={18} className="animate-spin" />
-          ) : step.isCompleted ? (
-            <Check size={18} strokeWidth={3} />
-          ) : isUnlocked ? (
-            <Plus size={18} />
+            <Loader2 size={18} className="animate-spin text-accent" />
+          ) : status === "completed" ? (
+            <Check size={18} strokeWidth={3} className="text-white" />
+          ) : status === "active" ? (
+            <Plus size={18} strokeWidth={2.5} />
           ) : (
-            <Lock size={16} />
+            <Lock size={16} className="text-ink-muted/50" />
           )}
         </div>
 
-        <span
-          className={`text-sm mt-3 font-medium text-center px-1 transition-colors
-          ${step.isCompleted ? "text-ink" : isUnlocked ? "text-ink group-hover:text-accent" : "text-ink-secondary/50"}`}
+        <div
+          className={`w-full mt-4 rounded-lg border p-2 text-center transition-colors duration-150
+            ${
+              status === "completed"
+                ? "border-success/30 bg-success-bg/50"
+                : status === "active"
+                  ? "border-accent/25 bg-accent/5"
+                  : "border-stroke"
+            }`}
         >
-          {stepDisplayName}
-        </span>
+          <span
+            className={`text-xs font-semibold block truncate
+              ${status === "completed" ? "text-ink" : status === "active" ? "text-ink" : "text-ink-muted"}`}
+          >
+            {stepDisplayName}
+          </span>
 
-        <div className="mt-2 flex flex-col items-center gap-1">
-          {step.isCompleted && (
-            <span className="text-xs text-ink-secondary">
-              {step.recordCount} {t("recordsCount", { count: step.recordCount })}
-            </span>
-          )}
-          {step.databaseId && !step.isCompleted && (
-            <button
-              type="button"
-              disabled={!isUnlocked}
-              onClick={(e) => {
-                if (isUnlocked) {
+          <div className="mt-1.5 flex flex-col items-center gap-1">
+            {status === "completed" && (
+              <span className="text-[10px] text-ink-secondary tabular-nums">
+                {step.recordCount} {t("recordsCount", { count: step.recordCount })}
+              </span>
+            )}
+
+            {status === "active" && step.databaseId && (
+              <button
+                type="button"
+                onClick={(e) => {
                   e.stopPropagation();
                   setShowPicker(true);
-                }
-              }}
-              className={`text-xs font-medium px-3 py-1 rounded-lg border transition-colors duration-150
-                ${
-                  isUnlocked
-                    ? "border-accent text-accent hover:bg-accent hover:text-white"
-                    : "border-border text-ink-secondary/40 cursor-not-allowed"
-                }`}
-            >
-              {t("newRecord")}
-            </button>
-          )}
-          {!step.databaseId && <span className="text-xs text-ink-muted/40">{t("noDatabase")}</span>}
+                }}
+                className="text-[10px] font-medium px-2 py-0.5 rounded border border-accent text-accent transition-colors duration-150"
+              >
+                {t("newRecord")}
+              </button>
+            )}
+
+            {status === "locked" && <span className="text-[10px] text-ink-muted/40">{t("noDatabase")}</span>}
+          </div>
         </div>
       </div>
 

@@ -6,14 +6,12 @@ export function updateDatabase(
   databaseId: string,
   data: {
     name?: string;
-    title?: string;
     icon?: string;
     sectionId?: string | null;
     position?: number;
     recordLimit?: number | null;
     useDefaultTemplate?: boolean;
     isLocked?: boolean;
-    enableStats?: boolean;
   },
 ) {
   return apiFetch<DatabaseResponseDto>(`/databases/${databaseId}`, {
@@ -22,7 +20,7 @@ export function updateDatabase(
   });
 }
 
-export function createDatabase(spaceId: string, data: { name: string; title: string; type?: string; sectionId?: string; icon?: string }) {
+export function createDatabase(spaceId: string, data: { name: string; type?: string; sectionId?: string; icon?: string }) {
   return apiFetch<DatabaseResponseDto>(`/databases`, {
     method: "POST",
     body: { ...data, spaceId },

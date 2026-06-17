@@ -68,16 +68,25 @@ function extractTextFromJson(json: unknown): string {
     }
   } else {
     const record = json as Record<string, unknown>;
+
     if (typeof record.text === "string") text += " " + record.text;
     if (typeof record.title === "string") text += " " + record.title;
+    if (typeof record.html === "string") {
+      const plainText = record.html.replace(/<[^>]*>?/gm, " ");
+      text += " " + plainText;
+    }
+    if (typeof record.caption === "string") text += " " + record.caption;
+    if (typeof record.name === "string") text += " " + record.name;
 
-    for (const key in record) {
-      if (key === "text" || key === "title") continue;
-      text += " " + extractTextFromJson(record[key]);
+    const containerFields = ["rows", "columns", "children", "items", "data", "content"];
+    for (const field of containerFields) {
+      if (record[field]) {
+        text += " " + extractTextFromJson(record[field]);
+      }
     }
   }
 
-  return text.trim();
+  return text.replace(/\s+/g, " ").trim();
 }
 
 function highlight(text: string, term: string): React.ReactNode {
@@ -157,7 +166,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
   }, [query, space, t, saveRecentSearch]);
 
   function handleResultClick(result: SpaceSearchResultDto) {
-    router.push(`/database/${result.databaseId}`);
+    router.push(`/record/${result.id}`);
     onClose();
   }
 
@@ -178,7 +187,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
     (accumulator, result) => {
       const key = result.databaseId;
       if (!accumulator[key]) {
-        const title = result.sectionName ? `${result.sectionName} / ${result.databaseTitle}` : result.databaseTitle;
+        const title = result.sectionName ? `${result.sectionName} / ${result.databaseName}` : result.databaseName;
         accumulator[key] = { title, databaseId: result.databaseId, items: [] };
       }
       accumulator[key]!.items.push(result);
@@ -284,7 +293,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
                       onClick={() => handleShowAll(databaseId)}
                       className="w-full px-11 py-1.5 text-left text-xs text-accent hover:underline transition-all duration-150"
                     >
-                      {t("showAllResults", { database: group.items[0]?.databaseTitle ?? "" })}
+                      {t("showAllResults", { database: group.items[0]?.databaseName ?? "" })}
                     </button>
                   )}
                 </div>

@@ -24,7 +24,7 @@
     "section": "Section",
     "record": "Record",
     "view": "View",
-    "manageSettings": "Manage your",
+    "manageSettings": "Manage your {label} settings",
     "settings": "Settings",
     "integration": "Integrations"
   },
@@ -38,7 +38,8 @@
     "mt5Description": "Connect your MetaTrader 5 account to import trades.",
     "add": "Add",
     "connect": "Connect",
-    "reconnect": "Reconnect",
+    "edit": "Edit",
+    "editConnection": "Edit Connection",
     "disconnect": "Disconnect",
     "syncNow": "Sync now",
     "cancel": "Cancel",
@@ -212,6 +213,10 @@
     "passwordChanged": "Password changed successfully.",
     "allFieldsRequired": "All fields are required.",
     "passwordsNotMatch": "New passwords do not match.",
+    "setPasswordDesc": "You signed up with Google. Set a password to also enable email login.",
+    "setPassword": "Set password",
+    "settingPassword": "Setting…",
+    "passwordSet": "Password set successfully.",
     "changeAvatar": "Change avatar",
     "removePhoto": "Remove photo",
     "changePassword": "Change password",
@@ -237,6 +242,17 @@
     "dateFormat": "Date format",
     "placeholderDateFormat": "e.g. DD/MM/YYYY",
     "timezone": "Timezone",
-    "placeholderTimezone": "Search timezone…"
+    "placeholderTimezone": "Search timezone…",
+    "logoutAllDevices": "Log out of all devices",
+    "logoutAllDevicesDesc": "Terminate all active sessions across all devices.",
+    "loggingOutAll": "Logging out…",
+    "logoutAllSuccess": "Logged out of all devices.",
+    "activeSessions": "Active sessions",
+    "sessionStarted": "Started",
+    "sessionExpires": "Expires",
+    "sessionCurrent": "Current",
+    "sessionRevoke": "End session",
+    "sessionRevoking": "Ending…",
+    "noOtherSessions": "No other active sessions."
   }
 }

@@ -3,12 +3,13 @@
 import { ModalShell } from "@/components/ui/overlays/modal-shell";
 import { Bell, CheckCheck, CircleAlert, Info, Trash2, Bot, Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useNotificationsQuery } from "@/hooks/api/use-notifications-query";
 import { useNotificationMutations } from "@/hooks/api/use-notification-mutations";
 import { useDateFormat } from "@/hooks/format/use-date-format";
+import { useUIContext } from "@/context/ui-context";
 import { NotificationType } from "@fixspace/domain";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 type NotificationsModalProps = {
   onClose: () => void;
@@ -18,17 +19,12 @@ export function NotificationsModal({ onClose }: NotificationsModalProps) {
   const t = useTranslations("NotificationsModal");
   const router = useRouter();
   const { formatDateTime } = useDateFormat();
+  const { openSettings } = useUIContext();
   const { data: notifications = [], isLoading } = useNotificationsQuery();
   const { markAllReadMutation, markReadMutation, clearMutation } = useNotificationMutations();
 
   const hasUnread = useMemo(() => notifications.some((notification) => !notification.isRead), [notifications]);
   const unreadCount = useMemo(() => notifications.filter((notification) => !notification.isRead).length, [notifications]);
-
-  useEffect(() => {
-    if (hasUnread && !markAllReadMutation.isPending) {
-      markAllReadMutation.mutate();
-    }
-  }, [hasUnread, markAllReadMutation]);
 
   function handleClearAll() {
     clearMutation.mutate();
@@ -38,7 +34,10 @@ export function NotificationsModal({ onClose }: NotificationsModalProps) {
     if (!isRead) {
       markReadMutation.mutate(id);
     }
-    if (link) {
+    if (link === "/settings") {
+      onClose();
+      openSettings("integration");
+    } else if (link) {
       router.push(link);
       onClose();
     }

@@ -11,6 +11,9 @@ type TextInputProps = {
   error?: string;
   hint?: string;
   type?: string;
+  onBlur?: () => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  autoFocus?: boolean;
 };
 
 export function TextInput({
@@ -24,6 +27,9 @@ export function TextInput({
   error,
   hint,
   type = "text",
+  onBlur,
+  onKeyDown,
+  autoFocus,
 }: TextInputProps) {
   const base = size === "sm" ? "field-input !py-1 !text-xs" : "field-input";
   const className = `${base}${error ? " !border-error" : ""}`;
@@ -44,6 +50,9 @@ export function TextInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       disabled={disabled}
+      onBlur={onBlur}
+      onKeyDown={onKeyDown}
+      autoFocus={autoFocus}
       className={className}
     />
   );

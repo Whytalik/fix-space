@@ -46,7 +46,12 @@
     "setDefault": "Set as default",
     "delete": "Delete",
     "deleteViewTitle": "Delete view?",
-    "deleteViewMessage": "This will permanently delete this view and all its settings. This action cannot be undone."
+    "deleteViewMessage": "This will permanently delete this view and all its settings. This action cannot be undone.",
+    "errorCreate": "Failed to create view",
+    "errorUpdate": "Failed to update view",
+    "errorDelete": "Failed to delete view",
+    "errorDuplicate": "Failed to duplicate view",
+    "errorReorder": "Failed to reorder views"
   },
   "PropertyVisibilityPanel": {
     "title": "Properties",
@@ -54,7 +59,8 @@
     "showAll": "Show all",
     "hideAll": "Hide all",
     "relativeDates": "Use relative dates",
-    "columns": "Columns"
+    "columns": "Columns",
+    "searchPlaceholder": "Search properties..."
   },
   "FilterPanel": {
     "title": "Filter",
@@ -166,8 +172,10 @@
   "DatabaseTable": {
     "noProperties": "No properties defined for this database.",
     "noRecords": "No records yet.",
+    "addRecord": "New record",
     "untitled": "Untitled",
     "recordsOf": "{from}–{to} of {total} records",
+    "recordsOfLimited": "{from}–{to} of {total} records (limited from {actualTotal})",
     "rowsPerPage": "Rows per page:",
     "refresh": "Refresh database",
     "previousPage": "Previous page",
@@ -177,7 +185,9 @@
     "delete": "Delete",
     "deleting": "Deleting…",
     "deleteRecords": "Delete records?",
-    "deleteRecordsDesc": "This will permanently delete {count, plural, one {# record} other {# records}}. This action cannot be undone."
+    "deleteRecordsDesc": "This will permanently delete {count, plural, one {# record} other {# records}}. This action cannot be undone.",
+    "automatedByIntegration": "Automated by integration",
+    "showAllRecords": "Show {count} more records"
   },
   "DatabaseEdit": {
     "title": "Title",
@@ -199,8 +209,21 @@
     "placeholderTitle": "e.g. Trading Journal",
     "icon": "Icon",
     "chooseIcon": "Choose an icon…",
-    "enableStats": "Include in Statistics",
-    "enableStatsDesc": "Show auto-generated analytics for this database on the Statistics page."
+    "automations": "Automations",
+    "data": "Import & Export",
+    "import": "Import",
+    "export": "Export",
+    "importDesc": "Import records from a CSV file. Columns will be mapped to database properties.",
+    "importCsv": "Import CSV",
+    "exportDesc": "Export all records from this database to a CSV file.",
+    "importFeaturesTitle": "Import Features",
+    "importFeature1": "Automatic column mapping by property names",
+    "importFeature2": "Supports text, numbers, dates, and select options",
+    "importFeature3": "Preview and review mapping before final import",
+    "exportFeaturesTitle": "Export Features",
+    "exportFeature1": "Select custom properties to include in file",
+    "exportFeature2": "Filter records by active view settings",
+    "exportFeature3": "Metadata fields (timestamps, IDs) optional"
   },
   "PropertyEdit": {
     "properties": "Properties",
@@ -209,13 +232,15 @@
     "addGroup": "Add group",
     "addProperty": "Add property",
     "groupName": "Group name…",
+    "general": "General",
     "noProperties": "No properties yet.",
     "deleteProperty": "Delete property?",
     "deletePropertyDesc": "This will permanently delete the property and all its values. This action cannot be undone.",
     "deleteKeyPropertyDesc": "This is a system property. Formulas and automations that reference it will stop working. This action cannot be undone.",
     "deleteGroup": "Delete group?",
     "deleteGroupDesc": "The group will be removed and all its properties will become ungrouped. Properties themselves will not be deleted.",
-    "delete": "Delete"
+    "delete": "Delete",
+    "automatedByIntegration": "Automated by integration"
   },
   "TemplateEdit": {
     "title": "Templates",
@@ -250,19 +275,22 @@
     "save": "Save",
     "tokensInfoTitle": "Template Tokens",
     "tokensInfoDesc": "Use tokens in the record name pattern to automatically generate names for new records. Tokens are replaced with actual values at the moment of creation.",
+    "tokensSupported": "Tokens supported: {{today}}, {{day}}, {{month}}, {{count}}",
     "input": "Input",
     "result": "Result",
     "tokens": {
-      "today": "Current date in DD.MM.YYYY format",
+      "today": "DD.MM.YYYY",
       "year": "Current year",
-      "month": "Current month index (01-12)",
-      "count": "Total record count in database + 1",
-      "countWithValue": "Count of records where Prop equals Value + 1"
+      "month": "Month index (01–12)",
+      "month_name": "Month name (January...December)",
+      "count": "Record count + 1",
+      "countWithValue": "Filtered count + 1"
     },
     "content": "Content",
     "icon": "Icon",
     "chooseIcon": "Choose an icon…",
-    "template": "Шаблон"
+    "template": "Шаблон",
+    "automatedByIntegration": "Automated by integration"
   },
   "PropertyForm": {
     "newProperty": "New property",
@@ -286,7 +314,21 @@
     "addProperty": "Add property",
     "chooseType": "choose type",
     "saveChanges": "Save changes",
-    "addPropertyTitle": "Add {type} property"
+    "addPropertyTitle": "Add {type} property",
+    "conditionalVisibility": "Conditional Visibility",
+    "addVisibilityCondition": "Add condition",
+    "visibilityWhen": "Show this field only when:",
+    "visibilityPropertyPlaceholder": "Choose property…",
+    "visibilityValuePlaceholder": "Value…",
+    "removeCondition": "Remove condition",
+    "opEquals": "equals",
+    "opNotEquals": "does not equal",
+    "opContains": "contains",
+    "opExists": "is not empty",
+    "opNotExists": "is empty",
+    "opIn": "is one of",
+    "opNotIn": "is not one of",
+    "addHint": "Add hint"
   },
   "AddDatabaseModal": {
     "addDatabase": "New Database",
@@ -315,7 +357,7 @@
     "chooseTemplateDesc": "Select a template to apply to the new record.",
     "noTemplate": "No template",
     "default": "Default",
-    "applyTemplate": "Застосувати шаблон"
+    "applyTemplate": "Apply template"
   },
   "TemplateEditModal": {
     "templateName": "Template name",
@@ -435,7 +477,16 @@
     "errorReadFile": "Failed to read file",
     "errorValidation": "Validation failed",
     "errorImport": "Import failed",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "unknownOptionsTitle": "{count} row(s) contain unknown options",
+    "unknownOptionsAdd": "Add as new option",
+    "unknownOptionsSkip": "Skip rows ({count})",
+    "partialImport": "Import rows partially (skip fields with errors instead of the whole row)",
+    "titleTemplate": "Choose a template",
+    "templateHint": "The template will be applied to every imported record",
+    "noTemplate": "No template",
+    "noTemplates": "This database has no templates yet",
+    "import": "Import"
   },
   "ExportCsvButton": {
     "label": "Export CSV",
@@ -460,7 +511,9 @@
     "decimalPlaces": "Decimal places",
     "currencySymbol": "Currency symbol",
     "prefix": "Prefix",
+    "prefixPlaceholder": "e.g. ≈",
     "suffix": "Suffix",
+    "suffixPlaceholder": "e.g. kg",
     "defaultValue": "Default value",
     "defaultValueSeconds": "Default value (seconds)",
     "dateFormat": "Date format",
@@ -500,8 +553,17 @@
     "statusCategories": {
       "todo": "Todo",
       "in_progress": "In Progress",
-      "done": "Done"
+      "done": "Done",
+      "complete": "Complete"
     },
-    "categoryPlaceholder": "{category} label…"
+    "categoryPlaceholder": "{category} label…",
+    "maxStars": "Max stars",
+    "allowHalf": "Allow half stars"
+  },
+  "GroupSettings": {
+    "title": "Group: {name}",
+    "conditionalVisibility": "Conditional Visibility",
+    "cancel": "Cancel",
+    "save": "Save"
   }
 }

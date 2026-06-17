@@ -1,44 +1,67 @@
 "use client";
 
-import { PropertyType } from "@fixspace/domain/enums";
+import { PropertyType } from "@fixspace/domain";
 import type { PropertyResponseDto } from "@fixspace/domain";
 import { PropertyIcon } from "@/app/[locale]/(dashboard)/database/[id]/_components/properties/ui/property-icon";
 import { PropertyHint } from "@/app/[locale]/(dashboard)/database/[id]/_components/properties/ui/property-hint";
 import { Link2 } from "lucide-react";
 import { CellValue } from "@/app/[locale]/(dashboard)/database/[id]/_components/cell-value";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { createPropertyValue, updatePropertyValue } from "@/lib/api/property-value";
 import { updateRecord } from "@/lib/api/record";
+import { createTemplatePropertyValue, updateTemplatePropertyValue } from "@/lib/api/template-property-value";
 import { queryKeys } from "@/lib/api/query-keys";
 
-interface RecordPropertyRowProps {
-  recordId: string;
+interface PropertyRowProps {
+  entityId: string;
+  mode: "record" | "template";
   property: PropertyResponseDto;
   value: unknown;
   valueId?: string;
 }
 
-export function RecordPropertyRow({ recordId, property, value, valueId }: RecordPropertyRowProps) {
-  const isNumeric = property.type === PropertyType.NUMBER || property.type === PropertyType.FORMULA;
+export function PropertyRow({ entityId, mode, property, value, valueId }: PropertyRowProps) {
+  const tRecord = useTranslations("RecordPage");
+  const tTemplate = useTranslations("TemplateEdit");
+  const t = mode === "record" ? tRecord : tTemplate;
+  const isNumeric = property.type === PropertyType.NUMBER;
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: async (newValue: unknown) => {
       const isPrimary = property.position === 0 && property.type === PropertyType.TEXT;
 
-      if (isPrimary) {
-        return updateRecord(recordId, { name: newValue as string });
-      }
+      if (mode === "record") {
+        if (isPrimary) {
+          return updateRecord(entityId, { name: newValue as string });
+        }
 
-      if (valueId) {
-        return updatePropertyValue(recordId, valueId, { value: newValue });
+        if (valueId) {
+          return updatePropertyValue(entityId, valueId, { value: newValue });
+        } else {
+          return createPropertyValue(entityId, { propertyId: property.id, value: newValue });
+        }
       } else {
-        return createPropertyValue(recordId, { propertyId: property.id, value: newValue });
+        if (valueId) {
+          return updateTemplatePropertyValue(valueId, { value: newValue });
+        } else {
+          return createTemplatePropertyValue({
+            templateId: entityId,
+            propertyId: property.id,
+            value: newValue,
+          });
+        }
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["records", "detail", recordId] });
-      queryClient.invalidateQueries({ queryKey: queryKeys.records.all(property.databaseId) });
+      if (mode === "record") {
+        queryClient.invalidateQueries({ queryKey: ["records", "detail", entityId] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.records.all(property.databaseId) });
+      } else {
+        queryClient.invalidateQueries({ queryKey: queryKeys.templates.values(entityId) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.templates.detail(entityId) });
+      }
     },
   });
 
@@ -51,7 +74,7 @@ export function RecordPropertyRow({ recordId, property, value, valueId }: Record
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-sm text-ink-secondary truncate">{property.name}</span>
           {property.integrationKey && (
-            <span title="Automated by integration" className="flex items-center">
+            <span title={t("automatedByIntegration")} className="flex items-center">
               <Link2 size={12} className="text-accent shrink-0" />
             </span>
           )}
@@ -68,7 +91,7 @@ export function RecordPropertyRow({ recordId, property, value, valueId }: Record
           config={property.config}
           readOnly={false}
           ghost
-          onChange={(value) => mutation.mutate(value)}
+          onChange={(newValue) => mutation.mutate(newValue)}
         />
       </div>
     </div>

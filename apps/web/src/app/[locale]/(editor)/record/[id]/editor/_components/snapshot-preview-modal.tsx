@@ -37,7 +37,7 @@ function PreviewContent({ content, title }: { content: ContentSchema; title?: st
 
   return (
     <div className="space-y-6">
-      {title && <p className="text-[10px] font-bold uppercase tracking-widest text-ink-muted mb-4">{title}</p>}
+      {title && <p className="text-xs font-bold uppercase tracking-widest text-ink-muted mb-4">{title}</p>}
       {content.rows.map((row) => (
         <div key={row.id} className="flex gap-4">
           {row.columns.map((column) => (
@@ -120,7 +120,7 @@ export function SnapshotPreviewModal({ isOpen, onClose, snapshot, currentContent
 
           {isComparing && currentContent && (
             <div className="flex-1 overflow-y-auto p-8 scrollbar">
-              <PreviewContent content={currentContent} title="Current Version" />
+              <PreviewContent content={currentContent} title={t("currentVersion")} />
             </div>
           )}
         </div>
@@ -134,7 +134,7 @@ export function SnapshotPreviewModal({ isOpen, onClose, snapshot, currentContent
                 onClick={() => setIsComparing(!isComparing)}
                 leftIcon={<ArrowLeftRight size={16} />}
               >
-                {isComparing ? "Exit Comparison" : t("compareVersions")}
+                {isComparing ? t("exitComparison") : t("compareVersions")}
               </Button>
             )}
           </div>

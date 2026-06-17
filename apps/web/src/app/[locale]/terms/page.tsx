@@ -29,13 +29,13 @@ export default function TermsPage() {
                     <ul className="flex flex-col gap-3">
                       {[0, 1, 2, 3, 4].map((itemIdx) => {
                         const itemKey = `sections.${index}.items.${itemIdx}`;
-                        const translation = t(itemKey);
-                        if (translation === itemKey) return null;
+                        const translatedText = t(itemKey);
+                        if (translatedText === itemKey) return null;
 
                         return (
                           <li key={itemIdx} className="flex gap-3 text-sm text-ink-secondary leading-relaxed group">
                             <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent shrink-0 transition-transform group-hover:scale-125" />
-                            <span>{translation}</span>
+                            <span>{translatedText}</span>
                           </li>
                         );
                       })}

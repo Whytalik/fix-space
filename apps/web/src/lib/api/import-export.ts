@@ -21,12 +21,18 @@ export function executeCsvImport(
   databaseId: string,
   mapping: Record<string, string>,
   maxRows?: number,
+  addUnknownOptionPropertyIds?: string[],
+  partialImport?: boolean,
+  templateId?: string,
 ): Promise<ImportResultResponseDto> {
   const form = new FormData();
   form.append("file", file);
   form.append("databaseId", databaseId);
   form.append("mapping", JSON.stringify(mapping));
   if (maxRows !== undefined) form.append("maxRows", String(maxRows));
+  if (addUnknownOptionPropertyIds?.length) form.append("addUnknownOptionPropertyIds", JSON.stringify(addUnknownOptionPropertyIds));
+  if (partialImport) form.append("partialImport", "true");
+  if (templateId) form.append("templateId", templateId);
   return apiFetch<ImportResultResponseDto>("/import-export/import", { method: "POST", body: form });
 }
 

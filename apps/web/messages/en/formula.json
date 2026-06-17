@@ -40,6 +40,18 @@
       "RULE_COMPLIANCE": {
         "name": "Rule Compliance",
         "description": "Percentage of selected checkboxes that are checked"
+      },
+      "SUBTRACT": {
+        "name": "Subtract",
+        "description": "Subtracts one number field from another (A − B)"
+      },
+      "SUM_FIELDS": {
+        "name": "Sum Fields",
+        "description": "Adds multiple number fields together"
+      },
+      "FIELD_COMPARE": {
+        "name": "Field Compare",
+        "description": "Compares two fields and returns a text label"
       }
     },
     "gallery": {
@@ -91,7 +103,17 @@
       "relationField": "Relation field",
       "operation": "Operation",
       "relatedField": "Field from related database",
-      "expression": "Expression"
+      "expression": "Expression",
+      "subtractFieldA": "Field A (minuend)",
+      "subtractFieldB": "Field B (subtrahend)",
+      "sumFieldsLabel": "Number fields (min. 2)",
+      "selectNumberFields": "Select number fields",
+      "compareFieldA": "Field A",
+      "compareFieldB": "Field B",
+      "compareOperator": "Comparison",
+      "compareThenLabel": "If true → label",
+      "compareElseLabel": "If false → label",
+      "compareLabelPlaceholder": "e.g. Yes"
     },
     "customBuilder": {
       "calculate": "Calculate",
@@ -118,7 +140,52 @@
       "valuePlaceholder": "e.g. WON or 100",
       "thenPlaceholder": "e.g. Done",
       "elsePlaceholder": "e.g. Not done",
-      "expression": "Expression"
+      "expression": "Expression",
+      "properties": "Properties",
+      "functionsAndOperators": "Functions & Operators",
+      "helpPlaceholder": "Hover over a function or operator for help",
+      "labels": {
+        "IF": "If",
+        "AVG": "Average",
+        "SUM": "Sum",
+        "DATE_DIFF": "Date Diff",
+        "MAP": "Values from...",
+        "&&": "AND",
+        "||": "OR",
+        "==": "Equals",
+        ">": "Greater (>)",
+        "<": "Less (<)",
+        "add": "Add (+)",
+        "subtract": "Subtract (-)",
+        "multiply": "Multiply (*)",
+        "divide": "Divide (/)",
+        "comma": ",",
+        "openParen": "(",
+        "closeParen": ")"
+      },
+      "help": {
+        "functions": {
+          "IF": "Logical condition: IF(test, then, else)",
+          "AVG": "Arithmetic average of values in an array",
+          "SUM": "Sum of all values in an array",
+          "DATE_DIFF": "Difference between dates (days, hours, minutes, weeks)",
+          "MAP": "Get values of a specific field from an array of relations"
+        },
+        "operators": {
+          "+": "Addition or text concatenation",
+          "-": "Subtraction",
+          "*": "Multiplication",
+          "/": "Division",
+          "==": "Equality",
+          ">": "Greater than",
+          "<": "Less than",
+          "&&": "Logical AND (both conditions true)",
+          "||": "Logical OR (at least one condition true)",
+          ",": "Separator for function arguments",
+          "(": "Open parenthesis",
+          ")": "Close parenthesis"
+        }
+      }
     }
   }
 }

@@ -2,9 +2,10 @@
 
 import { Card } from "@/components/ui/primitives/display/card";
 import type { MarketSession } from "@fixspace/domain";
-import { Clock } from "lucide-react";
+import { Globe } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import { StatusDot } from "@/components/ui/primitives/display/badge";
 
 interface MarketSessionsProps {
   data: {
@@ -16,12 +17,23 @@ interface MarketSessionsProps {
 
 const ALL_SESSIONS = ["Tokyo", "Frankfurt", "London", "New York"];
 
-function formatNextSessionLocal(nextUtc: string): string {
+function getNextSessionLabel(nextUtc: string, locale: string, now: Date): string {
   const [hours, minutes] = nextUtc.split(":");
   if (!hours) return nextUtc;
-  const d = new Date();
+  const d = new Date(now);
   d.setUTCHours(Number(hours), minutes ? Number(minutes) : 0, 0, 0);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+
+  if (d <= now) {
+    d.setDate(d.getDate() + 1);
+  }
+
+  const timeStr = d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", hour12: false });
+  const dayDiff = Math.round((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (dayDiff === 0) return timeStr;
+
+  const dayName = d.toLocaleDateString(locale, { weekday: "long" });
+  return `${dayName} ${timeStr}`;
 }
 
 export function MarketSessions({ data }: MarketSessionsProps) {
@@ -52,26 +64,26 @@ export function MarketSessions({ data }: MarketSessionsProps) {
         .replace(/^./, (str) => str.toUpperCase())
     : data.dayOfWeek;
 
-  const isWeekendServer = data.dayOfWeek === "Saturday" || data.dayOfWeek === "Sunday";
-  const isWeekend = now ? now.getDay() === 0 || now.getDay() === 6 : isWeekendServer;
+  const isWeekend = now ? now.getDay() === 0 || now.getDay() === 6 : false;
 
   return (
-    <Card className="h-full flex flex-col justify-center">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="type-panel-title flex items-center gap-2">
-          <Clock className="w-5 h-5 text-accent" />
+    <Card className="h-full flex flex-col justify-center p-6 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-32 bg-surface-hover/20 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
+      <div className="relative z-10 flex items-center justify-between mb-5">
+        <h2 className="text-lg font-bold text-ink flex items-center gap-2.5">
+          <Globe className="w-5 h-5 text-accent" />
           {t("overview")}
         </h2>
         <span
-          className={`text-sm font-medium px-3 py-1 rounded-full border min-w-[200px] text-center ${
-            isWeekend ? "text-error border-error/50 bg-error-bg" : "text-ink-secondary bg-surface border-border"
+          className={`text-[11px] uppercase tracking-wider font-mono tabular-nums px-3 py-1.5 rounded-lg border ${
+            isWeekend ? "text-error border-error/20 bg-error-bg/50" : "text-ink-secondary border-stroke/50 bg-canvas/30"
           }`}
         >
           {displayTime}
         </span>
       </div>
 
-      <div className="flex gap-2">
+      <div className="relative z-10 flex gap-3">
         {ALL_SESSIONS.map((sessionName) => {
           const isActive = activeNames.includes(sessionName);
           const key = sessionName.toLowerCase().replace(" ", "");
@@ -79,21 +91,27 @@ export function MarketSessions({ data }: MarketSessionsProps) {
           return (
             <div
               key={sessionName}
-              className={`flex-1 rounded-xl p-3 text-center transition-colors border ${
-                isActive ? "bg-success-bg border-success text-success font-medium" : "bg-surface border-border text-ink-muted"
+              className={`flex-1 rounded-xl px-3 py-2.5 text-center transition-all duration-300 border ${
+                isActive ? "border-success/30 bg-success-bg/40 shadow-[0_0_15px_rgba(87,242,135,0.05)]" : "border-stroke/50 bg-canvas/30"
               }`}
             >
-              <div className="text-sm">{sessionT(sessionKey as Parameters<typeof sessionT>[0])}</div>
-              <div className="text-xs mt-1 opacity-80">{isActive ? t("active") : t("closed")}</div>
+              <div className={`text-[13px] font-semibold tracking-wide ${isActive ? "text-success" : "text-ink-muted"}`}>
+                {sessionT(sessionKey as Parameters<typeof sessionT>[0])}
+              </div>
+              <div className="mt-1 flex items-center justify-center gap-1.5">
+                <StatusDot variant={isActive ? "success" : "neutral"} label={isActive ? t("active") : t("closed")} />
+              </div>
             </div>
           );
         })}
       </div>
 
-      <div className="mt-4 text-sm text-ink-secondary flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-        {t("next")} {t("sessionIndicator.opensAt")}{" "}
-        <span className="font-semibold text-ink">{formatNextSessionLocal(data.nextSessionOpening)}</span>
+      <div className="relative z-10 mt-5 pt-4 border-t border-stroke/50 flex items-center gap-2.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-accent/80 animate-pulse shadow-[0_0_8px_rgba(37,99,235,0.4)]" />
+        <span className="text-[11px] uppercase tracking-wider font-semibold text-ink-muted">{t("next")}</span>
+        <span className="text-[13px] font-semibold font-mono tabular-nums text-ink">
+          {now ? getNextSessionLabel(data.nextSessionOpening, locale, now) : data.nextSessionOpening}
+        </span>
       </div>
     </Card>
   );

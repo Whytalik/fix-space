@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppContext } from "@/context/app-context";
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -24,11 +24,16 @@ interface SidebarProps {
 export function Sidebar({ initialCollapsed = false, initialExpandedSections = [], initialWidth = 250 }: SidebarProps) {
   const t = useTranslations("Sidebar");
   const { space, isLoading } = useAppContext();
-  const { collapsed, toggle, setCollapsedState, expandedSections, toggleSection, isMounted, width, changeWidth } = useSidebarState(
-    initialCollapsed,
-    initialExpandedSections,
-    initialWidth,
-  );
+  const { collapsed, toggle, setCollapsedState, expandedSections, toggleSection, setExpandedSectionsState, isMounted, width, changeWidth } =
+    useSidebarState(initialCollapsed, initialExpandedSections, initialWidth);
+
+  useEffect(() => {
+    if (space?.sections && isMounted && localStorage.getItem("sidebar-expanded-sections") === null) {
+      const allSectionIds = space.sections.map((s) => s.id);
+      setExpandedSectionsState(allSectionIds);
+    }
+  }, [space, isMounted, setExpandedSectionsState]);
+
   const { contentRef, sensors, verticalOnly, collisionDetection, activeDrag, handleDragStart, handleDragCancel, handleDragEnd } =
     useSidebarDnd();
   const [isResizing, setIsResizing] = useState(false);

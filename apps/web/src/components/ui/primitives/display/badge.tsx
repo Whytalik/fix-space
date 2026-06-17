@@ -21,7 +21,7 @@ export function Badge({ children, color, variant = "neutral", className = "" }: 
   const preset = color ? "" : variantCls[variant];
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${preset} ${className}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-medium ${preset} ${className}`}
       style={color ? { backgroundColor: `${color}20`, color } : undefined}
     >
       {children}

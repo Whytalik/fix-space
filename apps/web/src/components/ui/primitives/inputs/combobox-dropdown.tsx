@@ -26,17 +26,19 @@ export function ComboboxDropdown({ options, onSelect, selectedValue, placement =
             onMouseDown={() => onSelect(option.value)}
             className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface transition-colors duration-150 text-left"
           >
+            {option.iconElement ? (
+              <span className="shrink-0 text-ink-secondary">{option.iconElement}</span>
+            ) : option.icon ? (
+              <span className="shrink-0 text-ink-secondary">
+                <IconDisplay value={option.icon} size={14} />
+              </span>
+            ) : null}
             <span className="flex-1">
               {option.color ? (
                 <span
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
                   style={{ backgroundColor: `${option.color}20`, color: option.color }}
                 >
-                  {option.label}
-                </span>
-              ) : option.icon ? (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-elevated text-ink-secondary">
-                  <IconDisplay value={option.icon} size={12} />
                   {option.label}
                 </span>
               ) : (

@@ -2,7 +2,8 @@
   "UI": {
     "close": "Close",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "loading": "Loading"
   },
   "Search": {
     "placeholder": "Search records...",

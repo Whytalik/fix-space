@@ -17,12 +17,14 @@ import { createSpace, deleteSpace, duplicateSpace, updateSpace } from "@/lib/api
 import type { SpaceSettings as SpaceSettingsDto } from "@fixspace/domain";
 import { Copy, Globe, Pencil, Plus, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export function SpaceSettings() {
   const t = useTranslations("SpaceSettingsComp");
   const { spaces, updateSpaceInList, addSpace, removeSpace } = useAppContext();
-  const { showToast } = useUIContext();
+  const { showToast, closeSettings } = useUIContext();
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { data: fetchedSettings, isLoading } = useSpaceSettingsQuery();
@@ -165,6 +167,8 @@ export function SpaceSettings() {
       setNewName("");
       setNewIcon("");
       showToast(t("spaceCreated"), "success");
+      closeSettings();
+      router.push("/");
     },
     onError: (error) => {
       showToast(parseApiError(error), "error");

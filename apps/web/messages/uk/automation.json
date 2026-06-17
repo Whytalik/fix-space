@@ -54,6 +54,15 @@
     "propertyPlaceholder": "— оберіть властивість —",
     "databasePlaceholder": "— оберіть базу даних —",
     "noRelationFields": "— немає RELATION-полів —",
+    "dateValue": {
+      "today": "Сьогодні",
+      "tomorrow": "Завтра",
+      "relative": "Відносно",
+      "custom": "Довільна дата",
+      "in": "через",
+      "ago": "тому",
+      "days": "дн."
+    },
     "templates": {
       "dateOnChange": {
         "name": "Поставити дату при зміні",

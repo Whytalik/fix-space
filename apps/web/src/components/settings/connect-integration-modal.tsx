@@ -33,12 +33,11 @@ export function ConnectIntegrationModal({ isOpen, onClose, service, existing }: 
   const queryClient = useQueryClient();
   const { spaces, space: currentSpace } = useAppContext();
 
-  const isReconnect = !!existing;
+  const isEdit = !!existing;
   const [name, setName] = useState(existing?.name ?? "");
   const [spaceId, setSpaceId] = useState(existing?.spaceId ?? currentSpace?.id ?? "");
   const [form, setForm] = useState<CredentialValues>({});
 
-  // State for MT5 success screen
   const [mt5Result, setMt5Result] = useState<IntegrationConnectionResponseDto | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -56,16 +55,19 @@ export function ConnectIntegrationModal({ isOpen, onClose, service, existing }: 
 
   const mutation = useMutation({
     mutationFn: () => {
-      const credentials = form as unknown as ExchangeCredentials | Mt5Credentials;
-
-      if (isReconnect) {
-        return updateIntegrationConnection(existing.id, { credentials: { ...credentials, service }, name, spaceId });
+      if (isEdit) {
+        return updateIntegrationConnection(existing.id, { name, spaceId });
       }
-      return createIntegrationConnection({ service, name, spaceId, credentials: { ...credentials, service } });
+      return createIntegrationConnection({
+        service,
+        name,
+        spaceId,
+        credentials: { ...form, service } as unknown as ExchangeCredentials | Mt5Credentials,
+      });
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.integrationConnections.all() });
-      if (service === IntegrationService.METATRADER5 && !isReconnect) {
+      if (service === IntegrationService.METATRADER5 && !isEdit) {
         setMt5Result(data);
       } else {
         onClose();
@@ -76,6 +78,7 @@ export function ConnectIntegrationModal({ isOpen, onClose, service, existing }: 
   const isFormValid = () => {
     if (!name.trim()) return false;
     if (!spaceId) return false;
+    if (isEdit) return true;
     return metadata.fields.every((f) => !!form[f.id]);
   };
 
@@ -84,7 +87,6 @@ export function ConnectIntegrationModal({ isOpen, onClose, service, existing }: 
     onClose();
   };
 
-  // MT5 Success Screen (Instructions)
   if (mt5Result) {
     const apiToken = mt5Result.apiToken ?? "Error: Token not found";
     const webhookUrl = `${window.location.origin}/api/integration-connections/mt5/webhook`;
@@ -188,7 +190,7 @@ export function ConnectIntegrationModal({ isOpen, onClose, service, existing }: 
     <ModalShell
       isOpen={isOpen}
       onClose={handleClose}
-      title={isReconnect ? t("reconnect") : t("connectService", { service: metadata.label })}
+      title={isEdit ? t("editConnection") : t("connectService", { service: metadata.label })}
       size="md"
       footer={
         <div className="flex justify-end gap-3">
@@ -196,7 +198,7 @@ export function ConnectIntegrationModal({ isOpen, onClose, service, existing }: 
             {t("cancel")}
           </Button>
           <Button type="button" loading={mutation.isPending} disabled={!isFormValid()} onClick={() => mutation.mutate()}>
-            {isReconnect ? t("reconnect") : t("connect")}
+            {isEdit ? t("edit") : t("connect")}
           </Button>
         </div>
       }
@@ -220,7 +222,7 @@ export function ConnectIntegrationModal({ isOpen, onClose, service, existing }: 
           />
         </div>
 
-        {service === IntegrationService.METATRADER5 && (
+        {!isEdit && service === IntegrationService.METATRADER5 && (
           <p className="text-sm text-ink-secondary p-3 bg-canvas border border-stroke rounded-2xl">
             {t("mt5CreationNotice", {
               fallback:
@@ -229,18 +231,19 @@ export function ConnectIntegrationModal({ isOpen, onClose, service, existing }: 
           </p>
         )}
 
-        {metadata.fields.map((field) => (
-          <FormField
-            key={field.id}
-            id={field.id}
-            label={t(field.labelKey)}
-            placeholder={t(field.placeholderKey)}
-            type={field.type}
-            value={form[field.id] ?? ""}
-            onChange={(e) => updateField(field.id, e.target.value)}
-            autoComplete="off"
-          />
-        ))}
+        {!isEdit &&
+          metadata.fields.map((field) => (
+            <FormField
+              key={field.id}
+              id={field.id}
+              label={t(field.labelKey)}
+              placeholder={t(field.placeholderKey)}
+              type={field.type}
+              value={form[field.id] ?? ""}
+              onChange={(e) => updateField(field.id, e.target.value)}
+              autoComplete="off"
+            />
+          ))}
 
         {mutation.isError && <p className="text-sm text-error">{t("connectionError")}</p>}
       </div>
