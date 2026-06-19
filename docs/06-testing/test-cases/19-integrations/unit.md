@@ -105,3 +105,334 @@
 ---
 
 ---
+
+### [x] TC-INT-U-050: IntegrationConnectionService.findAll — отримання списку підключень
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-077             |
+| **Issue**    | —                  |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P3                 |
+
+**Кроки:**
+
+1. Налаштувати мок репозиторію на повернення списку підключень для користувача.
+2. Викликати `service.findAll(userId)`.
+3. Перевірити, що повернено масив з підключеннями.
+
+**Очікуваний результат:**
+
+- Метод повертає масив `IntegrationConnectionResponseDto[]`.
+- Репозиторій викликано з правильним userId.
+
+---
+
+---
+
+### [x] TC-INT-U-052: IntegrationConnectionService.findOne — отримання одного підключення
+
+| Поле         | Значення                |
+| ------------ | ----------------------- |
+| **US**       | US-077                  |
+| **Issue**    | —                       |
+| **TS**       | —                       |
+| **Метод**    | Unit (Jest)             |
+| **Техніка**  | Boundary Value Analysis |
+| **Priority** | P3                      |
+
+**Кроки:**
+
+1. Налаштувати мок `findByOwner` на повернення підключення.
+2. Викликати `service.findOne(id, userId)`.
+3. Повторити з моком `findByOwner = null`.
+
+**Очікуваний результат:**
+
+- При знайденому підключенні — повертається DTO.
+- При `null` — викидається `NotFoundException`.
+
+---
+
+---
+
+### [x] TC-INT-U-053: IntegrationConnectionService.create — створення підключення (Binance)
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-078             |
+| **Issue**    | —                  |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P3                 |
+
+**Кроки:**
+
+1. Налаштувати моки: space знайдено, ліміт не перевищено, credentials валідні.
+2. Викликати `service.create(userId, dto)`.
+3. Перевірити, що створено підключення і створено сповіщення.
+
+**Очікуваний результат:**
+
+- Метод повертає `IntegrationConnectionResponseDto`.
+- Викликано `notificationService.create`.
+
+---
+
+---
+
+### [x] TC-INT-U-054: IntegrationConnectionService.create — MT5 токен генерація
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-078             |
+| **Issue**    | —                  |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P3                 |
+
+**Кроки:**
+
+1. Налаштувати моки для MT5 сервісу.
+2. Викликати `service.create` з `service = METATRADER5`.
+3. Перевірити, що credentials містять apiToken з префіксом `sk_`.
+
+**Очікуваний результат:**
+
+- Згенеровано токен через `crypto.randomBytes()` (не `Math.random()`).
+- Токен повертається в response.
+
+---
+
+---
+
+### [x] TC-INT-U-055: IntegrationConnectionService.create — ліміт підключень
+
+| Поле         | Значення                |
+| ------------ | ----------------------- |
+| **US**       | US-078                  |
+| **Issue**    | —                       |
+| **TS**       | —                       |
+| **Метод**    | Unit (Jest)             |
+| **Техніка**  | Boundary Value Analysis |
+| **Priority** | P3                      |
+
+**Кроки:**
+
+1. Налаштувати мок `countBySpaceAndService` на повернення ліміту.
+2. Викликати `service.create(userId, dto)`.
+
+**Очікуваний результат:**
+
+- Викидається `BadRequestException`.
+- Підключення не створюється.
+
+---
+
+---
+
+### [x] TC-INT-U-056: IntegrationConnectionService.update — оновлення підключення
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-079             |
+| **Issue**    | —                  |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P3                 |
+
+**Кроки:**
+
+1. Налаштувати мок `findByOwner` на повернення підключення.
+2. Викликати `service.update(id, userId, { name: "New" })`.
+3. Перевірити, що репозиторій оновлено і кеш очищено.
+
+**Очікуваний результат:**
+
+- Метод повертає оновлений DTO.
+- `cacheService.deletePattern` викликано.
+
+---
+
+---
+
+### [x] TC-INT-U-057: IntegrationConnectionService.update — простір з лімітом
+
+| Поле         | Значення                |
+| ------------ | ----------------------- |
+| **US**       | US-079                  |
+| **Issue**    | —                       |
+| **TS**       | —                       |
+| **Метод**    | Unit (Jest)             |
+| **Техніка**  | Boundary Value Analysis |
+| **Priority** | P3                      |
+
+**Кроки:**
+
+1. Налаштувати моки: підключення знайдено, новий простір досяг ліміту.
+2. Викликати `service.update(id, userId, { spaceId: "space-2" })`.
+
+**Очікуваний результат:**
+
+- Викидається `BadRequestException`.
+- Підключення не оновлюється.
+
+---
+
+---
+
+### [x] TC-INT-U-058: IntegrationConnectionService.delete — видалення підключення
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-080             |
+| **Issue**    | —                  |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P3                 |
+
+**Кроки:**
+
+1. Налаштувати мок `findByOwner` на повернення підключення.
+2. Викликати `service.delete(id, userId)`.
+3. Перевірити виклик `repo.delete` та `cacheService.deletePattern`.
+
+**Очікуваний результат:**
+
+- Підключення видалено, кеш очищено.
+
+---
+
+---
+
+### [x] TC-INT-U-059: IntegrationConnectionService.delete — не знайдено
+
+| Поле         | Значення                |
+| ------------ | ----------------------- |
+| **US**       | US-080                  |
+| **Issue**    | —                       |
+| **TS**       | —                       |
+| **Метод**    | Unit (Jest)             |
+| **Техніка**  | Boundary Value Analysis |
+| **Priority** | P3                      |
+
+**Кроки:**
+
+1. Налаштувати мок `findByOwner` на `null`.
+2. Викликати `service.delete(id, userId)`.
+
+**Очікуваний результат:**
+
+- Викидається `NotFoundException`.
+- `repo.delete` не викликано.
+
+---
+
+---
+
+### [x] TC-INT-U-060: IntegrationConnectionService.triggerSync — ручна синхронізація
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-081             |
+| **Issue**    | —                  |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P3                 |
+
+**Кроки:**
+
+1. Налаштувати моки для успішної синхронізації.
+2. Викликати `service.triggerSync(id, userId)`.
+3. Перевірити результат синхронізації.
+
+**Очікуваний результат:**
+
+- Повертається `SyncResult` з `synced > 0`.
+- Репозиторій оновлено з `lastSyncAt`.
+
+---
+
+---
+
+### [x] TC-INT-U-062: IntegrationConnectionService.previewTrades — попередній перегляд угод
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-081             |
+| **Issue**    | —                  |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P3                 |
+
+**Кроки:**
+
+1. Налаштувати мок кешу на повернення списку угод.
+2. Викликати `service.previewTrades(id, userId, dto)`.
+3. Перевірити, що повернено список угод з `journalDatabaseId`.
+
+**Очікуваний результат:**
+
+- Метод повертає `PreviewTradesResponseDto` з угодами.
+- Якщо підключення не знайдено — `NotFoundException`.
+
+---
+
+---
+
+### [x] TC-INT-U-064: IntegrationConnectionService.handleMT5Webhook — обробка вебхука
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-081             |
+| **Issue**    | —                  |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P3                 |
+
+**Кроки:**
+
+1. Налаштувати моки: знайдено MT5 підключення, токен валідний.
+2. Викликати `service.handleMT5Webhook(token, dto)`.
+3. Перевірити результат імпорту.
+
+**Очікуваний результат:**
+
+- Повертається `{ success: true, imported: N, skipped: M }`.
+- При невалідному connectionId — `UnprocessableEntityException`.
+- При невалідному токені — `UnprocessableEntityException`.
+
+---
+
+---
+
+### [x] TC-INT-U-065: IntegrationConnectionService.importTrades — імпорт вибраних угод
+
+| Поле         | Значення           |
+| ------------ | ------------------ |
+| **US**       | US-081             |
+| **Issue**    | —                  |
+| **TS**       | —                  |
+| **Метод**    | Unit (Jest)        |
+| **Техніка**  | Statement Coverage |
+| **Priority** | P3                 |
+
+**Кроки:**
+
+1. Налаштувати моки: кеш з угодами, вибрано дві позиції.
+2. Викликати `service.importTrades(id, userId, dto)`.
+3. Перевірити, що імпортовано лише вибрані.
+
+**Очікуваний результат:**
+
+- Повертається `{ created: N, skipped: M }`.
+- `persistTrades` викликано лише з вибраними sourcePositionIds.
