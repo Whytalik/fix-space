@@ -78,5 +78,7 @@ export default async function globalSetup() {
   await app.init();
   await app.listen(TEST_PORT);
 
+  (global as unknown as Record<string, unknown>)["__integrationApp__"] = app;
+
   process.env.INTEGRATION_SERVER_URL = `http://localhost:${TEST_PORT}`;
 }

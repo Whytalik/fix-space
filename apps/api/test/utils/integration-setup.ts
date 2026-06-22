@@ -86,11 +86,6 @@ export async function cleanupIntegrationApp(app?: INestApplication, marker = INT
   }
 
   if (process.env.INTEGRATION_SERVER_URL) {
-    try {
-      await prisma.$disconnect();
-    } catch {
-      // ignore
-    }
     return;
   }
 

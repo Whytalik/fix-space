@@ -374,4 +374,8 @@ describe("PropertyOperations (integration)", () => {
     expect(groupRes.body.name).toBe("Financials");
     expect(groupRes.body.visibility).toEqual({ type: "Demo" });
   });
+
+  afterAll(async () => {
+    await cleanupIntegrationApp(app, INTEGRATION_PROPERTY_MARKER);
+  });
 });
