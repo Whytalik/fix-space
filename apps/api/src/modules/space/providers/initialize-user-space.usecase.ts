@@ -269,7 +269,15 @@ export class InitializeUserSpaceUseCase {
         if (hasNamePattern) {
           await this.recordRepo.update(record.id, { name: "Untitled" });
         }
-        await this.recordService.applyTemplate(record.id, template.id);
+        try {
+          await this.recordService.applyTemplate(record.id, template.id);
+        } catch (error) {
+          this.logger.warn("Failed to apply template during seed, skipping record", {
+            recordId: record.id,
+            templateId: template.id,
+            error: (error as Error).message,
+          });
+        }
       }
     }
   }
