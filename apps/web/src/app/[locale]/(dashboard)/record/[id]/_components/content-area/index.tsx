@@ -20,6 +20,8 @@ import type { ContentEditorState } from "./lib/use-content-editor";
 import { isDrop } from "./lib/dnd-types";
 import { ContentCanvas } from "./nodes/content-canvas";
 import { ContentPanel, PanelDragOverlay, type PanelDragData } from "./nodes/content-panel";
+import { ComponentDragOverlay } from "./nodes/content-component";
+import type { ContentComponentNode } from "@fixspace/domain";
 
 const contentAreaCollision: CollisionDetection = (args) => {
   const hits = pointerWithin(args);
@@ -45,8 +47,18 @@ function ViewContentArea({ editor, recordId }: { editor: ContentEditorState; rec
   );
 }
 
+function findComponentById(content: ContentEditorState["content"], id: string): ContentComponentNode | null {
+  for (const row of content.rows) {
+    for (const column of row.columns) {
+      const found = column.children.find((c) => c.id === id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 export function ContentArea({ editor, recordId, mode = "edit" }: ContentAreaProps) {
-  const [activeDragData, setActiveDragData] = useState<PanelDragData | null>(null);
+  const [activeDragData, setActiveDragData] = useState<PanelDragData | { dragType: "component"; componentId: string } | null>(null);
 
   const isDraggingPanelRow = activeDragData?.dragType === "panel-row";
 
@@ -68,9 +80,12 @@ export function ContentArea({ editor, recordId, mode = "edit" }: ContentAreaProp
   }
 
   const handleDragStart = (event: DragStartEvent) => {
-    const data = event.active.data.current as PanelDragData | undefined;
-    if (data?.dragType === "panel-component" || data?.dragType === "panel-row") {
-      setActiveDragData(data);
+    const raw = event.active.data.current as Record<string, unknown> | undefined;
+    const dragType = raw?.dragType as string | undefined;
+    if (dragType === "panel-component" || dragType === "panel-row") {
+      setActiveDragData(raw as unknown as PanelDragData);
+    } else if (dragType === "component" && typeof raw?.componentId === "string") {
+      setActiveDragData({ dragType: "component", componentId: raw.componentId });
     }
   };
 
@@ -121,7 +136,14 @@ export function ContentArea({ editor, recordId, mode = "edit" }: ContentAreaProp
       </div>
 
       <DragOverlay dropAnimation={null}>
-        <PanelDragOverlay data={activeDragData} />
+        {(() => {
+          if (!activeDragData) return null;
+          if (activeDragData.dragType === "component") {
+            const comp = findComponentById(editor.content, activeDragData.componentId);
+            return comp ? <ComponentDragOverlay component={comp} /> : null;
+          }
+          return <PanelDragOverlay data={activeDragData as PanelDragData} />;
+        })()}
       </DragOverlay>
     </DndContext>
   );

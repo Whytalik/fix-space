@@ -18,6 +18,7 @@ export class TemplatePropertyValueController {
   @ApiBody({ type: CreateTemplatePropertyValueDto })
   @ApiResponse({ status: 201, description: "Template property value created.", type: TemplatePropertyValueResponseDto })
   @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Template or property not found." })
   create(
     @CurrentUser("userId")
@@ -32,6 +33,7 @@ export class TemplatePropertyValueController {
   @ApiOperation({ summary: "Get all template property values for a template" })
   @ApiQuery({ name: "templateId", type: String, description: "Template ID" })
   @ApiResponse({ status: 200, description: "List of template property values.", type: [TemplatePropertyValueResponseDto] })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   findAll(
     @Query("templateId")
     templateId: string,
@@ -50,8 +52,9 @@ export class TemplatePropertyValueController {
   @ApiOperation({ summary: "Get template property value by ID" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Template property value found.", type: TemplatePropertyValueResponseDto })
-  @ApiResponse({ status: 404, description: "Template property value not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Template property value not found." })
   findOne(@Param("id") id: string) {
     return this.templatePropertyValueService.findOne(id);
   }
@@ -66,8 +69,9 @@ export class TemplatePropertyValueController {
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: UpdateTemplatePropertyValueDto })
   @ApiResponse({ status: 200, description: "Template property value updated.", type: TemplatePropertyValueResponseDto })
-  @ApiResponse({ status: 404, description: "Template property value not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Template property value not found." })
   update(
     @Param("id") id: string,
     @Body()
@@ -85,8 +89,9 @@ export class TemplatePropertyValueController {
   @ApiOperation({ summary: "Delete template property value" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Template property value deleted." })
-  @ApiResponse({ status: 404, description: "Template property value not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Template property value not found." })
   remove(@Param("id") id: string) {
     return this.templatePropertyValueService.remove(id);
   }

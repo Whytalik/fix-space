@@ -1,0 +1,186 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - name: "ramp-up"
+      duration: 30
+      arrivalRate: 1
+      rampTo: 10
+    - name: "sustained"
+      duration: 120
+      arrivalRate: 10
+    - name: "peak"
+      duration: 30
+      arrivalRate: 10
+      rampTo: 20
+    - name: "peak-hold"
+      duration: 30
+      arrivalRate: 20
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "Read trader workflow"
+    weight: 30
+    flow:
+      - post:
+          url: "/auth/login"
+          json:
+            email: "loadtest@fixspace.dev"
+            password: "Password123!"
+          capture:
+            - json: "$.accessToken"
+              as: "token"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/spaces"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          capture:
+            - json: "$[0].id"
+              as: "spaceId"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/databases?spaceId={{ spaceId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          capture:
+            - json: "$[0].id"
+              as: "dbId"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/records?databaseId={{ dbId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  - name: "Create record"
+    weight: 20
+    flow:
+      - post:
+          url: "/auth/login"
+          json:
+            email: "loadtest@fixspace.dev"
+            password: "Password123!"
+          capture:
+            - json: "$.accessToken"
+              as: "token"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/spaces"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          capture:
+            - json: "$[0].id"
+              as: "spaceId"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/databases?spaceId={{ spaceId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          capture:
+            - json: "$[0].id"
+              as: "dbId"
+          expect:
+            - statusCode: 200
+      - post:
+          url: "/records"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          json:
+            databaseId: "{{ dbId }}"
+            name: "Artillery record {{ $randomString }}"
+          expect:
+            - statusCode: 201
+
+  - name: "Search records"
+    weight: 15
+    flow:
+      - post:
+          url: "/auth/login"
+          json:
+            email: "loadtest@fixspace.dev"
+            password: "Password123!"
+          capture:
+            - json: "$.accessToken"
+              as: "token"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/spaces"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          capture:
+            - json: "$[0].id"
+              as: "spaceId"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/records/search?spaceId={{ spaceId }}&q=Load"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  - name: "Auth check"
+    weight: 15
+    flow:
+      - post:
+          url: "/auth/login"
+          json:
+            email: "loadtest@fixspace.dev"
+            password: "Password123!"
+          capture:
+            - json: "$.accessToken"
+              as: "token"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/spaces"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  - name: "Dashboard"
+    weight: 10
+    flow:
+      - post:
+          url: "/auth/login"
+          json:
+            email: "loadtest@fixspace.dev"
+            password: "Password123!"
+          capture:
+            - json: "$.accessToken"
+              as: "token"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/spaces"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          capture:
+            - json: "$[0].id"
+              as: "spaceId"
+          expect:
+            - statusCode: 200
+      - get:
+          url: "/spaces/{{ spaceId }}/dashboard"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          expect:
+            - statusCode: 200
+
+  - name: "Health check"
+    weight: 10
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200

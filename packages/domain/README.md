@@ -15,7 +15,7 @@ The package compiles to `dist/` via `tsc` and exposes two export paths:
 packages/domain/src/
 ├── auth/                    # Login, register, verify, reset DTOs + session DTO
 ├── automation/              # Automation DTOs, entities, trigger/status enums
-├── content-block-library/   # ContentBlockLibrary DTOs and entity
+├── common/                  # Shared utility DTOs (e.g., DuplicateOptionsDto)
 ├── database/                # Database DTOs and entity
 ├── import-mapping/          # ImportMapping and ImportHistory DTOs
 ├── integration-connection/  # IntegrationConnection DTOs + service/status enums
@@ -32,6 +32,7 @@ packages/domain/src/
 ├── section/                 # Section DTOs and entity
 ├── settings/                # Settings DTOs, entity, and per-category interfaces + constants
 ├── space/                   # Space DTOs and entity
+├── statistics/              # Custom reporting, breakdowns, and metrics DTOs
 ├── template/                # Template DTOs and entity
 ├── template-property-value/ # TemplatePropertyValue DTOs and entity
 ├── user/                    # User DTOs and entity
@@ -43,49 +44,52 @@ packages/domain/src/
 
 ## DTOs by module
 
-| Module                    | Request DTOs                                                                                                                         | Response DTO                                                   |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
-| `auth`                    | `LoginUserDto`, `RegisterUserDto`, `ForgotPasswordDto`, `ResetPasswordDto`, `VerifyEmailDto`, `DeleteAccountDto`, `DevVerifyUserDto` | `AuthResponseDto`, `SessionResponseDto`                        |
-| `user`                    | `UpdateUserDto`, `ChangePasswordDto`, `SetPasswordDto`                                                                               | `UserResponseDto`                                              |
-| `space`                   | `CreateSpaceDto`, `UpdateSpaceDto`                                                                                                   | `SpaceResponseDto`, `SpaceSearchResultDto`                     |
-| `section`                 | `CreateSectionDto`, `UpdateSectionDto`, `SectionOperationDto`                                                                        | `SectionResponseDto`                                           |
-| `database`                | `CreateDatabaseDto`, `UpdateDatabaseDto`                                                                                             | `DatabaseResponseDto`                                          |
-| `property-group`          | `CreatePropertyGroupDto`, `UpdatePropertyGroupDto`                                                                                   | `PropertyGroupResponseDto`                                     |
-| `property`                | `CreatePropertyDto`, `UpdatePropertyDto`                                                                                             | `PropertyResponseDto`                                          |
-| `property-value`          | `CreatePropertyValueDto`, `UpdatePropertyValueDto`                                                                                   | `PropertyValueResponseDto`                                     |
-| `record`                  | `CreateRecordDto`, `UpdateRecordDto`, `MassUpdateRecordsDto`, `RecordFilterDto`, `RecordSortDto`, `RecordGroupDto`                   | `RecordResponseDto`                                            |
-| `record-content`          | `UpdateRecordContentDto`                                                                                                             | `RecordContentResponseDto`, `RecordContentSnapshotResponseDto` |
-| `template`                | `CreateTemplateDto`, `UpdateTemplateDto`                                                                                             | `TemplateResponseDto`                                          |
-| `template-property-value` | `CreateTemplatePropertyValueDto`, `UpdateTemplatePropertyValueDto`                                                                   | `TemplatePropertyValueResponseDto`                             |
-| `view`                    | `CreateViewDto`, `UpdateViewDto`                                                                                                     | `ViewResponseDto`                                              |
-| `automation`              | `CreateAutomationDto`, `UpdateAutomationDto`                                                                                         | `AutomationResponseDto`, `AutomationLogResponseDto`            |
-| `notification`            | —                                                                                                                                    | `NotificationResponseDto`                                      |
-| `integration-connection`  | `CreateIntegrationConnectionDto`, `UpdateIntegrationConnectionDto`                                                                   | `IntegrationConnectionResponseDto`                             |
-| `import-mapping`          | `CreateImportMappingDto`                                                                                                             | `ImportMappingResponseDto`, `ImportHistoryResponseDto`         |
-| `settings`                | `CreateSettingsDto`, `UpdateSettingsDto`                                                                                             | `SettingsResponseDto`                                          |
-| `content-block-library`   | `CreateContentBlockDto`, `UpdateContentBlockDto`                                                                                     | `ContentBlockResponseDto`                                      |
+| Module                    | Request DTOs                                                                                                                         | Response DTO                                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth`                    | `LoginUserDto`, `RegisterUserDto`, `ForgotPasswordDto`, `ResetPasswordDto`, `VerifyEmailDto`, `DeleteAccountDto`, `DevVerifyUserDto` | `AuthResponseDto`, `SessionResponseDto`                                                                                                 |
+| `user`                    | `UpdateUserDto`, `ChangePasswordDto`, `SetPasswordDto`                                                                               | `UserResponseDto`                                                                                                                       |
+| `space`                   | `CreateSpaceDto`, `UpdateSpaceDto`, `DuplicateSpaceDto`                                                                              | `SpaceResponseDto`, `SpaceSearchResultDto`, `DashboardResponseDto`                                                                      |
+| `section`                 | `CreateSectionDto`, `UpdateSectionDto`, `SectionOperationDto`                                                                        | `SectionResponseDto`                                                                                                                    |
+| `database`                | `CreateDatabaseDto`, `UpdateDatabaseDto`, `DuplicateDatabaseDto`                                                                     | `DatabaseResponseDto`                                                                                                                   |
+| `property-group`          | `CreatePropertyGroupDto`, `UpdatePropertyGroupDto`                                                                                   | `PropertyGroupResponseDto`                                                                                                              |
+| `property`                | `CreatePropertyDto`, `UpdatePropertyDto`, `VisibilityConditionDto`                                                                   | `PropertyResponseDto`                                                                                                                   |
+| `property-value`          | `CreatePropertyValueDto`, `UpdatePropertyValueDto`                                                                                   | `PropertyValueResponseDto`                                                                                                              |
+| `record`                  | `CreateRecordDto`, `UpdateRecordDto`, `MassUpdateRecordsDto`, `RecordFilterDto`, `RecordSortDto`, `RecordGroupDto`                   | `RecordResponseDto`                                                                                                                     |
+| `record-content`          | `UpdateRecordContentDto`                                                                                                             | `RecordContentResponseDto`, `RecordContentSnapshotResponseDto`, `ContentImageResponseDto`                                               |
+| `template`                | `CreateTemplateDto`, `UpdateTemplateDto`                                                                                             | `TemplateResponseDto`                                                                                                                   |
+| `template-property-value` | `CreateTemplatePropertyValueDto`, `UpdateTemplatePropertyValueDto`                                                                   | `TemplatePropertyValueResponseDto`                                                                                                      |
+| `view`                    | `CreateViewDto`, `UpdateViewDto`, `ViewConfigDto`                                                                                    | `ViewResponseDto`                                                                                                                       |
+| `automation`              | `CreateAutomationDto`, `UpdateAutomationDto`, `FieldChangeConditionDto`, `FieldChangeTriggerConfigDto`, `ScheduleTriggerConfigDto`   | `AutomationResponseDto`, `AutomationLogResponseDto`                                                                                     |
+| `notification`            | —                                                                                                                                    | `NotificationResponseDto`, `UnreadCountResponseDto`                                                                                     |
+| `integration-connection`  | `CreateIntegrationConnectionDto`, `UpdateIntegrationConnectionDto`, `ImportTradesDto`, `PreviewTradesDto`                            | `IntegrationConnectionResponseDto`, `IntegrationTradeDto`, `PreviewTradesResponseDto`                                                   |
+| `import-mapping`          | `CreateImportMappingDto`                                                                                                             | `ImportMappingResponseDto`, `ImportHistoryResponseDto`, `CsvPreviewResponseDto`, `ImportResultResponseDto`, `ImportValidateResponseDto` |
+| `settings`                | `CreateSettingsDto`, `UpdateSettingsDto`                                                                                             | `SettingsResponseDto`                                                                                                                   |
+| `statistics`              | `StatisticsQueryDto`                                                                                                                 | `TradingStatsResponseDto`, `DatabaseStatBlockDto`, `CustomReportDto`                                                                    |
+| `common`                  | `DuplicateOptionsDto`                                                                                                                | —                                                                                                                                       |
 
 ## Enums
 
 Available from both `@fixspace/domain` and `@fixspace/domain/enums`:
 
-| Enum                   | Values                                                                                                                                                                      |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PropertyType`         | TEXT · NUMBER · DATE · CHECKBOX · DURATION · SELECT · STATUS · RELATION · FORMULA · RATING · PROGRESS                                                                       |
-| `BlockType`            | PARAGRAPH · HEADING1 · HEADING2 · HEADING3 · BULLETED_LIST · NUMBERED_LIST · QUOTE · CODE · DIVIDER · IMAGE · COLUMN_LAYOUT                                                 |
-| `FilterField`          | PROPERTY · CREATED_AT · UPDATED_AT                                                                                                                                          |
-| `FilterOperator`       | equals · notEquals · contains · notContains · startsWith · endsWith · isEmpty · isNotEmpty · greaterThan · lessThan · before · after · isChecked · isUnchecked · in · notIn |
-| `FilterLogic`          | AND · OR                                                                                                                                                                    |
-| `SortField`            | CREATED_AT · UPDATED_AT · PROPERTY                                                                                                                                          |
-| `SortDirection`        | asc · desc                                                                                                                                                                  |
-| `GroupField`           | PROPERTY · CREATED_AT · UPDATED_AT                                                                                                                                          |
-| `DateGroupGranularity` | day · week · month · year                                                                                                                                                   |
-| `AutomationTrigger`    | ON_RECORD_CREATE · ON_FIELD_CHANGE · ON_SCHEDULE                                                                                                                            |
-| `AutomationStatus`     | SUCCESS · FAILURE · SKIPPED                                                                                                                                                 |
-| `NotificationType`     | SYSTEM · ALERT · INTEGRATION                                                                                                                                                |
-| `IntegrationService`   | BINANCE · BYBIT · OKX · METATRADER5 · CTRADER                                                                                                                               |
-| `IntegrationStatus`    | ACTIVE · INACTIVE · ERROR                                                                                                                                                   |
-| `ImportStatus`         | PENDING · PROCESSING · COMPLETED · FAILED                                                                                                                                   |
+| Enum                   | Values                                                                                                                                                                                                                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PropertyType`         | TEXT · NUMBER · DATE · CHECKBOX · DURATION · SELECT · STATUS · RELATION · FORMULA · RATING · PROGRESS                                                                                                                                       |
+| `ContentComponentType` | TEXT · HEADING · IMAGE · DIVIDER · CHECKLIST · CALLOUT · TABLE · LIST · LINKED_DATABASE · CHART                                                                                                                                             |
+| `FilterField`          | PROPERTY · CREATED_AT · UPDATED_AT                                                                                                                                                                                                          |
+| `FilterOperator`       | equals · notEquals · contains · notContains · startsWith · endsWith · isEmpty · isNotEmpty · greaterThan · lessThan · greaterThanOrEqual · lessThanOrEqual · before · after · onOrBefore · onOrAfter · isChecked · isUnchecked · in · notIn |
+| `FilterLogic`          | AND · OR                                                                                                                                                                                                                                    |
+| `DatePreset`           | today · thisWeek · thisMonth · thisQuarter · thisYear                                                                                                                                                                                       |
+| `SortField`            | CREATED_AT · UPDATED_AT · PROPERTY                                                                                                                                                                                                          |
+| `SortDirection`        | asc · desc                                                                                                                                                                                                                                  |
+| `GroupField`           | PROPERTY · CREATED_AT · UPDATED_AT                                                                                                                                                                                                          |
+| `DateGroupGranularity` | day · week · month · year                                                                                                                                                                                                                   |
+| `SummaryMetric`        | COUNT · COUNT_FILLED · COUNT_EMPTY · SUM · AVERAGE · MEDIAN · MIN · MAX · RANGE · CHECKED · UNCHECKED · PERCENT_CHECKED · UNIQUE · EARLIEST · LATEST · DATE_RANGE                                                                           |
+| `AutomationTrigger`    | ON_RECORD_CREATE · ON_FIELD_CHANGE · ON_SCHEDULE                                                                                                                                                                                            |
+| `AutomationStatus`     | SUCCESS · FAILURE · SKIPPED                                                                                                                                                                                                                 |
+| `NotificationType`     | INFO · ERROR · AUTOMATION · INTEGRATION                                                                                                                                                                                                     |
+| `IntegrationService`   | BINANCE · METATRADER5                                                                                                                                                                                                                       |
+| `IntegrationStatus`    | ACTIVE · INACTIVE · ERROR · PENDING                                                                                                                                                                                                         |
+| `ImportStatus`         | PENDING · PROCESSING · COMPLETED · FAILED                                                                                                                                                                                                   |
 
 ## Property type configs
 
@@ -103,7 +107,7 @@ Each property type has a typed `config` object used in `CreatePropertyDto` and
 | `SELECT`   | `SelectProperty`   | `isMultiSelect`, `categories: SelectCategory[]`                                      |
 | `STATUS`   | `StatusProperty`   | `defaultOption`, `categories: StatusCategoryConfig[]`                                |
 | `RELATION` | `RelationProperty` | `relatedEntityId`, `multiple`, `sourceDatabaseType`                                  |
-| `FORMULA`  | `FormulaProperty`  | `formula`, `output: { type: FormulaOutput }`                                         |
+| `FORMULA`  | `FormulaProperty`  | `expression`, `resultType`                                                           |
 | `RATING`   | `RatingProperty`   | `defaultValue`, `maxStars`, `allowHalf`                                              |
 | `PROGRESS` | `ProgressProperty` | `defaultValue`, `min`, `max`, `step`, `showLabel`, `thresholds: ProgressThreshold[]` |
 

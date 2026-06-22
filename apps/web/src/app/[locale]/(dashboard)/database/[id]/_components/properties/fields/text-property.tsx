@@ -17,9 +17,10 @@ interface TextPropertyProps {
   placeholder?: string;
   ghost?: boolean;
   editorClass?: string;
+  textAlign?: string;
 }
 
-export function TextProperty({ value, readOnly, className, onChange, placeholder, ghost, editorClass }: TextPropertyProps) {
+export function TextProperty({ value, readOnly, className, onChange, placeholder, ghost, editorClass, textAlign }: TextPropertyProps) {
   const t = useTranslations("PropertyInput");
 
   if (readOnly) {
@@ -35,7 +36,14 @@ export function TextProperty({ value, readOnly, className, onChange, placeholder
   }
 
   return (
-    <RichTextEditor value={value} onChange={onChange} placeholder={placeholder || t("enterText")} ghost={ghost} editorClass={editorClass} />
+    <RichTextEditor
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder || t("enterText")}
+      ghost={ghost}
+      editorClass={editorClass}
+      textAlign={textAlign}
+    />
   );
 }
 
@@ -45,13 +53,20 @@ function RichTextEditor({
   placeholder,
   ghost,
   editorClass = "text-sm",
+  textAlign,
 }: {
   value: unknown;
   onChange?: (v: string) => void;
   placeholder: string;
   ghost?: boolean;
   editorClass?: string;
+  textAlign?: string;
 }) {
+  const placeholderAlignClass =
+    textAlign === "center" || textAlign === "right" || textAlign === "justify"
+      ? "before:float-none before:block before:w-full"
+      : "before:float-left";
+
   const extensions = useMemo(
     () => [
       StarterKit.configure({
@@ -66,11 +81,10 @@ function RichTextEditor({
       BubbleMenuExtension,
       Placeholder.configure({
         placeholder,
-        emptyEditorClass:
-          "before:content-[attr(data-placeholder)] before:text-ink-muted before:pointer-events-none before:float-left before:h-0",
+        emptyEditorClass: `before:content-[attr(data-placeholder)] before:text-ink-muted before:pointer-events-none before:h-0 ${placeholderAlignClass}`,
       }),
     ],
-    [placeholder],
+    [placeholder, placeholderAlignClass],
   );
 
   const editor = useEditor({

@@ -51,7 +51,7 @@ export function SidebarDragOverlay({ activeDrag, sections, unsectioned, expanded
                       <span className="shrink-0 flex items-center">
                         <IconDisplay value={database.icon || "📄"} size={14} />
                       </span>
-                      <span className="text-sm text-ink-secondary truncate">{database.title || database.name}</span>
+                      <span className="text-sm text-ink-secondary truncate">{database.name}</span>
                     </div>
                   ))}
                 </div>
@@ -70,7 +70,7 @@ export function SidebarDragOverlay({ activeDrag, sections, unsectioned, expanded
               <span className="shrink-0 flex items-center">
                 <IconDisplay value={database.icon || "📄"} size={14} />
               </span>
-              <span className="text-sm text-ink truncate">{database.title || database.name}</span>
+              <span className="text-sm text-ink truncate">{database.name}</span>
             </div>
           );
         })()}

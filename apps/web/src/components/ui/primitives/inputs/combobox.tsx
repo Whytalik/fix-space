@@ -2,13 +2,15 @@
 
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { ComboboxDropdown } from "./combobox-dropdown";
 
 export interface ComboboxOption {
   value: string;
   label: string;
   icon?: string | null;
+  iconElement?: ReactNode;
   color?: string;
 }
 
@@ -40,6 +42,29 @@ export function Combobox(props: ComboboxProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const measureAndOpen = (placement: "top" | "bottom") => {
+    setOpen(true);
+    if (wrapperRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: placement === "top" ? rect.top - 4 : rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  };
+
+  const portalDropdown = (content: ReactNode) =>
+    dropdownPos &&
+    createPortal(
+      <div style={{ position: "fixed", top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width, zIndex: 9999 }}>
+        {content}
+      </div>,
+      document.body,
+    );
 
   if (props.multiple) {
     const { placement = "bottom", size = "md", disabled } = props;
@@ -80,7 +105,7 @@ export function Combobox(props: ComboboxProps) {
                 <button
                   type="button"
                   onClick={() => handleRemove(option.value)}
-                  className="text-ink-muted hover:text-ink disabled:opacity-50"
+                  className="text-ink-muted hover:text-ink disabled:opacity-50 transition-colors duration-150"
                   disabled={disabled}
                 >
                   <X size={10} />
@@ -89,24 +114,25 @@ export function Combobox(props: ComboboxProps) {
             ))}
           </div>
         )}
-        <div className="relative">
+        <div className="relative" ref={wrapperRef}>
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              setOpen(true);
+              measureAndOpen(placement);
             }}
-            onFocus={() => !disabled && setOpen(true)}
+            onFocus={() => !disabled && measureAndOpen(placement)}
             onBlur={() => setTimeout(() => setOpen(false), 150)}
             placeholder={selected.length === 0 ? (props.placeholder ?? "Search…") : "Add more…"}
             className={inputCls}
             disabled={disabled}
           />
-          {open && !disabled && available.length > 0 && (
-            <ComboboxDropdown options={available} onSelect={(value) => handleAdd(value)} placement={placement} />
-          )}
+          {open &&
+            !disabled &&
+            available.length > 0 &&
+            portalDropdown(<ComboboxDropdown options={available} onSelect={(value) => handleAdd(value)} placement={placement} />)}
         </div>
       </div>
     );
@@ -122,20 +148,21 @@ export function Combobox(props: ComboboxProps) {
   const inputCls = size === "sm" ? "field-input w-full !py-1 !text-xs" : "field-input w-full";
   const selectedOption = freeText ? null : props.options.find((option) => option.value === props.value);
   const currentLabel = freeText ? (props.value as string) : (selectedOption?.label ?? "");
-  const showIcon = !open && selectedOption?.icon;
+  const showIcon = !!selectedOption?.icon;
+  const showColorBadge = !open && !!selectedOption?.color;
 
   const filtered = props.options.filter((option) => query === currentLabel || option.label.toLowerCase().includes(query.toLowerCase()));
 
   function handleFocus() {
     if (disabled) return;
     setQuery(currentLabel);
-    setOpen(true);
+    measureAndOpen(placement);
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (disabled) return;
     setQuery(e.target.value);
-    setOpen(true);
+    measureAndOpen(placement);
     if (freeText) (props.onChange as (value: string) => void)(e.target.value);
   }
 
@@ -154,12 +181,30 @@ export function Combobox(props: ComboboxProps) {
     setOpen(false);
   }
 
+  const showIconElement = !showColorBadge && !!selectedOption?.iconElement;
+
   return (
-    <div className="relative">
-      {showIcon && (
+    <div className="relative self-start w-full" ref={wrapperRef}>
+      {!showColorBadge && !showIconElement && showIcon && (
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-secondary pointer-events-none flex items-center justify-center">
           <IconDisplay value={selectedOption?.icon ?? ""} size={14} />
         </span>
+      )}
+      {showIconElement && (
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none flex items-center justify-center">
+          {selectedOption!.iconElement}
+        </span>
+      )}
+      {showColorBadge && (
+        <div className="absolute inset-0 flex items-center px-3 pointer-events-none">
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
+            style={{ backgroundColor: `${selectedOption!.color}20`, color: selectedOption!.color }}
+          >
+            {selectedOption?.icon && <IconDisplay value={selectedOption.icon} size={12} />}
+            {selectedOption?.label}
+          </span>
+        </div>
       )}
       <input
         ref={inputRef}
@@ -169,12 +214,15 @@ export function Combobox(props: ComboboxProps) {
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={props.placeholder}
-        className={`${inputCls} ${showIcon ? "pl-9" : ""}`}
+        className={`${inputCls} ${!showColorBadge && (showIconElement || showIcon) ? "pl-9" : ""} ${showColorBadge ? "text-transparent caret-transparent" : ""}`}
         disabled={disabled}
       />
-      {open && !disabled && filtered.length > 0 && (
-        <ComboboxDropdown options={filtered} onSelect={handleSelect} selectedValue={props.value as string} placement={placement} />
-      )}
+      {open &&
+        !disabled &&
+        filtered.length > 0 &&
+        portalDropdown(
+          <ComboboxDropdown options={filtered} onSelect={handleSelect} selectedValue={props.value as string} placement={placement} />,
+        )}
     </div>
   );
 }

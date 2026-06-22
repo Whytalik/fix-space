@@ -1,4 +1,4 @@
-import type { AuthResponseDto, LoginUserDto, RegisterUserDto } from "@fixspace/domain";
+import type { AuthResponseDto, LoginUserDto, RegisterUserDto, SessionResponseDto } from "@fixspace/domain";
 import { apiFetch } from "./client";
 
 export function login(dto: LoginUserDto) {
@@ -21,6 +21,14 @@ export function logout() {
   return apiFetch<{
     message: string;
   }>("/auth/logout", {
+    method: "POST",
+  });
+}
+
+export function logoutAll() {
+  return apiFetch<{
+    message: string;
+  }>("/auth/logout-all", {
     method: "POST",
   });
 }
@@ -65,5 +73,15 @@ export function resendVerification(email: string) {
   return apiFetch<{ message: string }>("/auth/resend-verification", {
     method: "POST",
     body: { email },
+  });
+}
+
+export function getSessions() {
+  return apiFetch<SessionResponseDto[]>("/auth/sessions");
+}
+
+export function revokeSession(id: string) {
+  return apiFetch<{ message: string }>(`/auth/sessions/${id}`, {
+    method: "DELETE",
   });
 }

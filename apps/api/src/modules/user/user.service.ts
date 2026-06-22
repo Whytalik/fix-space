@@ -1,7 +1,7 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 
-import { Prisma, type User } from "@fixspace/database";
-import { ChangePasswordDto, DeleteAccountDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
+import { type User } from "@fixspace/database";
+import { ChangePasswordDto, DeleteAccountDto, SetPasswordDto, UpdateUserDto, UserResponseDto } from "@fixspace/domain";
 
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
@@ -13,6 +13,7 @@ import { StorageService } from "@/core/storage/storage.service";
 import { TokenService } from "@/core/auth/token.service";
 
 import { UserRepository } from "./repositories/user.repository";
+import { toUserResponse } from "./utils/to-user-response.util";
 
 @Injectable()
 export class UserService {
@@ -34,22 +35,30 @@ export class UserService {
   async findById(id: string): Promise<UserResponseDto> {
     this.logger.debug("Finding user by id", { id });
     const user = await this.userRepo.findByIdOrThrow(id);
-    return new UserResponseDto(user);
+    return toUserResponse(user);
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<UserResponseDto> {
     this.logger.debug("Updating user", { id });
-    const { password, ...rest } = dto;
+    const { email, username, icon } = dto;
+    const user = await this.userRepo.update(id, filterUndefined({ fields: { email, username, icon } }));
+    this.logger.log("User updated", { id });
+    return toUserResponse(user);
+  }
 
-    const updateData: Prisma.UserUpdateInput = filterUndefined({ fields: rest });
-    if (password) {
-      updateData.passwordHash = await hashPassword(password);
+  async setPassword(id: string, dto: SetPasswordDto): Promise<{ message: string }> {
+    this.logger.debug("Setting password for OAuth user", { id });
+
+    const user = await this.userRepo.findByIdOrThrow(id);
+
+    if (user.passwordHash) {
+      throw new BadRequestException(t("errors.PASSWORD_ALREADY_SET"));
     }
 
-    const user = await this.userRepo.update(id, updateData);
+    await this.userRepo.update(id, { passwordHash: await hashPassword(dto.password) });
 
-    this.logger.log("User updated", { id });
-    return new UserResponseDto(user);
+    this.logger.log("Password set", { id });
+    return { message: t("errors.PASSWORD_SET_SUCCESS") };
   }
 
   async changePassword(id: string, dto: ChangePasswordDto): Promise<{ message: string }> {
@@ -72,7 +81,7 @@ export class UserService {
     await this.mailService.sendPasswordChangeNotification(user.email);
 
     this.logger.log("Password changed", { id });
-    return { message: "Password changed successfully" };
+    return { message: t("errors.PASSWORD_CHANGED_SUCCESS") };
   }
 
   async updateAvatar(id: string, file: Express.Multer.File): Promise<UserResponseDto> {
@@ -81,7 +90,7 @@ export class UserService {
     try {
       const user = await this.userRepo.update(id, { icon: iconPath });
       this.logger.log("Avatar updated", { id });
-      return new UserResponseDto(user);
+      return toUserResponse(user);
     } catch (error) {
       await this.storageService.removeAvatarFiles(id);
       throw error;
@@ -90,10 +99,14 @@ export class UserService {
 
   async removeAvatar(id: string): Promise<UserResponseDto> {
     this.logger.debug("Removing avatar", { id });
+    try {
+      await this.storageService.removeAvatarFiles(id);
+    } catch (error) {
+      this.logger.warn("Failed to remove avatar files from storage", { id, error });
+    }
     const user = await this.userRepo.update(id, { icon: null });
-    await this.storageService.removeAvatarFiles(id);
     this.logger.log("Avatar removed", { id });
-    return new UserResponseDto(user);
+    return toUserResponse(user);
   }
 
   async remove(id: string, dto: DeleteAccountDto): Promise<{ message: string }> {
@@ -120,6 +133,6 @@ export class UserService {
 
     await this.mailService.sendAccountDeletionNotification(email);
 
-    return { message: "Account deleted successfully" };
+    return { message: t("errors.ACCOUNT_DELETED") };
   }
 }

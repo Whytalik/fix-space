@@ -20,7 +20,7 @@ export function CustomReportCard({ report }: CustomReportCardProps) {
     <div className="mb-8">
       <div className="flex items-center gap-2 mb-4">
         <IconDisplay value={report.icon ?? "📋"} size={20} />
-        <h2 className="type-panel-title">{report.title}</h2>
+        <h2 className="type-panel-title">{report.name}</h2>
         <span className="text-xs text-ink-muted ml-1">{t("recordCount", { count: report.recordCount })}</span>
       </div>
 

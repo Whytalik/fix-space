@@ -39,7 +39,7 @@ export class GetDashboardUseCase {
   async execute(spaceId: string): Promise<DashboardResponseDto> {
     this.logger.debug("Getting dashboard", { spaceId });
 
-    const space = await this.spaceRepo.findOne(spaceId, { databases: true });
+    const space = await this.spaceRepo.findOneWithDatabases(spaceId);
     if (!space) {
       throw new NotFoundException(t("errors.SPACE_NOT_FOUND_ID", { id: spaceId }));
     }
@@ -51,10 +51,9 @@ export class GetDashboardUseCase {
     const notesDb = databases.find((db) => db.type === "notes");
     const mistakesDb = databases.find((db) => db.type === "mistakes");
 
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
+    const now = new Date();
+    const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+    const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
 
     const getTodayRecords = async (databaseId: string | undefined) => {
       if (!databaseId) return [];
@@ -86,10 +85,10 @@ export class GetDashboardUseCase {
         { name: "Log Mistakes", isCompleted: mistakes.length > 0, databaseId: mistakesDb?.id, recordCount: mistakes.length },
       ],
       todayItems: {
-        tradingJournal: { title: journalDb?.title ?? "Trading Journal", databaseId: journalDb?.id, records: tradingJournal },
-        dailyRoutine: { title: routineDb?.title ?? "Daily Routine", databaseId: routineDb?.id, records: dailyRoutine },
-        notes: { title: notesDb?.title ?? "Notes", databaseId: notesDb?.id, records: notes },
-        mistakes: { title: mistakesDb?.title ?? "Mistakes", databaseId: mistakesDb?.id, records: mistakes },
+        tradingJournal: { name: journalDb?.name ?? "Trading Journal", databaseId: journalDb?.id, records: tradingJournal },
+        dailyRoutine: { name: routineDb?.name ?? "Daily Routine", databaseId: routineDb?.id, records: dailyRoutine },
+        notes: { name: notesDb?.name ?? "Notes", databaseId: notesDb?.id, records: notes },
+        mistakes: { name: mistakesDb?.name ?? "Mistakes", databaseId: mistakesDb?.id, records: mistakes },
       },
     };
   }

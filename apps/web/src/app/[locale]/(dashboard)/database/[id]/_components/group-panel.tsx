@@ -2,10 +2,11 @@
 
 import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
+import { PropertyIcon } from "./properties/ui/property-icon";
 import { useDatabaseContext } from "@/context/database-context";
 import { ColorPicker } from "@/components/ui/color-picker/color-picker";
 import type { RecordGroupDto } from "@fixspace/domain";
-import { DateGroupGranularity, GroupField, PALETTE_COLOR_VALUES, PropertyType } from "@fixspace/domain/enums";
+import { DateGroupGranularity, GroupField, PALETTE_COLOR_VALUES, PropertyType } from "@fixspace/domain";
 import { Eye, EyeOff } from "lucide-react";
 import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -39,7 +40,7 @@ export function GroupPanelContent({
 
   const propertyOptions: ComboboxOption[] = properties
     .filter((property) => property.type !== PropertyType.RELATION)
-    .map((property) => ({ value: property.id, label: property.name }));
+    .map((property) => ({ value: property.id, label: property.name, iconElement: <PropertyIcon type={property.type} size={14} /> }));
 
   function handleFieldChange(value: string) {
     if (isViewLocked) return;

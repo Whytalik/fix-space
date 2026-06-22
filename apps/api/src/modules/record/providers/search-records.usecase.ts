@@ -35,7 +35,7 @@ export class SearchRecordsUseCase {
         new SpaceSearchResultDto({
           id: record.id,
           databaseId: record.databaseId,
-          databaseTitle: record.database.title,
+          databaseName: record.database.name,
           sectionName: (record.database as any).section?.name ?? null,
           name: record.name,
           icon: record.icon,

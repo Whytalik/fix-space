@@ -31,7 +31,7 @@ export function HeaderDatabase() {
         <span className="inline-flex items-center">
           <IconDisplay value={displayDatabase.icon || "📄"} size={13} />
         </span>
-        {displayDatabase.title || displayDatabase.name}
+        {displayDatabase.name}
       </Link>
     </>
   );

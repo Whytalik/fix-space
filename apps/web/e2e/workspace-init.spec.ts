@@ -1,7 +1,8 @@
 import { type APIRequestContext, expect, test } from "@playwright/test";
+import { waitForApi } from "./helpers";
 
-const API = "http://localhost:3000";
-const WEB = "http://localhost:3001";
+const API = "http://127.0.0.1:3000";
+const WEB = "http://127.0.0.1:3001";
 
 const PRESET_DB_TITLES = [
   "Trading Journal",
@@ -76,6 +77,10 @@ async function getTemplates(request: APIRequestContext, token: string, databaseI
   return (await res.json()) as TemplateDto[];
 }
 
+test.beforeAll(async ({ request }) => {
+  await waitForApi(request);
+});
+
 test.describe("TC-WS-001 / TC-DB-001: Workspace browser flow", () => {
   let testUser: { email: string; username: string; password: string };
 
@@ -89,7 +94,7 @@ test.describe("TC-WS-001 / TC-DB-001: Workspace browser flow", () => {
   });
 
   test("registration → verification → login → 9 preset databases in sidebar", async ({ page, request }) => {
-    await page.goto(`${WEB}/en/register`, { waitUntil: "networkidle" });
+    await page.goto(`${WEB}/en/register`, { waitUntil: "load" });
     await page.getByLabel(/email/i).fill(testUser.email);
     await page.getByLabel(/username/i).fill(testUser.username);
     await page.getByLabel(/password/i).fill(testUser.password);
@@ -104,13 +109,12 @@ test.describe("TC-WS-001 / TC-DB-001: Workspace browser flow", () => {
       throw new Error(`Verification API failed (${verifyRes.status()}): ${await verifyRes.text()}`);
     }
 
-    await page.goto(`${WEB}/en/login`, { waitUntil: "networkidle" });
+    await page.goto(`${WEB}/en/login`, { waitUntil: "load" });
     await page.getByLabel(/email/i).fill(testUser.email);
     await page.getByLabel(/password/i).fill(testUser.password);
     await page.getByRole("button", { name: /^sign in$|^увійти$/i }).click();
     await page.waitForURL(/\/en$/, { timeout: 10000 });
-
-    const dbLinks = page.locator('a[href*="/database/"]');
+    const dbLinks = page.locator('aside a[href*="/database/"]');
     await expect(dbLinks.first()).toBeVisible({ timeout: 15000 });
     await expect(dbLinks).toHaveCount(9);
 
@@ -181,10 +185,9 @@ test.describe("Workspace API tests (shared user)", () => {
     expect(tradesRelation, "Session Routine: Trades RELATION property").toBeDefined();
     expect(tradesRelation!.config["relatedEntityId"]).toBe(tjId);
   });
-
   test("TC-WS-003: preset templates created for Trading Journal and Performance Review", async ({ request }) => {
     const tjTemplates = await getTemplates(request, token, dbsByTitle.get("Trading Journal")!);
-    expect(tjTemplates.map((template) => template.name)).toContain("Default");
+    expect(tjTemplates.map((template) => template.name)).toContain("Trade Review");
 
     const prTemplates = await getTemplates(request, token, dbsByTitle.get("Performance Review")!);
     const prNames = prTemplates.map((template) => template.name);

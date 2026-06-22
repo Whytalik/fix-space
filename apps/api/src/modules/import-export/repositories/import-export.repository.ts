@@ -45,10 +45,18 @@ export class ImportExportRepository extends BaseRepository {
     });
   }
 
+  async updatePropertyConfig(propertyId: string, config: Record<string, unknown>) {
+    return prisma.property.update({
+      where: { id: propertyId },
+      data: { config: config as Prisma.InputJsonValue },
+    });
+  }
+
   async createRecordsBulk(
     data: Array<{
       name: string;
       databaseId: string;
+      templateId?: string;
       values: Array<{ propertyId: string; value: Prisma.InputJsonValue }>;
     }>,
     transaction: Prisma.TransactionClient,
@@ -59,6 +67,7 @@ export class ImportExportRepository extends BaseRepository {
       id: randomUUID(),
       name: item.name,
       databaseId: item.databaseId,
+      ...(item.templateId ? { templateId: item.templateId } : {}),
     }));
 
     await transaction.record.createMany({

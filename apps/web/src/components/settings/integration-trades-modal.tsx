@@ -137,8 +137,6 @@ export function IntegrationTradesModal({ connection, onClose }: IntegrationTrade
             <div className="w-36">
               <DateInput
                 value={startDate}
-                min={toLocalInputDate(minStartDate)}
-                max={endDate}
                 onChange={(v) => {
                   setStartDate(v);
                   setSelected(new Set());
@@ -152,8 +150,6 @@ export function IntegrationTradesModal({ connection, onClose }: IntegrationTrade
             <div className="w-36">
               <DateInput
                 value={endDate}
-                min={startDate}
-                max={toLocalInputDate(today)}
                 onChange={(v) => {
                   setEndDate(v);
                   setSelected(new Set());
@@ -209,7 +205,7 @@ export function IntegrationTradesModal({ connection, onClose }: IntegrationTrade
                         className="text-ink-muted hover:text-ink transition-colors duration-150"
                         disabled={importable.length === 0}
                       >
-                        {allImportableSelected ? <CheckSquare size={15} className="text-accent" /> : <Square size={15} />}
+                        {allImportableSelected ? <CheckSquare size={13} className="text-accent" /> : <Square size={13} />}
                       </button>
                     </th>
                     <th className="px-3 py-2.5 text-left font-medium text-ink-secondary">{t("colSymbol")}</th>
@@ -291,7 +287,7 @@ function TradeRow({ trade, isSelected, isExpanded, onToggleSelect, onToggleExpan
             title={isSelected ? t("deselect") : t("select")}
             className="text-ink-muted hover:text-ink transition-colors duration-150 disabled:cursor-not-allowed"
           >
-            {isSelected ? <CheckSquare size={15} className="text-accent" /> : <Square size={15} />}
+            {isSelected ? <CheckSquare size={13} className="text-accent" /> : <Square size={13} />}
           </button>
         </td>
         <td className="px-3 py-2.5 font-medium text-ink">

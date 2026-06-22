@@ -1,14 +1,15 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { SchedulerRegistry } from "@nestjs/schedule";
 import { CronJob } from "cron";
-import { IntegrationStatus } from "@fixspace/domain";
+import { IntegrationStatus, IntegrationService } from "@fixspace/domain";
 import { prisma } from "@fixspace/database";
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { IntegrationConnectionService } from "./integration-connection.service";
 
 @Injectable()
-export class IntegrationSyncScheduler implements OnModuleInit {
+export class IntegrationSyncScheduler implements OnModuleInit, OnModuleDestroy {
   private readonly inProgress = new Set<string>();
+  private cronJob: CronJob | null = null;
 
   constructor(
     private readonly logger: AppLogger,
@@ -21,14 +22,25 @@ export class IntegrationSyncScheduler implements OnModuleInit {
   onModuleInit(): void {
     this.logger.debug("Registering integration sync scheduler");
 
-    const cronJob = new CronJob("* * * * *", async () => {
+    this.cronJob = new CronJob("* * * * *", async () => {
       await this.checkConnections();
     });
 
-    this.schedulerRegistry.addCronJob("integration-sync", cronJob);
-    cronJob.start();
+    this.schedulerRegistry.addCronJob("integration-sync", this.cronJob);
+    this.cronJob.start();
 
     this.logger.log("Integration sync scheduler registered (every minute)");
+  }
+
+  onModuleDestroy(): void {
+    if (this.cronJob) {
+      void this.cronJob.stop();
+      try {
+        this.schedulerRegistry.deleteCronJob("integration-sync");
+      } catch {
+        // ignore
+      }
+    }
   }
 
   private async checkConnections(): Promise<void> {
@@ -37,6 +49,7 @@ export class IntegrationSyncScheduler implements OnModuleInit {
         where: {
           status: IntegrationStatus.ACTIVE,
           spaceId: { not: null },
+          service: { not: IntegrationService.METATRADER5 },
         },
       });
 

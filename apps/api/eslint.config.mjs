@@ -12,6 +12,23 @@ export default [
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    rules: {
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      'no-console': 'off',
+    },
+  },
+  {
+    files: ['**/*.spec.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['./tsconfig.test.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unsafe-argument': 'off',
+    },
   },
   {
     ignores: ['.prettierrc.mjs', 'eslint.config.mjs', 'src/modules/_disabled/**/*'],

@@ -37,7 +37,7 @@ export function SnapshotHistory({ recordId }: SnapshotHistoryProps) {
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          aria-label="Close history"
+          aria-label={t("closeHistory")}
           className="p-1 text-ink-muted hover:text-ink hover:bg-hover rounded-lg transition-colors duration-150"
         >
           <X size={18} />
@@ -63,7 +63,7 @@ export function SnapshotHistory({ recordId }: SnapshotHistoryProps) {
                   type="button"
                   onClick={() => restoreMutation.mutate(snapshot.id)}
                   disabled={restoreMutation.isPending}
-                  aria-label="Restore this snapshot"
+                  aria-label={t("restoreSnapshot")}
                   className="p-1.5 opacity-0 group-hover:opacity-100 text-accent hover:bg-accent/10 rounded-lg transition-all duration-150"
                 >
                   {restoreMutation.isPending ? <Spinner size="sm" /> : <RotateCcw size={14} />}

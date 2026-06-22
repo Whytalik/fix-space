@@ -100,7 +100,7 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
       >
         <Link
           href={`/database/${database.id}`}
-          title={collapsed ? database.title || database.name : undefined}
+          title={collapsed ? database.name : undefined}
           draggable={false}
           {...listeners}
           className={`flex items-center gap-2 py-1 h-7 flex-1 min-w-0 touch-none ${collapsed ? "justify-center px-2" : sectionId ? "pl-3 pr-2" : "px-2"}`}
@@ -110,7 +110,7 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
           </span>
           {!collapsed && (
             <span className={`text-sm truncate min-w-0 whitespace-nowrap ${isActive ? "text-ink" : "text-ink-secondary"}`}>
-              {database.title || database.name}
+              {database.name}
             </span>
           )}
         </Link>
@@ -135,9 +135,9 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
           onClose={() => setShowMenu(false)}
           items={[
             { label: t("edit"), icon: <Pencil size={14} />, onClick: () => router.push(`/database/${database.id}/edit`) },
-            { label: t("duplicate"), icon: <Copy size={14} />, onClick: () => setShowDuplicateModal(true) },
             ...(!database.isKey
               ? [
+                  { label: t("duplicate"), icon: <Copy size={14} />, onClick: () => setShowDuplicateModal(true) },
                   {
                     label: t("delete"),
                     icon: <Trash size={14} />,
@@ -162,7 +162,7 @@ export function DatabaseItem({ spaceId, database, collapsed, sectionId, sectionC
       {showDuplicateModal && (
         <DuplicationModal
           target="database"
-          initialName={`${database.title || database.name} (Copy)`}
+          initialName={`${database.name} (Copy)`}
           onConfirm={async (options) => {
             await duplicateDatabaseAction(options);
           }}

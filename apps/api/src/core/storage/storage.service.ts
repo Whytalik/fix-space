@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 import { v2 as cloudinary, type UploadApiOptions, type UploadApiResponse } from "cloudinary";
 
@@ -16,14 +17,25 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 @Injectable()
 export class StorageService {
-  constructor(private readonly logger: AppLogger) {
+  private readonly avatarFolder: string;
+  private readonly contentFolder: string;
+
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly configService: ConfigService,
+  ) {
     this.logger.setContext(StorageService.name);
 
     cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
+      cloud_name: this.configService.getOrThrow<string>("CLOUDINARY_CLOUD_NAME"),
+      api_key: this.configService.getOrThrow<string>("CLOUDINARY_API_KEY"),
+      api_secret: this.configService.getOrThrow<string>("CLOUDINARY_API_SECRET"),
     });
+
+    const isProduction = this.configService.get<string>("NODE_ENV") === "production";
+    const prefix = this.configService.get<string>("CLOUDINARY_FOLDER_PREFIX") ?? (isProduction ? "fixspace" : "fixspace-dev");
+    this.avatarFolder = `${prefix}/avatars`;
+    this.contentFolder = `${prefix}/content`;
   }
 
   async saveAvatar(userId: string, file: Express.Multer.File): Promise<string> {
@@ -31,10 +43,9 @@ export class StorageService {
 
     this.validateImage(file);
 
-    const folder = process.env.CLOUDINARY_AVATAR_FOLDER ?? "fixspace/avatars";
     const result = await this.upload(file, {
       public_id: userId,
-      folder,
+      folder: this.avatarFolder,
       overwrite: true,
       transformation: [{ width: 400, height: 400, crop: "fill", quality: "auto" }],
     });
@@ -46,8 +57,7 @@ export class StorageService {
   async removeAvatarFiles(userId: string): Promise<void> {
     this.logger.debug("Removing avatar from Cloudinary", { userId });
 
-    const folder = process.env.CLOUDINARY_AVATAR_FOLDER ?? "fixspace/avatars";
-    const publicId = `${folder}/${userId}`;
+    const publicId = `${this.avatarFolder}/${userId}`;
 
     try {
       await cloudinary.uploader.destroy(publicId);
@@ -62,8 +72,7 @@ export class StorageService {
 
     this.validateImage(file);
 
-    const folder = process.env.CLOUDINARY_CONTENT_FOLDER ?? "fixspace/content";
-    const result = await this.upload(file, { public_id: randomUUID(), folder, overwrite: false });
+    const result = await this.upload(file, { public_id: randomUUID(), folder: this.contentFolder, overwrite: false });
 
     this.logger.log("Content image uploaded to Cloudinary", { publicId: result.public_id });
     return result.secure_url;

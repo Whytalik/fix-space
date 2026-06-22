@@ -4,11 +4,10 @@ import { AppLogger } from "@/common/logger/app-logger.service";
 import { DatabaseService } from "@/modules/database/database.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
-import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
+import { SettingsCategory } from "@fixspace/domain";
 import { SettingsService } from "@/modules/settings/settings.service";
 import { SectionService } from "./providers/section.service";
 import { SpaceRepository } from "./repositories/space.repository";
-import { sectionsInclude } from "./constants/space.constants";
 import { toSpaceResponseDto } from "./utils/to-space-response.util";
 
 @Injectable()
@@ -41,14 +40,13 @@ export class SpaceService {
         await this.spaceRepo.updateMany({ ownerId, isDefault: true }, { isDefault: false }, transaction);
       }
 
-      const space = await this.spaceRepo.create(
+      const space = await this.spaceRepo.createWithSections(
         {
           name: dto.name,
           icon,
           isDefault: dto.isDefault ?? false,
           ownerId,
         },
-        sectionsInclude,
         transaction,
       );
 
@@ -59,14 +57,14 @@ export class SpaceService {
 
   async findAll(ownerId: string): Promise<SpaceResponseDto[]> {
     this.logger.debug("Finding all spaces", { ownerId });
-    const spaces = await this.spaceRepo.findAll(ownerId, sectionsInclude);
+    const spaces = await this.spaceRepo.findAllWithSections(ownerId);
     return spaces.map(toSpaceResponseDto);
   }
 
   async findOne(id: string): Promise<SpaceResponseDto> {
     this.logger.debug("Finding space", { id });
 
-    const space = await this.spaceRepo.findOne(id, sectionsInclude);
+    const space = await this.spaceRepo.findOneWithSections(id);
 
     if (!space) {
       throw new NotFoundException(t("errors.SPACE_NOT_FOUND_ID", { id }));
@@ -109,10 +107,9 @@ export class SpaceService {
 
       const updateData = filterUndefined({
         fields: { name: spaceData.name, icon: spaceData.icon, isDefault: spaceData.isDefault },
-        jsonFields: { config: spaceData.config },
       });
 
-      const space = await this.spaceRepo.update(id, updateData, sectionsInclude, transaction);
+      const space = await this.spaceRepo.updateWithSections(id, updateData, transaction);
 
       this.logger.log("Space updated", { spaceId: id });
       return toSpaceResponseDto(space);
@@ -122,12 +119,15 @@ export class SpaceService {
   async remove(id: string): Promise<SpaceResponseDto> {
     this.logger.debug("Removing space", { id });
 
-    const existing = await this.spaceRepo.findOwner(id);
-    if (existing?.isDefault) {
+    const space = await this.spaceRepo.findOneWithSections(id);
+    if (!space) {
+      throw new NotFoundException(t("errors.SPACE_NOT_FOUND_ID", { id }));
+    }
+    if (space.isDefault) {
       throw new BadRequestException(t("errors.CANNOT_DELETE_DEFAULT_SPACE"));
     }
 
-    const space = await this.spaceRepo.delete(id);
+    await this.spaceRepo.delete(id);
     this.logger.log("Space removed", { id });
     return toSpaceResponseDto(space);
   }

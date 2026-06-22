@@ -1,4 +1,5 @@
 import type {
+  CreateAutomationDto,
   CreateDatabaseDto,
   CreatePropertyDto,
   CreateSectionDto,
@@ -16,7 +17,13 @@ export type InitPropertyDef = Omit<CreatePropertyDto, "databaseId" | "config"> &
 
 export type InitTemplateDef = Omit<CreateTemplateDto, "databaseId">;
 
-export type InitViewDef = Omit<CreateViewDto, "databaseId">;
+export type InitViewDef = Omit<CreateViewDto, "databaseId"> & {
+  defaultTemplateName?: string;
+};
+
+export type InitAutomationDef = Omit<CreateAutomationDto, "databaseId"> & {
+  config?: Record<string, unknown>;
+};
 
 export type DatabaseTemplate = Omit<CreateDatabaseDto, "spaceId" | "properties"> & {
   type?: DatabaseType;
@@ -24,6 +31,8 @@ export type DatabaseTemplate = Omit<CreateDatabaseDto, "spaceId" | "properties">
   seeds?: SeedRecord[];
   templates?: InitTemplateDef[];
   views?: InitViewDef[];
+  automations?: InitAutomationDef[];
+  applyDefaultTemplateToSeeds?: boolean;
 };
 
 export interface InitializationConfig {

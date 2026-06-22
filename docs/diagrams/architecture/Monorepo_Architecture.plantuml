@@ -1,0 +1,40 @@
+@startuml Monorepo_Architecture
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam nodesep 30
+skinparam ranksep 40
+
+skinparam componentBackgroundColor #FFFFFF
+skinparam componentBorderColor #2563eb
+skinparam componentArrowColor #2563eb
+
+left to right direction
+
+title Структура монорепозиторію FIX Space
+
+package "apps/" as Apps #E3F2FD {
+  component "api\n(@fixspace/api)\nNestJS REST API" as API
+  component "web\n(@fixspace/web)\nNext.js" as Web
+}
+
+package "packages/" as Packages #E8F5E9 {
+  component "domain\n(@fixspace/domain)\nDTO, Entity, Enum" as Domain
+  component "database\n(@fixspace/database)\nPrisma ORM" as Database
+  component "eslint-config\njest-config\ntypescript-config" as Config
+}
+
+API -right-> Domain : runtime\nimport
+API -right-> Database : runtime\nimport
+
+Web ..> Domain : types-only\n(devDependency)
+
+API -[hidden]down-> Web
+
+Domain -[hidden]right-> Database
+Database -[hidden]right-> Config
+
+@enduml

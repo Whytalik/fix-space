@@ -11,17 +11,23 @@ import {
   UpdateIntegrationConnectionDto,
 } from "@fixspace/domain";
 import { NotificationType, IntegrationStatus as DbIntegrationStatus, prisma } from "@fixspace/database";
-import { AppLogger } from "../../common/logger/app-logger.service";
-import { t } from "../../common/utils/i18n.helper";
+import { I18nContext, I18nService } from "nestjs-i18n";
+import { randomBytes } from "crypto";
+import { AppLogger } from "@/common/logger/app-logger.service";
+import { filterUndefined } from "@/common/utils/filter-undefined";
+import { t } from "@/common/utils/i18n.helper";
+import { CacheService } from "@/core/cache/cache.service";
+import { NotificationService } from "@/modules/notification/notification.service";
+import { RecordRepository } from "@/modules/record/repositories/record.repository";
+import { RecordService } from "@/modules/record/record.service";
+import { InitializeUserSpaceUseCase } from "@/modules/space/providers/initialize-user-space.usecase";
+import { toIntegrationConnectionResponse } from "./utils/to-integration-connection-response.util";
 import { decryptCredentials, encryptCredentials } from "./utils/credentials.util";
+import { MT5WebhookDto } from "./dto/mt5-webhook.dto";
 import { IntegrationConnectionRepository } from "./repositories/integration-connection.repository";
 import { IntegrationProviderFactory } from "./providers/provider.factory";
-import { NotificationService } from "../notification/notification.service";
-import { RecordService } from "../record/record.service";
 import { SyncRecordService } from "./sync-record.service";
-import { CacheService } from "../../core/cache/cache.service";
 import type { SyncResult, TradeData } from "./providers/integration.provider";
-import { InitializeUserSpaceUseCase } from "../space/providers/initialize-user-space.usecase";
 
 @Injectable()
 export class IntegrationConnectionService {
@@ -32,8 +38,10 @@ export class IntegrationConnectionService {
     private readonly syncRecordService: SyncRecordService,
     private readonly notificationService: NotificationService,
     private readonly recordService: RecordService,
+    private readonly recordRepo: RecordRepository,
     private readonly cacheService: CacheService,
     private readonly initializeUserSpaceUseCase: InitializeUserSpaceUseCase,
+    private readonly i18nService: I18nService,
   ) {
     this.logger.setContext(IntegrationConnectionService.name);
   }
@@ -41,16 +49,35 @@ export class IntegrationConnectionService {
   async findAll(userId: string): Promise<IntegrationConnectionResponseDto[]> {
     this.logger.debug("Listing integration connections", { userId });
     const connections = await this.integrationRepo.findAllByUser(userId);
-    return connections.map(
-      (connection) => new IntegrationConnectionResponseDto(connection as unknown as Partial<IntegrationConnectionResponseDto>),
-    );
+    return connections.map((connection) => {
+      const response = toIntegrationConnectionResponse(connection);
+      if (connection.service === IntegrationService.METATRADER5 && connection.credentials) {
+        try {
+          const decrypted = decryptCredentials(connection.credentials as unknown as Record<string, string>) as any;
+          response.apiToken = decrypted.apiToken;
+        } catch (e) {
+          this.logger.error("Failed to decrypt credentials for findAll", { error: e instanceof Error ? e.message : String(e) });
+        }
+      }
+      return response;
+    });
   }
 
   async findOne(id: string, userId: string): Promise<IntegrationConnectionResponseDto> {
     this.logger.debug("Getting integration connection", { id });
     const connection = await this.integrationRepo.findByOwner(id, userId);
     if (!connection) throw new NotFoundException(t("errors.INTEGRATION_CONNECTION_NOT_FOUND"));
-    return new IntegrationConnectionResponseDto(connection as unknown as Partial<IntegrationConnectionResponseDto>);
+
+    const response = toIntegrationConnectionResponse(connection);
+    if (connection.service === IntegrationService.METATRADER5 && connection.credentials) {
+      try {
+        const decrypted = decryptCredentials(connection.credentials as unknown as Record<string, string>) as any;
+        response.apiToken = decrypted.apiToken;
+      } catch (e) {
+        this.logger.error("Failed to decrypt credentials for findOne", { error: e instanceof Error ? e.message : String(e) });
+      }
+    }
+    return response;
   }
 
   async create(userId: string, dto: CreateIntegrationConnectionDto): Promise<IntegrationConnectionResponseDto> {
@@ -73,7 +100,12 @@ export class IntegrationConnectionService {
       dto.credentials = trimCredentials(dto.credentials as unknown as Record<string, unknown>) as any;
     }
 
-    const provider = this.providerFactory.get(dto.service);
+    if (dto.service === IntegrationService.METATRADER5) {
+      if (!dto.credentials) dto.credentials = {} as any;
+      if (!(dto.credentials as any).apiToken) {
+        (dto.credentials as any).apiToken = `sk_${randomBytes(12).toString("hex")}`;
+      }
+    }
 
     const encryptedCredentials = encryptCredentials(dto.credentials as unknown as Record<string, unknown>);
 
@@ -85,10 +117,13 @@ export class IntegrationConnectionService {
       credentials: encryptedCredentials,
       syncInterval: dto.syncInterval ?? 5,
       marketType: dto.marketType,
-      status: DbIntegrationStatus.ACTIVE,
+      status: dto.service === IntegrationService.METATRADER5 ? DbIntegrationStatus.ACTIVE : DbIntegrationStatus.INACTIVE,
     });
 
-    void this.deployAsync(connection.id, dto, provider);
+    if (dto.service !== IntegrationService.METATRADER5) {
+      const provider = this.providerFactory.get(dto.service);
+      void this.deployAsync(connection.id, dto, provider);
+    }
 
     await this.notificationService.create(
       userId,
@@ -98,7 +133,11 @@ export class IntegrationConnectionService {
     );
 
     this.logger.log("Integration connection created (Pending)", { connectionId: connection.id, service: dto.service });
-    return new IntegrationConnectionResponseDto(connection as unknown as Partial<IntegrationConnectionResponseDto>);
+    const response = toIntegrationConnectionResponse(connection);
+    if (dto.service === IntegrationService.METATRADER5) {
+      response.apiToken = (dto.credentials as any).apiToken;
+    }
+    return response;
   }
 
   private async deployAsync(connectionId: string, dto: CreateIntegrationConnectionDto, provider: any) {
@@ -151,33 +190,40 @@ export class IntegrationConnectionService {
 
     if (dto.credentials !== undefined) {
       dto.credentials = trimCredentials(dto.credentials as unknown as Record<string, unknown>) as any;
-      const provider = this.providerFactory.get(connection.service as IntegrationService);
-      const validation = await provider.validateCredentials(dto.credentials);
-      if (!validation.valid) {
-        throw new BadRequestException(
-          t("errors.INTEGRATION_CREDENTIALS_INVALID", { service: connection.service, error: validation.error }),
-        );
+      if (connection.service !== IntegrationService.METATRADER5) {
+        const provider = this.providerFactory.get(connection.service as IntegrationService);
+        const validation = await provider.validateCredentials(dto.credentials);
+        if (!validation.valid) {
+          throw new BadRequestException(
+            t("errors.INTEGRATION_CREDENTIALS_INVALID", { service: connection.service, error: validation.error }),
+          );
+        }
       }
     }
 
     const encryptedCredentials =
       dto.credentials !== undefined ? encryptCredentials(dto.credentials as unknown as Record<string, unknown>) : undefined;
 
-    const updated = await this.integrationRepo.update(id, {
-      name: dto.name,
-      spaceId: spaceIdToUpdate,
-      credentials: encryptedCredentials,
-      status: dto.status as DbIntegrationStatus | undefined,
-      syncInterval: dto.syncInterval,
-      marketType: dto.marketType,
-      externalAccountId: dto.externalAccountId,
-      lastSyncError: dto.lastSyncError,
-      consecutiveFailures: dto.consecutiveFailures,
-    });
+    const updated = await this.integrationRepo.update(
+      id,
+      filterUndefined({
+        fields: {
+          name: dto.name,
+          spaceId: spaceIdToUpdate,
+          status: dto.status as DbIntegrationStatus | undefined,
+          syncInterval: dto.syncInterval,
+          marketType: dto.marketType,
+          externalAccountId: dto.externalAccountId,
+          lastSyncError: dto.lastSyncError,
+          consecutiveFailures: dto.consecutiveFailures,
+          credentials: encryptedCredentials as any,
+        },
+      }) as never,
+    );
 
     this.logger.log("Integration connection updated", { connectionId: id });
     await this.cacheService.deletePattern(`trades_cache:${id}:*`);
-    return new IntegrationConnectionResponseDto(updated as unknown as Partial<IntegrationConnectionResponseDto>);
+    return toIntegrationConnectionResponse(updated);
   }
 
   async delete(id: string, userId: string): Promise<void> {
@@ -225,42 +271,45 @@ export class IntegrationConnectionService {
     throw new BadRequestException(t("errors.INTEGRATION_NOT_LINKED_TO_SPACE"));
   }
 
-  async handleMT5Webhook(token: string, payload: any): Promise<{ success: boolean; imported: number; skipped: number }> {
+  async handleMT5Webhook(token: string, payload: MT5WebhookDto): Promise<{ success: boolean; imported: number; skipped: number }> {
     this.logger.debug("Received MT5 webhook payload", { connectionId: payload.connectionId });
 
-    // Validate connection exists
     const connection = await this.integrationRepo.findById(payload.connectionId);
     if (!connection || connection.service !== IntegrationService.METATRADER5) {
-      throw new UnprocessableEntityException("Invalid connection ID");
+      throw new UnprocessableEntityException(t("errors.INTEGRATION_INVALID_CONNECTION_ID"));
     }
 
-    // Validate the token against stored credentials (we store the MQL5 EA password/token as `apiToken`)
     const credentials = decryptCredentials(connection.credentials as unknown as Record<string, string>);
     if (credentials.apiToken !== token) {
-      throw new UnprocessableEntityException("Invalid token for this connection");
+      throw new UnprocessableEntityException(t("errors.INTEGRATION_INVALID_TOKEN"));
     }
 
     const spaceId = await this.ensureSpaceId(connection, connection.userId);
     const serviceLabel = this.getServiceLabel(connection.service as IntegrationService);
 
-    // Filter and map trades
-    const trades: TradeData[] = payload.trades.map((t: any) => ({
+    const trades: TradeData[] = payload.trades.map((t) => ({
       sourcePositionId: t.sourcePositionId,
       symbol: t.symbol,
-      direction: t.direction,
+      direction: t.direction as "BUY" | "SELL",
       entryPrice: t.entryPrice,
       exitPrice: t.exitPrice,
       quantity: t.quantity,
       grossPnL: t.grossPnL,
       fees: t.fees,
       netPnL: t.netPnL,
-      openTime: new Date(t.openTime),
-      closeTime: new Date(t.closeTime),
+      openTime: t.openTime,
+      closeTime: t.closeTime,
       currency: t.currency,
     }));
 
     if (trades.length > 0) {
-      const persistResult = await this.syncRecordService.persistTrades(connection.userId, connection.id, serviceLabel, trades, spaceId);
+      const persistResult = await this.syncRecordService.persistTrades(
+        connection.userId as string,
+        connection.id as string,
+        serviceLabel,
+        trades,
+        spaceId,
+      );
 
       let statusSignal: string | null = null;
       if (persistResult.noJournal) {
@@ -273,20 +322,26 @@ export class IntegrationConnectionService {
       if (statusSignal) {
         updateData.lastSyncError = statusSignal;
         if (statusSignal === "TRADING_JOURNAL_NOT_FOUND") {
-          updateData.consecutiveFailures = (connection.consecutiveFailures ?? 0) + 1;
+          updateData.consecutiveFailures = ((connection.consecutiveFailures as number) ?? 0) + 1;
         }
       } else {
         updateData.lastSyncError = null;
         updateData.consecutiveFailures = 0;
       }
 
-      await this.integrationRepo.update(connection.id, updateData as never);
+      await this.integrationRepo.update(connection.id as string, updateData as never);
 
       return { success: true, imported: persistResult.created, skipped: persistResult.skipped };
     }
 
     await this.integrationRepo.update(connection.id, { lastSyncAt: new Date(), lastSyncError: null, consecutiveFailures: 0 } as never);
     return { success: true, imported: 0, skipped: 0 };
+  }
+
+  private safeTranslate(key: string, args?: Record<string, unknown>): string {
+    const ctx = I18nContext.current();
+    if (ctx) return ctx.t(key, { args });
+    return this.i18nService.t(key, { lang: "en", args });
   }
 
   async triggerSync(id: string, userId: string, opts?: { startDate?: string; endDate?: string }): Promise<SyncResult> {
@@ -311,7 +366,7 @@ export class IntegrationConnectionService {
       await this.notificationService.create(
         userId,
         NotificationType.INTEGRATION,
-        t("notifications.integration_failed", { service: serviceLabel }),
+        this.safeTranslate("notifications.integration_failed", { service: serviceLabel }),
         "/settings",
       );
       await this.integrationRepo.update(id, { status: DbIntegrationStatus.ERROR, lastSyncError: result.errors[0] });
@@ -335,7 +390,7 @@ export class IntegrationConnectionService {
         await this.notificationService.create(
           userId,
           NotificationType.INTEGRATION,
-          t("notifications.integration_no_journal", { service: serviceLabel }),
+          this.safeTranslate("notifications.integration_no_journal", { service: serviceLabel }),
           "/settings",
         );
       } else {
@@ -343,7 +398,7 @@ export class IntegrationConnectionService {
         await this.notificationService.create(
           userId,
           NotificationType.INTEGRATION,
-          t("notifications.integration_missing_properties", { service: serviceLabel, properties }),
+          this.safeTranslate("notifications.integration_missing_properties", { service: serviceLabel, properties }),
           "/settings",
         );
       }
@@ -375,6 +430,83 @@ export class IntegrationConnectionService {
     const connection = await this.integrationRepo.findByOwner(id, userId);
     if (!connection) throw new NotFoundException(t("errors.INTEGRATION_CONNECTION_NOT_FOUND"));
     const spaceId = await this.ensureSpaceId(connection, userId);
+
+    if (connection.service === IntegrationService.METATRADER5) {
+      const records = await this.recordRepo.findManyWithValuesBySourceIntegration(id);
+
+      const mappedTrades: TradeData[] = records.map((record) => {
+        const getVal = (key: string): any => {
+          const valObj = record.values.find((v) => v.property.integrationKey === key);
+          return valObj ? valObj.value : undefined;
+        };
+
+        const dirVal = getVal("direction");
+        const direction: "BUY" | "SELL" = dirVal === "Long" ? "BUY" : "SELL";
+
+        const entryPrice = Number(getVal("entryPrice") ?? 0);
+        const exitPrice = Number(getVal("exitPrice") ?? 0);
+        const quantity = Number(getVal("quantity") ?? 0);
+        const fees = Number(getVal("fees") ?? 0);
+
+        const openTime = getVal("entryDate") ? new Date(getVal("entryDate") as string).toISOString() : record.createdAt.toISOString();
+        const closeTime = getVal("exitDate") ? new Date(getVal("exitDate") as string).toISOString() : record.createdAt.toISOString();
+
+        const netPnL = (exitPrice - entryPrice) * quantity * (direction === "BUY" ? 1 : -1) - fees;
+        const grossPnL = netPnL + fees;
+
+        return {
+          sourcePositionId: record.sourcePositionId ?? record.id,
+          symbol: getVal("pair") ?? record.name.split(" ")[0] ?? "Unknown",
+          direction,
+          entryPrice,
+          exitPrice,
+          quantity,
+          grossPnL,
+          fees,
+          netPnL,
+          openTime,
+          closeTime,
+          currency: record.sourceCurrency ?? "USD",
+          stopLoss: getVal("stopLoss") ? Number(getVal("stopLoss")) : undefined,
+          takeProfit: getVal("takeProfit") ? Number(getVal("takeProfit")) : undefined,
+        };
+      });
+
+      const start = new Date(dto.startDate).getTime();
+      const end = new Date(dto.endDate).getTime();
+
+      const filteredTrades = mappedTrades.filter((trade) => {
+        const tTime = new Date(trade.closeTime).getTime();
+        return tTime >= start && tTime <= end;
+      });
+
+      const annotated = filteredTrades.map((t) => ({ ...t, alreadyImported: true }));
+
+      const tradeDtos: IntegrationTradeDto[] = annotated.map((trade) => ({
+        sourcePositionId: trade.sourcePositionId,
+        symbol: trade.symbol,
+        direction: trade.direction,
+        entryPrice: trade.entryPrice,
+        exitPrice: trade.exitPrice,
+        quantity: trade.quantity,
+        grossPnL: trade.grossPnL,
+        fees: trade.fees,
+        netPnL: trade.netPnL,
+        openTime: trade.openTime,
+        closeTime: trade.closeTime,
+        currency: trade.currency,
+        alreadyImported: trade.alreadyImported,
+        stopLoss: trade.stopLoss,
+        takeProfit: trade.takeProfit,
+      }));
+
+      const journalDatabaseId = await this.syncRecordService.findJournalDatabaseId(spaceId);
+
+      return {
+        trades: tradeDtos,
+        journalDatabaseId,
+      };
+    }
 
     const cacheKey = this.cacheService.generateTradeCacheKey(id, dto.startDate, dto.endDate);
     let trades = await this.cacheService.get<TradeData[]>(cacheKey);
@@ -428,6 +560,9 @@ export class IntegrationConnectionService {
 
     const connection = await this.integrationRepo.findByOwner(id, userId);
     if (!connection) throw new NotFoundException(t("errors.INTEGRATION_CONNECTION_NOT_FOUND"));
+    if (connection.service === IntegrationService.METATRADER5) {
+      return { created: 0, skipped: dto.sourcePositionIds.length };
+    }
     const spaceId = await this.ensureSpaceId(connection, userId);
 
     const cacheKey = this.cacheService.generateTradeCacheKey(id, dto.startDate, dto.endDate);

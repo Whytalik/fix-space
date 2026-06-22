@@ -8,15 +8,14 @@ export function getProperties(databaseId: string) {
 type CreatePropertyInput = Omit<CreatePropertyDto, "databaseId" | "config"> & { config?: Record<string, unknown> };
 
 export function createProperty(databaseId: string, dto: CreatePropertyInput) {
-  return apiFetch<PropertyResponseDto>(`/properties?databaseId=${databaseId}`, {
+  return apiFetch<PropertyResponseDto>(`/properties`, {
     method: "POST",
-    body: dto,
+    body: { ...dto, databaseId },
   });
 }
 
-type UpdatePropertyInput = Omit<UpdatePropertyDto, "config" | "group"> & {
+type UpdatePropertyInput = Omit<UpdatePropertyDto, "config"> & {
   config?: Record<string, unknown>;
-  group?: string | null;
 };
 
 export function updateProperty(propertyId: string, dto: UpdatePropertyInput) {

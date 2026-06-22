@@ -8,7 +8,7 @@ export function getViews(databaseId: string) {
 export function createView(databaseId: string, data: Partial<CreateViewDto>) {
   return apiFetch<ViewResponseDto>(`/databases/${databaseId}/views`, {
     method: "POST",
-    body: { ...data, databaseId },
+    body: data,
   });
 }
 
@@ -26,5 +26,12 @@ export function deleteView(viewId: string) {
 export function duplicateView(viewId: string) {
   return apiFetch<ViewResponseDto>(`/views/${viewId}/duplicate`, {
     method: "POST",
+  });
+}
+
+export function reorderViews(databaseId: string, viewOrders: { id: string; position: number }[]) {
+  return apiFetch<ViewResponseDto[]>(`/databases/${databaseId}/views/reorder`, {
+    method: "PATCH",
+    body: { viewOrders },
   });
 }

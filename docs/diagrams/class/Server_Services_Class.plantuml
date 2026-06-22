@@ -1,0 +1,124 @@
+@startuml Server_Services_Class
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam nodesep 14
+skinparam ranksep 24
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #666666
+  FontSize 12
+}
+
+top to bottom direction
+
+title Діаграма класів серверної частини
+
+package "Security & Core" as Core #FFF9C4 {
+  class AuthService
+  class TokenService
+  class NotificationService
+  class SettingsService
+
+  AuthService -[hidden]down-> TokenService
+  TokenService -[hidden]down-> NotificationService
+  NotificationService -[hidden]down-> SettingsService
+}
+
+package "Space & Database" as SpacePkg #FFF9C4 {
+  class SpaceService
+  class DatabaseService
+  class ViewService
+  class TemplateService
+
+  SpaceService -[hidden]down-> DatabaseService
+  DatabaseService -[hidden]down-> ViewService
+  ViewService -[hidden]down-> TemplateService
+}
+
+package "Records" as RecordPkg #FFF9C4 {
+  class RecordService
+  class RecordContentService
+  class StatisticsService
+
+  RecordService -[hidden]down-> RecordContentService
+  RecordContentService -[hidden]down-> StatisticsService
+}
+
+package "Property Handling & Formulas" as PropertyPkg #FFF59D {
+  class PropertyService
+  class PropertyTypeRegistry << (M, #9B59B6) Registry >>
+  interface PropertyHandler << (I, #3498DB) Strategy >>
+
+  class TextHandler
+  class NumberHandler
+  class FormulaHandler
+  class CheckboxHandler
+  class DateHandler
+  class DurationHandler
+  class ProgressHandler
+  class RatingHandler
+  class RelationHandler
+  class SelectHandler
+  class StatusHandler
+
+  class FormulaEngine << (E, #3498DB) Interpreter >>
+  class FormulaRecalculator
+
+  PropertyService --> PropertyTypeRegistry
+  PropertyTypeRegistry o-- PropertyHandler
+  TextHandler ..|> PropertyHandler
+  NumberHandler ..|> PropertyHandler
+  FormulaHandler ..|> PropertyHandler
+  CheckboxHandler ..|> PropertyHandler
+  DateHandler ..|> PropertyHandler
+  DurationHandler ..|> PropertyHandler
+  ProgressHandler ..|> PropertyHandler
+  RatingHandler ..|> PropertyHandler
+  RelationHandler ..|> PropertyHandler
+  SelectHandler ..|> PropertyHandler
+  StatusHandler ..|> PropertyHandler
+  FormulaHandler --> FormulaEngine
+  FormulaRecalculator o-- FormulaEngine
+}
+
+package "Automation" as AutomationPkg #FFF9C4 {
+  class AutomationService
+  class AutomationEngine
+
+  AutomationService o-- AutomationEngine
+}
+
+package "External Integrations" as IntegrationPkg #FFF9C4 {
+  class IntegrationConnectionService
+  class IntegrationProviderFactory << (F, #E67E22) Factory >>
+  interface IntegrationProvider << (I, #3498DB) Strategy >>
+  class BinanceProvider
+
+  IntegrationConnectionService --> IntegrationProviderFactory
+  IntegrationProviderFactory ..> IntegrationProvider
+  BinanceProvider ..|> IntegrationProvider
+}
+
+Core -[hidden]down-> SpacePkg
+SpacePkg -[hidden]down-> RecordPkg
+RecordPkg -[hidden]down-> PropertyPkg
+PropertyPkg -[hidden]down-> AutomationPkg
+AutomationPkg -[hidden]down-> IntegrationPkg
+
+AuthService --> TokenService
+SpaceService --> DatabaseService
+DatabaseService --> ViewService
+DatabaseService -down-> PropertyTypeRegistry
+RecordService -down-> FormulaRecalculator
+AutomationService -down-> RecordService
+AutomationService --> NotificationService
+StatisticsService --> RecordService
+IntegrationConnectionService -up-> RecordService
+
+@enduml

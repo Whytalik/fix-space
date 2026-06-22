@@ -9,7 +9,7 @@ import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
 import { generateUniqueName } from "@/common/utils/generate-unique-name";
 
-import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
+import { SettingsCategory } from "@fixspace/domain";
 import { SettingsService } from "@/modules/settings/settings.service";
 import { FormulaRecalculator } from "@/modules/property/types/formula/formula-recalculator.service";
 import { RecordContentService } from "@/modules/record-content/record-content.service";

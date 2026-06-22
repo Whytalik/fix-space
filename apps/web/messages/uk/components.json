@@ -2,7 +2,8 @@
   "UI": {
     "close": "Закрити",
     "confirm": "Підтвердити",
-    "cancel": "Скасувати"
+    "cancel": "Скасувати",
+    "loading": "Завантаження"
   },
   "Search": {
     "placeholder": "Пошук записів...",
@@ -126,7 +127,8 @@
     "noRecordsFound": "Записів не знайдено",
     "selectedCount": "{count} вибрано",
     "applyChanges": "Застосувати зміни",
-    "untitled": "Без назви"
+    "untitled": "Без назви",
+    "cancel": "Cancel"
   },
   "IconPicker": {
     "searchIcons": "Пошук іконок…",

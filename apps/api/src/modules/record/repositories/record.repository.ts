@@ -2,6 +2,10 @@ import { Injectable } from "@nestjs/common";
 import { Prisma, prisma } from "@fixspace/database";
 import { BaseRepository } from "@/common/utils/base.repository";
 
+const valuesWithPropertyName = {
+  include: { property: { select: { name: true } } },
+} as const;
+
 @Injectable()
 export class RecordRepository extends BaseRepository {
   async findByIdWithOwner(id: string, userId: string) {
@@ -24,14 +28,14 @@ export class RecordRepository extends BaseRepository {
   async findById(id: string) {
     return prisma.record.findUnique({
       where: { id },
-      include: { values: true },
+      include: { values: valuesWithPropertyName },
     });
   }
 
   async findAllByDatabase(databaseId: string, userId: string) {
     return prisma.record.findMany({
       where: { databaseId, database: { space: { ownerId: userId } } },
-      include: { values: true },
+      include: { values: valuesWithPropertyName },
       orderBy: { createdAt: "desc" },
     });
   }
@@ -41,7 +45,7 @@ export class RecordRepository extends BaseRepository {
     return Promise.all([
       prisma.record.findMany({
         where,
-        include: { values: true },
+        include: { values: valuesWithPropertyName },
         orderBy: { createdAt: "desc" },
         skip,
         take,
@@ -91,7 +95,7 @@ export class RecordRepository extends BaseRepository {
         database: {
           select: {
             id: true,
-            title: true,
+            name: true,
             section: { select: { name: true } },
           },
         },
@@ -99,6 +103,22 @@ export class RecordRepository extends BaseRepository {
         content: { select: { content: true } },
       },
       take: 2000,
+    });
+  }
+
+  async findManyWithValuesBySourceIntegration(connectionId: string) {
+    return prisma.record.findMany({
+      where: {
+        sourceIntegrationId: connectionId,
+      },
+      include: {
+        values: {
+          include: {
+            property: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -113,15 +133,15 @@ export class RecordRepository extends BaseRepository {
     });
   }
 
-  async update(id: string, data: Prisma.RecordUpdateInput) {
-    return prisma.record.update({
+  async update(id: string, data: Prisma.RecordUpdateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).record.update({
       where: { id },
       data,
       include: { values: true },
     });
   }
 
-  async delete(id: string) {
-    return prisma.record.delete({ where: { id } });
+  async delete(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).record.delete({ where: { id } });
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useDatabaseContext } from "@/context/database-context";
-import { PropertyType, SummaryMetric } from "@fixspace/domain/enums";
+import { PropertyType, SummaryMetric } from "@fixspace/domain";
 import type { RecordResponseDto } from "@fixspace/domain";
 import { calculateSummary, getAvailableMetrics } from "@/utils/record/summary-calculations";
 import { useState, useMemo, useRef, useEffect } from "react";

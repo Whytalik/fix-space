@@ -1,6 +1,6 @@
 "use client";
 
-import { PropertyType } from "@fixspace/domain/enums";
+import { PropertyType } from "@fixspace/domain";
 import type { RecordResponseDto, PropertyResponseDto } from "@fixspace/domain";
 import {
   isDatePropertyConfig,
@@ -124,6 +124,7 @@ export function CellValue({ value, type, config, relatedRecords, readOnly = true
           config={isStatusPropertyConfig(config) ? config : null}
           value={currentValue}
           readOnly={readOnly}
+          ghost={ghost}
           onChange={onChange as (value: StatusPropertyValue | null) => void}
         />
       );

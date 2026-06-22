@@ -38,12 +38,12 @@ describe("SpaceService", () => {
   } as unknown as jest.Mocked<AppLogger>;
 
   const mockSpaceRepo = {
-    create: jest.fn(),
-    findAll: jest.fn(),
-    findOne: jest.fn(),
+    createWithSections: jest.fn(),
+    findAllWithSections: jest.fn(),
+    findOneWithSections: jest.fn(),
     findOwner: jest.fn(),
     count: jest.fn(),
-    update: jest.fn(),
+    updateWithSections: jest.fn(),
     updateMany: jest.fn(),
     delete: jest.fn(),
     transaction: jest.fn((callback) => callback(prisma)),
@@ -96,23 +96,22 @@ describe("SpaceService", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockSpaceRepo.create.mockResolvedValue(createdSpace);
+      mockSpaceRepo.createWithSections.mockResolvedValue(createdSpace);
 
       const result = await service.create("user-1", { name: "Test Space" });
 
       expect(result).toBeDefined();
-      expect(spaceRepo.create).toHaveBeenCalledWith(
+      expect(spaceRepo.createWithSections).toHaveBeenCalledWith(
         expect.objectContaining({
           name: "Test Space",
           ownerId: "user-1",
           isDefault: false,
         }),
-        expect.any(Object),
         expect.anything(),
       );
     });
 
-    it("TC-WS-U-001: should create space with explicit isDefault=true", async () => {
+    it("TC-WS-U-002: should create space with explicit isDefault=true", async () => {
       const createdSpace = {
         id: "space-2",
         name: "Default Space",
@@ -125,33 +124,32 @@ describe("SpaceService", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockSpaceRepo.create.mockResolvedValue(createdSpace);
+      mockSpaceRepo.createWithSections.mockResolvedValue(createdSpace);
 
       const result = await service.create("user-1", { name: "Default Space", icon: "🏠", isDefault: true });
 
       expect(result).toBeDefined();
-      expect(spaceRepo.create).toHaveBeenCalledWith(
+      expect(spaceRepo.createWithSections).toHaveBeenCalledWith(
         expect.objectContaining({
           name: "Default Space",
           icon: "🏠",
           ownerId: "user-1",
           isDefault: true,
         }),
-        expect.any(Object),
         expect.anything(),
       );
     });
 
-    it("TC-WS-U-005: should throw BadRequestException if space limit of 5 is reached", async () => {
+    it("TC-WS-U-003: should throw BadRequestException if space limit of 5 is reached", async () => {
       mockSpaceRepo.count.mockResolvedValue(5);
 
       await expect(service.create("user-1", { name: "New Space" })).rejects.toThrow(BadRequestException);
-      expect(spaceRepo.create).not.toHaveBeenCalled();
+      expect(spaceRepo.createWithSections).not.toHaveBeenCalled();
     });
   });
 
   describe("findOne", () => {
-    it("TC-WS-U-002: should return space when found", async () => {
+    it("TC-WS-U-004: should return space when found", async () => {
       const foundSpace = {
         id: "space-1",
         name: "Test Space",
@@ -164,23 +162,23 @@ describe("SpaceService", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockSpaceRepo.findOne.mockResolvedValue(foundSpace);
+      mockSpaceRepo.findOneWithSections.mockResolvedValue(foundSpace);
 
       const result = await service.findOne("space-1");
 
       expect(result).toBeDefined();
-      expect(spaceRepo.findOne).toHaveBeenCalledWith("space-1", expect.any(Object));
+      expect(spaceRepo.findOneWithSections).toHaveBeenCalledWith("space-1");
     });
 
-    it("TC-WS-U-002: should throw NotFoundException when space not found", async () => {
-      mockSpaceRepo.findOne.mockResolvedValue(null);
+    it("TC-WS-U-005: should throw NotFoundException when space not found", async () => {
+      mockSpaceRepo.findOneWithSections.mockResolvedValue(null);
 
       await expect(service.findOne("nonexistent")).rejects.toThrow(NotFoundException);
     });
   });
 
   describe("update", () => {
-    it("TC-WS-U-003: should reset isDefault of other spaces when setting isDefault=true", async () => {
+    it("TC-WS-U-006: should reset isDefault of other spaces when setting isDefault=true", async () => {
       const currentSpace = { id: "space-1", ownerId: "user-1", isDefault: false };
       const updatedSpace = {
         id: "space-1",
@@ -197,7 +195,7 @@ describe("SpaceService", () => {
 
       mockSpaceRepo.findOwner.mockResolvedValue(currentSpace);
       mockSpaceRepo.updateMany.mockResolvedValue({ count: 2 });
-      mockSpaceRepo.update.mockResolvedValue(updatedSpace);
+      mockSpaceRepo.updateWithSections.mockResolvedValue(updatedSpace);
 
       const result = await service.update("space-1", { isDefault: true });
 
@@ -210,7 +208,7 @@ describe("SpaceService", () => {
       );
     });
 
-    it("TC-WS-U-003: should not reset other spaces when isDefault is not set to true", async () => {
+    it("TC-WS-U-007: should not reset other spaces when isDefault is not set to true", async () => {
       const updatedSpace = {
         id: "space-1",
         name: "Updated Name",
@@ -224,7 +222,7 @@ describe("SpaceService", () => {
         updatedAt: new Date(),
       };
 
-      mockSpaceRepo.update.mockResolvedValue(updatedSpace);
+      mockSpaceRepo.updateWithSections.mockResolvedValue(updatedSpace);
 
       const result = await service.update("space-1", { name: "Updated Name" });
 
@@ -235,34 +233,39 @@ describe("SpaceService", () => {
   });
 
   describe("remove", () => {
-    it("TC-WS-U-004: should throw BadRequestException when trying to delete default space", async () => {
-      mockSpaceRepo.findOwner.mockResolvedValue({ ownerId: "user-1", isDefault: true });
+    it("TC-WS-U-008: should throw BadRequestException when trying to delete default space", async () => {
+      mockSpaceRepo.findOneWithSections.mockResolvedValue({ id: "space-1", isDefault: true, sections: [], databases: [] });
 
       await expect(service.remove("space-1")).rejects.toThrow(BadRequestException);
       expect(spaceRepo.delete).not.toHaveBeenCalled();
     });
 
-    it("TC-WS-U-004: should allow deleting non-default space", async () => {
-      const deletedSpace = {
+    it("TC-WS-U-008a: should throw NotFoundException when space does not exist", async () => {
+      mockSpaceRepo.findOneWithSections.mockResolvedValue(null);
+
+      await expect(service.remove("nonexistent")).rejects.toThrow(NotFoundException);
+      expect(spaceRepo.delete).not.toHaveBeenCalled();
+    });
+
+    it("TC-WS-U-009: should allow deleting non-default space", async () => {
+      const space = {
         id: "space-2",
         name: "To Delete",
         icon: null,
         isDefault: false,
         ownerId: "user-1",
-        config: null,
         sections: [],
         databases: [],
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      mockSpaceRepo.findOwner.mockResolvedValue({ ownerId: "user-1", isDefault: false });
-      mockSpaceRepo.delete.mockResolvedValue(deletedSpace);
+      mockSpaceRepo.findOneWithSections.mockResolvedValue(space);
 
       const result = await service.remove("space-2");
 
       expect(result).toBeDefined();
-      expect(spaceRepo.findOwner).toHaveBeenCalledWith("space-2");
+      expect(spaceRepo.findOneWithSections).toHaveBeenCalledWith("space-2");
       expect(spaceRepo.delete).toHaveBeenCalledWith("space-2");
     });
   });

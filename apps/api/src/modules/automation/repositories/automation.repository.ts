@@ -30,16 +30,16 @@ export class AutomationRepository extends BaseRepository {
     });
   }
 
-  async create(data: Prisma.AutomationUncheckedCreateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).automation.create({ data });
+  async create(data: Prisma.AutomationUncheckedCreateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).automation.create({ data });
   }
 
-  async update(id: string, data: Prisma.AutomationUpdateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).automation.update({ where: { id }, data });
+  async update(id: string, data: Prisma.AutomationUpdateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).automation.update({ where: { id }, data });
   }
 
-  async delete(id: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).automation.delete({ where: { id } });
+  async delete(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).automation.delete({ where: { id } });
   }
 
   async createLog(data: Prisma.AutomationLogUncheckedCreateInput) {

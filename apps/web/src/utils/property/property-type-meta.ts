@@ -11,7 +11,7 @@ import {
   DEFAULT_STATUS_PROPERTY,
   DEFAULT_TEXT_PROPERTY,
   PropertyType,
-} from "@fixspace/domain/enums";
+} from "@fixspace/domain";
 
 export function getTypeMeta(t: (key: string) => string): Record<PropertyType, { label: string; description: string }> {
   return {

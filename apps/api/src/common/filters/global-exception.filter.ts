@@ -58,6 +58,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 
   catch(exception: unknown, host: ArgumentsHost) {
+    if (host.getType() !== "http") return;
+
     const httpCtx = host.switchToHttp();
     const request = httpCtx.getRequest<Request>();
     const response = httpCtx.getResponse<Response>();

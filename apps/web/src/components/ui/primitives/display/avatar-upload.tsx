@@ -17,6 +17,59 @@ type AvatarUploadProps = {
   removeLabel?: string;
 };
 
+function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const image = new Image();
+      image.src = event.target?.result as string;
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = image.width;
+        let height = image.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext("2d");
+        if (!context) {
+          reject(new Error("Failed to get 2D context"));
+          return;
+        }
+
+        context.drawImage(image, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error("Canvas to Blob failed"));
+            }
+          },
+          "image/jpeg",
+          0.85,
+        );
+      };
+      image.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+}
+
 export function AvatarUpload({ username, icon, size = "md", onUpdate, changeLabel, removeLabel }: AvatarUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,19 +77,20 @@ export function AvatarUpload({ username, icon, size = "md", onUpdate, changeLabe
 
   const avatarUrl = icon ? (icon.startsWith("http") ? icon : `${API_BASE_URL}${icon}`) : null;
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
     if (!file) return;
     setError(null);
     setIsUploading(true);
     try {
-      const updated = await uploadAvatar(file);
+      const resizedBlob = await resizeImage(file, 400, 400);
+      const updated = await uploadAvatar(resizedBlob);
       onUpdate(updated);
-    } catch (error) {
-      setError(parseApiError(error));
+    } catch (uploadError) {
+      setError(parseApiError(uploadError));
     } finally {
       setIsUploading(false);
-      e.target.value = "";
+      event.target.value = "";
     }
   }
 

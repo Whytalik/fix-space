@@ -80,7 +80,7 @@ jobs:
         run: pnpm turbo test -- --coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe # v5
+        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe 
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
@@ -135,14 +135,29 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fixspace_test?schema=public
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
       NODE_ENV: test
       JWT_SECRET: super-secret-key-for-diploma-project
       JWT_REFRESH_SECRET: super-refresh-secret-key-for-diploma-project
       GOOGLE_CLIENT_ID: test-google-client-id
       GOOGLE_CLIENT_SECRET: test-google-client-secret
       GOOGLE_CALLBACK_URL: http://localhost:3000/auth/google/callback
+      CLOUDINARY_CLOUD_NAME: test-cloud
+      CLOUDINARY_API_KEY: test-key
+      CLOUDINARY_API_SECRET: test-secret
+      CLOUDINARY_FOLDER_PREFIX: fixspace-test
     steps:
       - uses: actions/checkout@v4
 
@@ -163,6 +178,9 @@ jobs:
 
       - name: Build domain package
         run: pnpm --filter @fixspace/domain build
+
+      - name: Build database package
+        run: pnpm --filter @fixspace/database build
 
       - name: Run migrations
         run: pnpm --filter @fixspace/database exec prisma migrate deploy

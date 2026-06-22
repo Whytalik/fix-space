@@ -1,0 +1,59 @@
+@startuml Hierarchical_Content_Snapshots_Activity
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  BarColor #000000
+  StartColor #000000
+  EndColor #000000
+  ArrowColor #000000
+  FontColor #000000
+}
+
+title Алгоритм управління знімками стану контенту запису
+
+|Користувач / UI|
+start
+:Редагування вмісту запису;
+
+|Система (RecordContentService)|
+partition "Збереження та створення знімка" {
+  :Оновлення поточного вмісту в БД;
+  
+  :Перевірка потреби у створенні знімка;
+  if (Минуло > 5 хв АБО примусовий знімок?) then (так)
+    :Запит кількості існуючих знімків;
+    if (Кількість >= 50?) then (так)
+      :Видалення найстарішого знімка;
+    endif
+    :Створення нового запису знімка стану (Snapshot);
+  else (ні)
+    :Пропуск створення знімка;
+  endif
+}
+
+|Користувач / UI|
+:Перегляд історії версій;
+:Вибір знімка для відновлення;
+
+|Система (RecordContentService)|
+partition "Відновлення стану" {
+  :Отримання даних знімка за ID;
+  if (Знімок знайдено?) then (так)
+    :Оновлення основного вмісту даними зі знімка;
+    :Створення нового знімка поточного стану (Snapshot);
+  else (ні)
+    :Помилка: Знімок не знайдено;
+    stop
+  endif
+}
+
+|Користувач / UI|
+:Відображення відновленого вмісту;
+stop
+
+@enduml

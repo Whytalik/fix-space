@@ -16,10 +16,14 @@ export class NumberHandler implements PropertyConfigHandler, PropertyValueHandle
   readonly type = PropertyType.NUMBER;
 
   private parseConfig(config: Record<string, unknown>): NumberPropertyConfig {
-    if (!isNumberPropertyConfig(config)) {
+    const fullConfig = {
+      ...this.getDefaultConfig(),
+      ...config,
+    };
+    if (!isNumberPropertyConfig(fullConfig)) {
       throw new Error(`Invariant: expected NumberPropertyConfig, got ${JSON.stringify(config)}`);
     }
-    return config;
+    return fullConfig as NumberPropertyConfig;
   }
 
   getDefaultConfig(): Record<string, unknown> {
@@ -31,7 +35,7 @@ export class NumberHandler implements PropertyConfigHandler, PropertyValueHandle
   validateConfig(config: Record<string, unknown>): string[] | null {
     const errors: string[] = [];
 
-    if (config.defaultValue !== undefined && typeof config.defaultValue !== "number") {
+    if (config.defaultValue !== undefined && config.defaultValue !== null && typeof config.defaultValue !== "number") {
       errors.push("defaultValue must be a number");
     }
 

@@ -60,9 +60,9 @@ graph TD
 
     PR[Performance Review] -->|Trades| TJ
     PR -->|Mistakes| MK
-    PR -->|Account| AC
-
-    TS -->|Notes| NT
+    PR -->|Routines| DR
+    PR -->|Systems| TS
+    PR -->|Notes| NT
 ```
 
 ## Метадані та UX-атрибути властивостей
@@ -100,7 +100,7 @@ graph TD
 | **Trading Journal**    | Intraday Trade   | Trade #{{count}}                 | **Авто-категоризація P&L**: встановлення статусу Win/Loss; розрахунок Risk %. |
 |                        | Swing Trade      | Swing Trade #{{count}}           | **Авто-зв'язок з рутиною**: знаходить Daily Routine за датою створення.       |
 | **Daily Routine**      | Daily Routine    | {{date}}                         | **Авто-зв'язок з угодами**: знаходить усі записи Trading Journal за цю дату.  |
-| **Routine Library**    | Routine Library  | Routine Library #{{count}}       | Центральна база SOP (Standard Operating Procedures).                          |
+| **Routine Library**    | Routine Library  | Routine Library {{today}}        | Central SOP (Standard Operating Procedures) database templates.               |
 | **Notes**              | Strategy Note    | Note #{{count}}                  | Шаблон для фіксації правил та нових патернів.                                 |
 |                        | Observation      | Observation {{date}}             | Шаблон для вільних нотаток про поведінку ціни.                                |
 | **Mistakes**           | Execution Error  | Error #{{count}}                 | Помилки технічного виконання.                                                 |
@@ -117,8 +117,6 @@ graph TD
 
 ## Специфікація властивостей баз даних
 
-Нижче наведено перелік властивостей для кожної бази з відповідними конфігураційними параметрами.
-
 ### 1. Trading Journal (trading-journal)
 
 **Шар А: Виконання (Execution)**
@@ -127,128 +125,186 @@ graph TD
 | 0 | Name | TEXT | Короткий ідентифікатор угоди для швидкого пошуку в списку. | `isRequired: true` | "EU Long Breakout" |
 | 1 | Status | SELECT | Відображає життєвий цикл угоди. | `isMultiSelect: false`, Options: `Active`, `Closed` | Active, Closed |
 | 2 | Pair | SELECT | Конкретний актив. | `isMultiSelect: false`, categories: `PAIR_CATEGORIES` | "EURUSD" |
-| 3 | Direction | SELECT | Напрямок позиції. | `isMultiSelect: false`, categories: `DIRECTION_OPTIONS` | Див. Directions |
+| 3 | Direction | SELECT | Напрямок позиції. | `isMultiSelect: false`, Options: `Long`, `Short` | Long, Short |
 | 4 | Entry Price | NUMBER | Точна ціна виконання ордера. | `defaultValue: 0, format: "float"` | "1.0850" |
 | 5 | Exit Price | NUMBER | Середня ціна виходу. | `defaultValue: 0, format: "float"` | "1.0920" |
 | 6 | Quantity | NUMBER | Об'єм позиції. | `defaultValue: 0, format: "float"` | "1.0 lot" |
-| 7 | Entry Date | DATE | Час входу. | `format: "DD.MM.YYYY"` | - |
-| 8 | Exit Date | DATE | Час виходу. | `format: "DD.MM.YYYY"` | - |
+| 7 | Entry Date | DATE | Час входу. | `format: "DD.MM.YYYY HH:mm"` | - |
+| 8 | Exit Date | DATE | Час виходу. | `format: "DD.MM.YYYY HH:mm"` | - |
+| 9 | Outcome | SELECT | Фінальний результат угоди. | `isMultiSelect: false`, Options: `Win`, `Loss`, `Breakeven` | Win, Loss, Breakeven |
 
 **Шар Б: Ризик-менеджмент**
 | # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 9 | Initial SL | NUMBER | Ціна, за якої ідея вважається невалідною. | `defaultValue: 0, format: "float"` | "1.0800" |
-| 10 | Initial TP | NUMBER | Цільова ціна виходу. | `defaultValue: 0, format: "float"` | "1.1000" |
-| 11 | Risk Amount ($) | FORMULA | Сума збитку при досягненні Stop Loss. | `{ output: { type: "text" } }` | (Entry - SL) _ Qty |
-| 12 | Risk % | FORMULA | Відсоток від капіталу під загрозою. | `{ output: { type: "text" } }` | "1%" |
-| 13 | Planned R | FORMULA | Потенційна винагорода відносно ризику. | `{ output: { type: "text" } }` | (TP-Entry)/(Entry-SL) |
-| 14 | Actual R | FORMULA | Фактичне R-кратне в одиницях ризику. | `{ output: { type: "text" } }` | (Exit-Entry)/(Entry-SL) |
-| 15 | Gross P&L | FORMULA | Результат угоди без урахування витрат. | `{ output: { type: "text" } }` | (Exit - Entry) _ Qty |
-| 16 | Fees | NUMBER | Сумарні витрати на комісії та свопи. | `defaultValue: 0, format: "float"` | "5.00" |
-| 17 | Net P&L | FORMULA | Реальний чистий прибуток. | `{ output: { type: "text" } }` | Gross P&L - Fees |
+| 10 | Initial SL | NUMBER | Ціна, за якої ідея вважається невалідною. | `defaultValue: 0, format: "float"` | "1.0800" |
+| 11 | Initial TP | NUMBER | Цільова ціна виходу. | `defaultValue: 0, format: "float"` | "1.1000" |
+| 12 | Risk Amount ($) | FORMULA | Сума збитку при досягненні Stop Loss. | `expression: "IF({{Initial SL}} == 0, 0, ABS({{Entry Price}} - {{Initial SL}}) * {{Quantity}})", resultType: "NUMBER"` | (Entry - SL) * Qty |
+| 13 | Risk % | FORMULA | Відсоток від капіталу під загрозою. | `expression: "({{Risk Amount ($)}} / 100000) _ 100", resultType: "NUMBER"`| "1%" |
+| 14 | Planned R | FORMULA | Потенційна винагорода відносно ризику. |`expression: "IF({{Direction}} == 'Long', ...)", resultType: "NUMBER"`| (TP-Entry)/(Entry-SL) |
+| 15 | Actual R | FORMULA | Фактичне R-кратне в одиницях ризику. |`expression: "IF({{Direction}} == 'Long', ...)", resultType: "NUMBER"`| (Exit-Entry)/(Entry-SL) |
+| 16 | Gross P&L | FORMULA | Результат угоди без урахування витрат. |`expression: "IF({{Direction}} == 'Long', ...)", resultType: "NUMBER"` | (Exit - Entry) _ Qty |
+| 17 | Fees | NUMBER | Сумарні витрати на комісії та свопи. | `defaultValue: 0, format: "float"` | "5.00" |
+| 18 | Net P&L | FORMULA | Реальний чистий прибуток. | `expression: "{{Gross P&L}} - {{Fees}}", resultType: "NUMBER"` | Gross P&L - Fees |
 
 **Шар В: Контекст та Виконання (Context & Execution)**
 | # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 18 | Narrative Timeframe | SELECT | Основний аналітичний таймфрейм. | `isMultiSelect: false`, categories: `TIMEFRAME_OPTIONS` | Див. Timeframes |
-| 19 | Execution Timeframe | SELECT | Таймфрейм точки входу. | `isMultiSelect: false`, categories: `TIMEFRAME_OPTIONS` | Див. Timeframes |
-| 20 | Point A (Origin) | TEXT | Логічна точка старту цінового імпульсу. | - | "Asian Low Sweep" |
-| 21 | Point B (Target) | TEXT | Ринкова ціль ціни. | - | "Daily FVG" |
-| 22 | Entry Model | SELECT | Конкретний механічний сетап. | `isMultiSelect: false`, Options: Breakout, Retest, Reversal, Sweep+MSS, Silver Bullet, Turtle Soup | Sweep+MSS |
-| 23 | Session / Time | SELECT | Торговий період. | `isMultiSelect: false`, categories: `SESSION_OPTIONS` | Див. Sessions |
+| 19 | Narrative Timeframe | SELECT | Основний аналітичний таймфрейм. | `isMultiSelect: false`, Options: TIMEFRAME_OPTIONS | Див. Timeframes |
+| 20 | Execution Timeframe | SELECT | Таймфрейм точки входу. | `isMultiSelect: false`, Options: TIMEFRAME_OPTIONS | Див. Timeframes |
+| 21 | Point A (Origin) | TEXT | Логічна точка старту цінового імпульсу. | - | "Asian Low Sweep" |
+| 22 | Point B (Target) | TEXT | Ринкова ціль ціни. | - | "Daily FVG" |
+| 23 | Entry Model | SELECT | Конкретний механічний сетап. | `isMultiSelect: false`, Options: Breakout, Retest, Reversal, Sweep+MSS, Silver Bullet, Turtle Soup | Sweep+MSS |
+| 24 | Session / Time | SELECT | Торговий період. | `isMultiSelect: false`, Options: SESSION_OPTIONS | Див. Sessions |
 
 **Шар Г: Психологія та Дисципліна**
 | # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 24 | Confidence | RATING | Ваша внутрішня впевненість у сетапі. | - | 1-5 зірок |
-| 25 | Plan Adherence | SELECT | Наскільки точно ви виконали свій план. | `isMultiSelect: false`, Options: `Followed`, `Partial`, `Broken` | Followed |
-| 26 | Emotion | SELECT | Емоційний фон під час торгівлі. | `isMultiSelect: true`, Options: Emotions list | FOMO, Revenge |
+| 25 | Confidence | RATING | Ваша внутрішня впевненість у сетапі. | - | 1-5 зірок |
+| 26 | Setup Quality | RATING | Об'єктивна якість сетапу по чеклисту. | `maxStars: 5, allowHalf: true` | 1-5 зірок |
+| 27 | Plan Adherence | SELECT | Наскільки точно ви виконали свій план. | `isMultiSelect: false`, Options: `Followed`, `Partial`, `Broken` | Followed |
+| 28 | Emotion | SELECT | Емоційний фон під час торгівлі. | `isMultiSelect: true`, Options: Emotions list | FOMO, Revenge |
 
 **Шар Ґ: Професійна аналітика (Advanced)**
 | # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 27 | MFE (Max Fav) | NUMBER | Максимальна ціна на користь угоди. | `defaultValue: 0, format: "float"` | "1.0950" |
-| 28 | MAE (Max Adv) | NUMBER | Найгірша ціна проти угоди. | `defaultValue: 0, format: "float"` | "1.0820" |
-| 29 | Exit Efficiency| FORMULA | Наскільки вчасно ви вийшли. | `{ output: { type: "text" } }` | % від MFE |
-| 30 | Hold Time | FORMULA | Тривалість угоди. | `{ output: { type: "text" } }` | хв / год |
+| 29 | MFE (Max Fav) | NUMBER | Максимальна ціна на користь угоди. | `defaultValue: 0, format: "float"` | "1.0950" |
+| 30 | MAE (Max Adv) | NUMBER | Найгірша ціна проти угоди. | `defaultValue: 0, format: "float"` | "1.0820" |
+| 31 | Exit Efficiency| FORMULA | Наскільки вчасно ви вийшли. | `expression: "IF(...)", resultType: "PROGRESS"` | % від MFE |
+| 32 | Hold Time | FORMULA | Тривалість угоди. | `expression: "IF(IS_EMPTY({{Exit Date}}), 0, DATE_DIFF(...))", resultType: "DURATION"` | хв / год |
 
 **Шар Д: Зв'язки (Relations)**
 | # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 31 | Trading System | RELATION | Прив'язка до конкретної стратегії. | `sourceDatabaseType: "trading-system", multiple: false` | (Single) |
-| 32 | Account | RELATION | На якому рахунку відбувалася торгівля. | `sourceDatabaseType: "accounts", multiple: false` | (Single) |
-| 33 | Daily Routine | RELATION | Контекст дня. | `sourceDatabaseType: "daily-routine", multiple: false` | (Single) |
-| 34 | Notes | RELATION | Специфічні уроки або спостереження. | `sourceDatabaseType: "notes", multiple: true` | (Multiple) |
-| 35 | Mistakes | RELATION | Допущені помилки. | `sourceDatabaseType: "mistakes", multiple: true` | (Multiple) |
+| 33 | Trading System | RELATION | Прив'язка до конкретної стратегії. | `sourceDatabaseType: "trading-system", multiple: false` | (Single) |
+| 34 | Account | RELATION | На якому рахунку відбувалася торгівля. | `sourceDatabaseType: "accounts", multiple: false` | (Single) |
+| 35 | Daily Routine | RELATION | Контекст дня. | `sourceDatabaseType: "daily-routine", multiple: false` | (Single) |
+| 36 | Notes | RELATION | Специфічні уроки або спостереження. | `sourceDatabaseType: "notes", multiple: true` | (Multiple) |
+| 37 | Mistakes | RELATION | Допущені помилки. | `sourceDatabaseType: "mistakes", multiple: true` | (Multiple) |
+| 38 | Is Win | FORMULA | Допоміжний прапорець перемоги. | `expression: "IF({{Outcome}} == 'Win', 1, 0)", resultType: "NUMBER"` | 1 / 0 |
 
 ---
 
 ### 2. Daily Routine (daily-routine)
 
-| #   | Назва              | Тип      | Хінт                                         | Конфіг (Config)                                                               | Приклад / Логіка    |
-| :-- | :----------------- | :------- | :------------------------------------------- | :---------------------------------------------------------------------------- | :------------------ |
-| 0   | Name               | TEXT     | Назва торгової сесії або дня.                | `isRequired: true`                                                            | "London Open 22.05" |
-| 1   | Date               | DATE     | Дата сесії.                                  | `format: "DD.MM.YYYY"`                                                        | -                   |
-| 2   | Pair               | SELECT   | Головний актив дня.                          | `isMultiSelect: false`, categories: `PAIR_CATEGORIES`                         | "EURUSD"            |
-| 3   | Narrative          | SELECT   | Ваш очікуваний напрямок ринку на основі HTF. | `isMultiSelect: false`, Options: `Bullish`, `Bearish`, `Neutral`, `Uncertain` | Bullish/Bearish     |
-| 4   | Narrative Logic    | TEXT     | Детальне обґрунтування вашого біасу.         | -                                                                             | "Sweep of PDH..."   |
-| 5   | Key Catalyst       | SELECT   | Новини або події.                            | `isMultiSelect: true`, Options: `CPI`, `NFP`, `FOMC`                          | CPI, NFP            |
-| 6   | Narrative Outcome  | SELECT   | Фактичний напрямок, який показав ринок.      | `isMultiSelect: false`, Options: `Bullish`, `Bearish`, `Neutral`, `Uncertain` | Bullish/Bearish     |
-| 7   | Narrative Accuracy | FORMULA  | Оцінка якості вашого аналізу.                | `{ output: { type: "text" } }`                                                | Авто-розрахунок     |
-| 8   | Account            | RELATION | Основний рахунок сесії.                      | `sourceDatabaseType: "accounts", multiple: false`                             | (Single)            |
-| 9   | Trades             | RELATION | Створені угоди.                              | `sourceDatabaseType: "trading-journal", multiple: true`                       | (Multiple)          |
-| 10  | Notes              | RELATION | Спостереження в реальному часі.              | `sourceDatabaseType: "notes", multiple: true`                                 | (Multiple)          |
-| 11  | Mistakes           | RELATION | Помилки за день.                             | `sourceDatabaseType: "mistakes", multiple: true`                              | (Multiple)          |
+**Група: General**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 0 | Name | TEXT | Назва торгової сесії або дня. | `isRequired: true` | "London Open 22.05" |
+| 1 | Date | DATE | Дата сесії. | `format: "DD.MM.YYYY"` | - |
+| 2 | Pair | SELECT | Головний актив дня. | `isMultiSelect: false`, categories: `PAIR_CATEGORIES` | "EURUSD" |
+
+**Група: Analysis**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 3 | Narrative | SELECT | Ваш очікуваний напрямок ринку на основі HTF. | `isMultiSelect: false`, Options: `Bullish`, `Bearish`, `Neutral`, `Uncertain` | Bullish/Bearish |
+| 4 | Narrative Logic | TEXT | Детальне обґрунтування вашого біасу. | - | "Sweep of PDH..." |
+| 5 | Key Catalyst | SELECT | Новини або події. | `isMultiSelect: true`, Options: CPI, NFP, FOMC, etc. | CPI, NFP |
+| 6 | Narrative Outcome | SELECT | Фактичний напрямок, який показав ринок. | `isMultiSelect: false`, Options: `Bullish`, `Bearish`, `Neutral`, `Uncertain` | Bullish/Bearish |
+| 7 | Narrative Accuracy | FORMULA | Оцінка якості вашого аналізу. | `expression: "IF({{Narrative}} == {{Narrative Outcome}}, 'Correct', 'Incorrect')", resultType: "TEXT"` | Correct / Incorrect |
+| 8 | Key Levels | TEXT | Ключові рівні/зони під час пре-маркету. | - | "H4 FVG, Daily OB" |
+
+**Група: Stats**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 9 | Session P&L | FORMULA | Сумарний Net P&L угод за сесію. | `expression: "SUM(MAP({{Trades}}, 'Net P&L'))", resultType: "NUMBER"` | Авто-розрахунок |
+| 10 | Trade Count | FORMULA | Кількість угод за сесію. | `expression: "COUNT({{Trades}})", resultType: "NUMBER"` | Авто-розрахунок |
+
+**Група: Relations**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 11 | Account | RELATION | Основний рахунок сесії. | `sourceDatabaseType: "accounts", multiple: false` | (Single) |
+| 12 | Trades | RELATION | Створені угоди. | `sourceDatabaseType: "trading-journal", multiple: true` | (Multiple) |
+| 13 | Notes | RELATION | Спостереження в реальному часі. | `sourceDatabaseType: "notes", multiple: true` | (Multiple) |
+| 14 | Mistakes | RELATION | Помилки за день. | `sourceDatabaseType: "mistakes", multiple: true` | (Multiple) |
 
 ---
 
 ### 3. Routine Library (routine-library)
 
-| #   | Назва             | Тип      | Хінт                                 | Конфіг (Config)                                       | Приклад / Логіка |
-| :-- | :---------------- | :------- | :----------------------------------- | :---------------------------------------------------- | :--------------- |
-| 0   | Name              | TEXT     | Назва чеклиста або SOP.              | `isRequired: true`                                    | "Morning SOP"    |
-| 1   | Date              | DATE     | Дата останнього перегляду правил.    | `format: "DD.MM.YYYY"`                                | -                |
-| 2   | Sleep Quality     | RATING   | Вплив сну на дисципліну.             | -                                                     | 1-5 зірок        |
-| 3   | Pre-Market State  | SELECT   | Ваш ментальний стан перед торгівлею. | `isMultiSelect: true`, Options: Emotions list         | Calm, Anxious    |
-| 4   | Post-Market State | SELECT   | Емоційний результат після сесії.     | `isMultiSelect: true`, Options: Emotions list         | Calm             |
-| 5   | Plan Adherence    | RATING   | Загальна оцінка дисципліни за день.  | -                                                     | 1-5 зірок        |
-| 6   | Distractions      | SELECT   | Фактори, що заважали концентрації.   | `isMultiSelect: true`, Options: `Phone`, `Social`     | "Phone"          |
-| 7   | Daily Routines    | RELATION | Пов'язані сесії.                     | `sourceDatabaseType: "daily-routine", multiple: true` | (Multiple)       |
+**Група: General**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 0 | Name | TEXT | Назва чеклиста або SOP. | - | "Morning SOP" |
+| 1 | Date | DATE | Дата останнього перегляду правил. | `format: "DD.MM.YYYY"` | - |
+
+**Група: Metrics**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 2 | Sleep Quality | RATING | Вплив сну на дисципліну. | `maxStars: 5, allowHalf: true` | 1-5 зірок |
+
+**Група: Psychology**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 3 | Pre-Market State | SELECT | Ваш ментальний стан перед торгівлею. | `isMultiSelect: true`, Options: Emotions list | Calm, Anxious |
+| 4 | Post-Market State | SELECT | Емоційний результат після сесії. | `isMultiSelect: true`, Options: Emotions list | Calm |
+| 5 | Plan Adherence | RATING | Загальна оцінка дисципліни за день. | `maxStars: 5, allowHalf: true` | 1-5 зірок |
+| 6 | Distractions | SELECT | Фактори, що заважали концентрації. | `isMultiSelect: true`, Options: `Phone`, `Social` | "Phone" |
+
+**Група: Relations**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 7 | Daily Routines | RELATION | Пов'язані сесії. | `sourceDatabaseType: "daily-routine", multiple: true` | (Multiple) |
 
 ---
 
 ### 4. Notes (notes)
 
-| #   | Назва           | Тип      | Хінт                                | Конфіг (Config)                                                                                     | Приклад / Логіка  |
-| :-- | :-------------- | :------- | :---------------------------------- | :-------------------------------------------------------------------------------------------------- | :---------------- |
-| 0   | Name            | TEXT     | Короткий заголовок інсайту.         | `isRequired: true`                                                                                  | "New S&R Pattern" |
-| 1   | Date            | DATE     | Дата фіксації ідеї.                 | `format: "DD.MM.YYYY"`                                                                              | -                 |
-| 2   | Category        | SELECT   | Групування за темами навчання.      | `isMultiSelect: true`, Options: Preparation, Execution, Management, Exit, Psychology                | Execution         |
-| 3   | Confidence      | SELECT   | Рівень впевненості у патерні.       | `isMultiSelect: false`, Options: Backtested, Forwardtested, Live Observation, Guess                 | Backtested        |
-| 4   | Source          | SELECT   | Джерело інсайту.                    | `isMultiSelect: true`, Options: Trade Loss, Trade Win, Book, Mentor, Backtest, Journal Review       | Trade Loss        |
-| 5   | Market Regime   | SELECT   | Ринкові умови для патерна.          | `isMultiSelect: true`, Options: Bullish Trend, Bearish Trend, Ranging/Chop, Volatile, Consolidation | Bullish Trend     |
-| 6   | Status          | SELECT   | Актуальність нотатки.               | `isMultiSelect: false`, Options: `Active`, `Archived`                                               | Active            |
-| 7   | Last Used       | FORMULA  | Дата останнього посилання в угодах. | `{ output: { type: "text" } }`                                                                      | Авто-розрахунок   |
-| 8   | Trading Journal | RELATION | Застосовані угоди.                  | `sourceDatabaseType: "trading-journal", multiple: true`                                             | (Multiple)        |
-| 9   | Daily Routines  | RELATION | Пов'язані сесії появи.              | `sourceDatabaseType: "daily-routine", multiple: true`                                               | (Multiple)        |
+**Група: General**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 0 | Name | TEXT | Короткий заголовок інсайту. | `isRequired: true` | "New S&R Pattern" |
+| 1 | Date | DATE | Дата фіксації ідеї. | `format: "DD.MM.YYYY"` | - |
+| 2 | Category | SELECT | Групування за темами навчання. | `isMultiSelect: true`, Options: Strategy, Analysis, Execution, Risk Management, Rules, Psychology | Execution |
+| 3 | Status | SELECT | Актуальність нотатки. | `isMultiSelect: false`, Options: `Draft`, `Active`, `Archived` | Active |
+| 4 | Confidence | SELECT | Рівень впевненості у патерні. | `isMultiSelect: false`, Options: Backtested, Forwardtested, Live Observation, Guess | Backtested |
+| 5 | Source | SELECT | Джерело інсайту. | `isMultiSelect: true`, Options: Trade Loss, Trade Win, Book, Video, Course, Mentor, Research, etc. | Trade Loss |
+| 6 | Market Regime | SELECT | Ринкові умови для патерна. | `isMultiSelect: true`, Options: Bullish Trend, Bearish Trend, Ranging/Chop, Volatile, Consolidation | Bullish Trend |
+| 7 | Rating | RATING | Важливість інсайту. | `maxStars: 5, allowHalf: true` | 1-5 зірок |
+| 9 | Times Applied | FORMULA | Кількість використань в угодах. | `expression: "COUNT({{Trading Journal}})", resultType: "NUMBER"` | Авто-розрахунок |
+| 10 | Last Used | FORMULA | Дата останнього посилання в угодах. | `expression: "MAX(MAP({{Trading Journal}}, 'Entry Date'))", resultType: "DATE"` | Авто-розрахунок |
+
+**Група: Context**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 8 | Pair | SELECT | Інструмент(и), до яких застосовується інсайт. | `isMultiSelect: true`, categories: PAIR_CATEGORIES | "EURUSD" |
+
+**Група: Relations**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 11 | Trading Journal | RELATION | Застосовані угоди. | `sourceDatabaseType: "trading-journal", multiple: true` | (Multiple) |
+| 12 | Mistakes | RELATION | Пов'язані помилки. | `sourceDatabaseType: "mistakes", multiple: true` | (Multiple) |
+| 13 | Learning Tasks | RELATION | Навчальні завдання (плани). | `sourceDatabaseType: "learning-tasks", multiple: true` | (Multiple) |
+| 14 | Daily Routines | RELATION | Пов'язані сесії появи. | `sourceDatabaseType: "daily-routine", multiple: true` | (Multiple) |
 
 ---
 
 ### 5. Mistakes (mistakes)
 
-| #   | Назва           | Тип      | Хінт                                | Конфіг (Config)                                                                      | Приклад / Логіка  |
-| :-- | :-------------- | :------- | :---------------------------------- | :----------------------------------------------------------------------------------- | :---------------- |
-| 0   | Name            | TEXT     | Чітка назва помилки.                | `isRequired: true`                                                                   | "Revenge Trading" |
-| 1   | Date            | DATE     | Коли допущена вперше.               | `format: "DD.MM.YYYY"`                                                               | -                 |
-| 2   | Category        | SELECT   | Де саме стався збій.                | `isMultiSelect: true`, Options: Preparation, Execution, Management, Exit, Psychology | Psychology        |
-| 3   | Prevention Rule | TEXT     | Правило для уникнення.              | -                                                                                    | "Lock terminal"   |
-| 4   | Status          | SELECT   | Вирішення проблеми.                 | `isMultiSelect: false`, Options: `Active`, `Resolved`                                | Active            |
-| 5   | Resolved Date   | DATE     | Дата закриття проблеми.             | `format: "DD.MM.YYYY"`                                                               | -                 |
-| 6   | Severity        | FORMULA  | Рівень небезпеки на основі частоти. | `{ output: { type: "text" } }`                                                       | Авто-розрахунок   |
-| 7   | Total Cost      | FORMULA  | Сумарна шкода для балансу.          | `{ output: { type: "text" } }`                                                       | Сума P&L угод     |
-| 8   | Last Used       | FORMULA  | Дата останнього повторення.         | `{ output: { type: "text" } }`                                                       | Авто-розрахунок   |
-| 9   | Trading Journal | RELATION | Угоди, які постраждали.             | `sourceDatabaseType: "trading-journal", multiple: true`                              | (Multiple)        |
-| 10  | Daily Routines  | RELATION | Дні, коли повторювалася.            | `sourceDatabaseType: "daily-routine", multiple: true`                                | (Multiple)        |
+**Група: General**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 0 | Name | TEXT | Чітка назва помилки. | `isRequired: true` | "Revenge Trading" |
+| 1 | Date | DATE | Коли допущена вперше. | `format: "DD.MM.YYYY"` | - |
+| 2 | Category | SELECT | Де саме стався збій. | `isMultiSelect: true`, Options: Preparation, Analysis, Execution, Management, Exit, Psychology | Psychology |
+| 3 | Trigger | SELECT | Що спровокувало помилку. | `isMultiSelect: true`, Options: Losing Streak, Winning Streak, FOMO, Overconfidence, Boredom, News Event, etc. | FOMO |
+| 4 | Impact Type | SELECT | Тип збитку. | `isMultiSelect: false`, Options: Financial Loss, Missed Opportunity, Rule Violation, Psychological | Financial Loss |
+| 5 | Prevention Rule | TEXT | Правило для уникнення. | - | "Lock terminal" |
+| 6 | Status | SELECT | Вирішення проблеми. | `isMultiSelect: false`, Options: `Active`, `Monitoring`, `Resolved` | Active |
+| 7 | Resolved Date | DATE | Дата закриття проблеми. | `format: "DD.MM.YYYY"` | - |
+
+**Група: Stats**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 8 | Severity | FORMULA | Рівень небезпеки на основі частоти. | `expression: "IF(COUNT({{Trading Journal}}) + COUNT({{Daily Routines}}) > 5, 'High', ...)", resultType: "TEXT"` | High / Medium / Low |
+| 9 | Recurrence Count | FORMULA | Кількість рецидивів. | `expression: "COUNT({{Trading Journal}}) + COUNT({{Daily Routines}})", resultType: "NUMBER"` | Авто-розрахунок |
+| 10 | Total Cost | FORMULA | Сумарна шкода для балансу. | `expression: "ABS(SUM(MAP({{Trading Journal}}, 'Net P&L')))", resultType: "NUMBER"` | Сума P&L угод |
+| 11 | Last Used | FORMULA | Дата останнього повторення. | `expression: "MAX(MAP({{Trading Journal}}, 'Entry Date'))", resultType: "DATE"` | Авто-розрахунок |
+
+**Група: Relations**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 12 | Trading Journal | RELATION | Угоди, які постраждали. | `sourceDatabaseType: "trading-journal", multiple: true` | (Multiple) |
+| 13 | Daily Routines | RELATION | Дні, коли повторювалася. | `sourceDatabaseType: "daily-routine", multiple: true` | (Multiple) |
 
 ---
 
@@ -260,9 +316,9 @@ graph TD
 | 0 | Name | TEXT | Унікальне ім'я рахунку. | `isRequired: true` | "Funded 50k - Apex" |
 | 1 | Account Type | SELECT | Правила та ризики для рахунку. | `isMultiSelect: false`, Options: `Prop Firm`, `Live`, `Demo` | Prop Firm |
 | 2 | Account ID | TEXT | Технічний ідентифікатор рахунку. | - | "MT5-12345" |
-| 3 | Currency | SELECT | Валюта розрахунків. | `isMultiSelect: false`, Options: `USD`, `EUR`, `GBP`, `USDT`, `BTC`, `UAH` | USD |
+| 3 | Currency | SELECT | Валюта розрахунків. | `isMultiSelect: false`, Options: USD, EUR, GBP, USDT, BTC, UAH | USD |
 | 4 | Starting Balance | NUMBER | Початковий капітал. | `defaultValue: 0, format: "float"` | "50000" |
-| 5 | Status | SELECT | Чи використовується зараз. | `isMultiSelect: false`, Options: `Active`, `Closed` | Active |
+| 5 | Status | SELECT | Чи використовується зараз. | `isMultiSelect: false`, Options: `Active`, `Paused`, `Closed`, `Failed` | Active |
 | 6 | Start Date | DATE | Дата відкриття рахунку. | `format: "DD.MM.YYYY"` | - |
 | 7 | End Date | DATE | Дата закриття рахунку. | `format: "DD.MM.YYYY"` | - |
 
@@ -270,13 +326,12 @@ graph TD
 | # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | 8 | Max Overall Drawdown | NUMBER | Гранична втрата балансу. | `defaultValue: 0, format: "float"` | "5000" |
-| 9 | Drawdown Type | SELECT | Механіка розрахунку просадки. | `isMultiSelect: false`, Options: `Static`, `Trailing`, `Relative` | Static |
+| 9 | Drawdown Type | SELECT | Механіка розрахунку просадки. | `isMultiSelect: false`, Options: `Static`, `Trailing`, `Relative`, `visibilityCondition: { dependsOnPropertyName: 'Account Type', operator: 'EQUALS', value: 'Prop Firm' }` | Static |
 | 10 | Daily Loss Limit | NUMBER | Системний ліміт збитків на добу. | `defaultValue: 0, format: "float"` | "1500" |
 | 11 | Max Position Size | NUMBER | Максимальний об'єм позицій. | `defaultValue: 0, format: "float"` | "5 lots" |
 | 12 | Max Open Trades | NUMBER | Максимальна кількість угод. | `defaultValue: 0, format: "integer"` | "3" |
 | 13 | News Trading | SELECT | Дозвіл торгівлі на новинах. | `isMultiSelect: false`, Options: `Allowed`, `Restricted` | Allowed |
 | 14 | Weekend Holding | SELECT | Дозвіл перенесення на вихідні. | `isMultiSelect: false`, Options: `Allowed`, `Forbidden` | Allowed |
-| 15 | Hard Stop Loss | CHECKBOX | Обов'язковий фізичний стоп. | - | Yes/No |
 
 **Група: Prop Firm Specific** (діє при Account Type = Prop Firm)
 | # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
@@ -287,49 +342,131 @@ graph TD
 | 19 | Consistency Rule | NUMBER | Правило консистенції прибутку. | `defaultValue: 0, format: "float"`, `visibilityCondition: { dependsOnPropertyName: 'Account Type', operator: 'EQUALS', value: 'Prop Firm' }` | "30" |
 | 20 | Min Trading Days | NUMBER | Мінімальна к-сть торгових днів. | `defaultValue: 0, format: "integer"`, `visibilityCondition: { dependsOnPropertyName: 'Account Type', operator: 'EQUALS', value: 'Prop Firm' }` | "5" |
 | 21 | Profit Split | NUMBER | Розподіл прибутку (частка трейдера).| `defaultValue: 0, format: "float"`, `visibilityCondition: { dependsOnPropertyName: 'Account Type', operator: 'EQUALS', value: 'Prop Firm' }` | "90" |
+| 22 | Challenge Fee | NUMBER | Вартість проходження. | `defaultValue: 0, format: "currency", currencySymbol: "$", decimalPlaces: 2`, `visibilityCondition: { dependsOnPropertyName: 'Account Type', operator: 'EQUALS', value: 'Prop Firm' }` | "$500" |
+
+**Група: Live / Demo** (діє при Account Type = Live або Demo)
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 23 | Broker | TEXT | Назва брокера. | `visibilityCondition: { dependsOnPropertyName: 'Account Type', operator: 'IN', value: ['Live', 'Demo'] }` | "IC Markets" |
+| 24 | Platform | SELECT | Торгова платформа. | `isMultiSelect: false`, Options: MT4, MT5, cTrader, TradingView, NinjaTrader, Other, `visibilityCondition: { dependsOnPropertyName: 'Account Type', operator: 'IN', value: ['Live', 'Demo'] }` | MT5 |
+| 25 | Leverage | SELECT | Кредитне плече. | `isMultiSelect: false`, Options: 1:10, 1:20, 1:30, 1:50, 1:100, 1:200, 1:500, `visibilityCondition: { dependsOnPropertyName: 'Account Type', operator: 'IN', value: ['Live', 'Demo'] }` | 1:100 |
 
 **Зв'язки (Relations)**
 | # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| 22 | Operations | RELATION | Всі фінансові транзакції рахунку. | `sourceDatabaseType: "operations", multiple: true` | (Multiple) |
-| 23 | Trades | RELATION | Усі угоди на цьому рахунку. | `sourceDatabaseType: "trading-journal", multiple: true` | (Multiple) |
+| 26 | Operations | RELATION | Всі фінансові транзакції рахунку. | `sourceDatabaseType: "operations", multiple: true` | (Multiple) |
+| 27 | Trades | RELATION | Усі угоди на цьому рахунку. | `sourceDatabaseType: "trading-journal", multiple: true` | (Multiple) |
 
 ---
 
 ### 7. Operations (operations)
 
-| #   | Назва   | Тип      | Хінт                  | Конфіг (Config)                                          | Приклад / Логіка |
-| :-- | :------ | :------- | :-------------------- | :------------------------------------------------------- | :--------------- |
-| 0   | Name    | TEXT     | Опис операції.        | `isRequired: true`                                       | "Withdrawal Jan" |
-| 1   | Type    | SELECT   | Напрямок руху коштів. | `isMultiSelect: false`, Options: `Deposit`, `Withdrawal` | Deposit          |
-| 2   | Date    | DATE     | Дата транзакції.      | `format: "DD.MM.YYYY"`                                   | -                |
-| 3   | Account | RELATION | Зв'язаний рахунок.    | `sourceDatabaseType: "accounts", multiple: false`        | (Single)         |
-| 4   | Amount  | NUMBER   | Сума операції.        | `defaultValue: 0, format: "float"`                       | "1000"           |
+**Група: General**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 0 | Name | TEXT | Опис операції (додається за замовчуванням). | `isRequired: true` | "Withdrawal Jan" |
+| 1 | Type | SELECT | Напрямок руху коштів. | `isMultiSelect: false`, Options: `Deposit`, `Withdrawal`, `Fee`, `Transfer` | Deposit |
+| 2 | Status | SELECT | Стан проведення транзакції. | `isMultiSelect: false`, Options: `Pending`, `Processing`, `Completed`, `Failed`, `Cancelled` | Completed |
+| 3 | Date | DATE | Дата ініціації транзакції. | `format: "DD.MM.YYYY"` | - |
+| 4 | Settlement Date | DATE | Дата фактичного проведення. | `format: "DD.MM.YYYY"` | - |
+| 5 | Account | RELATION | Зв'язаний рахунок. | `sourceDatabaseType: "accounts", multiple: false` | (Single) |
+| 6 | Payment Method | SELECT | Платіжний метод. | `isMultiSelect: false`, Options: Bank Wire, SEPA, Crypto, PayPal, Wise, Internal Transfer | Crypto |
+| 7 | Reference | TEXT | ID транзакції або підтвердження брокера. | - | "TXN-12345" |
+| 11 | Notes | TEXT | Додаткові нотатки. | - | "First payout split" |
+
+**Група: Financials**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 8 | Amount | NUMBER | Сума операції. | `defaultValue: 0, format: "currency", currencySymbol: "$", decimalPlaces: 2` | "1000" |
+| 9 | Fee | NUMBER | Комісія транзакції. | `defaultValue: 0, format: "currency", currencySymbol: "$", decimalPlaces: 2` | "15.00" |
+| 10 | Net Amount | FORMULA | Чиста сума після вирахування комісій. | `expression: "IF(IS_EMPTY({{Fee}}), {{Amount}}, {{Amount}} - {{Fee}})", resultType: "NUMBER"` | Amount - Fee |
 
 ---
 
 ### 8. Trading System (trading-system)
 
-| #   | Назва | Тип  | Хінт                        | Конфіг (Config)        | Приклад / Логіка |
-| :-- | :---- | :--- | :-------------------------- | :--------------------- | :--------------- |
-| 0   | Name  | TEXT | Назва торгової стратегії.   | `isRequired: true`     | "Silver Bullet"  |
-| 1   | Date  | DATE | Дата створення або ревізії. | `format: "DD.MM.YYYY"` | -                |
+**Група: Identity**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 0 | Name | TEXT | Назва торгової стратегії. | `isRequired: true` | "Silver Bullet" |
+| 1 | Date | DATE | Дата створення або ревізії. | `format: "DD.MM.YYYY"` | - |
+| 2 | Status | SELECT | Поточний статус системи. | `isMultiSelect: false`, Options: `Active`, `Testing`, `Paused`, `Retired` | Active |
+| 3 | Category | SELECT | Стиль та підхід системи. | `isMultiSelect: false`, Options: Trend Following, Mean Reversion, Breakout, SMC/ICT, Scalping, Swing, Position Trading | SMC/ICT |
+| 4 | Market Type | SELECT | Умови ринку для системи. | `isMultiSelect: true`, Options: Trending, Ranging, High Volatility, Low Volatility | Trending |
+
+**Група: Market Context**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 5 | Pairs | SELECT | Інструменти для системи. | `isMultiSelect: true`, categories: PAIR_CATEGORIES | "EURUSD" |
+| 6 | Timeframes | SELECT | Основні таймфрейми. | `isMultiSelect: true`, Options: TIMEFRAME_OPTIONS | M15, M5 |
+| 7 | Sessions | SELECT | Торгові сесії. | `isMultiSelect: true`, Options: SESSION_OPTIONS | London, NY AM |
+
+**Група: Risk Rules**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 8 | Risk Per Trade % | NUMBER | Максимальний % ризику на угоду. | `defaultValue: 1, format: "float"` | "1%" |
+| 9 | Max Daily Loss % | NUMBER | Денний ліміт збитків. | `defaultValue: 3, format: "float"` | "3%" |
+| 10 | Max Simultaneous Trades | NUMBER | Максимальна кількість відкритих позицій. | `defaultValue: 1, format: "integer"` | "1" |
+| 11 | Min Sample Size | NUMBER | Мінімальна к-сть угод для оцінки. | `defaultValue: 50, format: "integer"` | "50" |
+
+**Група: Performance**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 12 | Trades | RELATION | Всі угоди по системі. | `sourceDatabaseType: "trading-journal", multiple: true` | (Multiple) |
+| 13 | Total Trades | FORMULA | Загальна кількість угод. | `expression: "COUNT({{Trades}})", resultType: "NUMBER"` | Авто-розрахунок |
+| 14 | Total R | FORMULA | Сумарний результат у R. | `expression: "SUM(MAP({{Trades}}, 'Actual R'))", resultType: "NUMBER"` | Авто-розрахунок |
+| 15 | Avg R | FORMULA | Середнє R-кратне на угоду. | `expression: "IF(COUNT({{Trades}}) == 0, 0, AVG(MAP({{Trades}}, 'Actual R')))", resultType: "NUMBER"` | Авто-розрахунок |
+| 16 | Win Rate | FORMULA | Відсоток прибуткових угод. | `expression: "IF(COUNT({{Trades}}) == 0, 0, SUM(MAP({{Trades}}, 'Is Win')) / COUNT({{Trades}}) * 100)", resultType: "NUMBER"` | Авто-розрахунок |
+| 17 | Profit Factor | NUMBER | Співвідношення прибутків до збитків. | `defaultValue: 0, format: "float"` | "1.85" |
+| 18 | Expectancy | NUMBER | Математичне очікування в R. | `defaultValue: 0, format: "float"` | "0.35" |
+| 19 | Max Consecutive Losses | NUMBER | Серія збиткових угод підряд. | `defaultValue: 0, format: "integer"` | "4" |
+
+**Група: Evaluation**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 20 | Confidence | RATING | Рівень впевненості в системі. | `maxStars: 5, allowHalf: true` | 1-5 зірок |
+| 21 | Last Updated | DATE | Дата останнього оновлення. | `format: "DD.MM.YYYY"` | - |
 
 ---
 
 ### 9. Performance Review (performance-review)
 
-| #   | Назва        | Тип      | Хінт                               | Конфіг (Config)                                          | Приклад / Логіка    |
-| :-- | :----------- | :------- | :--------------------------------- | :------------------------------------------------------- | :------------------ |
-| 0   | Name         | TEXT     | Заголовок огляду.                  | `isRequired: true`                                       | "Weekly Review W22" |
-| 1   | Date         | DATE     | Дата проведення аналізу.           | `format: "DD.MM.YYYY"`                                   | -                   |
-| 2   | Period       | SELECT   | Період аналізованого відрізку.     | `isMultiSelect: false`, Options: `Weekly`, `Monthly`     | Weekly              |
-| 3   | Period Start | DATE     | Дата початку періоду.              | `format: "DD.MM.YYYY"`                                   | -                   |
-| 4   | Period End   | DATE     | Дата закінчення періоду.           | `format: "DD.MM.YYYY"`                                   | -                   |
-| 5   | Net P&L      | FORMULA  | Чистий заробіток за цей час.       | `{ output: { type: "text" } }`                           | Сума P&L періоду    |
-| 6   | Trade Count  | FORMULA  | Кількість проведених угод.         | `{ output: { type: "text" } }`                           | Авто-розрахунок     |
-| 7   | Win Rate     | FORMULA  | Частота успішних сетапів.          | `{ output: { type: "text" } }`                           | Авто-розрахунок     |
-| 8   | Grade        | SELECT   | Суб'єктивна оцінка своєї роботи.   | `isMultiSelect: false`, Options: `A`, `B`, `C`, `D`, `F` | A                   |
-| 9   | Account      | RELATION | Рахунок, для якого робиться огляд. | `sourceDatabaseType: "accounts", multiple: false`        | (Single)            |
-| 10  | Trades       | RELATION | Угоди за період.                   | `sourceDatabaseType: "trading-journal", multiple: true`  | (Multiple)          |
-| 11  | Mistakes     | RELATION | Головні помилки за період.         | `sourceDatabaseType: "mistakes", multiple: true`         | (Multiple)          |
+**Група: General**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 0 | Name | TEXT | Заголовок огляду. | `isRequired: true` | "Weekly Review W22" |
+| 1 | Date | DATE | Дата проведення аналізу. | `format: "DD.MM.YYYY"` | - |
+| 2 | Period | SELECT | Період аналізованого відрізку. | `isMultiSelect: false`, Options: `Weekly`, `Monthly`, `Quarterly` | Weekly |
+| 3 | Period Start | DATE | Дата початку періоду. | `format: "DD.MM.YYYY"` | - |
+| 4 | Period End | DATE | Дата закінчення періоду. | `format: "DD.MM.YYYY"` | - |
+| 5 | Grade | SELECT | Оцінка своєї роботи. | `isMultiSelect: false`, Options: `A`, `B`, `C`, `D`, `F` | A |
+
+**Група: Stats**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 6 | Net P&L | FORMULA | Чистий заробіток за цей час. | `expression: "SUM(MAP({{Trades}}, 'Net P&L'))", resultType: "NUMBER"` | Авто-розрахунок |
+| 7 | Gross P&L | FORMULA | Валовий прибуток до комісій. | `expression: "SUM(MAP({{Trades}}, 'Gross P&L'))", resultType: "NUMBER"` | Авто-розрахунок |
+| 8 | Trade Count | FORMULA | Кількість проведених угод. | `expression: "COUNT({{Trades}})", resultType: "NUMBER"` | Авто-розрахунок |
+| 9 | Win Rate | FORMULA | Відсоток виграшних угод. | `expression: "IF(COUNT({{Trades}}) == 0, 0, SUM(MAP({{Trades}}, 'Is Win')) / COUNT({{Trades}}) * 100)", resultType: "NUMBER"` | Авто-розрахунок |
+| 10 | Total R | FORMULA | Сумарний результат в R. | `expression: "SUM(MAP({{Trades}}, 'Actual R'))", resultType: "NUMBER"` | Авто-розрахунок |
+| 11 | Avg R | FORMULA | Середній R на угоду. | `expression: "IF(COUNT({{Trades}}) == 0, 0, AVG(MAP({{Trades}}, 'Actual R')))", resultType: "NUMBER"` | Авто-розрахунок |
+| 12 | Max R | FORMULA | Найкраща угода в R. | `expression: "MAX(MAP({{Trades}}, 'Actual R'))", resultType: "NUMBER"` | Авто-розрахунок |
+| 13 | Min R | FORMULA | Найгірша угода в R. | `expression: "MIN(MAP({{Trades}}, 'Actual R'))", resultType: "NUMBER"` | Авто-розрахунок |
+| 14 | Profit Factor | NUMBER | Profit Factor за період. | `defaultValue: 0, format: "float"` | "2.1" |
+| 15 | Max Drawdown % | NUMBER | Максимальне просідання. | `defaultValue: 0, format: "float"` | "1.5%" |
+
+**Група: Scores**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 16 | Discipline Score | RATING | Оцінка дотримання плану. | `maxStars: 5, allowHalf: true` | 1-5 зірок |
+| 17 | Psychology Score | RATING | Оцінка психологічного стану. | `maxStars: 5, allowHalf: true` | 1-5 зірок |
+| 18 | Process Score | RATING | Оцінка якості підготовки та рутин. | `maxStars: 5, allowHalf: true` | 1-5 зірок |
+
+**Група: Relations**
+| # | Назва | Тип | Хінт | Конфіг (Config) | Приклад / Логіка |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 19 | Trades | RELATION | Угоди за період. | `sourceDatabaseType: "trading-journal", multiple: true` | (Multiple) |
+| 20 | Mistakes | RELATION | Головні помилки за період. | `sourceDatabaseType: "mistakes", multiple: true` | (Multiple) |
+| 21 | Daily Routines | RELATION | Пов'язані щоденні сесії. | `sourceDatabaseType: "daily-routine", multiple: true` | (Multiple) |
+| 22 | Trading Systems | RELATION | Використані торгові системи. | `sourceDatabaseType: "trading-system", multiple: true` | (Multiple) |
+| 23 | Notes | RELATION | Пов'язані нотатки та інсайти. | `sourceDatabaseType: "notes", multiple: true` | (Multiple) |

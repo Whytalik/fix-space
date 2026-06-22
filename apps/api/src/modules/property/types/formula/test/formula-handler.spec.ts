@@ -55,55 +55,55 @@ describe("FormulaHandler", () => {
     it("errors when type is missing", () => {
       const errors = handler.validateConfig({ expression: "a + b", resultType: "NUMBER" });
       expect(errors).not.toBeNull();
-      expect(errors!.some((e) => e.includes("type"))).toBe(true);
+      expect(errors!.some((error) => error.includes("type"))).toBe(true);
     });
 
     it("errors when type is invalid", () => {
       const errors = handler.validateConfig({ type: "INVALID", expression: "a + b", resultType: "NUMBER" });
       expect(errors).not.toBeNull();
-      expect(errors!.some((e) => e.includes("type"))).toBe(true);
+      expect(errors!.some((error) => error.includes("type"))).toBe(true);
     });
 
     it("errors when PRESET config has no presetName", () => {
       const errors = handler.validateConfig({ type: "PRESET", expression: "a + b", resultType: "NUMBER" });
       expect(errors).not.toBeNull();
-      expect(errors!.some((e) => e.includes("presetName"))).toBe(true);
+      expect(errors!.some((error) => error.includes("presetName"))).toBe(true);
     });
 
     it("errors when PRESET config has invalid presetName", () => {
       const errors = handler.validateConfig({ type: "PRESET", presetName: "INVALID", expression: "a + b", resultType: "NUMBER" });
       expect(errors).not.toBeNull();
-      expect(errors!.some((e) => e.includes("presetName"))).toBe(true);
+      expect(errors!.some((error) => error.includes("presetName"))).toBe(true);
     });
 
     it("errors when expression is missing", () => {
       const errors = handler.validateConfig({ type: "CUSTOM", resultType: "NUMBER" });
       expect(errors).not.toBeNull();
-      expect(errors!.some((e) => e.includes("expression"))).toBe(true);
+      expect(errors!.some((error) => error.includes("expression"))).toBe(true);
     });
 
     it("errors when expression is unparseable", () => {
       const errors = handler.validateConfig({ type: "CUSTOM", expression: "a ??? b", resultType: "NUMBER" });
       expect(errors).not.toBeNull();
-      expect(errors!.some((e) => e.includes("expression"))).toBe(true);
+      expect(errors!.some((error) => error.includes("expression"))).toBe(true);
     });
 
     it("errors when resultType is missing", () => {
       const errors = handler.validateConfig({ type: "CUSTOM", expression: "a + b" });
       expect(errors).not.toBeNull();
-      expect(errors!.some((e) => e.includes("resultType"))).toBe(true);
+      expect(errors!.some((error) => error.includes("resultType"))).toBe(true);
     });
 
     it("errors when resultType is invalid", () => {
       const errors = handler.validateConfig({ type: "CUSTOM", expression: "a + b", resultType: "INVALID" });
       expect(errors).not.toBeNull();
-      expect(errors!.some((e) => e.includes("resultType"))).toBe(true);
+      expect(errors!.some((error) => error.includes("resultType"))).toBe(true);
     });
 
     it("errors when uiState is not an object", () => {
       const errors = handler.validateConfig({ ...validConfig, uiState: "not-an-object" });
       expect(errors).not.toBeNull();
-      expect(errors!.some((e) => e.includes("uiState"))).toBe(true);
+      expect(errors!.some((error) => error.includes("uiState"))).toBe(true);
     });
 
     it("accepts uiState as object", () => {

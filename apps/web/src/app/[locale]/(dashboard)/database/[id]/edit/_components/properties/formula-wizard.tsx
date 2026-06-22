@@ -1,16 +1,19 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import type { FormulaPropertyConfig, PropertyResponseDto } from "@fixspace/domain";
 import { FormulaPresetName, compileFormula } from "@fixspace/domain";
-import { PropertyType } from "@fixspace/domain/enums";
-import { Plus, Trash2 } from "lucide-react";
+import { PropertyType } from "@fixspace/domain";
 import { Combobox } from "@/components/ui/primitives/inputs/combobox";
-import { Select } from "@/components/ui/primitives/inputs/select";
+import { TextInput } from "@/components/ui/primitives/inputs/text-input";
+
 import { Toggle } from "@/components/ui/primitives/inputs/toggle";
-import { getProperties } from "@/lib/api/property";
 import { PRESET_META } from "./formula-presets.meta";
+
+import { FieldPicker } from "./formula-wizard/field-picker";
+import { ConditionalTextFields } from "./formula-wizard/conditional-text-fields";
+import { CategoryThresholdFields } from "./formula-wizard/category-threshold-fields";
+import { RelatedRecordsFields } from "./formula-wizard/related-records-fields";
 
 type FormulaWizardProps = {
   config: FormulaPropertyConfig;
@@ -20,7 +23,7 @@ type FormulaWizardProps = {
 
 export function FormulaWizard({ config, properties, onPatch }: FormulaWizardProps) {
   const t = useTranslations("Formula");
-  const nonFormulaProps = properties.filter((p) => p.type !== PropertyType.FORMULA);
+  const nonFormulaProps = properties.filter((property) => property.type !== PropertyType.FORMULA);
   const uiState = (config.uiState ?? {}) as Record<string, unknown>;
 
   function patchUiState(key: string, value: unknown) {
@@ -37,10 +40,12 @@ export function FormulaWizard({ config, properties, onPatch }: FormulaWizardProp
     });
   }
 
-  const numberProps = nonFormulaProps.filter((p) => p.type === PropertyType.NUMBER);
-  const numberAndRatingProps = nonFormulaProps.filter((p) => p.type === PropertyType.NUMBER || p.type === PropertyType.RATING);
-  const checkboxProps = nonFormulaProps.filter((p) => p.type === PropertyType.CHECKBOX);
-  const dateProps = nonFormulaProps.filter((p) => p.type === PropertyType.DATE);
+  const numberProps = nonFormulaProps.filter((property) => property.type === PropertyType.NUMBER);
+  const numberAndRatingProps = nonFormulaProps.filter(
+    (property) => property.type === PropertyType.NUMBER || property.type === PropertyType.RATING,
+  );
+  const checkboxProps = nonFormulaProps.filter((property) => property.type === PropertyType.CHECKBOX);
+  const dateProps = nonFormulaProps.filter((property) => property.type === PropertyType.DATE);
 
   const presetMeta = config.presetName ? PRESET_META[config.presetName] : undefined;
 
@@ -97,7 +102,7 @@ export function FormulaWizard({ config, properties, onPatch }: FormulaWizardProp
             />
             <div className="flex items-center justify-between py-1">
               <label className="type-form-label">{t("wizard.shortPosition")}</label>
-              <Toggle value={!!uiState.isShort} onChange={(v) => patchUiState("isShort", v)} />
+              <Toggle value={!!uiState.isShort} onChange={(value) => patchUiState("isShort", value)} />
             </div>
           </>
         );
@@ -152,9 +157,9 @@ export function FormulaWizard({ config, properties, onPatch }: FormulaWizardProp
             <label className="type-form-label">{t("wizard.fieldsLabel")}</label>
             <Combobox
               multiple
-              options={numberAndRatingProps.map((p) => ({ label: p.name, value: p.id }))}
+              options={numberAndRatingProps.map((property) => ({ label: property.name, value: property.id }))}
               value={((uiState.fields as string[]) ?? []).slice(0, 5)}
-              onChange={(vals) => patchUiState("fields", (vals as string[]).slice(0, 5))}
+              onChange={(values) => patchUiState("fields", (values as string[]).slice(0, 5))}
               placeholder={t("wizard.selectFields")}
             />
           </div>
@@ -166,9 +171,9 @@ export function FormulaWizard({ config, properties, onPatch }: FormulaWizardProp
             <label className="type-form-label">{t("wizard.rulesLabel")}</label>
             <Combobox
               multiple
-              options={checkboxProps.map((p) => ({ label: p.name, value: p.id }))}
+              options={checkboxProps.map((property) => ({ label: property.name, value: property.id }))}
               value={(uiState.fields as string[]) ?? []}
-              onChange={(vals) => patchUiState("fields", vals)}
+              onChange={(values) => patchUiState("fields", values)}
               placeholder={t("wizard.selectCheckboxes")}
             />
           </div>
@@ -201,9 +206,9 @@ export function FormulaWizard({ config, properties, onPatch }: FormulaWizardProp
             />
             <div className="flex flex-col gap-1.5">
               <label className="type-form-label">{t("wizard.format")}</label>
-              <Select
+              <Combobox
                 value={(uiState.format as string) ?? "days"}
-                onChange={(e) => patchUiState("format", e.target.value)}
+                onChange={(value) => patchUiState("format", value)}
                 options={[
                   { value: "days", label: t("wizard.days") },
                   { value: "hours", label: t("wizard.hours") },
@@ -216,6 +221,95 @@ export function FormulaWizard({ config, properties, onPatch }: FormulaWizardProp
 
       case FormulaPresetName.RELATED_RECORDS:
         return <RelatedRecordsFields t={t} config={config} properties={nonFormulaProps} onPatch={onPatch} />;
+
+      case FormulaPresetName.SUBTRACT:
+        return (
+          <>
+            <FieldPicker
+              label={t("wizard.subtractFieldA")}
+              paramKey="fieldA"
+              t={t}
+              options={numberProps}
+              uiState={uiState}
+              onPatch={patchUiState}
+            />
+            <FieldPicker
+              label={t("wizard.subtractFieldB")}
+              paramKey="fieldB"
+              t={t}
+              options={numberProps}
+              uiState={uiState}
+              onPatch={patchUiState}
+            />
+          </>
+        );
+
+      case FormulaPresetName.SUM_FIELDS:
+        return (
+          <div className="flex flex-col gap-1.5">
+            <label className="type-form-label">{t("wizard.sumFieldsLabel")}</label>
+            <Combobox
+              multiple
+              options={numberProps.map((property) => ({ label: property.name, value: property.id }))}
+              value={(uiState.fields as string[]) ?? []}
+              onChange={(values) => patchUiState("fields", values)}
+              placeholder={t("wizard.selectNumberFields")}
+            />
+          </div>
+        );
+
+      case FormulaPresetName.FIELD_COMPARE:
+        return (
+          <>
+            <FieldPicker
+              label={t("wizard.compareFieldA")}
+              paramKey="fieldA"
+              t={t}
+              options={nonFormulaProps}
+              uiState={uiState}
+              onPatch={patchUiState}
+            />
+            <FieldPicker
+              label={t("wizard.compareFieldB")}
+              paramKey="fieldB"
+              t={t}
+              options={nonFormulaProps}
+              uiState={uiState}
+              onPatch={patchUiState}
+            />
+            <div className="flex flex-col gap-1.5">
+              <label className="type-form-label">{t("wizard.compareOperator")}</label>
+              <Combobox
+                value={(uiState.operator as string) ?? "=="}
+                onChange={(value) => patchUiState("operator", value)}
+                options={[
+                  { value: "==", label: "= (дорівнює)" },
+                  { value: "!=", label: "≠ (не дорівнює)" },
+                  { value: ">", label: "> (більше)" },
+                  { value: "<", label: "< (менше)" },
+                  { value: ">=", label: "≥ (більше або рівне)" },
+                  { value: "<=", label: "≤ (менше або рівне)" },
+                ]}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="type-form-label">{t("wizard.compareThenLabel")}</label>
+              <TextInput
+                value={(uiState.thenLabel as string) ?? ""}
+                onChange={(value) => patchUiState("thenLabel", value)}
+                placeholder={t("wizard.compareLabelPlaceholder")}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="type-form-label">{t("wizard.compareElseLabel")}</label>
+              <TextInput
+                value={(uiState.elseLabel as string) ?? ""}
+                onChange={(value) => patchUiState("elseLabel", value)}
+                placeholder={t("wizard.compareLabelPlaceholder")}
+              />
+            </div>
+          </>
+        );
 
       default:
         return null;
@@ -231,271 +325,6 @@ export function FormulaWizard({ config, properties, onPatch }: FormulaWizardProp
         </div>
       )}
       <div className="flex flex-col gap-4">{renderFields()}</div>
-      {config.expression && (
-        <div className="pt-3 border-t border-stroke">
-          <p className="type-hint uppercase tracking-widest mb-1.5">{t("wizard.expression")}</p>
-          <div className="px-3 py-2 bg-canvas rounded-lg border border-stroke">
-            <p className="font-mono text-xs text-ink-secondary truncate">{config.expression}</p>
-          </div>
-        </div>
-      )}
     </div>
-  );
-}
-
-type FieldPickerProps = {
-  label: string;
-  paramKey: string;
-  options: PropertyResponseDto[];
-  uiState: Record<string, unknown>;
-  onPatch: (key: string, value: unknown) => void;
-  t: (key: string) => string;
-};
-
-function FieldPicker({ label, paramKey, options, uiState, onPatch, t }: FieldPickerProps) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="type-form-label">{label}</label>
-      <Combobox
-        options={options.map((p) => ({ label: p.name, value: p.id }))}
-        value={(uiState[paramKey] as string) ?? ""}
-        onChange={(val) => onPatch(paramKey, val)}
-        placeholder={t("wizard.fieldPickerPlaceholder")}
-      />
-    </div>
-  );
-}
-
-type ConditionalTextFieldsProps = {
-  uiState: Record<string, unknown>;
-  properties: PropertyResponseDto[];
-  onPatch: (key: string, value: unknown) => void;
-  t: (key: string) => string;
-};
-
-function ConditionalTextFields({ t, uiState, properties, onPatch }: ConditionalTextFieldsProps) {
-  return (
-    <>
-      <FieldPicker
-        label={t("wizard.conditionalTextField")}
-        paramKey="field"
-        t={t}
-        options={properties}
-        uiState={uiState}
-        onPatch={onPatch}
-      />
-      <div className="flex flex-col gap-1.5">
-        <label className="type-form-label">{t("wizard.conditionLabel")}</label>
-        <Select
-          value={(uiState.operator as string) ?? "=="}
-          onChange={(e) => onPatch("operator", e.target.value)}
-          options={[
-            { value: "==", label: t("customBuilder.equals") },
-            { value: "!=", label: t("customBuilder.notEquals") },
-            { value: ">", label: t("customBuilder.greaterThan") },
-            { value: "<", label: t("customBuilder.lessThan") },
-            { value: ">=", label: t("customBuilder.greaterThanEquals") },
-            { value: "<=", label: t("customBuilder.lessThanEquals") },
-          ]}
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label className="type-form-label">{t("wizard.valueLabel")}</label>
-        <input
-          type="text"
-          className="field-input w-full"
-          value={(uiState.value as string) ?? ""}
-          onChange={(e) => onPatch("value", e.target.value)}
-          placeholder={t("customBuilder.valuePlaceholder")}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-1.5">
-          <label className="type-form-label">{t("wizard.thenLabel")}</label>
-          <input
-            type="text"
-            className="field-input w-full"
-            value={(uiState.thenLabel as string) ?? ""}
-            onChange={(e) => onPatch("thenLabel", e.target.value)}
-            placeholder={t("customBuilder.thenPlaceholder")}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label className="type-form-label">{t("wizard.elseLabel")}</label>
-          <input
-            type="text"
-            className="field-input w-full"
-            value={(uiState.elseLabel as string) ?? ""}
-            onChange={(e) => onPatch("elseLabel", e.target.value)}
-            placeholder={t("customBuilder.elsePlaceholder")}
-          />
-        </div>
-      </div>
-    </>
-  );
-}
-
-type CategoryThresholdFieldsProps = {
-  uiState: Record<string, unknown>;
-  numberProps: PropertyResponseDto[];
-  onRecompile: (newUiState: Record<string, unknown>) => void;
-  t: (key: string) => string;
-};
-
-function CategoryThresholdFields({ t, uiState, numberProps, onRecompile }: CategoryThresholdFieldsProps) {
-  const thresholds = (uiState.thresholds ?? []) as Array<{ threshold: string; label: string }>;
-
-  function patchThresholds(next: Array<{ threshold: string; label: string }>) {
-    onRecompile({ ...uiState, thresholds: next });
-  }
-
-  return (
-    <>
-      <div className="flex flex-col gap-1.5">
-        <label className="type-form-label">{t("wizard.categoryThresholdField")}</label>
-        <Combobox
-          options={numberProps.map((p) => ({ label: p.name, value: p.id }))}
-          value={(uiState.field as string) ?? ""}
-          onChange={(val) => onRecompile({ ...uiState, field: val })}
-          placeholder={t("wizard.fieldPickerPlaceholder")}
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <p className="type-form-label">{t("wizard.thresholdsLabel")}</p>
-        {thresholds.map((row, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <input
-              type="number"
-              className="field-input w-24"
-              placeholder={t("wizard.valueLabel")}
-              value={row.threshold}
-              onChange={(e) => patchThresholds(thresholds.map((r, j) => (j === i ? { ...r, threshold: e.target.value } : r)))}
-            />
-            <span className="type-hint shrink-0">→</span>
-            <input
-              type="text"
-              className="field-input flex-1"
-              placeholder={t("wizard.valueLabel")}
-              value={row.label}
-              onChange={(e) => patchThresholds(thresholds.map((r, j) => (j === i ? { ...r, label: e.target.value } : r)))}
-            />
-            <button
-              type="button"
-              onClick={() => patchThresholds(thresholds.filter((_, j) => j !== i))}
-              className="text-ink-muted hover:text-error transition-colors duration-150"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        ))}
-        {thresholds.length < 3 && (
-          <button
-            type="button"
-            onClick={() => patchThresholds([...thresholds, { threshold: "", label: "" }])}
-            className="flex items-center gap-1.5 type-hint hover:text-ink-secondary transition-colors duration-150"
-          >
-            <Plus size={12} />
-            {t("wizard.addThreshold")}
-          </button>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="type-form-label">{t("wizard.elseLabelCategory")}</label>
-        <input
-          type="text"
-          className="field-input w-full"
-          value={(uiState.elseLabel as string) ?? ""}
-          onChange={(e) => onRecompile({ ...uiState, elseLabel: e.target.value })}
-          placeholder={t("customBuilder.elsePlaceholder")}
-        />
-      </div>
-    </>
-  );
-}
-
-function RelatedRecordsFields({ config, properties, onPatch, t }: FormulaWizardProps & { t: (key: string) => string }) {
-  const uiState = (config.uiState ?? {}) as Record<string, unknown>;
-  const relationProps = properties.filter((p) => p.type === PropertyType.RELATION);
-
-  const selectedRelProp = properties.find((p) => p.id === uiState.relation);
-  const relConfig = selectedRelProp?.config as { relatedEntityId?: string } | undefined;
-  const relatedDbId = relConfig?.relatedEntityId ?? "";
-
-  const { data: relatedProps = [] } = useQuery({
-    queryKey: ["properties", relatedDbId],
-    queryFn: () => getProperties(relatedDbId),
-    enabled: !!relatedDbId,
-  });
-
-  const operation = (uiState.operation as string) ?? "COUNT";
-  const needsField = operation !== "COUNT";
-
-  const filteredRelatedProps = relatedProps.filter((p) => {
-    if (p.type === PropertyType.FORMULA) return false;
-    if (operation === "SUM" || operation === "AVG" || operation === "MIN" || operation === "MAX") {
-      return p.type === PropertyType.NUMBER;
-    }
-    if (operation === "EARLIEST" || operation === "LATEST") {
-      return p.type === PropertyType.DATE;
-    }
-    return true;
-  });
-
-  function patch(key: string, value: unknown) {
-    const newUiState = { ...uiState, [key]: value };
-    const compiled = compileFormula(FormulaPresetName.RELATED_RECORDS, newUiState);
-    onPatch({
-      uiState: newUiState,
-      expression: compiled.expression,
-      resultType: compiled.resultType as FormulaPropertyConfig["resultType"],
-    });
-  }
-
-  return (
-    <>
-      <div className="flex flex-col gap-1.5">
-        <label className="type-form-label">{t("wizard.relationField")}</label>
-        <Combobox
-          options={relationProps.map((p) => ({ label: p.name, value: p.id }))}
-          value={(uiState.relation as string) ?? ""}
-          onChange={(val) => patch("relation", val)}
-          placeholder={t("wizard.fieldPickerPlaceholder")}
-        />
-      </div>
-
-      {relatedDbId && (
-        <div className="flex flex-col gap-1.5">
-          <label className="type-form-label">{t("wizard.operation")}</label>
-          <Select
-            value={operation}
-            onChange={(e) => patch("operation", e.target.value)}
-            options={[
-              { value: "COUNT", label: t("wizard.count") },
-              { value: "SUM", label: t("wizard.sum") },
-              { value: "AVG", label: t("wizard.avg") },
-              { value: "MIN", label: t("wizard.min") },
-              { value: "MAX", label: t("wizard.max") },
-              { value: "EARLIEST", label: t("wizard.earliest") },
-              { value: "LATEST", label: t("wizard.latest") },
-              { value: "LIST", label: t("wizard.list") },
-            ]}
-          />
-        </div>
-      )}
-
-      {needsField && relatedDbId && (
-        <div className="flex flex-col gap-1.5">
-          <label className="type-form-label">{t("wizard.relatedField")}</label>
-          <Combobox
-            options={filteredRelatedProps.map((p) => ({ label: p.name, value: p.id }))}
-            value={(uiState.field as string) ?? ""}
-            onChange={(val) => patch("field", val)}
-            placeholder={t("wizard.fieldPickerPlaceholder")}
-          />
-        </div>
-      )}
-    </>
   );
 }

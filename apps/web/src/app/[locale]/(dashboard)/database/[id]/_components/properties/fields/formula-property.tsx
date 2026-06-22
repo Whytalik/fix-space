@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormulaPropertyConfig } from "@fixspace/domain";
-import { PropertyType } from "@fixspace/domain/enums";
+import { PropertyType } from "@fixspace/domain";
 import { useDateFormat } from "@/hooks/format/use-date-format";
 
 type FormulaPropertyProps = {
@@ -15,6 +15,10 @@ export function FormulaProperty({ readOnly, value, config, className }: FormulaP
   const { formatDate } = useDateFormat();
 
   if (readOnly) {
+    if (typeof value === "string" && value.includes("field_")) {
+      return <span className="text-ink-muted">—</span>;
+    }
+
     const resultType = config?.resultType ?? PropertyType.TEXT;
 
     if (resultType === PropertyType.CHECKBOX) {
@@ -24,7 +28,7 @@ export function FormulaProperty({ readOnly, value, config, className }: FormulaP
     if (resultType === PropertyType.DATE) {
       const date = new Date(value as string);
       if (isNaN(date.getTime())) return <span className="text-ink-muted">—</span>;
-      return <span className="type-body text-ink-secondary">{formatDate(date)}</span>;
+      return <span className="text-sm text-ink-secondary">{formatDate(date)}</span>;
     }
 
     if (resultType === PropertyType.NUMBER || resultType === PropertyType.RATING || resultType === PropertyType.PROGRESS) {
@@ -36,7 +40,7 @@ export function FormulaProperty({ readOnly, value, config, className }: FormulaP
     }
 
     return (
-      <span className={`type-body text-ink ${className || "truncate max-w-full"}`}>
+      <span className={`text-sm text-ink ${className || "truncate max-w-full"}`}>
         {Array.isArray(value) ? (value as unknown[]).join(", ") : String(value ?? "")}
       </span>
     );

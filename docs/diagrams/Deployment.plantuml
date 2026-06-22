@@ -18,41 +18,56 @@ skinparam databaseBorderColor #2563eb
 
 top to bottom direction
 
-title Діаграма розгортання
+title Діаграма розгортання системи FixSpace
 
-node "Vercel" as Vercel_Node #F8F9FA {
+node "GitHub Actions" as GitHub #F8F9FA {
+  artifact "CI/CD Pipeline\n(Пайплайни)" as Pipeline
+}
+
+node "Vercel (PaaS)" as Vercel_Node #F8F9FA {
   artifact "Static Assets\n(JS, CSS, зображення)" as Static
-  artifact "SSR Pages\n(Next.js App Router)" as SSR
+  artifact "SSR Pages\n(Next.js 16 / React 19)" as SSR
   artifact "CDN Edge Cache" as CDN
   artifact "Vercel Monitoring\n(Web Vitals, логи)" as Monitor
 }
 
-node "Railway" as Railway_Node #F8F9FA {
-  artifact "NestJS 11\n(порт 3000)" as NestJS
-  artifact "Змінні оточення\n(.env.development)" as Env
+node "Railway (PaaS)" as Railway_Node #F8F9FA {
+  artifact "NestJS 11 API\n(Docker Container)" as NestJS
   database "PostgreSQL 16\n(Prisma ORM 7)" as PgDB
+  database "Redis 7\n(Кешування)" as Redis
+  artifact "Railway Secrets\n(Змінні оточення)" as Env
 }
 
-node "Зовнішні сервіси" as Ext_Node #FFF9C4 {
+node "Зовнішні сервіси (SaaS)" as Ext_Node #FFF9C4 {
   artifact "Google OAuth 2.0" as Google
-  artifact "Resend SDK / API" as Resend
-  artifact "Cloudinary API / SDK" as Cloudinary
+  artifact "Resend API / SMTP" as Resend
+  artifact "Cloudinary API" as Cloudinary
+  artifact "Trading Platforms\n(Binance, MT5)" as Trading
 }
 
-Vercel_Node -[hidden]down-> Railway_Node
-Railway_Node -[hidden]right-> Ext_Node
+node "Термінал користувача" as User_Terminal #F8F9FA {
+  node "MetaTrader 5" as MT5 {
+    artifact "FixSpaceSync.mq5\n(Expert Advisor)" as EA
+  }
+}
+
+GitHub ..> Vercel_Node : Deploy (Next.js)
+GitHub ..> Railway_Node : Deploy (Docker/NestJS)
 
 Static ..> NestJS : HTTPS REST API
 SSR ..> NestJS : HTTPS REST API (SSR)
 CDN ..> SSR : Edge-кешування
 
-NestJS ..> PgDB : Prisma ORM (SSL)
-NestJS ..> Resend : API / SMTP
+NestJS ..> PgDB : TCP/IP (SSL)
+NestJS ..> Redis : TCP/IP
+NestJS ..> Resend : HTTPS API / SMTP
 NestJS ..> Google : OAuth 2.0
 NestJS ..> Cloudinary : HTTPS API
+NestJS ..> Trading : HTTPS API
+
+EA ..> NestJS : HTTPS REST API (WebRequest)
 
 SSR ..> Monitor : Web Vitals
-
 Env ..> NestJS : Конфігурація
 
 @enduml

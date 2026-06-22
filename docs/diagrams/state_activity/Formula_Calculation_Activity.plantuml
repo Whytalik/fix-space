@@ -1,0 +1,67 @@
+@startuml Formula_Calculation_Activity
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  BarColor #000000
+  StartColor #000000
+  EndColor #000000
+  ArrowColor #000000
+  FontColor #000000
+}
+
+title Алгоритм роботи формульного типу даних (Formula Engine)
+
+|Користувач / UI|
+start
+:Вибір формули з переліку доступних;
+
+|Система (Перерахунок)|
+:Збереження конфігурації властивості;
+
+|Система (Перерахунок)|
+partition "Recalculation Service" {
+  :Подія: Зміна запису або запуск перерахунку;
+  :Отримання всіх формул бази даних;
+  
+  partition "Побудова контексту" {
+    :Отримання значень усіх властивостей запису;
+    :Завантаження пов'язаних даних для властивостей типу Relation;
+    :Коерція значень (приведення типів);
+    :Формування об'єкта Context;
+  }
+  
+  while (Є наступна формула?) is (так)
+    partition "Formula Engine" {
+      :Парсинг виразу в AST (jsep);
+      :Рекурсивний обхід вузлів дерева (evalNode);
+      
+      switch (Тип вузла)
+      case ( Literal )
+        :Повернення значення;
+      case ( Identifier )
+        :Отримання значення з контексту;
+      case ( Binary / Unary )
+        :Виконання операції (+, -, *, /, == тощо);
+      case ( CallExpression )
+        :Виклик вбудованої функції (ABS, ROUND, SUM, IF тощо);
+      case ( MemberExpression )
+        :Доступ до властивостей об'єкта;
+      endswitch
+      
+      :Автоматичне визначення типу (Type Inference);
+      :Форматування результату згідно з визначеним типом;
+    }
+    :Збереження (upsert) обчисленого значення;
+  endwhile (ні)
+}
+
+|Користувач / UI|
+:Оновлення значень у таблиці/картці;
+stop
+
+@enduml

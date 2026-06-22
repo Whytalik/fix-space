@@ -4,9 +4,12 @@ import { useRef, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { useDroppable, useDndContext } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import type { ContentComponentData, ContentColumn, ContentRow as ContentRowType, ContentComponentType } from "@fixspace/domain";
+import type { ContentComponentData, ContentColumn, ContentRow as ContentRowType } from "@fixspace/domain";
+import type { ContentComponentType } from "@fixspace/domain";
 import { GripVertical } from "lucide-react";
+
 import { ContentComponent } from "./content-component";
+import { getColumnMinPx } from "../lib/component-min-widths";
 import { useTranslations } from "next-intl";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
@@ -82,8 +85,8 @@ function DroppableColumn({
 
   return (
     <div
-      style={{ width: `${column.width}%` }}
-      className={`relative group/column min-h-[60px]`}
+      style={{ width: `${column.width}%`, minWidth: getColumnMinPx(column) }}
+      className={`relative group/column ${isEditing ? "min-h-[60px]" : ""}`}
       onClick={(e) => {
         if (!isEditing) return;
         const target = e.target as HTMLElement;
@@ -97,16 +100,19 @@ function DroppableColumn({
     >
       <div
         ref={setNodeRef}
-        className={`h-full border border-dashed rounded-2xl p-3 pb-8 transition-colors duration-150 min-h-[60px]
-          ${
-            isSelected
-              ? "ring-2 ring-accent border-accent bg-accent/5"
-              : isOver && isActive
-                ? "border-accent bg-accent/10"
-                : isComponentDragActive
-                  ? "border-stroke-subtle bg-surface/40"
-                  : "border-stroke hover:border-stroke-subtle"
-          }`}
+        className={
+          isEditing
+            ? `h-full border border-dashed rounded-2xl p-3 pb-8 transition-colors duration-150 min-h-[60px] ${
+                isSelected
+                  ? "ring-2 ring-accent border-accent bg-accent/5"
+                  : isOver && isActive
+                    ? "border-accent bg-accent/10"
+                    : isComponentDragActive
+                      ? "border-stroke-subtle bg-surface/40"
+                      : "border-stroke hover:border-stroke-subtle"
+              }`
+            : "h-full min-h-0"
+        }
       >
         <div className="flex flex-col gap-3">
           <SortableContext items={sortableItems} strategy={verticalListSortingStrategy}>
@@ -127,7 +133,7 @@ function DroppableColumn({
             ))}
           </SortableContext>
 
-          {!hasContent && (
+          {!hasContent && isEditing && (
             <div className="py-6 flex items-center justify-center text-ink-muted italic text-xs pointer-events-none">
               {isOver && isActive ? <span className="text-accent not-italic font-medium">{t("dropHere")}</span> : t("empty")}
             </div>
@@ -204,9 +210,14 @@ export function ContentRow({
       const nextW = initialWidths[index + 1];
       if (currentW === undefined || nextW === undefined) return;
 
-      const newLeft = Math.max(10, Math.min(90, currentW + deltaPercent));
+      const leftCol = row.columns[index];
+      const rightCol = row.columns[index + 1];
+      const leftMinPct = leftCol ? Math.max(5, (getColumnMinPx(leftCol) / containerWidth) * 100) : 10;
+      const rightMinPct = rightCol ? Math.max(5, (getColumnMinPx(rightCol) / containerWidth) * 100) : 10;
+
+      const newLeft = Math.max(leftMinPct, Math.min(100 - rightMinPct, currentW + deltaPercent));
       const actualDelta = newLeft - currentW;
-      const newRight = Math.max(10, Math.min(90, nextW - actualDelta));
+      const newRight = Math.max(rightMinPct, nextW - actualDelta);
 
       const updated = [...initialWidths];
       updated[index] = newLeft;
@@ -232,8 +243,8 @@ export function ContentRow({
   return (
     <div
       ref={setNodeRef}
-      style={dragStyle}
-      className={`group/row relative mb-4 last:mb-0 ${isDragging ? "z-50 opacity-50" : ""} ${isSelected ? "ring-2 ring-accent ring-offset-4 rounded-2xl" : ""}`}
+      style={{ ...dragStyle, paddingTop: row.paddingTop, paddingBottom: row.paddingBottom }}
+      className={`group/row relative ${isEditing ? "mb-4 last:mb-0" : "mb-2 last:mb-0"} ${isDragging ? "z-50 opacity-50" : ""} ${isSelected ? "ring-2 ring-accent ring-offset-4 rounded-2xl" : ""}`}
       onClick={(e) => {
         if (!isEditing) return;
         const target = e.target as HTMLElement;
@@ -257,7 +268,7 @@ export function ContentRow({
         </div>
       )}
 
-      <div ref={rowRef} className="flex gap-3 min-h-[60px]">
+      <div ref={rowRef} className={`flex gap-3 ${isEditing ? "min-h-[60px]" : ""}`}>
         {row.columns.map((column, index) => (
           <DroppableColumn
             key={column.id}

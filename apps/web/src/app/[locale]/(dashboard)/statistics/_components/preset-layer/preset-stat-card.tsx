@@ -63,7 +63,7 @@ export function PresetStatCard({ block, sections, hiddenProps }: PresetStatCardP
   const t = useTranslations("Statistics");
   const [modalOpen, setModalOpen] = useState(false);
   const highlights = getHighlights(block);
-  const displayTitle = block.title || (t.raw(`keyDatabaseTypes.${block.type}`) as string) || block.type;
+  const displayTitle = block.name || (t.raw(`keyDatabaseTypes.${block.type}`) as string) || block.type;
 
   return (
     <>

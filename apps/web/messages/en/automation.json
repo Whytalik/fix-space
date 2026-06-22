@@ -43,17 +43,26 @@
       "monthly": "Monthly"
     },
     "daysOfWeek": {
+      "0": "Sunday",
       "1": "Monday",
       "2": "Tuesday",
       "3": "Wednesday",
       "4": "Thursday",
       "5": "Friday",
-      "6": "Saturday",
-      "0": "Sunday"
+      "6": "Saturday"
     },
     "propertyPlaceholder": "— select a property —",
     "databasePlaceholder": "— select a database —",
     "noRelationFields": "— no RELATION fields —",
+    "dateValue": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "relative": "Relative",
+      "custom": "Custom date",
+      "in": "in",
+      "ago": "ago",
+      "days": "days"
+    },
     "templates": {
       "dateOnChange": {
         "name": "Set date on change",

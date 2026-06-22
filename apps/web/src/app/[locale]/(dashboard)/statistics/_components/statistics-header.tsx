@@ -22,8 +22,7 @@ const PRESETS: { key: Preset; labelKey: string }[] = [
   { key: "all", labelKey: "presets.all" },
 ];
 
-function presetToRange(preset: Preset): { from?: string; to?: string } {
-  const now = dayjs();
+function presetToRange(preset: Preset, now: dayjs.Dayjs = dayjs()): { from?: string; to?: string } {
   if (preset === "all") return {};
   if (preset === "quarter") {
     const quarterStart = dayjs(now)
@@ -39,10 +38,43 @@ function presetToRange(preset: Preset): { from?: string; to?: string } {
   return map[preset];
 }
 
+type ComparePreset = "prevMonth" | "prevQuarter" | "prevYear" | "custom";
+
+function computeCompareRange(mainPreset: Exclude<Preset, "all">): { compareFrom: string; compareTo: string } {
+  const now = dayjs();
+  const shiftMap: Record<Exclude<Preset, "all">, { amount: number; unit: dayjs.ManipulateType }> = {
+    week: { amount: 1, unit: "week" },
+    month: { amount: 1, unit: "month" },
+    quarter: { amount: 3, unit: "month" },
+    year: { amount: 1, unit: "year" },
+  };
+  const shift = shiftMap[mainPreset];
+  const ref = now.subtract(shift.amount, shift.unit);
+  const r = presetToRange(mainPreset, ref);
+  return { compareFrom: r.from!, compareTo: r.to! };
+}
+
+const PRESET_TO_MAIN: Record<ComparePreset, Exclude<Preset, "all"> | undefined> = {
+  prevMonth: "month",
+  prevQuarter: "quarter",
+  prevYear: "year",
+  custom: undefined,
+};
+
+const COMPARE_PRESET_LIST: ComparePreset[] = ["prevMonth", "prevQuarter", "prevYear", "custom"];
+
+function mainToComparePreset(preset: Preset | null): ComparePreset | null {
+  if (preset === "month") return "prevMonth";
+  if (preset === "quarter") return "prevQuarter";
+  if (preset === "year") return "prevYear";
+  return null;
+}
+
 export function StatisticsHeader({ query, onChange }: StatisticsHeaderProps) {
   const t = useTranslations("Statistics");
   const [activePreset, setActivePreset] = useState<Preset | null>("all");
   const [compareMode, setCompareMode] = useState(false);
+  const [activeComparePreset, setActiveComparePreset] = useState<ComparePreset>("custom");
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
   const [showCmpFromPicker, setShowCmpFromPicker] = useState(false);
@@ -54,8 +86,35 @@ export function StatisticsHeader({ query, onChange }: StatisticsHeaderProps) {
 
   function applyPreset(preset: Preset) {
     setActivePreset(preset);
+
+    if (compareMode && activeComparePreset !== "custom" && preset !== "all") {
+      const matched = mainToComparePreset(preset);
+      if (matched) {
+        setActiveComparePreset(matched);
+        const range = presetToRange(preset);
+        const cr = computeCompareRange(preset as Exclude<Preset, "all">);
+        onChange({ ...query, from: undefined, to: undefined, ...range, ...cr });
+        return;
+      }
+    }
+
     const range = presetToRange(preset);
+    if (preset === "all" && compareMode) setActiveComparePreset("custom");
+
     onChange({ ...query, from: undefined, to: undefined, ...range, compareFrom: undefined, compareTo: undefined });
+  }
+
+  function applyComparePreset(preset: ComparePreset) {
+    setActiveComparePreset(preset);
+    if (preset === "custom") return;
+
+    const mainPreset = PRESET_TO_MAIN[preset]!;
+    const range = presetToRange(mainPreset);
+    const cr = computeCompareRange(mainPreset);
+
+    setActivePreset(mainPreset);
+
+    onChange({ ...query, from: undefined, to: undefined, ...range, ...cr });
   }
 
   function formatDate(isoDate?: string) {
@@ -65,7 +124,16 @@ export function StatisticsHeader({ query, onChange }: StatisticsHeaderProps) {
   function toggleCompare() {
     const next = !compareMode;
     setCompareMode(next);
-    if (!next) {
+    if (next) {
+      const matched = mainToComparePreset(activePreset);
+      if (matched) {
+        applyComparePreset(matched);
+      } else {
+        setActiveComparePreset("custom");
+        onChange({ ...query, compareFrom: undefined, compareTo: undefined });
+      }
+    } else {
+      setActiveComparePreset("custom");
       onChange({ ...query, compareFrom: undefined, compareTo: undefined });
     }
   }
@@ -127,27 +195,46 @@ export function StatisticsHeader({ query, onChange }: StatisticsHeaderProps) {
       </button>
 
       {compareMode && (
-        <div className="flex items-center gap-1">
-          <button
-            ref={cmpFromRef}
-            type="button"
-            onClick={() => setShowCmpFromPicker(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-accent-muted border border-accent rounded-lg text-ink-secondary hover:text-ink transition-colors duration-150"
-          >
-            <CalendarDays size={12} />
-            {formatDate(query.compareFrom)}
-          </button>
-          <span className="text-ink-muted text-xs">—</span>
-          <button
-            ref={cmpToRef}
-            type="button"
-            onClick={() => setShowCmpToPicker(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-accent-muted border border-accent rounded-lg text-ink-secondary hover:text-ink transition-colors duration-150"
-          >
-            <CalendarDays size={12} />
-            {formatDate(query.compareTo)}
-          </button>
-        </div>
+        <>
+          <div className="flex items-center gap-1 bg-surface border border-stroke rounded-lg p-1">
+            {COMPARE_PRESET_LIST.map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => applyComparePreset(key)}
+                className={`px-3 py-1 text-xs rounded-md transition-colors duration-150 ${
+                  activeComparePreset === key ? "bg-elevated text-ink font-medium" : "text-ink-secondary hover:text-ink"
+                }`}
+              >
+                {t(`comparePresets.${key}`)}
+              </button>
+            ))}
+          </div>
+
+          {activeComparePreset === "custom" && (
+            <div className="flex items-center gap-1">
+              <button
+                ref={cmpFromRef}
+                type="button"
+                onClick={() => setShowCmpFromPicker(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-accent-muted border border-accent rounded-lg text-ink-secondary hover:text-ink transition-colors duration-150"
+              >
+                <CalendarDays size={12} />
+                {formatDate(query.compareFrom)}
+              </button>
+              <span className="text-ink-muted text-xs">—</span>
+              <button
+                ref={cmpToRef}
+                type="button"
+                onClick={() => setShowCmpToPicker(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-accent-muted border border-accent rounded-lg text-ink-secondary hover:text-ink transition-colors duration-150"
+              >
+                <CalendarDays size={12} />
+                {formatDate(query.compareTo)}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {showFromPicker && (

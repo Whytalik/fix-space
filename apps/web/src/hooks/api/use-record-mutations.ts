@@ -55,6 +55,8 @@ export function useApplyTemplate(databaseId: string) {
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.records.all(databaseId) });
       queryClient.setQueryData(queryKeys.records.detail(databaseId, updated.id), updated);
+      queryClient.invalidateQueries({ queryKey: ["records", "detail", updated.id] });
+      queryClient.invalidateQueries({ queryKey: ["records", updated.id, "content"] });
     },
   });
 }

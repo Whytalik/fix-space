@@ -89,13 +89,12 @@ model User {
   googleAccount          GoogleAccount?
   notifications          Notification[]
   integrationConnections IntegrationConnection[]
-  @@index([email])
 }
 
 model RefreshToken {
   id        String    @id @default(uuid())
   userId    String
-  tokenHash String
+  tokenHash String    @unique
   expiresAt DateTime
   createdAt DateTime  @default(now())
   revokedAt DateTime?
@@ -103,14 +102,13 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([tokenHash])
   @@index([expiresAt])
 }
 
 model EmailVerificationToken {
   id        String    @id @default(uuid())
   userId    String
-  tokenHash String
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
@@ -118,13 +116,12 @@ model EmailVerificationToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([tokenHash])
 }
 
 model PasswordResetToken {
   id        String    @id @default(uuid())
   userId    String
-  tokenHash String
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
@@ -132,7 +129,6 @@ model PasswordResetToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([tokenHash])
 }
 
 model GoogleAccount {
@@ -145,9 +141,6 @@ model GoogleAccount {
   tokenExpiresAt DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([googleId])
 }
 
 // -----------------------------------------------------------------------------
@@ -164,7 +157,6 @@ model Settings {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, key])
-  @@index([userId])
   @@index([category])
 }
 
@@ -194,7 +186,6 @@ model IntegrationConnection {
   syncInterval        Int                @default(5)
   marketType          String?
   externalAccountId   String?
-  config              Json?
   lastSyncAt          DateTime?
   lastSyncError       String?
   consecutiveFailures Int                @default(0)
@@ -220,9 +211,7 @@ model Space {
   name      String
   icon      String?
   isDefault Boolean  @default(false)
-  isDemo    Boolean  @default(false)
   createdAt DateTime @default(now())
-  config    Json?
 
   owner                  User                    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   databases              Database[]
@@ -230,7 +219,7 @@ model Space {
   integrationConnections IntegrationConnection[]
 
   @@unique([ownerId, name])
-  @@index([ownerId])
+  @@index([ownerId, isDefault])
   @@index([name])
 }
 
@@ -249,7 +238,7 @@ model Section {
   databases Database[]
 
   @@unique([spaceId, name])
-  @@index([spaceId])
+  @@index([spaceId, position])
   @@index([position])
 }
 
@@ -262,17 +251,14 @@ model Database {
   spaceId            String
   sectionId          String?
   name               String
-  title              String
   type               String?
   key                String?
   icon               String?
   position           Int      @default(0)
   isKey              Boolean  @default(false)
   isLocked           Boolean  @default(false)
-  enableStats        Boolean  @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
-  config             Json?
 
   space          Space           @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   section        Section?        @relation(fields: [sectionId], references: [id], onDelete: SetNull)
@@ -285,7 +271,6 @@ model Database {
   importMappings ImportMapping[]
 
   @@unique([spaceId, name])
-  @@index([spaceId])
   @@index([sectionId])
   @@index([position])
 }
@@ -302,8 +287,7 @@ model PropertyGroup {
   database   Database   @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   properties Property[]
 
-  @@index([databaseId])
-  @@index([position])
+  @@index([databaseId, position])
 }
 
 model Property {
@@ -315,21 +299,21 @@ model Property {
   position       Int
   icon           String?
   hint           String?
-  group          String?
   isVisible      Boolean      @default(true)
   isProtected    Boolean      @default(false)
   integrationKey String?      // e.g. "pair", "entryPrice", "stopLoss"
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  config         Json?
+  config              Json?
+  visibilityCondition Json?
 
   database       Database                @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   propertyGroup  PropertyGroup?          @relation(fields: [groupId], references: [id], onDelete: SetNull)
   values         PropertyValue[]
   templateValues TemplatePropertyValue[]
 
-  @@index([databaseId])
-  @@index([position])
+  @@index([databaseId, position])
+  @@index([databaseId, type])
   @@index([groupId])
   @@index([integrationKey])
 }
@@ -344,7 +328,6 @@ model Record {
   sourceCurrency      String?
   name                String    @default("Untitled")
   icon                String?
-  config              Json?
   deletedAt           DateTime?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -354,9 +337,8 @@ model Record {
   values           PropertyValue[]
   content          RecordContent?
 
-  @@index([databaseId])
+  @@index([databaseId, createdAt])
   @@index([templateId])
-  @@index([createdAt])
   @@index([deletedAt])
   @@index([sourceIntegrationId])
   @@index([sourcePositionId])
@@ -373,7 +355,6 @@ model PropertyValue {
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([recordId, propertyId])
-  @@index([recordId])
   @@index([propertyId])
 }
 
@@ -403,15 +384,14 @@ model Template {
   position    Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  config      Json?
 
   database Database                @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   values   TemplatePropertyValue[]
   records  Record[]
 
   @@unique([databaseId, name])
-  @@index([databaseId])
-  @@index([position])
+  @@index([databaseId, position])
+  @@index([databaseId, isDefault])
 }
 
 model TemplatePropertyValue {
@@ -424,7 +404,6 @@ model TemplatePropertyValue {
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([templateId, propertyId])
-  @@index([templateId])
   @@index([propertyId])
 }
 
@@ -437,6 +416,7 @@ model View {
   databaseId         String
   name               String
   icon               String?
+  position           Int      @default(0)
   isDefault          Boolean  @default(false)
   isLocked           Boolean  @default(false)
   pageSize           Int      @default(50)
@@ -457,7 +437,8 @@ model View {
 
   database Database @relation(fields: [databaseId], references: [id], onDelete: Cascade)
 
-  @@index([databaseId])
+  @@index([databaseId, position])
+  @@index([databaseId, isDefault])
 }
 
 model Automation {
@@ -465,7 +446,6 @@ model Automation {
   databaseId String
   name       String
   trigger    AutomationTrigger
-  condition  Json?
   actions    Json
   active     Boolean           @default(true)
   createdAt  DateTime          @default(now())
@@ -475,7 +455,7 @@ model Automation {
   database Database        @relation(fields: [databaseId], references: [id], onDelete: Cascade)
   logs     AutomationLog[]
 
-  @@index([databaseId])
+  @@index([databaseId, trigger])
   @@index([active])
 }
 
@@ -490,6 +470,7 @@ model AutomationLog {
   automation Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
 
   @@index([automationId])
+  @@index([automationId, createdAt(sort: Desc)])
   @@index([status])
 }
 
@@ -544,5 +525,3 @@ model RecordContentSnapshot {
   @@index([recordContentId])
   @@index([createdAt])
 }
-
-

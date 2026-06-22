@@ -1,14 +1,18 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, OnApplicationShutdown } from "@nestjs/common";
 import { Redis } from "ioredis";
 import { AppLogger } from "@/common/logger/app-logger.service";
 
 @Injectable()
-export class CacheService {
+export class CacheService implements OnApplicationShutdown {
   constructor(
     @Inject("REDIS_CLIENT") private readonly redis: Redis,
     private readonly logger: AppLogger,
   ) {
     this.logger.setContext(CacheService.name);
+  }
+
+  async onApplicationShutdown(): Promise<void> {
+    await this.redis.quit();
   }
 
   async get<T>(key: string): Promise<T | null> {

@@ -25,9 +25,19 @@ type StatusPropertyProps = {
   onChange?: (value: StatusPropertyValue | null) => void;
   placeholder?: string;
   size?: "md" | "sm";
+  ghost?: boolean;
 };
 
-export function StatusProperty({ config, options, value, readOnly, onChange, placeholder = "None", size = "md" }: StatusPropertyProps) {
+export function StatusProperty({
+  config,
+  options,
+  value,
+  readOnly,
+  onChange,
+  placeholder = "None",
+  size = "md",
+  ghost,
+}: StatusPropertyProps) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +45,7 @@ export function StatusProperty({ config, options, value, readOnly, onChange, pla
     if (!value) return null;
     return (
       <span
-        className="px-2 py-0.5 rounded text-xs font-medium inline-flex items-center gap-1"
+        className="px-2 py-0.5 rounded text-sm font-medium inline-flex items-center gap-1"
         style={{ backgroundColor: `${value.color}20`, color: value.color }}
       >
         {value.icon && (
@@ -48,8 +58,9 @@ export function StatusProperty({ config, options, value, readOnly, onChange, pla
     );
   }
 
-  const className =
-    size === "sm"
+  const className = ghost
+    ? "flex items-center gap-1 text-left"
+    : size === "sm"
       ? "field-input w-full !py-1 !text-xs flex items-center gap-2 text-left"
       : "field-input w-full flex items-center gap-2 text-left";
 
@@ -69,7 +80,7 @@ export function StatusProperty({ config, options, value, readOnly, onChange, pla
       >
         {value ? (
           <span
-            className="px-2 py-0.5 rounded text-xs font-medium inline-flex items-center gap-1"
+            className="px-2 py-0.5 rounded text-sm font-medium inline-flex items-center gap-1"
             style={{ backgroundColor: `${value.color}20`, color: value.color }}
           >
             {value.icon && (
@@ -80,9 +91,9 @@ export function StatusProperty({ config, options, value, readOnly, onChange, pla
             {value.label}
           </span>
         ) : (
-          <span className="flex-1 text-sm text-ink-muted">{placeholder}</span>
+          <span className={`text-sm text-ink-muted ${ghost ? "" : "flex-1"}`}>{placeholder}</span>
         )}
-        <ChevronDown size={13} className="text-ink-muted shrink-0" />
+        {!ghost && <ChevronDown size={13} className="text-ink-muted shrink-0" />}
       </button>
 
       {open && (options || config?.categories) && (
@@ -98,7 +109,7 @@ export function StatusProperty({ config, options, value, readOnly, onChange, pla
                     className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-surface transition-colors duration-150 text-ink"
                   >
                     <span
-                      className="px-2 py-0.5 rounded text-xs font-medium inline-flex items-center gap-1"
+                      className="px-2 py-0.5 rounded text-sm font-medium inline-flex items-center gap-1"
                       style={{ backgroundColor: `${option.color}20`, color: option.color }}
                     >
                       {option.icon && (
@@ -127,7 +138,7 @@ export function StatusProperty({ config, options, value, readOnly, onChange, pla
                         className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-surface transition-colors duration-150 text-ink"
                       >
                         <span
-                          className="px-2 py-0.5 rounded text-xs font-medium inline-flex items-center gap-1"
+                          className="px-2 py-0.5 rounded text-sm font-medium inline-flex items-center gap-1"
                           style={{ backgroundColor: `${option.color}20`, color: option.color }}
                         >
                           {option.icon && (

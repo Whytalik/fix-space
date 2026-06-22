@@ -45,14 +45,16 @@ export class DuplicateSectionUseCase {
         for (const database of source.databases) {
           const propertyIdMap = new Map<string, string>();
 
-          const newDbSlug = await this.databaseRepo.findUniqueSlug(database.name, source.spaceId, transaction);
-          const newDbTitle = await this.databaseRepo.findUniqueTitle(database.title, source.spaceId, transaction);
+          const newDatabaseName = await this.databaseRepo.findUniqueName(database.name, source.spaceId, transaction);
 
           const newDatabase = await transaction.database.create({
             data: {
-              name: newDbSlug,
-              title: newDbTitle,
+              name: newDatabaseName,
+              type: database.type,
+              key: database.key,
               icon: database.icon,
+              isKey: database.isKey,
+              isLocked: database.isLocked,
               spaceId: source.spaceId,
               sectionId: newSection.id,
             },
@@ -86,7 +88,6 @@ export class DuplicateSectionUseCase {
                   content: template.content as Prisma.InputJsonValue,
                   isDefault: template.isDefault,
                   position: template.position,
-                  config: template.config as Prisma.InputJsonValue,
                   databaseId: newDatabase.id,
                 },
               });
@@ -112,7 +113,6 @@ export class DuplicateSectionUseCase {
                 data: {
                   name: automation.name,
                   trigger: automation.trigger,
-                  condition: automation.condition as Prisma.InputJsonValue,
                   actions: automation.actions as Prisma.InputJsonValue,
                   active: automation.active,
                   config: automation.config as Prisma.InputJsonValue,

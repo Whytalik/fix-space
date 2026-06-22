@@ -3,6 +3,9 @@ import type { SeedRecord } from "./types";
 export const routineLibrarySeeds: SeedRecord[] = [
   {
     name: "Swing Strategy SOP",
+    relations: {
+      "Daily Routines": { type: "daily-routine", name: "Daily Log - 2025-01-16" },
+    },
     values: {
       Date: "2025-01-01",
       "Sleep Quality": 5,
@@ -14,6 +17,9 @@ export const routineLibrarySeeds: SeedRecord[] = [
   },
   {
     name: "Intraday SOP",
+    relations: {
+      "Daily Routines": { type: "daily-routine", name: "Daily Log - 2025-01-15" },
+    },
     values: {
       Date: "2025-01-01",
       "Sleep Quality": 4,

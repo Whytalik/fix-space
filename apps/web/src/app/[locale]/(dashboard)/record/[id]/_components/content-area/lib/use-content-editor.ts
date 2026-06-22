@@ -14,8 +14,10 @@ import {
   deleteRow,
   moveContentItem,
   moveRow,
+  setColumnCount,
   setColumnWidths,
   updateComponentData,
+  updateRow,
 } from "./content-tree";
 
 const DEBOUNCE_MS = 700;
@@ -23,11 +25,13 @@ const DEBOUNCE_MS = 700;
 interface UseContentEditorOptions {
   initialContent: ContentSchema | undefined;
   isLoading: boolean;
-  onSave: (content: ContentSchema) => void;
+  onSave: (content: ContentSchema) => void | Promise<unknown>;
 }
 
 export function useContentEditor({ initialContent, isLoading, onSave }: UseContentEditorOptions) {
   const [content, setContent] = useState<ContentSchema>({ rows: [] });
+  const [isDirty, setIsDirty] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onSaveRef = useRef(onSave);
   onSaveRef.current = onSave;
@@ -40,8 +44,13 @@ export function useContentEditor({ initialContent, isLoading, onSave }: UseConte
 
   const scheduleSave = useCallback((next: ContentSchema) => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
-      onSaveRef.current(next);
+    saveTimerRef.current = setTimeout(async () => {
+      try {
+        await onSaveRef.current(next);
+        setIsDirty(false);
+      } catch {
+        // Save failed; isDirty stays true so the user is warned before leaving
+      }
     }, DEBOUNCE_MS);
   }, []);
 
@@ -54,6 +63,8 @@ export function useContentEditor({ initialContent, isLoading, onSave }: UseConte
   const apply = useCallback(
     (next: ContentSchema) => {
       setContent(next);
+      setIsDirty(true);
+      setHasChanges(true);
       scheduleSave(next);
     },
     [scheduleSave],
@@ -61,13 +72,17 @@ export function useContentEditor({ initialContent, isLoading, onSave }: UseConte
 
   return {
     content,
+    isDirty,
+    hasChanges,
     isLoading,
     onAddRow: () => apply(addRow(content)),
     onDeleteRow: (rowId: string) => apply(deleteRow(content, rowId)),
     onMoveRow: (fromIndex: number, toIndex: number) => apply(moveRow(content, fromIndex, toIndex)),
     onAddColumn: (rowId: string) => apply(addColumn(content, rowId)),
     onDeleteColumn: (rowId: string, columnId: string) => apply(deleteColumn(content, rowId, columnId)),
+    onSetColumnCount: (rowId: string, targetCount: number) => apply(setColumnCount(content, rowId, targetCount)),
     onSetColumnWidths: (rowId: string, widths: number[]) => apply(setColumnWidths(content, rowId, widths)),
+    onUpdateRow: (rowId: string, patch: { paddingTop?: number; paddingBottom?: number }) => apply(updateRow(content, rowId, patch)),
     onAddRowWithColumns: (columnCount: 1 | 2 | 3 | 4 | 5, insertIndex?: number) =>
       apply(addRowWithColumns(content, columnCount, insertIndex)),
     onAddComponent: (rowId: string, columnId: string, type: ContentComponentType, overId?: string) =>

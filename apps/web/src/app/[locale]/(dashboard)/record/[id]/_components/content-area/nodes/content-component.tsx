@@ -1,24 +1,32 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 import type {
   ContentComponentData,
   ContentComponentNode,
   ImageComponentData,
   TextComponentData,
   HeadingComponentData,
+  ChecklistComponentData,
+  CalloutComponentData,
+  TableComponentData,
+  ListComponentData,
+  LinkedDatabaseComponentData,
+  ChartComponentData,
 } from "@fixspace/domain";
 import { ContentComponentType } from "@fixspace/domain";
-import { ImageIcon, Upload, Link, GripVertical } from "lucide-react";
-import { Spinner } from "@/components/ui/primitives/feedback/spinner";
+import { COMPONENT_MIN_WIDTH_PX } from "../lib/component-min-widths";
 import { TextProperty } from "@/app/[locale]/(dashboard)/database/[id]/_components/properties/fields/text-property";
-import { uploadContentImage } from "@/lib/api/record-content";
-import { uploadTemplateContentImage } from "@/lib/api/template";
-import { parseApiError } from "@/lib/api/client";
-import { useTranslations } from "next-intl";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { Button } from "@/components/ui/primitives/actions/button";
+import { ChartComponent } from "./chart-component";
+import { ChecklistComponent } from "./checklist-block";
+import { CalloutComponent } from "./callout-block";
+import { TableComponent } from "./table-block";
+import { ListComponent } from "./list-block";
+import { ImageComponent } from "./image-block";
+import { LinkedDatabaseComponent } from "./linked-database-block";
 
 interface ContentComponentProps {
   component: ContentComponentNode;
@@ -50,21 +58,23 @@ export function ContentComponent({
     disabled: !isEditing,
   });
 
+  const isFullWidth = component.type === ContentComponentType.LINKED_DATABASE;
   const dragStyle = {
     transform: CSS.Transform.toString(transform),
     transition,
+    ...(isFullWidth ? { width: "100%" } : { minWidth: COMPONENT_MIN_WIDTH_PX[component.type] }),
   };
 
   return (
     <div
       ref={setNodeRef}
       style={dragStyle}
-      className={`group/component relative rounded-lg transition-all duration-150 ${isDragging ? "z-50 opacity-0 pointer-events-none" : ""}
+      className={`group/component relative rounded-lg transition-all duration-150 ${isDragging ? "z-50 opacity-30 pointer-events-none" : ""}
         ${isSelected ? "ring-2 ring-accent" : isEditing ? "hover:bg-surface-hover hover:ring-1 hover:ring-stroke" : ""}
         ${isEditing ? "cursor-pointer" : ""}`}
-      onClick={(e) => {
+      onClick={(event) => {
         if (!isEditing) return;
-        e.stopPropagation();
+        event.stopPropagation();
         onSelect?.(component.id, component.type);
       }}
     >
@@ -72,13 +82,13 @@ export function ContentComponent({
         <div
           {...attributes}
           {...listeners}
-          className="absolute -left-6 top-1/2 -translate-y-1/2 p-1 text-ink-muted hover:text-ink opacity-0 group-hover/component:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20"
+          className="absolute -left-6 top-2 p-1 text-ink-muted hover:text-ink opacity-0 group-hover/component:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20"
         >
           <GripVertical size={14} />
         </div>
       )}
 
-      <div className={isDragging ? "invisible" : ""}>
+      <div>
         <ComponentRenderer
           component={component}
           recordId={recordId}
@@ -97,6 +107,14 @@ interface RendererProps {
   templateId?: string;
   isEditing?: boolean;
   onUpdateData: (id: string, data: ContentComponentData) => void;
+}
+
+export function ComponentDragOverlay({ component }: { component: ContentComponentNode }) {
+  return (
+    <div className="shadow-xl rounded-lg bg-canvas border border-stroke/50 p-3 min-w-[200px] max-w-[420px] opacity-95 pointer-events-none">
+      <ComponentRenderer component={component} isEditing={false} onUpdateData={() => {}} />
+    </div>
+  );
 }
 
 const HEADING_STYLES: Record<number, string> = {
@@ -118,8 +136,10 @@ function ComponentRenderer({ component, recordId, templateId, isEditing, onUpdat
         <TextProperty
           ghost
           value={data.html ?? ""}
+          readOnly={false}
           onChange={(html) => onUpdateData(component.id, { html })}
           placeholder={t("typeSomething")}
+          textAlign={data.align}
         />
       </div>
     );
@@ -133,9 +153,11 @@ function ComponentRenderer({ component, recordId, templateId, isEditing, onUpdat
         <TextProperty
           ghost
           value={data.html ?? ""}
+          readOnly={false}
           onChange={(html) => onUpdateData(component.id, { html })}
           placeholder={t("heading", { level })}
           editorClass="text-inherit leading-inherit"
+          textAlign={align}
         />
       </div>
     );
@@ -155,7 +177,7 @@ function ComponentRenderer({ component, recordId, templateId, isEditing, onUpdat
 
   if (component.type === ContentComponentType.DIVIDER) {
     return (
-      <div className="py-4">
+      <div className="py-0.5">
         <div
           className={`w-full border-t border-stroke ${data.style === "dashed" ? "border-dashed" : data.style === "dotted" ? "border-dotted" : "border-solid"}`}
         />
@@ -163,247 +185,59 @@ function ComponentRenderer({ component, recordId, templateId, isEditing, onUpdat
     );
   }
 
-  return null;
-}
-
-interface ImageDisplayProps {
-  data: ImageComponentData;
-  isEditing?: boolean;
-  onUpdate: (data: ImageComponentData) => void;
-  onStartReplace: () => void;
-  onClear: () => void;
-}
-
-function ImageDisplay({ data, isEditing, onStartReplace, onClear }: ImageDisplayProps) {
-  const t = useTranslations("RecordPage.canvas");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [widthPct, setWidthPct] = useState<number>(100);
-
-  const handleResizeStart = useCallback((e: React.PointerEvent) => {
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = containerRef.current?.clientWidth ?? 0;
-    const parentWidth = containerRef.current?.parentElement?.clientWidth ?? 1;
-
-    const onMove = (pe: PointerEvent) => {
-      const delta = pe.clientX - startX;
-      const newPx = Math.max(80, startWidth + delta);
-      setWidthPct(Math.min(100, (newPx / parentWidth) * 100));
-    };
-    const onUp = () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-  }, []);
-
-  return (
-    <div className={`flex w-full ${data.align === "center" ? "justify-center" : data.align === "right" ? "justify-end" : "justify-start"}`}>
-      <div ref={containerRef} style={{ width: `${widthPct}%` }} className="relative group/img max-w-full">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={data.url} alt="" className="w-full h-auto rounded-lg object-contain max-h-[480px] block" />
-
-        {isEditing && (
-          <div
-            onPointerDown={handleResizeStart}
-            className="absolute right-0 top-0 bottom-0 w-3 cursor-col-resize flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-150"
-          >
-            <div className="w-1 h-8 rounded-full bg-stroke-subtle" />
-          </div>
-        )}
-
-        <div className="absolute top-2 right-4 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-150">
-          <button
-            type="button"
-            onClick={onStartReplace}
-            className="px-2 py-1 bg-elevated border border-stroke rounded-lg text-xs text-ink-secondary hover:text-ink transition-colors duration-150"
-          >
-            {t("replace")}
-          </button>
-          <button
-            type="button"
-            onClick={onClear}
-            className="px-2 py-1 bg-elevated border border-stroke rounded-lg text-xs text-ink-secondary hover:text-error transition-colors duration-150"
-          >
-            {t("remove")}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface ImageComponentProps {
-  data: ImageComponentData;
-  recordId?: string;
-  templateId?: string;
-  isEditing?: boolean;
-  onUpdate: (data: ImageComponentData) => void;
-}
-
-type ImageTab = "upload" | "url";
-
-function ImageComponent({ data, recordId, templateId, isEditing, onUpdate }: ImageComponentProps) {
-  const t = useTranslations("RecordPage.canvas");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<ImageTab>("upload");
-  const [urlInput, setUrlInput] = useState(data.url || "");
-  const [replacing, setReplacing] = useState(false);
-
-  useEffect(() => {
-    if (tab === "url" && urlInput && urlInput !== data.url) {
-      const timer = setTimeout(() => {
-        onUpdate({ ...data, url: urlInput });
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [urlInput, tab, data, onUpdate]);
-
-  const uploadFile = async (file: File) => {
-    if (!recordId && !templateId) return;
-    setError(null);
-    setIsUploading(true);
-    try {
-      const { url } = recordId ? await uploadContentImage(recordId, file) : await uploadTemplateContentImage(templateId!, file);
-      onUpdate({ ...data, url });
-      setReplacing(false);
-    } catch (err) {
-      setError(parseApiError(err));
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    event.target.value = "";
-    await uploadFile(file);
-  };
-
-  const handlePaste = async (e: React.ClipboardEvent) => {
-    const imageFile = Array.from(e.clipboardData.files).find((f) => f.type.startsWith("image/"));
-    if (imageFile) {
-      e.preventDefault();
-      await uploadFile(imageFile);
-      return;
-    }
-    const text = e.clipboardData.getData("text").trim();
-    if (text.startsWith("http://") || text.startsWith("https://")) {
-      e.preventDefault();
-      onUpdate({ ...data, url: text });
-      setReplacing(false);
-    }
-  };
-
-  const renderContent = () => {
-    if (data.url && !replacing) {
-      return (
-        <ImageDisplay
-          data={data}
-          isEditing={isEditing}
-          onUpdate={onUpdate}
-          onStartReplace={() => setReplacing(true)}
-          onClear={() => onUpdate({ ...data, url: "" })}
-        />
-      );
-    }
-
-    if (replacing || isEditing) {
-      return (
-        <div className="w-full">
-          <div className="flex border border-stroke rounded-t-2xl overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setTab("upload")}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium transition-colors duration-150 ${tab === "upload" ? "bg-surface-hover text-ink" : "text-ink-muted hover:text-ink-secondary"}`}
-            >
-              <Upload size={12} /> {t("upload")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("url")}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium transition-colors duration-150 ${tab === "url" ? "bg-surface-hover text-ink" : "text-ink-muted hover:text-ink-secondary"}`}
-            >
-              <Link size={12} /> {t("url")}
-            </button>
-            {replacing && (
-              <button
-                type="button"
-                onClick={() => setReplacing(false)}
-                className="px-2 text-ink-muted hover:text-ink text-xs transition-colors duration-150"
-              >
-                {t("cancel")}
-              </button>
-            )}
-          </div>
-          {tab === "upload" && (
-            <div
-              onPaste={handlePaste}
-              className="w-full py-10 flex flex-col items-center justify-center gap-3 border border-t-0 border-dashed border-stroke rounded-b-2xl text-ink-muted hover:text-ink-secondary transition-colors duration-150 focus:outline-none focus:border-accent bg-canvas-subtle/50"
-            >
-              {isUploading ? (
-                <Spinner size="sm" />
-              ) : (
-                <>
-                  <ImageIcon size={24} className="opacity-50" />
-                  <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
-                    {t("chooseFile")}
-                  </Button>
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-xs font-medium">{t("orPasteImage")}</span>
-                    <span className="text-xs opacity-40">{t("uploadHint")}</span>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-          {tab === "url" && (
-            <div className="border border-t-0 border-stroke rounded-b-2xl p-3 flex gap-2">
-              <input
-                type="url"
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="https://example.com/image.png"
-                className="flex-1 text-xs bg-transparent outline-none text-ink placeholder:text-ink-muted min-w-0"
-                autoFocus
-              />
-            </div>
-          )}
-          {error && <p className="mt-1 text-xs text-error">{error}</p>}
-        </div>
-      );
-    }
-
+  if (component.type === ContentComponentType.CHECKLIST) {
     return (
-      <div
-        onPaste={handlePaste}
-        tabIndex={0}
-        className="w-full py-8 flex flex-col items-center justify-center gap-3 border border-dashed border-stroke rounded-2xl text-ink-muted hover:border-stroke-subtle transition-colors duration-150 cursor-default focus:outline-none focus:border-accent"
-      >
-        {isUploading ? (
-          <Spinner size="sm" />
-        ) : (
-          <>
-            <ImageIcon size={20} className="opacity-50" />
-            <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
-              {t("chooseFile")}
-            </Button>
-            <span className="text-xs opacity-60 italic">{t("pasteImage")}</span>
-          </>
-        )}
-        {error && <p className="mt-1 text-xs text-error">{error}</p>}
-      </div>
+      <ChecklistComponent
+        data={component.data as ChecklistComponentData}
+        isEditing={isEditing}
+        onUpdate={(next) => onUpdateData(component.id, next)}
+      />
     );
-  };
+  }
 
-  return (
-    <>
-      {renderContent()}
-      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={handleFileChange} />
-    </>
-  );
+  if (component.type === ContentComponentType.CALLOUT) {
+    return (
+      <CalloutComponent
+        data={component.data as CalloutComponentData}
+        isEditing={isEditing}
+        onUpdate={(next) => onUpdateData(component.id, next)}
+      />
+    );
+  }
+
+  if (component.type === ContentComponentType.TABLE) {
+    return (
+      <TableComponent
+        data={component.data as TableComponentData}
+        isEditing={isEditing}
+        onUpdate={(next) => onUpdateData(component.id, next)}
+      />
+    );
+  }
+
+  if (component.type === ContentComponentType.LIST) {
+    return (
+      <ListComponent
+        data={component.data as ListComponentData}
+        isEditing={isEditing}
+        onUpdate={(next) => onUpdateData(component.id, next)}
+      />
+    );
+  }
+
+  if (component.type === ContentComponentType.LINKED_DATABASE) {
+    return (
+      <LinkedDatabaseComponent
+        data={component.data as LinkedDatabaseComponentData}
+        isEditing={isEditing}
+        onUpdate={(next) => onUpdateData(component.id, next)}
+      />
+    );
+  }
+
+  if (component.type === ContentComponentType.CHART) {
+    return <ChartComponent data={component.data as ChartComponentData} recordId={recordId} />;
+  }
+
+  return null;
 }

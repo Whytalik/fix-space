@@ -93,13 +93,13 @@ describe("RecordService", () => {
   });
 
   describe("duplicate", () => {
-    it("TC-REC-U-001: should throw NotFoundException when source record not found", async () => {
+    it("TC-REC-U-011: should throw NotFoundException when source record not found", async () => {
       mockRecordRepo.findById.mockResolvedValue(null);
 
       await expect(service.duplicate("nonexistent")).rejects.toThrow(NotFoundException);
     });
 
-    it("TC-REC-U-001: should duplicate record with all property values", async () => {
+    it("TC-REC-U-012: should duplicate record with all property values", async () => {
       const sourceRecord = {
         id: "rec-1",
         databaseId: "db-1",
@@ -141,7 +141,7 @@ describe("RecordService", () => {
       });
     });
 
-    it("TC-REC-U-001: should copy all property values to the new record", async () => {
+    it("TC-REC-U-003: should copy all property values to the new record", async () => {
       const sourceRecord = {
         id: "rec-1",
         databaseId: "db-1",

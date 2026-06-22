@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import type { DurationPropertyConfig } from "@fixspace/domain";
-import type { DurationFormat } from "@fixspace/domain/enums";
+import type { DurationFormat } from "@fixspace/domain";
+import { TextInput } from "@/components/ui/primitives/inputs/text-input";
 
 function formatDuration(totalSeconds: number, format: string): string {
   const hours = Math.floor(totalSeconds / 3600);
@@ -94,22 +95,32 @@ export function DurationProperty({ value, readOnly, config, onChange, ghost }: D
     }
   }
 
+  const placeholder = format === "seconds" || format === "minutes" ? "0" : "00:00";
+
+  if (ghost) {
+    return (
+      <input
+        type="text"
+        className="bg-transparent border-0 outline-none p-0 text-sm text-ink-secondary font-mono w-full placeholder:text-ink-muted"
+        value={text}
+        placeholder={placeholder}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") e.currentTarget.blur();
+        }}
+      />
+    );
+  }
+
   return (
-    <input
-      type="text"
-      className={
-        ghost
-          ? "bg-transparent border-0 outline-none p-0 text-sm text-ink-secondary font-mono w-full placeholder:text-ink-muted"
-          : "field-input"
-      }
+    <TextInput
       value={text}
-      placeholder={format === "seconds" ? "0" : format === "minutes" ? "0" : "00:00"}
-      onChange={(e) => setText(e.target.value)}
+      onChange={setText}
+      placeholder={placeholder}
       onBlur={commit}
       onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.currentTarget.blur();
-        }
+        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
       }}
     />
   );

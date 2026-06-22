@@ -5,6 +5,12 @@ export function getRecords(databaseId: string) {
   return apiFetch<RecordResponseDto[]>(`/records?databaseId=${databaseId}`);
 }
 
+export function getRecordsPage(databaseId: string, page: number, pageSize: number) {
+  return apiFetch<{ data: RecordResponseDto[]; total: number; page: number; pageSize: number }>(
+    `/records?databaseId=${databaseId}&page=${page}&pageSize=${pageSize}`,
+  );
+}
+
 export function getRecord(recordId: string) {
   return apiFetch<RecordResponseDto>(`/records/${recordId}`);
 }

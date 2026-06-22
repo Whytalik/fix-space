@@ -91,7 +91,7 @@ export function StatisticsSettingsModal({
               {blocks.map((block) => {
                 const isVisible = !hiddenDbs.has(block.databaseId);
                 const isExpanded = expandedDb === block.databaseId;
-                const displayTitle = block.title || (t.raw(`keyDatabaseTypes.${block.type}`) as string) || block.type;
+                const displayTitle = block.name || (t.raw(`keyDatabaseTypes.${block.type}`) as string) || block.type;
                 const props = getBlockProps(block);
                 const hiddenSet = hiddenProps[block.databaseId] ?? new Set<string>();
 

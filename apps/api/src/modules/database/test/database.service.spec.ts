@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from "@nestjs/common";
+import { ConflictException, ForbiddenException, NotFoundException } from "@nestjs/common";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -83,6 +83,8 @@ describe("DatabaseService", () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DatabaseService,
@@ -98,8 +100,6 @@ describe("DatabaseService", () => {
 
     service = module.get<DatabaseService>(DatabaseService);
     databaseRepo = module.get(DatabaseRepository);
-
-    jest.clearAllMocks();
   });
 
   describe("create", () => {
@@ -135,12 +135,18 @@ describe("DatabaseService", () => {
     it("TC-DB-U-002: should throw NotFoundException when space does not exist", async () => {
       mockSpaceRepo.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.create("nonexistent", { spaceId: "nonexistent", name: "custom-db", title: "Custom DB" }, "user-1"),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.create("nonexistent", { spaceId: "nonexistent", name: "custom-db" }, "user-1")).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
-    it("TC-DB-U-002: should throw ConflictException when database name is taken", async () => {
+    it("TC-DB-U-002b: should throw ForbiddenException when space belongs to another user", async () => {
+      mockSpaceRepo.findOne.mockResolvedValue({ id: "space-1", ownerId: "other-user" });
+
+      await expect(service.create("space-1", { spaceId: "space-1", name: "custom-db" }, "user-1")).rejects.toThrow(ForbiddenException);
+    });
+
+    it("TC-DB-U-003: should throw ConflictException when database name is taken", async () => {
       mockSpaceRepo.findOne.mockResolvedValue({ id: "space-1", ownerId: "user-1" });
       mockDatabaseRepo.findByNameInSpace.mockResolvedValue({ id: "db-1", name: "existing-db" });
 
@@ -151,18 +157,17 @@ describe("DatabaseService", () => {
   });
 
   describe("findOne", () => {
-    it("TC-DB-U-003: should return database when found", async () => {
-      const foundDb = {
+    it("TC-DB-U-004: should return database when found", async () => {
+      const foundDatabase = {
         id: "db-1",
         name: "test-db",
-        title: "Test DB",
         spaceId: "space-1",
         sectionId: null,
         isLocked: false,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      mockDatabaseRepo.findById.mockResolvedValue(foundDb);
+      mockDatabaseRepo.findById.mockResolvedValue(foundDatabase);
 
       const result = await service.findOne("db-1");
 
@@ -170,7 +175,7 @@ describe("DatabaseService", () => {
       expect(result.id).toBe("db-1");
     });
 
-    it("TC-DB-U-003: should throw NotFoundException when database not found", async () => {
+    it("TC-DB-U-005: should throw NotFoundException when database not found", async () => {
       mockDatabaseRepo.findById.mockResolvedValue(null);
 
       await expect(service.findOne("nonexistent")).rejects.toThrow(NotFoundException);
@@ -178,7 +183,7 @@ describe("DatabaseService", () => {
   });
 
   describe("update", () => {
-    it("TC-DB-U-004: should throw NotFoundException when sectionId is invalid", async () => {
+    it("TC-DB-U-006: should throw NotFoundException when sectionId is invalid", async () => {
       mockDatabaseRepo.findById.mockResolvedValue({
         id: "db-1",
         name: "test-db",
@@ -190,7 +195,7 @@ describe("DatabaseService", () => {
       await expect(service.update("db-1", { sectionId: "invalid-section" })).rejects.toThrow(NotFoundException);
     });
 
-    it("TC-DB-U-004: should update database successfully with valid sectionId", async () => {
+    it("TC-DB-U-007: should update database successfully with valid sectionId", async () => {
       mockDatabaseRepo.findById.mockResolvedValue({
         id: "db-1",
         name: "test-db",
@@ -215,7 +220,7 @@ describe("DatabaseService", () => {
       expect(databaseRepo.update).toHaveBeenCalledWith("db-1", expect.any(Object));
     });
 
-    it("TC-DB-U-004: should throw NotFoundException when database not found", async () => {
+    it("TC-DB-U-008: should throw NotFoundException when database not found", async () => {
       mockDatabaseRepo.findById.mockResolvedValue(null);
 
       await expect(service.update("nonexistent", { name: "New Name" })).rejects.toThrow(NotFoundException);
@@ -223,13 +228,13 @@ describe("DatabaseService", () => {
   });
 
   describe("remove", () => {
-    it("TC-DB-U-005: should throw NotFoundException when database does not exist", async () => {
+    it("TC-DB-U-009: should throw NotFoundException when database does not exist", async () => {
       mockDatabaseRepo.findById.mockResolvedValue(null);
 
       await expect(service.remove("nonexistent")).rejects.toThrow(NotFoundException);
     });
 
-    it("TC-DB-U-005: should delete database successfully", async () => {
+    it("TC-DB-U-010: should delete database successfully", async () => {
       mockDatabaseRepo.findById.mockResolvedValue({
         id: "db-1",
         name: "test-db",

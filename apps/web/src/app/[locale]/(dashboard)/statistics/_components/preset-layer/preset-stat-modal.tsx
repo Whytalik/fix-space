@@ -44,7 +44,7 @@ export function PresetStatModal({ block, sections, hiddenProps, onClose }: Prese
   const compareBreakdowns = block.compareBreakdowns?.filter((breakdown) => visible(breakdown.propertyName));
 
   const hasCompare = !!(compareKpis || compareActivityCurve || block.compareBreakdowns);
-  const displayTitle = block.title || (t.raw(`keyDatabaseTypes.${block.type}`) as string) || block.type;
+  const displayTitle = block.name || (t.raw(`keyDatabaseTypes.${block.type}`) as string) || block.type;
 
   return (
     <ModalShell

@@ -5,11 +5,14 @@ import { AppLogger } from "@/common/logger/app-logger.service";
 import { InitializationConfigService } from "@/core/config/initialization/initialization-config.service";
 import type { DatabaseTemplate } from "@/core/config/initialization/types";
 import type { SeedRecord, SeedRelation } from "@/core/config/initialization/seeds";
+import { AutomationRepository } from "@/modules/automation/repositories/automation.repository";
 import { DatabaseService } from "@/modules/database/database.service";
 import { PropertyRepository } from "@/modules/property/repositories/property.repository";
 import { PropertyService } from "@/modules/property/property.service";
 import { PropertyValueRepository } from "@/modules/property-value/repositories/property-value.repository";
 import { RecordRepository } from "@/modules/record/repositories/record.repository";
+import { RecordService } from "@/modules/record/record.service";
+import { TemplateRepository } from "@/modules/template/repositories/template.repository";
 import { TemplateService } from "@/modules/template/template.service";
 import { ViewService } from "@/modules/view/view.service";
 import { SpaceRepository } from "../repositories/space.repository";
@@ -24,6 +27,7 @@ type PropCache = {
 @Injectable()
 export class InitializeUserSpaceUseCase {
   constructor(
+    private readonly logger: AppLogger,
     private readonly spaceService: SpaceService,
     private readonly sectionService: SectionService,
     private readonly databaseService: DatabaseService,
@@ -31,11 +35,13 @@ export class InitializeUserSpaceUseCase {
     private readonly templateService: TemplateService,
     private readonly viewService: ViewService,
     private readonly initConfig: InitializationConfigService,
-    private readonly logger: AppLogger,
     private readonly propertyRepo: PropertyRepository,
     private readonly propertyValueRepo: PropertyValueRepository,
     private readonly recordRepo: RecordRepository,
     private readonly spaceRepo: SpaceRepository,
+    private readonly automationRepo: AutomationRepository,
+    private readonly templateRepo: TemplateRepository,
+    private readonly recordService: RecordService,
   ) {
     this.logger.setContext(InitializeUserSpaceUseCase.name);
   }
@@ -56,7 +62,13 @@ export class InitializeUserSpaceUseCase {
 
     await this.seedTemplates(userId, config.databases, databaseByType);
 
-    await this.seedViews(userId, config.databases, databaseByType);
+    const templateByType = await this.fetchDefaultTemplateIds(config.databases, databaseByType);
+
+    await this.seedViews(userId, config.databases, databaseByType, templateByType);
+
+    await this.seedAutomations(userId, config.databases, databaseByType);
+
+    await this.seedTemplateContent(config.databases, databaseByType);
 
     this.logger.log("Space content seeded", {
       spaceId,
@@ -99,7 +111,6 @@ export class InitializeUserSpaceUseCase {
           {
             spaceId,
             name: databaseTemplate.name,
-            title: databaseTemplate.title,
             type: databaseTemplate.type,
             icon: databaseTemplate.icon,
             sectionId: databaseTemplate.sectionKey ? sectionByKey.get(databaseTemplate.sectionKey) : undefined,
@@ -107,6 +118,7 @@ export class InitializeUserSpaceUseCase {
             properties: [],
           },
           userId,
+          true,
         );
         if (databaseTemplate.type) {
           databaseByType.set(databaseTemplate.type, database.id);
@@ -196,13 +208,86 @@ export class InitializeUserSpaceUseCase {
           if (!databaseId) return;
 
           for (const templateDef of databaseTemplate.templates!) {
-            await this.templateService.create(databaseId, { ...templateDef, databaseId }, userId);
+            const resolvedContent = this.resolveTemplateContent(templateDef.content, databaseId);
+            await this.templateService.create(databaseId, { ...templateDef, databaseId, content: resolvedContent }, userId);
           }
         }),
     );
   }
 
-  private async seedViews(userId: string, databases: DatabaseTemplate[], databaseByType: Map<string, string>): Promise<void> {
+  private resolveTemplateContent(content: unknown, databaseId: string): unknown {
+    if (!content || typeof content !== "object") return content;
+
+    if (Array.isArray(content)) {
+      return content.map((item) => this.resolveTemplateContent(item, databaseId));
+    }
+
+    const contentObject = content as Record<string, unknown>;
+
+    if (contentObject.type === "LINKED_DATABASE" && contentObject.data && typeof contentObject.data === "object") {
+      const data = contentObject.data as Record<string, unknown>;
+      if (data.databaseId === "$current") {
+        return { ...contentObject, data: { ...data, databaseId } };
+      }
+    }
+
+    const resolved: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(contentObject)) {
+      resolved[key] = this.resolveTemplateContent(value, databaseId);
+    }
+    return resolved;
+  }
+
+  private async fetchDefaultTemplateIds(databases: DatabaseTemplate[], databaseByType: Map<string, string>): Promise<Map<string, string>> {
+    const map = new Map<string, string>();
+    for (const db of databases) {
+      if (!db.type) continue;
+      const databaseId = databaseByType.get(db.type);
+      if (!databaseId) continue;
+      const template = await this.templateRepo.findDefaultInDatabase(databaseId);
+      if (template) map.set(db.type, template.id);
+    }
+    return map;
+  }
+
+  private async seedTemplateContent(databases: DatabaseTemplate[], databaseByType: Map<string, string>): Promise<void> {
+    for (const db of databases) {
+      if (!db.type || !db.seeds?.length) continue;
+
+      const hasNamePattern = db.templates?.some((t) => t.namePattern) ?? false;
+      const applyDefault = db.applyDefaultTemplateToSeeds ?? false;
+      if (!hasNamePattern && !applyDefault) continue;
+
+      const databaseId = databaseByType.get(db.type);
+      if (!databaseId) continue;
+
+      const template = await this.templateRepo.findDefaultInDatabase(databaseId);
+      if (!template) continue;
+
+      const records = await this.recordRepo.findManyByDatabase(databaseId);
+      for (const record of records) {
+        if (hasNamePattern) {
+          await this.recordRepo.update(record.id, { name: "Untitled" });
+        }
+        try {
+          await this.recordService.applyTemplate(record.id, template.id);
+        } catch (error) {
+          this.logger.warn("Failed to apply template during seed, skipping record", {
+            recordId: record.id,
+            templateId: template.id,
+            error: (error as Error).message,
+          });
+        }
+      }
+    }
+  }
+
+  private async seedViews(
+    userId: string,
+    databases: DatabaseTemplate[],
+    databaseByType: Map<string, string>,
+    templateByType?: Map<string, string>,
+  ): Promise<void> {
     await Promise.all(
       databases
         .filter((databaseTemplate) => databaseTemplate.views?.length && databaseTemplate.type)
@@ -239,14 +324,151 @@ export class InitializeUserSpaceUseCase {
               return colName;
             });
 
+            const columnSummaries: Record<string, string> = {};
+            const rawSummaries = (viewDef as unknown as Record<string, Record<string, string>>).columnSummaries;
+            if (rawSummaries) {
+              for (const [key, value] of Object.entries(rawSummaries)) {
+                const prop = propByName.get(key);
+                columnSummaries[prop ? prop.id : key] = value;
+              }
+            }
+
+            let defaultTemplateId = templateByType?.get(databaseTemplate.type!);
+            if (viewDef.defaultTemplateName) {
+              const namedTemplate = await this.templateRepo.findByNameInDatabase(databaseId, viewDef.defaultTemplateName);
+              if (namedTemplate) defaultTemplateId = namedTemplate.id;
+            }
+
             await this.viewService.create(
               databaseId,
-              { ...viewDef, databaseId, filters, sort, groupBy, hiddenColumns } as unknown as CreateViewDto,
+              {
+                ...viewDef,
+                databaseId,
+                filters,
+                sort,
+                groupBy,
+                hiddenColumns,
+                columnSummaries,
+                defaultTemplateId,
+              } as unknown as CreateViewDto,
               userId,
             );
           }
         }),
     );
+  }
+
+  private async seedAutomations(userId: string, databases: DatabaseTemplate[], databaseByType: Map<string, string>): Promise<void> {
+    for (const databaseTemplate of databases) {
+      if (!databaseTemplate.automations?.length || !databaseTemplate.type) continue;
+
+      const databaseId = databaseByType.get(databaseTemplate.type);
+      if (!databaseId) continue;
+
+      const properties = await this.propertyRepo.findManyByDatabase(databaseId);
+      const propByName = new Map(properties.map((p) => [p.name, p]));
+
+      for (const automationDef of databaseTemplate.automations) {
+        const config = this.resolveAutomationConfig(automationDef, propByName);
+        const actions = await this.resolveAutomationActions(automationDef.actions, propByName, databaseByType);
+
+        const filteredActions = actions.filter(Boolean);
+        if (filteredActions.length === 0) continue;
+
+        await this.automationRepo.create({
+          databaseId,
+          name: automationDef.name,
+          trigger: automationDef.trigger,
+          actions: filteredActions as unknown as Prisma.InputJsonValue,
+          active: automationDef.active ?? true,
+          config: (config ?? Prisma.DbNull) as Prisma.InputJsonValue,
+        });
+      }
+    }
+  }
+
+  private resolveAutomationConfig(
+    automationDef: Record<string, unknown>,
+    propByName: Map<string, { id: string }>,
+  ): Record<string, unknown> | null {
+    const config = automationDef.config as Record<string, unknown> | undefined;
+    if (!config) return null;
+
+    const propName = config.propertyName as string | undefined;
+    if (propName && propByName.has(propName)) {
+      const { propertyName: _propertyName, ...rest } = config;
+      return { ...rest, propertyId: propByName.get(propName)!.id };
+    }
+    return config;
+  }
+
+  private async resolveAutomationActions(
+    actions: unknown[],
+    propByName: Map<string, { id: string }>,
+    databaseByType: Map<string, string>,
+  ): Promise<unknown[]> {
+    const result: unknown[] = [];
+
+    for (const action of actions) {
+      const a = action as Record<string, unknown>;
+
+      switch (a.type) {
+        case "SET_FIELD_VALUE": {
+          const propName = a.propertyName as string | undefined;
+          if (propName && propByName.has(propName)) {
+            const { propertyName: _propertyName, ...rest } = a;
+            result.push({ ...rest, propertyId: propByName.get(propName)!.id });
+          } else {
+            result.push(a);
+          }
+          break;
+        }
+
+        case "CREATE_RECORD": {
+          const sourceType = a.sourceDatabaseType as string | undefined;
+          const dbId = sourceType ? databaseByType.get(sourceType) : (a.databaseId as string);
+          if (!dbId) break;
+
+          const rawFieldMappings = (a.fieldMappings as Record<string, unknown>[] | undefined) ?? [];
+          const dbProps = await this.propertyRepo.findManyByDatabase(dbId);
+          const targetPropByName = new Map(dbProps.map((p) => [p.name, p]));
+
+          const fieldMappings = rawFieldMappings.map((fieldMapping: Record<string, unknown>) => {
+            const { targetPropertyName, ...fieldMappingRest } = fieldMapping;
+            const targetProp = targetPropByName.get(targetPropertyName as string);
+            return targetProp ? { ...fieldMappingRest, targetPropertyId: targetProp.id } : fieldMapping;
+          });
+
+          const { sourceDatabaseType: _srcDbType, ...rest } = a;
+          result.push({ ...rest, databaseId: dbId, fieldMappings });
+          break;
+        }
+
+        case "LINK_RECORDS": {
+          const srcDb = a.sourceDatabaseType as string | undefined;
+          if (srcDb) {
+            const srcDbId = databaseByType.get(srcDb);
+            if (!srcDbId) break;
+
+            const srcProps = await this.propertyRepo.findManyByDatabase(srcDbId);
+            const srcPropByName = new Map(srcProps.map((p) => [p.name, p]));
+            const srcPropName = a.sourcePropertyName as string | undefined;
+            const sourcePropertyId = srcPropName && srcPropByName.has(srcPropName) ? srcPropByName.get(srcPropName)!.id : undefined;
+
+            const { sourceDatabaseType: _srcDbType, sourcePropertyName: _srcPropName, ...rest } = a;
+            result.push({ ...rest, sourceDatabaseId: srcDbId, sourcePropertyId });
+          } else {
+            result.push(a);
+          }
+          break;
+        }
+
+        default:
+          result.push(a);
+      }
+    }
+
+    return result;
   }
 
   private async seedRecords(

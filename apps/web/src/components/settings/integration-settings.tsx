@@ -3,14 +3,16 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { Plus, RefreshCw, Trash2, AlertCircle, CheckCircle, Clock, LineChart } from "lucide-react";
+import { Plus, Pencil, Trash2, AlertCircle, CheckCircle, Clock, LineChart, Info, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { useAppContext } from "@/context/app-context";
-import { deleteIntegrationConnection, getIntegrationConnections, triggerIntegrationSync } from "@/lib/api/integration-connection";
+import { useDateFormat } from "@/hooks/format/use-date-format";
+import { deleteIntegrationConnection, getIntegrationConnections } from "@/lib/api/integration-connection";
 import { queryKeys } from "@/lib/api/query-keys";
 import { ConnectIntegrationModal } from "./connect-integration-modal";
 import { IntegrationTradesModal } from "./integration-trades-modal";
-import { INTEGRATION_METADATA, type IntegrationConnectionResponseDto, type IntegrationService, SERVICE_LIMITS } from "@fixspace/domain";
+import { Mt5InfoModal } from "./mt5-info-modal";
+import { INTEGRATION_METADATA, type IntegrationConnectionResponseDto, IntegrationService, SERVICE_LIMITS } from "@fixspace/domain";
 
 const SERVICE_GROUPS = Object.values(INTEGRATION_METADATA);
 
@@ -18,27 +20,21 @@ export function IntegrationSettings() {
   const t = useTranslations("IntegrationSettingsComp");
   const queryClient = useQueryClient();
   const { spaces } = useAppContext();
+  const { formatDateTime } = useDateFormat();
 
   const [modalService, setModalService] = useState<IntegrationService | null>(null);
   const [reconnectTarget, setReconnectTarget] = useState<IntegrationConnectionResponseDto | null>(null);
   const [tradesTarget, setTradesTarget] = useState<IntegrationConnectionResponseDto | null>(null);
+  const [infoTarget, setInfoTarget] = useState<IntegrationConnectionResponseDto | null>(null);
 
   const { data: connections = [], isPending } = useQuery({
     queryKey: queryKeys.integrationConnections.all(),
     queryFn: getIntegrationConnections,
-    refetchInterval: (query) => {
-      const hasPending = query.state.data?.some((c) => c.status === "PENDING");
-      return hasPending ? 2000 : false;
-    },
+    refetchInterval: false,
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteIntegrationConnection,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.integrationConnections.all() }),
-  });
-
-  const syncMutation = useMutation({
-    mutationFn: triggerIntegrationSync,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.integrationConnections.all() }),
   });
 
@@ -89,36 +85,37 @@ export function IntegrationSettings() {
                           </span>
                         </div>
                         <p className="truncate text-xs text-ink-muted mt-0.5">
-                          {conn.lastSyncAt ? t("lastSync", { date: formatDate(conn.lastSyncAt) }) : t("neverSynced")}
+                          {conn.lastSyncAt ? t("lastSync", { date: formatDateTime(conn.lastSyncAt) }) : t("neverSynced")}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1 shrink-0">
+                      {conn.service === IntegrationService.METATRADER5 && (
+                        <button
+                          type="button"
+                          onClick={() => setInfoTarget(conn)}
+                          className="rounded-lg p-1.5 text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                          title={t("viewInfo", { fallback: "Connection Info" })}
+                        >
+                          <Info size={13} />
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => setTradesTarget(conn)}
                         className="rounded-lg p-1.5 text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                         title={t("viewTrades")}
                       >
-                        <LineChart size={14} />
+                        <LineChart size={13} />
                       </button>
                       <button
                         type="button"
                         onClick={() => setReconnectTarget(conn)}
                         className="rounded-lg p-1.5 text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                        title={t("reconnect")}
+                        title={t("edit")}
                       >
-                        <RefreshCw size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => syncMutation.mutate(conn.id)}
-                        disabled={syncMutation.isPending}
-                        className="rounded-lg p-1.5 text-ink-muted transition-colors duration-150 hover:bg-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
-                        title={t("syncNow")}
-                      >
-                        <Clock size={14} />
+                        <Pencil size={13} />
                       </button>
                       <button
                         type="button"
@@ -127,7 +124,7 @@ export function IntegrationSettings() {
                         className="rounded-lg p-1.5 text-ink-muted transition-colors duration-150 hover:bg-error-bg hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
                         title={t("disconnect")}
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   </li>
@@ -154,17 +151,15 @@ export function IntegrationSettings() {
       )}
 
       {tradesTarget && <IntegrationTradesModal connection={tradesTarget} onClose={() => setTradesTarget(null)} />}
+
+      {infoTarget && <Mt5InfoModal isOpen onClose={() => setInfoTarget(null)} connection={infoTarget} />}
     </div>
   );
 }
 
 function StatusIcon({ status }: { status: string }) {
-  if (status === "ACTIVE") return <CheckCircle size={14} className="shrink-0 text-success" />;
-  if (status === "ERROR") return <AlertCircle size={14} className="shrink-0 text-error" />;
-  if (status === "PENDING") return <RefreshCw size={14} className="shrink-0 text-accent animate-spin" />;
-  return <Clock size={14} className="shrink-0 text-ink-muted" />;
-}
-
-function formatDate(date: Date | string): string {
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "short", timeStyle: "short" }).format(new Date(date));
+  if (status === "ACTIVE") return <CheckCircle size={13} className="shrink-0 text-success" />;
+  if (status === "ERROR") return <AlertCircle size={13} className="shrink-0 text-error" />;
+  if (status === "PENDING") return <RefreshCw size={13} className="shrink-0 text-accent animate-spin" />;
+  return <Clock size={13} className="shrink-0 text-ink-muted" />;
 }

@@ -124,7 +124,7 @@ export function RelationProperty({
           const chipContent = (
             <span
               key={record.id}
-              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-xs transition-colors duration-150 ${
+              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-sm transition-colors duration-150 ${
                 isDeleted
                   ? "bg-surface border-stroke-subtle text-ink-muted line-through opacity-60"
                   : "bg-surface border-stroke text-ink-secondary hover:border-stroke hover:text-ink"

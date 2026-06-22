@@ -12,13 +12,15 @@ import {
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
+import { toFieldKey } from "@fixspace/domain";
 import { PropertyRepository } from "./repositories/property.repository";
+import { PropertyGroupRepository } from "@/modules/property-group/repositories/property-group.repository";
 import { ViewRepository } from "@/modules/view/repositories/view.repository";
 import { DatabaseRepository } from "@/modules/database/repositories/database.repository";
 import { FormulaRecalculator } from "./types/formula/formula-recalculator.service";
 import { FormulaEngine } from "./types/formula/formula-engine.service";
 import { PropertyTypeRegistry } from "./types";
-import { toPropertyResponseDto } from "./utils/to-property-response.dto";
+import { toPropertyResponseDto } from "./utils/to-property-response.util";
 
 @Injectable()
 export class PropertyService {
@@ -28,6 +30,7 @@ export class PropertyService {
     private readonly formulaRecalculator: FormulaRecalculator,
     private readonly formulaEngine: FormulaEngine,
     private readonly propertyRepo: PropertyRepository,
+    private readonly propertyGroupRepo: PropertyGroupRepository,
     private readonly viewRepo: ViewRepository,
     private readonly databaseRepo: DatabaseRepository,
   ) {
@@ -117,6 +120,18 @@ export class PropertyService {
       throw new BadRequestException(t("errors.INVALID_CONFIG", { type: createPropertyDto.type, errors: configErrors.join("; ") }));
     }
 
+    let resolvedGroupId: string | undefined = undefined;
+    if (!createPropertyDto.groupId) {
+      const existingGroups = await this.propertyGroupRepo.findAllByDatabase(databaseId);
+      if (existingGroups.length === 0) {
+        const generalGroup = await this.propertyGroupRepo.create({ databaseId, name: "General", position: 0 });
+        resolvedGroupId = generalGroup.id;
+        this.logger.log("Auto-created General group on property creation", { databaseId, groupId: generalGroup.id });
+      } else if (existingGroups.length === 1 && existingGroups[0]?.name === "General") {
+        resolvedGroupId = existingGroups[0]?.id;
+      }
+    }
+
     const property = await this.propertyRepo.transaction(async (transaction) => {
       const created = await this.propertyRepo.create(
         {
@@ -125,10 +140,13 @@ export class PropertyService {
           position: createPropertyDto.position,
           icon: createPropertyDto.icon,
           hint: createPropertyDto.hint,
-          group: createPropertyDto.group,
           isVisible: createPropertyDto.isVisible ?? true,
           integrationKey: createPropertyDto.integrationKey,
+          visibilityCondition: createPropertyDto.visibilityCondition
+            ? (createPropertyDto.visibilityCondition as unknown as Prisma.InputJsonValue)
+            : undefined,
           databaseId,
+          groupId: createPropertyDto.groupId ?? resolvedGroupId ?? null,
           config: mergedConfig as Prisma.InputJsonValue,
         } as Prisma.PropertyUncheckedCreateInput,
         transaction,
@@ -196,6 +214,11 @@ export class PropertyService {
 
   async findAll(databaseId: string, userId: string): Promise<PropertyResponseDto[]> {
     this.logger.debug("Finding all properties", { databaseId });
+    const database = await this.databaseRepo.findDatabaseByOwner(databaseId, userId);
+    if (!database) {
+      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
+    }
+
     const properties = await this.propertyRepo.findAllByDatabase(databaseId, userId);
 
     return Promise.all(
@@ -264,9 +287,15 @@ export class PropertyService {
       }
     }
 
-    if (updatePropertyDto.group !== undefined && updatePropertyDto.group !== existingProperty.group) {
-      if (isProtected && updatePropertyDto.group !== "General") {
-        throw new ForbiddenException(t("errors.CANNOT_CHANGE_GROUP_NAME_PROPERTY"));
+    if (updatePropertyDto.groupId !== undefined && isProtected) {
+      throw new ForbiddenException(t("errors.CANNOT_CHANGE_GROUP_NAME_PROPERTY"));
+    }
+
+    if (updatePropertyDto.groupId !== undefined && updatePropertyDto.groupId !== null) {
+      const targetGroup = await this.propertyGroupRepo.findById(updatePropertyDto.groupId);
+      if (!targetGroup) throw new NotFoundException(t("errors.PROPERTY_GROUP_NOT_FOUND"));
+      if (targetGroup.databaseId !== existingProperty.databaseId) {
+        throw new BadRequestException(t("errors.PROPERTY_GROUP_NOT_BELONG_TO_DATABASE"));
       }
     }
 
@@ -304,8 +333,13 @@ export class PropertyService {
         isVisible: updatePropertyDto.isVisible,
         integrationKey: updatePropertyDto.integrationKey,
       },
-      jsonFields: { config: configToSave },
-      nullableFields: { group: updatePropertyDto.group },
+      nullableFields: {
+        groupId: updatePropertyDto.groupId,
+      },
+      jsonFields: {
+        config: configToSave,
+        visibilityCondition: updatePropertyDto.visibilityCondition as unknown as Record<string, unknown> | null | undefined,
+      },
     });
 
     const property = await this.propertyRepo.transaction(async (transaction) => {
@@ -404,7 +438,8 @@ export class PropertyService {
 
   previewFormula(propertyId: string, config: FormulaPropertyConfig, recordValues: Record<string, unknown>): { result: unknown } {
     this.logger.debug("Previewing formula", { propertyId });
-    const result = this.formulaEngine.evaluate(config, recordValues);
+    const context = Object.fromEntries(Object.entries(recordValues).map(([key, value]) => [toFieldKey(key), value]));
+    const result = this.formulaEngine.evaluate(config, context);
     return { result };
   }
 
@@ -437,11 +472,13 @@ export class PropertyService {
           position: existingProperty.position + 1,
           icon: existingProperty.icon,
           hint: existingProperty.hint,
-          group: existingProperty.group,
           isVisible: existingProperty.isVisible,
           databaseId: existingProperty.databaseId,
           config: existingProperty.config as Prisma.InputJsonValue,
           groupId: existingProperty.groupId,
+          visibilityCondition: existingProperty.visibilityCondition
+            ? (existingProperty.visibilityCondition as Prisma.InputJsonValue)
+            : undefined,
         } as Prisma.PropertyUncheckedCreateInput,
         transaction,
       );

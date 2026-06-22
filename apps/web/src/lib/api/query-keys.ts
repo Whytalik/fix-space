@@ -13,13 +13,23 @@ export const queryKeys = {
   },
   records: {
     all: (databaseId: string) => ["records", databaseId] as const,
+    infinite: (databaseId: string) => ["records", databaseId, "infinite"] as const,
     detail: (databaseId: string, id: string) => ["records", databaseId, id] as const,
   },
   properties: {
     all: (databaseId: string) => ["properties", databaseId] as const,
   },
+  propertyGroups: {
+    all: (databaseId: string) => ["property-groups", databaseId] as const,
+  },
   views: {
     all: (databaseId: string) => ["views", databaseId] as const,
+  },
+  sessions: {
+    all: () => ["sessions"] as const,
+  },
+  settings: {
+    view: () => ["settings", "view"] as const,
   },
   templates: {
     all: (databaseId: string) => ["templates", databaseId] as const,

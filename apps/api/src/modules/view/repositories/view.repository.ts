@@ -7,7 +7,7 @@ export class ViewRepository extends BaseRepository {
   async findAllByDatabase(databaseId: string) {
     return prisma.view.findMany({
       where: { databaseId },
-      orderBy: { createdAt: "asc" },
+      orderBy: { position: "asc" },
     });
   }
 

@@ -2,8 +2,9 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { ContentComponentType } from "@fixspace/domain";
-import { Type, Heading, ImageIcon } from "lucide-react";
+import { Type, Heading, ImageIcon, Minus, CheckSquare, Info, Table, List, Database, BarChart3 } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { RowPreviewIcon } from "./row-preview-icon";
 
 export type PanelDragData =
@@ -35,13 +36,14 @@ function DraggablePanelItem({ id, data, children }: DraggablePanelItemProps) {
 
 export function ContentPanel() {
   const [activeTab, setActiveTab] = useState<"components" | "layouts">("components");
+  const tElements = useTranslations("RecordPage.elements");
 
   return (
     <aside className="w-44 shrink-0 border-r border-stroke flex flex-col overflow-y-auto">
       <div className="flex p-2 gap-1 border-b border-stroke">
         <button
           onClick={() => setActiveTab("components")}
-          className={`flex-1 flex justify-center py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest ${
+          className={`flex-1 flex justify-center py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors duration-150 ${
             activeTab === "components" ? "bg-surface-hover text-ink" : "text-ink-muted hover:text-ink-secondary"
           }`}
         >
@@ -49,7 +51,7 @@ export function ContentPanel() {
         </button>
         <button
           onClick={() => setActiveTab("layouts")}
-          className={`flex-1 flex justify-center py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest ${
+          className={`flex-1 flex justify-center py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors duration-150 ${
             activeTab === "layouts" ? "bg-surface-hover text-ink" : "text-ink-muted hover:text-ink-secondary"
           }`}
         >
@@ -60,9 +62,51 @@ export function ContentPanel() {
       {activeTab === "components" && (
         <div className="flex flex-col p-2 gap-1">
           {[
-            { id: "text", type: ContentComponentType.TEXT, icon: <Type size={14} className="shrink-0" />, label: "Text" },
-            { id: "heading", type: ContentComponentType.HEADING, icon: <Heading size={14} className="shrink-0" />, label: "Heading" },
-            { id: "image", type: ContentComponentType.IMAGE, icon: <ImageIcon size={14} className="shrink-0" />, label: "Image" },
+            { id: "text", type: ContentComponentType.TEXT, icon: <Type size={14} className="shrink-0" />, label: tElements("textBlock") },
+            {
+              id: "heading",
+              type: ContentComponentType.HEADING,
+              icon: <Heading size={14} className="shrink-0" />,
+              label: tElements("heading1"),
+            },
+            {
+              id: "image",
+              type: ContentComponentType.IMAGE,
+              icon: <ImageIcon size={14} className="shrink-0" />,
+              label: tElements("imageMedia"),
+            },
+            {
+              id: "divider",
+              type: ContentComponentType.DIVIDER,
+              icon: <Minus size={14} className="shrink-0" />,
+              label: tElements("divider"),
+            },
+            {
+              id: "checklist",
+              type: ContentComponentType.CHECKLIST,
+              icon: <CheckSquare size={14} className="shrink-0" />,
+              label: tElements("checklist"),
+            },
+            {
+              id: "callout",
+              type: ContentComponentType.CALLOUT,
+              icon: <Info size={14} className="shrink-0" />,
+              label: tElements("callout"),
+            },
+            { id: "table", type: ContentComponentType.TABLE, icon: <Table size={14} className="shrink-0" />, label: tElements("table") },
+            { id: "list", type: ContentComponentType.LIST, icon: <List size={14} className="shrink-0" />, label: tElements("list") },
+            {
+              id: "linked-database",
+              type: ContentComponentType.LINKED_DATABASE,
+              icon: <Database size={14} className="shrink-0" />,
+              label: tElements("linkedDatabase"),
+            },
+            {
+              id: "chart",
+              type: ContentComponentType.CHART,
+              icon: <BarChart3 size={14} className="shrink-0" />,
+              label: tElements("chart"),
+            },
           ].map(({ id, type, icon, label }) => (
             <DraggablePanelItem key={id} id={`panel-component-${id}`} data={{ dragType: "panel-component", componentType: type }}>
               {icon}
@@ -91,13 +135,21 @@ export function ContentPanel() {
 }
 
 export function PanelDragOverlay({ data }: { data: PanelDragData | null }) {
+  const tElements = useTranslations("RecordPage.elements");
   if (!data) return null;
 
   if (data.dragType === "panel-component") {
     const map: Record<string, { icon: React.ReactNode; label: string }> = {
-      [ContentComponentType.TEXT]: { icon: <Type size={14} />, label: "Text" },
-      [ContentComponentType.HEADING]: { icon: <Heading size={14} />, label: "Heading" },
-      [ContentComponentType.IMAGE]: { icon: <ImageIcon size={14} />, label: "Image" },
+      [ContentComponentType.TEXT]: { icon: <Type size={14} />, label: tElements("textBlock") },
+      [ContentComponentType.HEADING]: { icon: <Heading size={14} />, label: tElements("heading1") },
+      [ContentComponentType.IMAGE]: { icon: <ImageIcon size={14} />, label: tElements("imageMedia") },
+      [ContentComponentType.DIVIDER]: { icon: <Minus size={14} />, label: tElements("divider") },
+      [ContentComponentType.CHECKLIST]: { icon: <CheckSquare size={14} />, label: tElements("checklist") },
+      [ContentComponentType.CALLOUT]: { icon: <Info size={14} />, label: tElements("callout") },
+      [ContentComponentType.TABLE]: { icon: <Table size={14} />, label: tElements("table") },
+      [ContentComponentType.LIST]: { icon: <List size={14} />, label: tElements("list") },
+      [ContentComponentType.LINKED_DATABASE]: { icon: <Database size={14} />, label: tElements("linkedDatabase") },
+      [ContentComponentType.CHART]: { icon: <BarChart3 size={14} />, label: tElements("chart") },
     };
     const { icon, label } = map[data.componentType] || { icon: null, label: "Element" };
     return (

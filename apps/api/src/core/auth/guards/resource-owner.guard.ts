@@ -38,7 +38,7 @@ export class ResourceOwnerGuard implements CanActivate {
     const resourceId = request.params[paramName];
 
     if (!resourceId) {
-      throw new ForbiddenException(`Missing route param: ${paramName}`);
+      throw new ForbiddenException(t("errors.MISSING_ROUTE_PARAM", { param: paramName }));
     }
 
     if (!PRISMA_MODEL_NAMES.has(meta.model)) {

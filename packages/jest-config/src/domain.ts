@@ -4,6 +4,9 @@ import { config as baseConfig } from "./base";
 export const domainConfig = {
   ...baseConfig,
   rootDir: "src",
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/$1",
+  },
   testRegex: ".*\\.spec\\.ts$",
   transform: {
     "^.+\\.(t|j)s$": ["ts-jest", { tsconfig: "<rootDir>/../tsconfig.json" }],

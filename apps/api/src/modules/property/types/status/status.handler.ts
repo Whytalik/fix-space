@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { t } from "@/common/utils/i18n.helper";
 import {
   DEFAULT_STATUS_PROPERTY,
   FilterOperator,
@@ -99,7 +100,7 @@ export class StatusHandler implements PropertyConfigHandler, PropertyValueHandle
     if (categories) {
       const allOptions = categories.flatMap((category) => category.options.map((option) => option.name));
       if (!allOptions.includes(value)) {
-        return [`Status value must be one of: ${allOptions.join(", ")}`];
+        return [t("errors.STATUS_INVALID_OPTION", { value, options: allOptions.join(", ") })];
       }
     }
 

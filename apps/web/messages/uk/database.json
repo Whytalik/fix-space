@@ -46,7 +46,12 @@
     "setDefault": "За замовчуванням",
     "delete": "Видалити",
     "deleteViewTitle": "Видалити подання?",
-    "deleteViewMessage": "Це назавжди видалить це подання та всі його налаштування. Цю дію не можна скасувати."
+    "deleteViewMessage": "Це назавжди видалить це подання та всі його налаштування. Цю дію не можна скасувати.",
+    "errorCreate": "Не вдалося створити подання",
+    "errorUpdate": "Не вдалося оновити подання",
+    "errorDelete": "Не вдалося видалити подання",
+    "errorDuplicate": "Не вдалося дублювати подання",
+    "errorReorder": "Не вдалося змінити порядок подань"
   },
   "PropertyVisibilityPanel": {
     "title": "Властивості",
@@ -54,7 +59,8 @@
     "showAll": "Показати всі",
     "hideAll": "Приховати всі",
     "relativeDates": "Відносні дати",
-    "columns": "Колонки"
+    "columns": "Колонки",
+    "searchPlaceholder": "Пошук властивостей..."
   },
   "FilterPanel": {
     "title": "Фільтр",
@@ -138,7 +144,8 @@
     "day": "День",
     "week": "Тиждень",
     "month": "Місяць",
-    "year": "Рік"
+    "year": "Рік",
+    "locked": "Locked"
   },
   "SummaryMetrics": {
     "calculate": "Обчислити",
@@ -165,8 +172,10 @@
   "DatabaseTable": {
     "noProperties": "Для цієї бази даних не визначено властивостей.",
     "noRecords": "Записів ще немає.",
+    "addRecord": "Новий запис",
     "untitled": "Без назви",
     "recordsOf": "{from}–{to} з {total} записів",
+    "recordsOfLimited": "{from}–{to} з {total} записів (обмежено з {actualTotal})",
     "rowsPerPage": "Рядків на сторінці:",
     "refresh": "Оновити базу даних",
     "previousPage": "Попередня сторінка",
@@ -176,7 +185,9 @@
     "delete": "Видалити",
     "deleting": "Видалення…",
     "deleteRecords": "Видалити записи?",
-    "deleteRecordsDesc": "Це назавжди видалить {count, plural, one {# запис} few {# записи} other {# записів}}. Цю дію не можна скасувати."
+    "deleteRecordsDesc": "Це назавжди видалить {count, plural, one {# запис} few {# записи} other {# записів}}. Цю дію не можна скасувати.",
+    "automatedByIntegration": "Автоматизовано інтеграцією",
+    "showAllRecords": "Показати ще {count} записів"
   },
   "DatabaseEdit": {
     "title": "Назва",
@@ -198,8 +209,21 @@
     "placeholderTitle": "напр. Журнал угод",
     "icon": "Іконка",
     "chooseIcon": "Вибрати іконку…",
-    "enableStats": "Включити в статистику",
-    "enableStatsDesc": "Показувати автоматичну аналітику для цієї бази на сторінці Статистики."
+    "automations": "Автоматизації",
+    "data": "Імпорт та Експорт",
+    "import": "Імпорт",
+    "export": "Експорт",
+    "importDesc": "Імпортуйте записи з CSV-файлу. Стовпці будуть зіставлені з властивостями бази даних.",
+    "importCsv": "Імпортувати CSV",
+    "exportDesc": "Експортуйте всі записи з цієї бази даних у CSV-файл.",
+    "importFeaturesTitle": "Можливості імпорту",
+    "importFeature1": "Автоматичне зіставлення колонок за назвами",
+    "importFeature2": "Підтримка тексту, чисел, дат та статусів",
+    "importFeature3": "Попередній перегляд перед імпортом",
+    "exportFeaturesTitle": "Можливості експорту",
+    "exportFeature1": "Вибір властивостей для включення у файл",
+    "exportFeature2": "Фільтрація за активним представленням",
+    "exportFeature3": "Опціональний експорт метаданих (ID, дати)"
   },
   "PropertyEdit": {
     "properties": "Властивості",
@@ -208,13 +232,15 @@
     "addGroup": "Додати групу",
     "addProperty": "Додати властивість",
     "groupName": "Назва групи…",
+    "general": "Загальні",
     "noProperties": "Властивостей ще немає.",
     "deleteProperty": "Видалити властивість?",
     "deletePropertyDesc": "Це назавжди видалить властивість та всі її значення. Цю дію не можна скасувати.",
     "deleteKeyPropertyDesc": "Це системна властивість. Формули та автоматизації, що посилаються на неї, перестануть працювати. Цю дію не можна скасувати.",
     "deleteGroup": "Видалити групу?",
     "deleteGroupDesc": "Групу буде видалено, а всі її властивості стануть незгрупованими. Самі властивості не будуть видалені.",
-    "delete": "Видалити"
+    "delete": "Видалити",
+    "automatedByIntegration": "Автоматизовано інтеграцією"
   },
   "TemplateEdit": {
     "title": "Шаблони",
@@ -251,17 +277,20 @@
     "save": "Зберегти",
     "tokensInfoTitle": "Токени шаблону",
     "tokensInfoDesc": "Використовуйте токени в шаблоні назви запису для автоматичного створення назв нових записів. Токени замінюються на фактичні значення в момент створення.",
+    "tokensSupported": "Підтримувані токени: {{today}}, {{day}}, {{month}}, {{count}}",
     "input": "Ввід",
     "result": "Результат",
     "tokens": {
-      "today": "Поточна дата у форматі ДД.ММ.РРРР",
+      "today": "ДД.ММ.РРРР",
       "year": "Поточний рік",
-      "month": "Поточний місяць (01-12)",
-      "count": "Загальна кількість записів + 1",
-      "countWithValue": "Кількість записів, де Властивість дорівнює Значенню + 1"
+      "month": "Індекс місяця (01–12)",
+      "month_name": "Назва місяця (Січень...Грудень)",
+      "count": "Кількість записів + 1",
+      "countWithValue": "Відфільтрована кількість + 1"
     },
     "template": "Шаблон",
-    "content": "Вміст"
+    "content": "Вміст",
+    "automatedByIntegration": "Автоматизовано інтеграцією"
   },
   "PropertyForm": {
     "newProperty": "Нова властивість",
@@ -285,7 +314,21 @@
     "addProperty": "Додати властивість",
     "chooseType": "виберіть тип",
     "saveChanges": "Зберегти зміни",
-    "addPropertyTitle": "Додати властивість: {type}"
+    "addPropertyTitle": "Додати властивість: {type}",
+    "conditionalVisibility": "Умовна видимість",
+    "addVisibilityCondition": "Додати умову",
+    "visibilityWhen": "Показувати поле лише коли:",
+    "visibilityPropertyPlaceholder": "Оберіть властивість…",
+    "visibilityValuePlaceholder": "Значення…",
+    "removeCondition": "Видалити умову",
+    "opEquals": "дорівнює",
+    "opNotEquals": "не дорівнює",
+    "opContains": "містить",
+    "opExists": "не пусте",
+    "opNotExists": "пусте",
+    "opIn": "одне з",
+    "opNotIn": "не одне з",
+    "addHint": "Додати підказку"
   },
   "AddDatabaseModal": {
     "addDatabase": "Нова база даних",
@@ -434,7 +477,16 @@
     "errorReadFile": "Не вдалося прочитати файл",
     "errorValidation": "Помилка перевірки",
     "errorImport": "Помилка імпорту",
-    "loading": "Завантаження…"
+    "loading": "Завантаження…",
+    "unknownOptionsTitle": "{count} рядк(ів) містять невідомі варіанти",
+    "unknownOptionsAdd": "Додати як нові варіанти",
+    "unknownOptionsSkip": "Пропустити рядки ({count})",
+    "partialImport": "Імпортувати рядки частково (пропускати поля з помилками замість усього рядка)",
+    "titleTemplate": "Оберіть шаблон",
+    "templateHint": "Шаблон буде застосовано до кожного імпортованого запису",
+    "noTemplate": "Без шаблону",
+    "noTemplates": "У цій базі даних ще немає шаблонів",
+    "import": "Імпортувати"
   },
   "ExportCsvButton": {
     "label": "Експорт CSV",
@@ -459,7 +511,9 @@
     "decimalPlaces": "Десяткові знаки",
     "currencySymbol": "Символ валюти",
     "prefix": "Префікс",
+    "prefixPlaceholder": "напр. ≈",
     "suffix": "Суфікс",
+    "suffixPlaceholder": "напр. кг",
     "defaultValue": "Значення за замовчуванням",
     "defaultValueSeconds": "Значення за замовчуванням (секунди)",
     "dateFormat": "Формат дати",
@@ -499,8 +553,17 @@
     "statusCategories": {
       "todo": "Треба зробити",
       "in_progress": "В процесі",
-      "done": "Готово"
+      "done": "Готово",
+      "complete": "Виконано"
     },
-    "categoryPlaceholder": "Назва {category}…"
+    "categoryPlaceholder": "Назва {category}…",
+    "maxStars": "Максимум зірок",
+    "allowHalf": "Дозволити половину зірки"
+  },
+  "GroupSettings": {
+    "title": "Група: {name}",
+    "conditionalVisibility": "Умовна видимість",
+    "cancel": "Скасувати",
+    "save": "Зберегти"
   }
 }

@@ -1,7 +1,9 @@
 "use client";
 
-import { PALETTE_COLOR_VALUES, PropertyType } from "@fixspace/domain/enums";
+import { PALETTE_COLOR_VALUES, PropertyType, SummaryMetric } from "@fixspace/domain";
 import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
+import { calculateSummary } from "@/utils/record/summary-calculations";
+import { useDateFormat } from "@/hooks/format/use-date-format";
 import { CellValue } from "./cell-value";
 import { PropertyHint } from "./properties/ui/property-hint";
 import { PropertyIcon } from "./properties/ui/property-icon";
@@ -12,33 +14,58 @@ import { Button } from "@/components/ui/primitives/actions/button";
 import { deleteRecord, duplicateRecord } from "@/lib/api/record";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { FileText, Copy, Trash2, ChevronDown, Link as LinkIcon } from "lucide-react";
+import { FileText, Copy, Trash2, ChevronDown, Link as LinkIcon, Plus } from "lucide-react";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
 import { SummaryCell } from "./summary-cell";
+import { DatabasePagination } from "./database-pagination";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/utils/ui/cn";
 
 interface DatabaseTableProps {
   properties: PropertyResponseDto[];
   records: RecordResponseDto[];
+  onAddRecord?: () => void;
 }
 
-export function DatabaseTable({ properties, records }: DatabaseTableProps) {
+export function DatabaseTable({ properties, records, onAddRecord }: DatabaseTableProps) {
   const t = useTranslations("DatabaseTable");
+  const tSummary = useTranslations("SummaryMetrics");
   const router = useRouter();
-  const { relatedRecordsMap, invalidateRecords, activeView, updateActiveView, wrapCells, groupedRecords, groupColors, hiddenGroups } =
-    useDatabaseContext();
+  const { formatDate } = useDateFormat();
+  const {
+    relatedRecordsMap,
+    invalidateRecords,
+    activeView,
+    updateActiveView,
+    wrapCells,
+    groupedRecords,
+    groupColors,
+    hiddenGroups,
+    group,
+    allFilteredRecords,
+    columnSummaries,
+    isViewLocked,
+  } = useDatabaseContext();
 
   const activeViewRef = useRef(activeView);
   useEffect(() => {
     activeViewRef.current = activeView;
   }, [activeView]);
 
+  const visibleGroups = useMemo(() => {
+    return groupedRecords?.filter((groupEntry) => !hiddenGroups.has(groupEntry.key)) ?? null;
+  }, [groupedRecords, hiddenGroups]);
+
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [groupVisibleCounts, setGroupVisibleCounts] = useState<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    setGroupVisibleCounts(new Map());
+  }, [activeView?.id, group]);
 
   const hiddenColumns = useMemo(() => new Set(activeView?.hiddenColumns || []), [activeView]);
   const columnWidths = useMemo(() => activeView?.columnWidths || {}, [activeView]);
@@ -47,6 +74,10 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
   const resizingStateRef = useRef<{ propId: string; startX: number; startWidth: number; minWidth: number } | null>(null);
   const currentResizedWidthRef = useRef<number>(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setLocalWidths({});
+  }, [activeView?.id]);
 
   useEffect(() => {
     const el = scrollContainerRef.current;
@@ -69,6 +100,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
     let width = 24 + 14 + 8 + prop.name.length * 7 + 16;
     if (prop.hint) width += 20;
     if (prop.integrationKey) width += 20;
+    width += 40;
     return Math.max(80, width);
   }, []);
 
@@ -157,8 +189,54 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
         }
       });
 
+      const selectedMetric = columnSummaries[prop.id] || null;
+      let maxSummaryWidth = 0;
+      const isPrimary = prop.position === 0;
+
+      if (selectedMetric) {
+        const metricLabel = tSummary(`metrics.${selectedMetric}`);
+
+        const getFormattedSummaryValue = (val: string | number | null) => {
+          if (val === null || val === undefined) return "";
+          if (prop.type === PropertyType.DATE && (selectedMetric === SummaryMetric.EARLIEST || selectedMetric === SummaryMetric.LATEST)) {
+            return formatDate(val as string);
+          }
+          if (typeof val === "number") {
+            if (selectedMetric === SummaryMetric.PERCENT_CHECKED) return String(val);
+            return Number.isInteger(val) ? String(val) : val.toFixed(2);
+          }
+          return String(val);
+        };
+
+        const chevronWidth = isViewLocked ? 0 : 16;
+        const baseOffset = 16 + chevronWidth;
+
+        const overallVal = calculateSummary(allFilteredRecords, prop.id, prop.type as PropertyType, selectedMetric, isPrimary);
+        const overallFormatted = getFormattedSummaryValue(overallVal);
+        const overallText = `${metricLabel}: ${overallFormatted}`;
+        const overallWidth = overallText.length * 7 + baseOffset;
+        if (overallWidth > maxSummaryWidth) {
+          maxSummaryWidth = overallWidth;
+        }
+
+        if (visibleGroups) {
+          visibleGroups.forEach((groupEntry) => {
+            const groupVal = calculateSummary(groupEntry.records, prop.id, prop.type as PropertyType, selectedMetric, isPrimary);
+            const groupFormatted = getFormattedSummaryValue(groupVal);
+            const groupText = `${metricLabel}: ${groupFormatted}`;
+            const groupWidth = groupText.length * 7 + baseOffset;
+            if (groupWidth > maxSummaryWidth) {
+              maxSummaryWidth = groupWidth;
+            }
+          });
+        }
+      } else if (!isViewLocked) {
+        const calcText = tSummary("calculate");
+        maxSummaryWidth = calcText.length * 7 + 32;
+      }
+
       const headerWidth = getDefaultWidth(prop);
-      const finalWidth = Math.max(headerWidth, maxValWidth);
+      const finalWidth = Math.max(headerWidth, maxValWidth, maxSummaryWidth);
 
       setLocalWidths((prev) => ({ ...prev, [prop.id]: finalWidth }));
 
@@ -167,7 +245,19 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
         updateActiveView({ columnWidths: newColumnWidths }).catch(console.error);
       }
     },
-    [records, getDefaultWidth, getValueWidth, updateActiveView, t],
+    [
+      records,
+      getDefaultWidth,
+      getValueWidth,
+      updateActiveView,
+      t,
+      allFilteredRecords,
+      columnSummaries,
+      isViewLocked,
+      visibleGroups,
+      tSummary,
+      formatDate,
+    ],
   );
   const handleResizeStart = (e: React.MouseEvent, prop: PropertyResponseDto, currentWidth: number) => {
     e.preventDefault();
@@ -255,18 +345,17 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
   }
 
   function renderRecordRow(record: RecordResponseDto, groupColor?: string) {
-    const rowBgStyle = groupColor ? { backgroundColor: `${groupColor}0D` } : undefined;
+    const rowBgStyle = groupColor ? ({ "--group-row-bg": `${groupColor}0D` } as React.CSSProperties) : undefined;
 
     return (
       <tr
         key={record.id}
         onClick={() => router.push(`/record/${record.id}`)}
-        className="border-b border-stroke-subtle last:border-b-0 transition-colors duration-150 hover:bg-hover cursor-pointer group"
+        className="border-b border-stroke-subtle last:border-b-0 transition-colors duration-150 bg-[var(--group-row-bg,transparent)] hover:bg-hover cursor-pointer group"
         style={rowBgStyle}
       >
         <td
-          className="px-3 py-2 border-r border-b border-stroke-subtle bg-canvas group-hover:bg-hover transition-colors duration-150"
-          style={rowBgStyle}
+          className="px-3 py-2 border-r border-b border-stroke-subtle bg-[var(--group-row-bg,var(--color-canvas))] group-hover:bg-hover transition-colors duration-150"
           onClick={(e) => e.stopPropagation()}
         >
           <CheckboxInput checked={selectedIds.has(record.id)} onChange={(checked) => toggleOne(record.id, checked)} />
@@ -288,9 +377,8 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                 "px-3 py-2 align-middle border-b border-stroke-subtle last:border-r-0 overflow-hidden",
                 index > 0 && "border-r border-stroke-subtle",
                 index === 0 &&
-                  "sticky left-0 z-20 bg-canvas group-hover:bg-hover transition-colors duration-150 shadow-[inset_-1px_0_0_0_var(--color-stroke-subtle)] bg-opacity-100 group-hover:bg-opacity-100",
+                  "sticky left-0 z-20 bg-canvas group-hover:bg-hover transition-colors duration-150 shadow-[inset_-1px_0_0_0_var(--color-stroke-subtle)]",
               )}
-              style={index === 0 ? rowBgStyle : undefined}
             >
               <div
                 className={cn(
@@ -323,7 +411,6 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
     return <div className="flex items-center justify-center h-40 text-ink-secondary text-sm">{t("noProperties")}</div>;
   }
 
-  const visibleGroups = groupedRecords?.filter((group) => !hiddenGroups.has(group.key)) ?? null;
   const totalVisibleRecords = visibleGroups ? visibleGroups.reduce((sum, group) => sum + group.records.length, 0) : records.length;
 
   return (
@@ -357,17 +444,11 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
 
       <div className="rounded-lg border border-stroke overflow-hidden shadow-sm bg-canvas">
         <div ref={scrollContainerRef} className="overflow-x-auto scrollbar">
-          <table
-            className="w-full text-sm border-separate border-spacing-0 table-fixed"
-            style={{ width: `max(100%, ${totalColumnsWidth}px)` }}
-          >
+          <table className="text-sm border-separate border-spacing-0 table-fixed w-full" style={{ minWidth: `${totalColumnsWidth}px` }}>
             <colgroup>
-              <col className="w-10" />
-              {visibleProperties.map((prop, idx) => (
-                <col
-                  key={prop.id}
-                  style={idx === visibleProperties.length - 1 ? { width: "auto" } : { width: `${getPropWidth(prop)}px` }}
-                />
+              <col style={{ width: "40px" }} />
+              {visibleProperties.map((prop, index) => (
+                <col key={prop.id} style={index < visibleProperties.length - 1 ? { width: `${getPropWidth(prop)}px` } : undefined} />
               ))}
             </colgroup>
             <thead>
@@ -390,7 +471,7 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                       </span>
                       <span className="truncate">{prop.name}</span>
                       {prop.integrationKey && (
-                        <span title="Automated by integration" className="flex items-center">
+                        <span title={t("automatedByIntegration")} className="flex items-center">
                           <LinkIcon size={12} className="text-accent shrink-0" />
                         </span>
                       )}
@@ -412,7 +493,11 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
               {visibleGroups ? (
                 visibleGroups.length === 0 ? (
                   <tr>
-                    <td colSpan={visibleProperties.length + 1} className="px-4 py-16 text-center text-ink-muted bg-canvas">
+                    <td className="py-16 bg-canvas border-r border-stroke-subtle" />
+                    <td
+                      colSpan={visibleProperties.length}
+                      className="sticky left-0 z-20 py-16 px-3 text-sm text-ink-muted bg-canvas whitespace-nowrap"
+                    >
                       {t("noRecords")}
                     </td>
                   </tr>
@@ -420,9 +505,18 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                   visibleGroups.flatMap((groupEntry, groupIndex) => {
                     const color = groupColors[groupEntry.key] ?? PALETTE_COLOR_VALUES[groupIndex % PALETTE_COLOR_VALUES.length];
                     const isCollapsed = collapsedGroups.has(groupEntry.key);
+                    const limit = activeView?.recordLimit;
+                    const groupRecords = groupEntry.records;
+                    const hasMore = limit && limit > 0 && groupRecords.length > limit;
+                    const currentVisible = hasMore ? (groupVisibleCounts.get(groupEntry.key) ?? limit!) : groupRecords.length;
+                    const visibleGroupRecords = hasMore ? groupRecords.slice(0, currentVisible) : groupRecords;
+                    const stillHasMore = hasMore && currentVisible < groupRecords.length;
+                    const nextBatch = Math.min(limit!, groupRecords.length - currentVisible);
+
                     return [
-                      <tr key={`group-header-${groupEntry.key}`} className="bg-surface/60">
-                        <td colSpan={visibleProperties.length + 1} className="px-3 py-2 border-b border-stroke">
+                      <tr key={`group-header-${groupEntry.key}`} className="border-b border-stroke bg-surface/60">
+                        <td className="px-3 py-2 border-b border-stroke bg-surface/60" />
+                        <td className="px-3 py-2 border-b border-stroke bg-surface/60 sticky left-0 z-20 shadow-[inset_-1px_0_0_0_var(--color-stroke)]">
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
@@ -438,8 +532,40 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                             </span>
                           </div>
                         </td>
+                        {visibleProperties.length > 1 && (
+                          <td colSpan={visibleProperties.length - 1} className="px-3 py-2 border-b border-stroke bg-surface/60" />
+                        )}
                       </tr>,
-                      ...(!isCollapsed ? groupEntry.records.map((r) => renderRecordRow(r, color)) : []),
+                      ...(!isCollapsed ? visibleGroupRecords.map((r) => renderRecordRow(r, color)) : []),
+                      ...(!isCollapsed && stillHasMore
+                        ? [
+                            <tr
+                              key={`group-show-all-${groupEntry.key}`}
+                              className="border-b border-stroke-subtle hover:bg-hover transition-colors duration-150"
+                            >
+                              <td className="px-3 py-2 border-b border-stroke-subtle bg-canvas" />
+                              <td className="px-3 py-2 border-b border-stroke-subtle bg-canvas sticky left-0 z-20 shadow-[inset_-1px_0_0_0_var(--color-stroke-subtle)]">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setGroupVisibleCounts((prev) => {
+                                      const next = new Map(prev);
+                                      const current = next.get(groupEntry.key) ?? limit!;
+                                      next.set(groupEntry.key, current + limit!);
+                                      return next;
+                                    });
+                                  }}
+                                  className="text-sm text-accent hover:text-accent-hover font-semibold flex items-center gap-1.5 cursor-pointer transition-colors duration-150 whitespace-nowrap"
+                                >
+                                  {t("showAllRecords", { count: nextBatch })}
+                                </button>
+                              </td>
+                              {visibleProperties.length > 1 && (
+                                <td colSpan={visibleProperties.length - 1} className="px-3 py-2 border-b border-stroke-subtle bg-canvas" />
+                              )}
+                            </tr>,
+                          ]
+                        : []),
                       ...(!isCollapsed
                         ? [
                             <tr key={`group-summary-${groupEntry.key}`} className="border-t border-stroke">
@@ -448,10 +574,10 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                                 <td
                                   key={prop.id}
                                   className={cn(
-                                    "px-1 py-1 last:border-r-0 h-10 bg-surface/30",
+                                    "px-1 py-1 last:border-r-0 h-10",
+                                    index === 0 ? "bg-surface" : "bg-surface/30",
                                     index > 0 && "border-r border-stroke",
-                                    index === 0 &&
-                                      "sticky left-0 z-20 bg-surface shadow-[inset_-1px_0_0_0_var(--color-stroke)] bg-opacity-100",
+                                    index === 0 && "sticky left-0 z-20 shadow-[inset_-1px_0_0_0_var(--color-stroke)]",
                                   )}
                                 >
                                   <SummaryCell
@@ -470,12 +596,30 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
                 )
               ) : records.length === 0 ? (
                 <tr>
-                  <td colSpan={visibleProperties.length + 1} className="px-4 py-16 text-center text-ink-muted bg-canvas">
+                  <td className="py-16 bg-canvas border-r border-stroke-subtle" />
+                  <td
+                    colSpan={visibleProperties.length}
+                    className="sticky left-0 z-20 py-16 px-3 text-sm text-ink-muted bg-canvas whitespace-nowrap"
+                  >
                     {t("noRecords")}
                   </td>
                 </tr>
               ) : (
                 records.map((r) => renderRecordRow(r))
+              )}
+              {!visibleGroups && onAddRecord && (
+                <tr onClick={onAddRecord} className="cursor-pointer group/add-row hover:bg-canvas-subtle transition-colors duration-150">
+                  <td className="w-9 border-r border-stroke bg-canvas group-hover/add-row:bg-canvas-subtle transition-colors duration-150" />
+                  <td
+                    colSpan={visibleProperties.length}
+                    className="px-3 py-2 sticky left-0 z-10 bg-canvas group-hover/add-row:bg-canvas-subtle transition-colors duration-150"
+                  >
+                    <span className="flex items-center gap-1.5 text-sm text-ink-muted group-hover/add-row:text-accent font-medium transition-colors duration-150">
+                      <Plus size={13} />
+                      {t("addRecord")}
+                    </span>
+                  </td>
+                </tr>
               )}
             </tbody>
             {!visibleGroups && totalVisibleRecords > 0 && (
@@ -500,6 +644,8 @@ export function DatabaseTable({ properties, records }: DatabaseTableProps) {
           </table>
         </div>
       </div>
+
+      {!group && <DatabasePagination />}
 
       {showDeleteConfirm && (
         <ConfirmDialog

@@ -52,7 +52,7 @@
 
 ## M4 — v1.0 Integrations
 
-**Торгові підключення:** Binance, Bybit, OKX (read-only API Key + Secret), MetaTrader 5 (Investor Password), cTrader (OAuth 2.0).
+**Торгові підключення:** Binance (read-only API Key + Secret), MetaTrader 5 (Investor Password).
 **Синхронізація:** авто-синхронізація кожні 5 хв, ручний запуск, вибір діапазону дат, вибір типу ринку, обробка помилок (3 невдалих спроби → сповіщення).
 **Безпека:** credentials зашифровано, ключ з правами торгівлі відхиляється.
 

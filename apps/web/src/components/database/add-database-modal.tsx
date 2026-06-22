@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { parseApiError } from "@/lib/api/client";
 import { createDatabase } from "@/lib/api/database";
 import { useDatabaseSettingsQuery } from "@/hooks/api/use-database-settings-query";
-import { DEFAULT_DATABASE_SETTINGS } from "@fixspace/domain/enums";
+import { DEFAULT_DATABASE_SETTINGS } from "@fixspace/domain";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
@@ -33,8 +33,7 @@ export function AddDatabaseModal({ spaceId, sectionId, onClose, onSaved }: AddDa
       createDatabase(spaceId, {
         icon: values.icon || undefined,
         sectionId,
-        title: values.name,
-        name: `[DB] ${values.name}`,
+        name: values.name,
       }),
     onSuccess: (created) => {
       addDatabaseToSpace(created);

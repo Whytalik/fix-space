@@ -1,4 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -26,9 +27,24 @@ describe("StorageService — TC-SET-U-001", () => {
     error: jest.fn(),
   } as unknown as jest.Mocked<AppLogger>;
 
+  const mockConfigService = {
+    getOrThrow: jest.fn((key: string) => {
+      const values: Record<string, string> = {
+        CLOUDINARY_CLOUD_NAME: "test-cloud",
+        CLOUDINARY_API_KEY: "test-key",
+        CLOUDINARY_API_SECRET: "test-secret",
+      };
+      return values[key] ?? "";
+    }),
+    get: jest.fn((key: string, defaultValue?: string) => {
+      const values: Record<string, string> = { NODE_ENV: "test", CLOUDINARY_FOLDER_PREFIX: "fixspace-test" };
+      return values[key] ?? defaultValue;
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [StorageService, { provide: AppLogger, useValue: mockLogger }],
+      providers: [StorageService, { provide: AppLogger, useValue: mockLogger }, { provide: ConfigService, useValue: mockConfigService }],
     }).compile();
 
     service = module.get<StorageService>(StorageService);

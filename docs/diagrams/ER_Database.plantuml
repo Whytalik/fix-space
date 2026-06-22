@@ -1,0 +1,431 @@
+@startuml ER_Database
+
+top to bottom direction
+hide circle
+hide empty methods
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 10
+skinparam nodesep 12
+skinparam ranksep 20
+
+skinparam entity {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #555555
+  FontSize 10
+  HeaderBackgroundColor #E8EEF7
+}
+
+skinparam package {
+  BorderColor #2563eb
+  FontColor #2563eb
+  FontSize 11
+  BackgroundColor #F0F4FF
+}
+
+title ER-діаграма бази даних системи FIX Space
+
+' ─────────────────────────────────────────────────
+' Auth
+' ─────────────────────────────────────────────────
+package "Автентифікація" as AuthPkg #E8F5E9 {
+  entity "User" as User {
+    * id : String <<PK>>
+    --
+    * email : String <<UK>>
+    * username : String <<UK>>
+    passwordHash : String?
+    icon : String?
+    * isVerified : Boolean
+    * createdAt : DateTime
+  }
+
+  entity "RefreshToken" as RefreshToken {
+    * id : String <<PK>>
+    --
+    * userId : String <<FK>>
+    * tokenHash : String
+    * expiresAt : DateTime
+    * createdAt : DateTime
+    revokedAt : DateTime?
+  }
+
+  entity "EmailVerificationToken" as EmailToken {
+    * id : String <<PK>>
+    --
+    * userId : String <<FK>>
+    * tokenHash : String
+    * expiresAt : DateTime
+    usedAt : DateTime?
+    * createdAt : DateTime
+  }
+
+  entity "PasswordResetToken" as PasswordToken {
+    * id : String <<PK>>
+    --
+    * userId : String <<FK>>
+    * tokenHash : String
+    * expiresAt : DateTime
+    usedAt : DateTime?
+    * createdAt : DateTime
+  }
+
+  entity "GoogleAccount" as GoogleAccount {
+    * id : String <<PK>>
+    --
+    * userId : String <<FK, UK>>
+    * googleId : String <<UK>>
+    * email : String
+    * accessToken : String
+    refreshToken : String?
+    tokenExpiresAt : DateTime?
+  }
+}
+
+' ─────────────────────────────────────────────────
+' User Data
+' ─────────────────────────────────────────────────
+package "Дані користувача" as UserDataPkg #FFF3E0 {
+  entity "Settings" as Settings {
+    * id : String <<PK>>
+    --
+    * userId : String <<FK>>
+    * key : String
+    * value : Json
+    * category : String
+    <<UK: userId, key>>
+  }
+
+  entity "Notification" as Notification {
+    * id : String <<PK>>
+    --
+    * userId : String <<FK>>
+    * type : NotificationType
+    * text : String
+    * isRead : Boolean
+    link : String?
+    * createdAt : DateTime
+  }
+
+  entity "IntegrationConnection" as IntegrationConn {
+    * id : String <<PK>>
+    --
+    * userId : String <<FK>>
+    spaceId : String? <<FK>>
+    * service : IntegrationService
+    * name : String
+    * credentials : Json
+    * status : IntegrationStatus
+    * syncInterval : Int
+    marketType : String?
+    externalAccountId : String?
+    lastSyncAt : DateTime?
+    lastSyncError : String?
+    * consecutiveFailures : Int
+    * createdAt : DateTime
+    * updatedAt : DateTime
+  }
+}
+
+' ─────────────────────────────────────────────────
+' Workspace
+' ─────────────────────────────────────────────────
+package "Простір" as WorkspacePkg #E3F2FD {
+  entity "Space" as Space {
+    * id : String <<PK>>
+    --
+    * ownerId : String <<FK>>
+    * name : String
+    icon : String?
+    * isDefault : Boolean
+    * createdAt : DateTime
+    <<UK: ownerId, name>>
+  }
+
+  entity "Section" as Section {
+    * id : String <<PK>>
+    --
+    * spaceId : String <<FK>>
+    * name : String
+    key : String?
+    * position : Int
+    icon : String?
+    color : String?
+    * createdAt : DateTime
+    * updatedAt : DateTime
+    <<UK: spaceId, name>>
+  }
+}
+
+' ─────────────────────────────────────────────────
+' Core Data
+' ─────────────────────────────────────────────────
+package "Ядро даних" as CorePkg #FCE4EC {
+  entity "Database" as Database {
+    * id : String <<PK>>
+    --
+    * spaceId : String <<FK>>
+    sectionId : String? <<FK>>
+    * name : String
+    * title : String
+    type : String?
+    key : String?
+    icon : String?
+    * position : Int
+    * isKey : Boolean
+    * isLocked : Boolean
+    * createdAt : DateTime
+    * updatedAt : DateTime
+    <<UK: spaceId, name>>
+  }
+
+  entity "PropertyGroup" as PropertyGroup {
+    * id : String <<PK>>
+    --
+    * databaseId : String <<FK>>
+    * name : String
+    * position : Int
+    visibility : Json?
+    * createdAt : DateTime
+    * updatedAt : DateTime
+  }
+
+  entity "Property" as Property {
+    * id : String <<PK>>
+    --
+    * databaseId : String <<FK>>
+    groupId : String? <<FK>>
+    * name : String
+    * type : PropertyType
+    * position : Int
+    icon : String?
+    hint : String?
+    group : String?
+    * isVisible : Boolean
+    * isProtected : Boolean
+    integrationKey : String?
+    config : Json?
+    visibilityCondition : Json?
+    * createdAt : DateTime
+    * updatedAt : DateTime
+  }
+
+  entity "Record" as Record {
+    * id : String <<PK>>
+    --
+    * databaseId : String <<FK>>
+    templateId : String? <<FK>>
+    sourceIntegrationId : String?
+    sourceLabel : String?
+    sourcePositionId : String?
+    sourceCurrency : String?
+    * name : String
+    icon : String?
+    deletedAt : DateTime?
+    * createdAt : DateTime
+    * updatedAt : DateTime
+  }
+
+  entity "PropertyValue" as PropertyValue {
+    * id : String <<PK>>
+    --
+    * recordId : String <<FK>>
+    * propertyId : String <<FK>>
+    value : Json?
+    * computed : Boolean
+    <<UK: recordId, propertyId>>
+  }
+
+  entity "RecordContent" as RecordContent {
+    * id : String <<PK>>
+    --
+    * recordId : String <<FK, UK>>
+    * content : Json
+    * lastEditedAt : DateTime
+  }
+}
+
+' ─────────────────────────────────────────────────
+' Templates
+' ─────────────────────────────────────────────────
+package "Шаблони" as TemplatePkg #F3E5F5 {
+  entity "Template" as Template {
+    * id : String <<PK>>
+    --
+    * databaseId : String <<FK>>
+    * name : String
+    description : String?
+    icon : String?
+    namePattern : String?
+    * content : Json
+    * isDefault : Boolean
+    * position : Int
+    * createdAt : DateTime
+    * updatedAt : DateTime
+    <<UK: databaseId, name>>
+  }
+
+  entity "TemplatePropertyValue" as TemplateValue {
+    * id : String <<PK>>
+    --
+    * templateId : String <<FK>>
+    * propertyId : String <<FK>>
+    value : Json?
+    <<UK: templateId, propertyId>>
+  }
+}
+
+' ─────────────────────────────────────────────────
+' Views & Automations
+' ─────────────────────────────────────────────────
+package "Перегляди та автоматизації" as ViewsAutoPkg #E0F7FA {
+  entity "View" as View {
+    * id : String <<PK>>
+    --
+    * databaseId : String <<FK>>
+    * name : String
+    icon : String?
+    * position : Int
+    * isDefault : Boolean
+    * isLocked : Boolean
+    * pageSize : Int
+    recordLimit : Int?
+    * useDefaultTemplate : Boolean
+    defaultTemplateId : String?
+    filters : Json?
+    * filterLogic : FilterLogic
+    sort : Json?
+    groupBy : String?
+    hiddenColumns : String[]
+    columnWidths : Json?
+    * textWrap : Boolean
+    searchQuery : String?
+    config : Json?
+    * createdAt : DateTime
+    * updatedAt : DateTime
+  }
+
+  entity "Automation" as Automation {
+    * id : String <<PK>>
+    --
+    * databaseId : String <<FK>>
+    * name : String
+    * trigger : AutomationTrigger
+    condition : Json?
+    * actions : Json
+    * active : Boolean
+    config : Json?
+    * createdAt : DateTime
+    * updatedAt : DateTime
+  }
+
+  entity "AutomationLog" as AutomationLog {
+    * id : String <<PK>>
+    --
+    * automationId : String <<FK>>
+    sourceRecordId : String?
+    * status : AutomationStatus
+    result : String?
+    * createdAt : DateTime
+  }
+}
+
+' ─────────────────────────────────────────────────
+' Import
+' ─────────────────────────────────────────────────
+package "Імпорт" as ImportPkg #E8EAF6 {
+  entity "ImportMapping" as ImportMapping {
+    * id : String <<PK>>
+    --
+    * databaseId : String <<FK>>
+    * name : String
+    * sourceType : String
+    * mappingRules : Json
+    * createdAt : DateTime
+    * updatedAt : DateTime
+  }
+
+  entity "ImportHistory" as ImportHistory {
+    * id : String <<PK>>
+    --
+    * importMappingId : String <<FK>>
+    * status : ImportStatus
+    * recordsCreated : Int
+    * recordsFailed : Int
+    errorLog : Json?
+    * sourceFileInfo : Json
+    * createdAt : DateTime
+    completedAt : DateTime?
+  }
+}
+
+' ─────────────────────────────────────────────────
+' Content Snapshots
+' ─────────────────────────────────────────────────
+package "Версіонування" as VersionPkg #EFEBE9 {
+  entity "RecordContentSnapshot" as Snapshot {
+    * id : String <<PK>>
+    --
+    * recordContentId : String <<FK>>
+    * content : Json
+    * createdAt : DateTime
+  }
+}
+
+' ─────────────────────────────────────────────────
+' Relationships
+' ─────────────────────────────────────────────────
+
+' Auth
+User ||--o{ RefreshToken
+User ||--o{ EmailToken
+User ||--o{ PasswordToken
+User ||--o| GoogleAccount
+
+' User Data
+User ||--o{ Settings
+User ||--o{ Notification
+User ||--o{ IntegrationConn
+
+' Workspace
+User ||--o{ Space
+Space ||--o{ Section
+Space ||--o{ IntegrationConn
+
+' Core hierarchy
+Space ||--o{ Database
+Section |o--o{ Database
+Database ||--o{ PropertyGroup
+Database ||--o{ Property
+Database ||--o{ Record
+Database ||--o{ Template
+Database ||--o{ View
+Database ||--o{ Automation
+Database ||--o{ ImportMapping
+
+' Property
+PropertyGroup |o--o{ Property
+Property ||--o{ PropertyValue
+Property ||--o{ TemplateValue
+
+' Record
+Record ||--o{ PropertyValue
+Record ||--o| RecordContent
+Template |o--o{ Record
+
+' Template
+Template ||--o{ TemplateValue
+
+' Automation
+Automation ||--o{ AutomationLog
+
+' Import
+ImportMapping ||--o{ ImportHistory
+
+' Content snapshot
+RecordContent ||--o{ Snapshot
+
+@enduml

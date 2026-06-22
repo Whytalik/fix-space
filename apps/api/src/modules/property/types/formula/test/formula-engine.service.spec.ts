@@ -34,8 +34,8 @@ describe("FormulaEngine", () => {
     jest.clearAllMocks();
   });
 
-  const evaluate = (expression: string, ctx: Record<string, unknown> = {}, resultType = "NUMBER") =>
-    engine.evaluate({ type: "PRESET", expression, resultType } as never, ctx);
+  const evaluate = (expression: string, context: Record<string, unknown> = {}, resultType = "NUMBER") =>
+    engine.evaluate({ type: "PRESET", expression, resultType } as never, context);
 
   describe("TC-FMLA-U-001: binary arithmetic", () => {
     it("adds two numbers", () => {

@@ -122,24 +122,6 @@ describe("UserService", () => {
       expect(result.username).toBe("newname");
       expect(userRepo.update).toHaveBeenCalledWith("user-1", expect.objectContaining({ username: "newname" }));
     });
-
-    it("should hash password when updating password", async () => {
-      jest.spyOn(passwordUtils, "hashPassword").mockResolvedValue("new_hash");
-      mockUserRepo.update.mockResolvedValue({
-        id: "user-1",
-        email: "test@example.com",
-        username: "testuser",
-        icon: null,
-        isVerified: true,
-        passwordHash: "new_hash",
-        createdAt: new Date(),
-      });
-
-      await service.update("user-1", { password: "NewPass123!" });
-
-      expect(passwordUtils.hashPassword).toHaveBeenCalledWith("NewPass123!");
-      expect(userRepo.update).toHaveBeenCalledWith("user-1", expect.objectContaining({ passwordHash: "new_hash" }));
-    });
   });
 
   describe("changePassword", () => {
@@ -222,22 +204,35 @@ describe("UserService", () => {
   });
 
   describe("removeAvatar", () => {
+    const mockUserWithoutIcon = {
+      id: "user-1",
+      email: "test@example.com",
+      username: "testuser",
+      icon: null,
+      isVerified: true,
+      passwordHash: "hashed",
+      createdAt: new Date(),
+    };
+
     it("should remove avatar successfully", async () => {
-      mockUserRepo.update.mockResolvedValue({
-        id: "user-1",
-        email: "test@example.com",
-        username: "testuser",
-        icon: null,
-        isVerified: true,
-        passwordHash: "hashed",
-        createdAt: new Date(),
-      });
+      mockUserRepo.update.mockResolvedValue(mockUserWithoutIcon);
+
+      const result = await service.removeAvatar("user-1");
+
+      expect(result.icon).toBeNull();
+      expect(storageService.removeAvatarFiles).toHaveBeenCalledWith("user-1");
+      expect(userRepo.update).toHaveBeenCalledWith("user-1", { icon: null });
+    });
+
+    it("should still update DB to null even if storage removal fails", async () => {
+      mockStorageService.removeAvatarFiles.mockRejectedValueOnce(new Error("Storage error"));
+      mockUserRepo.update.mockResolvedValue(mockUserWithoutIcon);
 
       const result = await service.removeAvatar("user-1");
 
       expect(result.icon).toBeNull();
       expect(userRepo.update).toHaveBeenCalledWith("user-1", { icon: null });
-      expect(storageService.removeAvatarFiles).toHaveBeenCalledWith("user-1");
+      expect(mockLogger.warn).toHaveBeenCalled();
     });
   });
 

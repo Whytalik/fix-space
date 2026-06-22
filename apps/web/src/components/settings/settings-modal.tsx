@@ -13,10 +13,11 @@ import { RecordSettings } from "./record-settings";
 import { SectionSettings } from "./section-settings";
 import { IntegrationSettings } from "./integration-settings";
 import { ViewSettings } from "./view-settings";
-import { Database, FolderOpen, Table2, FileText, User, Palette, Puzzle, X, Box, LayoutTemplate } from "lucide-react";
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
+import { SETTINGS_CATEGORIES } from "./settings-categories";
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -35,17 +36,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
 
   if (isLoading || !user || !mounted) return null;
 
-  const categories: { id: SettingsCategory; label: string; icon: typeof User }[] = [
-    { id: "profile", label: t("profile"), icon: User },
-    { id: "space", label: t("space"), icon: Box },
-    { id: "appearance", label: t("appearance"), icon: Palette },
-    { id: "database", label: t("database"), icon: Database },
-    { id: "template", label: t("template"), icon: LayoutTemplate },
-    { id: "record", label: t("record"), icon: FileText },
-    { id: "section", label: t("section"), icon: FolderOpen },
-    { id: "view", label: t("view"), icon: Table2 },
-    { id: "integration", label: t("integration"), icon: Puzzle },
-  ];
+  const categories = SETTINGS_CATEGORIES.map((cat) => ({ ...cat, label: t(cat.i18nKey) }));
 
   const activeLabel = categories.find((category) => category.id === activeCategory)?.label ?? "";
 
@@ -78,11 +69,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
           <div className="flex items-center justify-between border-b border-stroke px-8 pb-4 pt-5">
             <div>
               <h1 className="type-panel-title tracking-[-0.03em]">{activeLabel}</h1>
-              <p className="mt-0.5 text-sm text-ink-secondary">
-                {t("title") === "Settings"
-                  ? `Manage your ${activeLabel.toLowerCase()} settings`
-                  : `Керування налаштуваннями: ${activeLabel}`}
-              </p>
+              <p className="mt-0.5 text-sm text-ink-secondary">{t("manageSettings", { label: activeLabel.toLowerCase() })}</p>
             </div>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X size={18} />

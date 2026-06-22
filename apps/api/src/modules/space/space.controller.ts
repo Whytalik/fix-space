@@ -1,6 +1,13 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { CreateSpaceDto, DuplicateSpaceDto, SectionResponseDto, SpaceResponseDto, UpdateSpaceDto } from "@fixspace/domain";
+import {
+  CreateSpaceDto,
+  DuplicateSectionDto,
+  DuplicateSpaceDto,
+  SectionResponseDto,
+  SpaceResponseDto,
+  UpdateSpaceDto,
+} from "@fixspace/domain";
 import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
 import { RequireOwnership } from "@/core/auth/decorators/required-ownership.decorator";
 import { ResourceOwnerGuard } from "@/core/auth/guards/resource-owner.guard";
@@ -27,7 +34,8 @@ export class SpaceController {
   @ApiOperation({ summary: "Create a new workspace with preset databases" })
   @ApiBody({ type: CreateSpaceDto })
   @ApiResponse({ status: 201, description: "Workspace created successfully.", type: SpaceResponseDto })
-  @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 400, description: "Validation error or workspace limit reached." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   create(@CurrentUser("userId") userId: string, @Body() createSpaceDto: CreateSpaceDto) {
     return this.initializeUserSpaceUseCase.createAndSeed(userId, createSpaceDto);
   }
@@ -41,8 +49,9 @@ export class SpaceController {
   @ApiOperation({ summary: "Get workspace dashboard data" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Dashboard data retrieved." })
-  @ApiResponse({ status: 404, description: "Workspace not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Workspace not found." })
   getDashboard(@Param("id") id: string) {
     return this.getDashboardUseCase.execute(id);
   }
@@ -50,6 +59,7 @@ export class SpaceController {
   @Get()
   @ApiOperation({ summary: "Get all workspaces for current user" })
   @ApiResponse({ status: 200, description: "List of workspaces.", type: [SpaceResponseDto] })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   findAll(@CurrentUser("userId") userId: string) {
     return this.spaceService.findAll(userId);
   }
@@ -63,8 +73,9 @@ export class SpaceController {
   @ApiOperation({ summary: "Get workspace by ID" })
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Workspace found.", type: SpaceResponseDto })
-  @ApiResponse({ status: 404, description: "Workspace not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Workspace not found." })
   findOne(@Param("id") id: string) {
     return this.spaceService.findOne(id);
   }
@@ -79,8 +90,10 @@ export class SpaceController {
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: UpdateSpaceDto })
   @ApiResponse({ status: 200, description: "Workspace updated.", type: SpaceResponseDto })
-  @ApiResponse({ status: 404, description: "Workspace not found." })
+  @ApiResponse({ status: 400, description: "Validation error." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Workspace not found." })
   update(@Param("id") id: string, @Body() updateSpaceDto: UpdateSpaceDto) {
     return this.spaceService.update(id, updateSpaceDto);
   }
@@ -96,8 +109,10 @@ export class SpaceController {
   @ApiParam({ name: "id", type: String })
   @ApiBody({ type: DuplicateSpaceDto })
   @ApiResponse({ status: 201, description: "Workspace duplicated.", type: SpaceResponseDto })
-  @ApiResponse({ status: 404, description: "Workspace not found." })
+  @ApiResponse({ status: 400, description: "Workspace limit reached." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Workspace not found." })
   duplicate(@Param("id") id: string, @CurrentUser("userId") userId: string, @Body() duplicateSpaceDto: DuplicateSpaceDto) {
     return this.duplicateSpaceUseCase.execute(id, userId, duplicateSpaceDto);
   }
@@ -112,11 +127,13 @@ export class SpaceController {
   @ApiOperation({ summary: "Duplicate section with all databases and structure" })
   @ApiParam({ name: "id", type: String })
   @ApiParam({ name: "sectionId", type: String })
+  @ApiBody({ type: DuplicateSectionDto })
   @ApiResponse({ status: 201, description: "Section duplicated.", type: SectionResponseDto })
-  @ApiResponse({ status: 404, description: "Section not found." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
-  duplicateSection(@Param("sectionId") sectionId: string, @Body() options: DuplicateSpaceDto) {
-    return this.duplicateSectionUseCase.execute(sectionId, options);
+  @ApiResponse({ status: 404, description: "Section not found." })
+  duplicateSection(@Param("sectionId") sectionId: string, @Body() duplicateSectionDto: DuplicateSectionDto) {
+    return this.duplicateSectionUseCase.execute(sectionId, duplicateSectionDto);
   }
 
   @Delete(":id")
@@ -129,7 +146,9 @@ export class SpaceController {
   @ApiParam({ name: "id", type: String })
   @ApiResponse({ status: 200, description: "Workspace deleted.", type: SpaceResponseDto })
   @ApiResponse({ status: 400, description: "Cannot delete default workspace." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 403, description: "Forbidden — not the owner." })
+  @ApiResponse({ status: 404, description: "Workspace not found." })
   remove(@Param("id") id: string) {
     return this.spaceService.remove(id);
   }

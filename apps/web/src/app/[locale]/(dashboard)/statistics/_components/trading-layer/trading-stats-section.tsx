@@ -48,7 +48,7 @@ export function TradingStatsSection({ query }: TradingStatsSectionProps) {
   return (
     <div>
       <MetricsGrid metrics={data.metrics} compareMetrics={data.compareMetrics} />
-      <EquityChart data={data.equityCurve} compareData={data.compareMetrics ? [] : undefined} />
+      <EquityChart data={data.equityCurve} />
       <BreakdownSection breakdowns={data.breakdowns} />
     </div>
   );

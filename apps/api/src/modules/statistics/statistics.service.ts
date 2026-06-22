@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 
-import { prisma } from "@fixspace/database";
 import {
   ChartPointDto,
   CustomReportDto,
@@ -13,12 +12,13 @@ import {
 
 import { AppLogger } from "@/common/logger/app-logger.service";
 
+import { StatisticsRepository } from "./repositories/statistics.repository";
 import {
   GenericRecord,
   PropertyBreakdown,
-  TradeRecord,
   computeActivityCurve,
   computeBreakdowns,
+  computeCountOnlyBreakdowns,
   computeEquityCurve,
   computeGenericBreakdowns,
   computeMetrics,
@@ -27,53 +27,34 @@ import {
   emptyMetrics,
   filterByDateRange,
   filterGenericByDateRange,
+  toTradeRecords,
 } from "./utils/trading-stats.util";
 
 @Injectable()
 export class StatisticsService {
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly statisticsRepository: StatisticsRepository,
+  ) {
     this.logger.setContext(StatisticsService.name);
   }
 
   async getTradingStats(userId: string, query: StatisticsQueryDto): Promise<TradingStatsResponseDto> {
     this.logger.debug("Computing trading stats", { userId });
 
-    const db = await prisma.database.findFirst({
-      where: { type: "trading-journal", space: { ownerId: userId } },
-      include: { properties: true },
-    });
+    const db = await this.statisticsRepository.findTradingJournalDb(userId);
 
     if (!db) {
       return { metrics: emptyMetrics(), equityCurve: [], breakdowns: [] };
     }
 
-    const records = await prisma.record.findMany({
-      where: { databaseId: db.id },
-      include: { values: true },
-    });
+    const records = await this.statisticsRepository.findRecordsByDatabaseId(db.id);
 
     const exitDateProp = db.properties.find((p) => p.integrationKey === "exitDate");
     const netPnlProp = db.properties.find((p) => p.name === "Net P&L");
     const outcomeProp = db.properties.find((p) => p.integrationKey === "outcome");
 
-    const allTrades = records
-      .map((record) => {
-        const getVal = (propId: string | undefined) => {
-          if (!propId) return null;
-          return record.values.find((v) => v.propertyId === propId)?.value ?? null;
-        };
-
-        const exitDateRaw = exitDateProp ? getVal(exitDateProp.id) : null;
-        const exitDate = exitDateRaw ? new Date(exitDateRaw as string) : null;
-        if (!exitDate || isNaN(exitDate.getTime())) return null;
-
-        const netPnlRaw = netPnlProp ? getVal(netPnlProp.id) : null;
-        const netPnl = netPnlRaw !== null ? Number(netPnlRaw) : 0;
-        const outcome = typeof getVal(outcomeProp?.id) === "string" ? (getVal(outcomeProp?.id) as string) : null;
-
-        return { exitDate, netPnl, outcome } satisfies TradeRecord;
-      })
-      .filter((t): t is TradeRecord => t !== null);
+    const allTrades = toTradeRecords(records, exitDateProp, netPnlProp, outcomeProp);
 
     const trades = filterByDateRange(allTrades, query.from, query.to);
 
@@ -85,24 +66,20 @@ export class StatisticsService {
     const breakdownData: PropertyBreakdown[] = selectStatusProps.map((prop) => ({
       propertyName: prop.name,
       propertyId: prop.id,
-      records: records
-        .map((record) => {
-          const exitDateRaw = exitDateProp ? record.values.find((v) => v.propertyId === exitDateProp.id)?.value : null;
-          const exitDate = exitDateRaw ? new Date(exitDateRaw as string) : null;
-          if (!exitDate || isNaN(exitDate.getTime())) return null;
-          const netPnlRaw = netPnlProp ? record.values.find((v) => v.propertyId === netPnlProp.id)?.value : null;
-          const valueRaw = record.values.find((v) => v.propertyId === prop.id)?.value;
-          const outcomeRaw = outcomeProp ? record.values.find((v) => v.propertyId === outcomeProp.id)?.value : null;
-
-          if (!filterByDateRange([{ exitDate, netPnl: 0, outcome: null }], query.from, query.to).length) return null;
-
+      records: toTradeRecords(records, exitDateProp, netPnlProp, outcomeProp)
+        .filter((t) => filterByDateRange([t], query.from, query.to).length > 0)
+        .map((t) => {
+          const matchingRecord = records.find((r) => {
+            const exitDateRaw = r.values.find((v) => v.propertyId === exitDateProp?.id)?.value;
+            return exitDateRaw === t.exitDate.toISOString();
+          });
+          const valueRaw = matchingRecord ? matchingRecord.values.find((v) => v.propertyId === prop.id)?.value : null;
           return {
             value: typeof valueRaw === "string" ? valueRaw : null,
-            netPnl: netPnlRaw !== null ? Number(netPnlRaw) : 0,
-            outcome: typeof outcomeRaw === "string" ? outcomeRaw : null,
+            netPnl: t.netPnl,
+            outcome: t.outcome,
           };
-        })
-        .filter((r): r is { value: string | null; netPnl: number; outcome: string | null } => r !== null),
+        }),
     }));
 
     const breakdowns = computeBreakdowns(breakdownData);
@@ -110,7 +87,7 @@ export class StatisticsService {
     let compareMetrics: TradingStatsResponseDto["compareMetrics"];
     if (query.compareFrom && query.compareTo) {
       const compareTrades = filterByDateRange(allTrades, query.compareFrom, query.compareTo);
-      compareMetrics = computeMetrics(compareTrades);
+      compareMetrics = compareTrades.length > 0 ? computeMetrics(compareTrades) : undefined;
     }
 
     this.logger.log("Trading stats computed", { userId, totalTrades: metrics.totalTrades });
@@ -120,26 +97,32 @@ export class StatisticsService {
   async getCustomStats(userId: string, query: StatisticsQueryDto): Promise<CustomReportDto[]> {
     this.logger.debug("Computing custom stats", { userId });
 
-    const databases = await prisma.database.findMany({
-      where: { enableStats: true, space: { ownerId: userId } },
-      include: { properties: true },
-    });
+    const databases = await this.statisticsRepository.findAllDatabases(userId);
+
+    if (databases.length === 0) return [];
+
+    const dbIds = databases.map((db) => db.id);
+    const allRecords = await this.statisticsRepository.findRecordsByDatabaseIds(dbIds);
+
+    const recordsByDbId = new Map<string, typeof allRecords>();
+    for (const record of allRecords) {
+      const bucket = recordsByDbId.get(record.databaseId) ?? [];
+      bucket.push(record);
+      recordsByDbId.set(record.databaseId, bucket);
+    }
 
     const results: CustomReportDto[] = [];
 
     for (const db of databases) {
-      const records = await prisma.record.findMany({
-        where: { databaseId: db.id },
-        include: { values: true },
-      });
+      const records = recordsByDbId.get(db.id) ?? [];
 
       const dateProp = db.properties.find((p) => p.type === PropertyType.DATE);
 
       const filtered = records.filter((record) => {
         if (!dateProp) return true;
         const dateRaw = record.values.find((v) => v.propertyId === dateProp.id)?.value;
-        if (!dateRaw) return true;
-        const date = new Date(dateRaw as string);
+        if (!dateRaw || typeof dateRaw !== "string") return true;
+        const date = new Date(dateRaw);
         if (isNaN(date.getTime())) return true;
         const from = query.from ? new Date(query.from) : null;
         const to = query.to ? new Date(query.to) : null;
@@ -159,7 +142,7 @@ export class StatisticsService {
         }),
       }));
 
-      const breakdowns = computeBreakdowns(breakdownData);
+      const breakdowns = computeCountOnlyBreakdowns(breakdownData);
 
       const numberProps = db.properties.filter((p) => p.type === PropertyType.NUMBER);
       const numberSeries: NumberSeriesDto[] = numberProps.map((prop) => {
@@ -187,7 +170,7 @@ export class StatisticsService {
 
       results.push({
         databaseId: db.id,
-        title: db.title,
+        name: db.name,
         icon: db.icon,
         recordCount: filtered.length,
         breakdowns,
@@ -200,24 +183,26 @@ export class StatisticsService {
   }
 
   async getKeyDatabasesOverview(userId: string, query: StatisticsQueryDto): Promise<DatabaseStatBlockDto[]> {
-    this.logger.debug("Computing preset overview", { userId });
+    this.logger.debug("Computing overview for all databases", { userId });
 
-    const databases = await prisma.database.findMany({
-      where: {
-        isKey: true,
-        space: { ownerId: userId, ...(query.spaceId ? { id: query.spaceId } : {}) },
-      },
-      include: { properties: true },
-      orderBy: { createdAt: "asc" },
-    });
+    const databases = await this.statisticsRepository.findAllDatabases(userId, query.spaceId);
+
+    if (databases.length === 0) return [];
+
+    const dbIds = databases.map((db) => db.id);
+    const allRecords = await this.statisticsRepository.findRecordsByDatabaseIds(dbIds);
+
+    const recordsByDbId = new Map<string, typeof allRecords>();
+    for (const record of allRecords) {
+      const bucket = recordsByDbId.get(record.databaseId) ?? [];
+      bucket.push(record);
+      recordsByDbId.set(record.databaseId, bucket);
+    }
 
     const results: DatabaseStatBlockDto[] = [];
 
     for (const db of databases) {
-      const records = await prisma.record.findMany({
-        where: { databaseId: db.id },
-        include: { values: true },
-      });
+      const records = recordsByDbId.get(db.id) ?? [];
 
       const dateProp = db.properties.find((p) => p.type === PropertyType.DATE);
       const ratingProps = db.properties.filter((p) => p.type === PropertyType.RATING);
@@ -228,7 +213,7 @@ export class StatisticsService {
         const getVal = (propId: string) => record.values.find((v) => v.propertyId === propId)?.value ?? null;
 
         const dateRaw = dateProp ? getVal(dateProp.id) : null;
-        const date = dateRaw ? new Date(dateRaw as string) : null;
+        const date = dateRaw && typeof dateRaw === "string" ? new Date(dateRaw as string) : null;
 
         return {
           date: date && !isNaN(date.getTime()) ? date : null,
@@ -255,7 +240,7 @@ export class StatisticsService {
       const block: DatabaseStatBlockDto = {
         databaseId: db.id,
         type: db.type ?? "unknown",
-        title: db.title,
+        name: db.name,
         icon: db.icon,
         recordCount: filtered.length,
         activityCurve,
@@ -277,22 +262,7 @@ export class StatisticsService {
         const netPnlProp = db.properties.find((p) => p.name === "Net P&L");
         const outcomeProp = db.properties.find((p) => p.integrationKey === "outcome");
 
-        const allTrades = records
-          .map((record) => {
-            const getVal = (propId: string | undefined) =>
-              propId ? (record.values.find((v) => v.propertyId === propId)?.value ?? null) : null;
-
-            const exitDateRaw = exitDateProp ? getVal(exitDateProp.id) : null;
-            const exitDate = exitDateRaw ? new Date(exitDateRaw as string) : null;
-            if (!exitDate || isNaN(exitDate.getTime())) return null;
-
-            const netPnlRaw = netPnlProp ? getVal(netPnlProp.id) : null;
-            const netPnl = netPnlRaw !== null ? Number(netPnlRaw) : 0;
-            const outcome = typeof getVal(outcomeProp?.id) === "string" ? (getVal(outcomeProp?.id) as string) : null;
-
-            return { exitDate, netPnl, outcome } satisfies TradeRecord;
-          })
-          .filter((t): t is TradeRecord => t !== null);
+        const allTrades = toTradeRecords(records, exitDateProp, netPnlProp, outcomeProp);
 
         const trades = filterByDateRange(allTrades, query.from, query.to);
         block.tradingKpis = computeMetrics(trades);
@@ -300,8 +270,8 @@ export class StatisticsService {
 
         if (hasCompare) {
           const compareTrades = filterByDateRange(allTrades, query.compareFrom, query.compareTo);
-          block.compareKpis = computeMetrics(compareTrades);
-          block.compareEquityCurve = computeEquityCurve(compareTrades);
+          block.compareKpis = compareTrades.length > 0 ? computeMetrics(compareTrades) : undefined;
+          block.compareEquityCurve = compareTrades.length > 0 ? computeEquityCurve(compareTrades) : undefined;
         }
       }
 

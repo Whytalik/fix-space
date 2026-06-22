@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 
-import { AppLogger } from "../../../common/logger/app-logger.service";
+import { AppLogger } from "@/common/logger/app-logger.service";
 import { StatisticsService } from "../statistics.service";
 import {
   computeActivityCurve,
@@ -16,6 +16,8 @@ import {
   filterByDateRange,
   filterGenericByDateRange,
 } from "../utils/trading-stats.util";
+
+import { StatisticsRepository } from "../repositories/statistics.repository";
 
 jest.mock("@fixspace/database", () => ({
   prisma: {
@@ -32,8 +34,6 @@ jest.mock("@fixspace/database", () => ({
   },
 }));
 
-import { prisma } from "@fixspace/database";
-
 const mockLogger: jest.Mocked<AppLogger> = {
   setContext: jest.fn(),
   debug: jest.fn(),
@@ -42,12 +42,23 @@ const mockLogger: jest.Mocked<AppLogger> = {
   error: jest.fn(),
 } as unknown as jest.Mocked<AppLogger>;
 
+const mockRepository: jest.Mocked<StatisticsRepository> = {
+  findTradingJournalDb: jest.fn(),
+  findAllDatabases: jest.fn(),
+  findRecordsByDatabaseIds: jest.fn(),
+  findRecordsByDatabaseId: jest.fn(),
+} as unknown as jest.Mocked<StatisticsRepository>;
+
 describe("StatisticsService", () => {
   let service: StatisticsService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [StatisticsService, { provide: AppLogger, useValue: mockLogger }],
+      providers: [
+        StatisticsService,
+        { provide: AppLogger, useValue: mockLogger },
+        { provide: StatisticsRepository, useValue: mockRepository },
+      ],
     }).compile();
 
     service = module.get<StatisticsService>(StatisticsService);
@@ -55,8 +66,8 @@ describe("StatisticsService", () => {
   });
 
   describe("getTradingStats — TC-STAT-U-007: no Trading Journal", () => {
-    it("returns empty stats when no Trading Journal database exists", async () => {
-      (prisma.database.findFirst as jest.Mock).mockResolvedValue(null);
+    it("TC-STAT-U-001: returns empty stats when no Trading Journal database exists", async () => {
+      (mockRepository.findTradingJournalDb as jest.Mock).mockResolvedValue(null);
 
       const result = await service.getTradingStats("user-1", {});
 
@@ -67,20 +78,20 @@ describe("StatisticsService", () => {
   });
 
   describe("getTradingStats — TC-STAT-U-001: core metrics", () => {
-    it("computes Win Rate, Profit Factor and Expectancy from records", async () => {
+    it("TC-STAT-U-002: computes Win Rate, Profit Factor and Expectancy from records", async () => {
       const properties = [
         { id: "exit-prop", name: "Exit Date", type: "DATE", integrationKey: "exitDate" },
         { id: "pnl-prop", name: "Net P&L", type: "FORMULA", integrationKey: null },
         { id: "outcome-prop", name: "Outcome", type: "SELECT", integrationKey: "outcome" },
       ];
 
-      (prisma.database.findFirst as jest.Mock).mockResolvedValue({
+      (mockRepository.findTradingJournalDb as jest.Mock).mockResolvedValue({
         id: "db-1",
         type: "trading-journal",
         properties,
       });
 
-      (prisma.record.findMany as jest.Mock).mockResolvedValue([
+      (mockRepository.findRecordsByDatabaseId as jest.Mock).mockResolvedValue([
         {
           id: "r1",
           values: [
@@ -118,15 +129,15 @@ describe("StatisticsService", () => {
   });
 
   describe("getTradingStats — TC-STAT-U-005: date range filter", () => {
-    it("filters trades by from/to date range using exitDate", async () => {
+    it("TC-STAT-U-003: filters trades by from/to date range using exitDate", async () => {
       const properties = [
         { id: "exit-prop", name: "Exit Date", type: "DATE", integrationKey: "exitDate" },
         { id: "pnl-prop", name: "Net P&L", type: "FORMULA", integrationKey: null },
         { id: "outcome-prop", name: "Outcome", type: "SELECT", integrationKey: "outcome" },
       ];
 
-      (prisma.database.findFirst as jest.Mock).mockResolvedValue({ id: "db-1", type: "trading-journal", properties });
-      (prisma.record.findMany as jest.Mock).mockResolvedValue([
+      (mockRepository.findTradingJournalDb as jest.Mock).mockResolvedValue({ id: "db-1", type: "trading-journal", properties });
+      (mockRepository.findRecordsByDatabaseId as jest.Mock).mockResolvedValue([
         {
           id: "r1",
           values: [
@@ -164,27 +175,27 @@ describe("StatisticsService", () => {
   });
 
   describe("getCustomStats", () => {
-    it("TC-STAT-U-004: returns empty array when no databases have enableStats", async () => {
-      (prisma.database.findMany as jest.Mock).mockResolvedValue([]);
+    it("TC-STAT-U-004: returns empty array when no databases exist", async () => {
+      (mockRepository.findAllDatabases as jest.Mock).mockResolvedValue([]);
 
       const result = await service.getCustomStats("user-1", {});
 
       expect(result).toHaveLength(0);
     });
 
-    it("TC-STAT-U-004: generates breakdowns for SELECT properties", async () => {
-      (prisma.database.findMany as jest.Mock).mockResolvedValue([
+    it("TC-STAT-U-005: generates breakdowns for SELECT properties", async () => {
+      (mockRepository.findAllDatabases as jest.Mock).mockResolvedValue([
         {
           id: "custom-db",
-          title: "Watchlist",
+          name: "Watchlist",
           icon: "📋",
           properties: [{ id: "cat-prop", name: "Category", type: "SELECT" }],
         },
       ]);
-      (prisma.record.findMany as jest.Mock).mockResolvedValue([
-        { id: "r1", values: [{ propertyId: "cat-prop", value: "A" }] },
-        { id: "r2", values: [{ propertyId: "cat-prop", value: "B" }] },
-        { id: "r3", values: [{ propertyId: "cat-prop", value: "A" }] },
+      (mockRepository.findRecordsByDatabaseIds as jest.Mock).mockResolvedValue([
+        { id: "r1", databaseId: "custom-db", values: [{ propertyId: "cat-prop", value: "A" }] },
+        { id: "r2", databaseId: "custom-db", values: [{ propertyId: "cat-prop", value: "B" }] },
+        { id: "r3", databaseId: "custom-db", values: [{ propertyId: "cat-prop", value: "A" }] },
       ]);
 
       const result = await service.getCustomStats("user-1", {});
@@ -200,11 +211,11 @@ describe("StatisticsService", () => {
 });
 
 describe("computeMetrics — unit", () => {
-  it("TC-STAT-U-001: returns zeros for empty trades", () => {
+  it("TC-STAT-U-006: returns zeros for empty trades", () => {
     expect(computeMetrics([])).toEqual(emptyMetrics());
   });
 
-  it("TC-STAT-U-001: computes win rate correctly", () => {
+  it("TC-STAT-U-007: computes win rate correctly", () => {
     const trades = [
       { netPnl: 100, outcome: "Win", exitDate: new Date("2025-01-01") },
       { netPnl: -50, outcome: "Loss", exitDate: new Date("2025-01-02") },
@@ -219,7 +230,7 @@ describe("computeMetrics — unit", () => {
     expect(metrics.grossLoss).toBe(125);
   });
 
-  it("TC-STAT-U-001: profit factor is correct", () => {
+  it("TC-STAT-U-008: profit factor is correct", () => {
     const trades = [
       { netPnl: 300, outcome: "Win", exitDate: new Date("2025-01-01") },
       { netPnl: -100, outcome: "Loss", exitDate: new Date("2025-01-02") },
@@ -228,13 +239,13 @@ describe("computeMetrics — unit", () => {
     expect(metrics.profitFactor).toBe(3);
   });
 
-  it("TC-STAT-U-001: profit factor is 999 when no losses", () => {
+  it("TC-STAT-U-009: profit factor is 999 when no losses", () => {
     const trades = [{ netPnl: 500, outcome: "Win", exitDate: new Date("2025-01-01") }];
     const metrics = computeMetrics(trades);
     expect(metrics.profitFactor).toBe(999);
   });
 
-  it("TC-STAT-U-002: computes max drawdown", () => {
+  it("TC-STAT-U-010: computes max drawdown", () => {
     const trades = [
       { netPnl: 100, outcome: "Win", exitDate: new Date("2025-01-01") },
       { netPnl: 200, outcome: "Win", exitDate: new Date("2025-01-02") },
@@ -245,7 +256,7 @@ describe("computeMetrics — unit", () => {
     expect(metrics.maxDrawdown).toBe(400);
   });
 
-  it("TC-STAT-U-002: max drawdown is 0 when all trades are wins", () => {
+  it("TC-STAT-U-011: max drawdown is 0 when all trades are wins", () => {
     const trades = [
       { netPnl: 100, outcome: "Win", exitDate: new Date("2025-01-01") },
       { netPnl: 200, outcome: "Win", exitDate: new Date("2025-01-02") },
@@ -255,11 +266,11 @@ describe("computeMetrics — unit", () => {
 });
 
 describe("computeEquityCurve — unit", () => {
-  it("returns empty array for no trades", () => {
+  it("TC-STAT-U-012: returns empty array for no trades", () => {
     expect(computeEquityCurve([])).toHaveLength(0);
   });
 
-  it("returns cumulative sum sorted by date", () => {
+  it("TC-STAT-U-013: returns cumulative sum sorted by date", () => {
     const trades = [
       { netPnl: 100, outcome: "Win", exitDate: new Date("2025-01-03") },
       { netPnl: -50, outcome: "Loss", exitDate: new Date("2025-01-01") },
@@ -273,7 +284,7 @@ describe("computeEquityCurve — unit", () => {
 });
 
 describe("computeBreakdowns — unit", () => {
-  it("TC-STAT-U-003: groups records by property value", () => {
+  it("TC-STAT-U-014: groups records by property value", () => {
     const data = [
       {
         propertyName: "Direction",
@@ -295,7 +306,7 @@ describe("computeBreakdowns — unit", () => {
     expect(longItem?.winRate).toBeCloseTo(0.6667, 2);
   });
 
-  it("TC-STAT-U-003: null values grouped as em-dash", () => {
+  it("TC-STAT-U-015: null values grouped as em-dash", () => {
     const data = [
       {
         propertyName: "Setup",
@@ -313,35 +324,39 @@ describe("getKeyDatabasesOverview", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [StatisticsService, { provide: AppLogger, useValue: mockLogger }],
+      providers: [
+        StatisticsService,
+        { provide: AppLogger, useValue: mockLogger },
+        { provide: StatisticsRepository, useValue: mockRepository },
+      ],
     }).compile();
     service = module.get<StatisticsService>(StatisticsService);
     jest.clearAllMocks();
   });
 
-  it("TC-STAT-U-008: returns empty array when no key databases exist", async () => {
-    (prisma.database.findMany as jest.Mock).mockResolvedValue([]);
+  it("TC-STAT-U-016: returns empty array when no databases exist", async () => {
+    (mockRepository.findAllDatabases as jest.Mock).mockResolvedValue([]);
 
     const result = await service.getKeyDatabasesOverview("user-1", {});
 
     expect(result).toHaveLength(0);
   });
 
-  it("TC-STAT-U-008: returns one block per key database", async () => {
-    (prisma.database.findMany as jest.Mock).mockResolvedValue([
+  it("TC-STAT-U-017: returns one block per database", async () => {
+    (mockRepository.findAllDatabases as jest.Mock).mockResolvedValue([
       {
         id: "db-mistakes",
         type: "mistakes",
-        title: "Mistakes",
+        name: "Mistakes",
         icon: null,
         properties: [
           { id: "date-p", name: "Date", type: "DATE", integrationKey: null },
           { id: "cat-p", name: "Category", type: "SELECT", integrationKey: null },
         ],
       },
-      { id: "db-notes", type: "notes", title: "Notes", icon: null, properties: [] },
+      { id: "db-notes", type: "notes", name: "Notes", icon: null, properties: [] },
     ]);
-    (prisma.record.findMany as jest.Mock).mockResolvedValue([]);
+    (mockRepository.findRecordsByDatabaseIds as jest.Mock).mockResolvedValue([]);
 
     const result = await service.getKeyDatabasesOverview("user-1", {});
 
@@ -350,19 +365,19 @@ describe("getKeyDatabasesOverview", () => {
     expect(result[1].type).toBe("notes");
   });
 
-  it("TC-STAT-U-008: computes rating averages for RATING properties", async () => {
-    (prisma.database.findMany as jest.Mock).mockResolvedValue([
+  it("TC-STAT-U-018: computes rating averages for RATING properties", async () => {
+    (mockRepository.findAllDatabases as jest.Mock).mockResolvedValue([
       {
         id: "db-lib",
         type: "routine-library",
-        title: "Library",
+        name: "Library",
         icon: null,
         properties: [{ id: "sleep-p", name: "Sleep Quality", type: "RATING", integrationKey: null }],
       },
     ]);
-    (prisma.record.findMany as jest.Mock).mockResolvedValue([
-      { id: "r1", values: [{ propertyId: "sleep-p", value: 4 }] },
-      { id: "r2", values: [{ propertyId: "sleep-p", value: 2 }] },
+    (mockRepository.findRecordsByDatabaseIds as jest.Mock).mockResolvedValue([
+      { id: "r1", databaseId: "db-lib", values: [{ propertyId: "sleep-p", value: 4 }] },
+      { id: "r2", databaseId: "db-lib", values: [{ propertyId: "sleep-p", value: 2 }] },
     ]);
 
     const result = await service.getKeyDatabasesOverview("user-1", {});
@@ -372,12 +387,12 @@ describe("getKeyDatabasesOverview", () => {
     expect(result[0].ratingAverages[0].count).toBe(2);
   });
 
-  it("TC-STAT-U-008: enriches trading-journal block with tradingKpis", async () => {
-    (prisma.database.findMany as jest.Mock).mockResolvedValue([
+  it("TC-STAT-U-019: enriches trading-journal block with tradingKpis", async () => {
+    (mockRepository.findAllDatabases as jest.Mock).mockResolvedValue([
       {
         id: "db-tj",
         type: "trading-journal",
-        title: "Trading Journal",
+        name: "Trading Journal",
         icon: null,
         properties: [
           { id: "exit-p", name: "Exit Date", type: "DATE", integrationKey: "exitDate" },
@@ -386,9 +401,10 @@ describe("getKeyDatabasesOverview", () => {
         ],
       },
     ]);
-    (prisma.record.findMany as jest.Mock).mockResolvedValue([
+    (mockRepository.findRecordsByDatabaseIds as jest.Mock).mockResolvedValue([
       {
         id: "r1",
+        databaseId: "db-tj",
         values: [
           { propertyId: "exit-p", value: "2025-01-10T00:00:00Z" },
           { propertyId: "pnl-p", value: 200 },
@@ -406,7 +422,7 @@ describe("getKeyDatabasesOverview", () => {
 });
 
 describe("filterByDateRange — unit", () => {
-  it("TC-STAT-U-005: includes trades within range", () => {
+  it("TC-STAT-U-020: includes trades within range", () => {
     const trades = [
       { netPnl: 0, outcome: null, exitDate: new Date("2025-01-05") },
       { netPnl: 0, outcome: null, exitDate: new Date("2025-01-15") },
@@ -417,7 +433,7 @@ describe("filterByDateRange — unit", () => {
     expect(filtered[0].exitDate.toISOString().slice(0, 10)).toBe("2025-01-15");
   });
 
-  it("TC-STAT-U-005: returns all trades when no range given", () => {
+  it("TC-STAT-U-021: returns all trades when no range given", () => {
     const trades = [
       { netPnl: 0, outcome: null, exitDate: new Date("2025-01-01") },
       { netPnl: 0, outcome: null, exitDate: new Date("2025-06-01") },
@@ -427,7 +443,7 @@ describe("filterByDateRange — unit", () => {
 });
 
 describe("computeActivityCurve — unit", () => {
-  it("TC-STAT-U-008: groups records by date", () => {
+  it("TC-STAT-U-022: groups records by date", () => {
     const records = [
       { date: new Date("2025-01-01"), ratingValues: [], numberValues: [], selectValues: [] },
       { date: new Date("2025-01-01"), ratingValues: [], numberValues: [], selectValues: [] },
@@ -439,7 +455,7 @@ describe("computeActivityCurve — unit", () => {
     expect(curve[1].value).toBe(1);
   });
 
-  it("TC-STAT-U-008: skips records with no date", () => {
+  it("TC-STAT-U-023: skips records with no date", () => {
     const records = [
       { date: null, ratingValues: [], numberValues: [], selectValues: [] },
       { date: new Date("2025-01-01"), ratingValues: [], numberValues: [], selectValues: [] },
@@ -449,7 +465,7 @@ describe("computeActivityCurve — unit", () => {
 });
 
 describe("computeRatingAverages — unit", () => {
-  it("TC-STAT-U-008: computes average per RATING property", () => {
+  it("TC-STAT-U-024: computes average per RATING property", () => {
     const records = [
       { date: null, ratingValues: [{ propertyId: "p1", value: 4 }], numberValues: [], selectValues: [] },
       { date: null, ratingValues: [{ propertyId: "p1", value: 2 }], numberValues: [], selectValues: [] },
@@ -461,7 +477,7 @@ describe("computeRatingAverages — unit", () => {
 });
 
 describe("computeNumberSummaries — unit", () => {
-  it("TC-STAT-U-008: sums and averages NUMBER property values", () => {
+  it("TC-STAT-U-025: sums and averages NUMBER property values", () => {
     const records = [
       { date: null, ratingValues: [], numberValues: [{ propertyId: "p1", value: 100 }], selectValues: [] },
       { date: null, ratingValues: [], numberValues: [{ propertyId: "p1", value: 200 }], selectValues: [] },

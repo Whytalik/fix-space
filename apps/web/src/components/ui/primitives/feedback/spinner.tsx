@@ -1,7 +1,10 @@
+"use client";
+
 type SpinnerProps = {
   size?: "sm" | "md" | "lg";
   color?: "default" | "white";
   className?: string;
+  label?: string;
 };
 
 const SIZE_CLASSES = {
@@ -15,12 +18,12 @@ const COLOR_CLASSES = {
   white: "border-white/30 border-t-white",
 };
 
-export function Spinner({ size = "md", color = "default", className = "" }: SpinnerProps) {
+export function Spinner({ size = "md", color = "default", className = "", label = "Loading" }: SpinnerProps) {
   return (
     <div
       className={`rounded-full animate-spin ${SIZE_CLASSES[size]} ${COLOR_CLASSES[color]} ${className}`}
       role="status"
-      aria-label="Loading"
+      aria-label={label}
     />
   );
 }

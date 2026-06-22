@@ -24,30 +24,41 @@ export class PropertyValueRepository extends BaseRepository {
     });
   }
 
-  async upsert(recordId: string, propertyId: string, value: Prisma.InputJsonValue, computed: boolean, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).propertyValue.upsert({
+  async upsert(
+    recordId: string,
+    propertyId: string,
+    value: Prisma.InputJsonValue,
+    computed: boolean,
+    transaction?: Prisma.TransactionClient,
+  ) {
+    return (transaction ?? prisma).propertyValue.upsert({
       where: { recordId_propertyId: { recordId, propertyId } },
       update: { value, computed },
       create: { recordId, propertyId, value, computed },
     });
   }
 
-  async update(id: string, data: Prisma.PropertyValueUpdateInput, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).propertyValue.update({ where: { id }, data });
+  async update(id: string, data: Prisma.PropertyValueUpdateInput, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).propertyValue.update({ where: { id }, data });
   }
 
-  async updateByCompositeKey(recordId: string, propertyId: string, data: Prisma.PropertyValueUpdateInput) {
-    return prisma.propertyValue.update({
+  async updateByCompositeKey(
+    recordId: string,
+    propertyId: string,
+    data: Prisma.PropertyValueUpdateInput,
+    transaction?: Prisma.TransactionClient,
+  ) {
+    return (transaction ?? prisma).propertyValue.update({
       where: { recordId_propertyId: { recordId, propertyId } },
       data,
     });
   }
 
-  async createMany(data: Prisma.PropertyValueCreateManyInput[]) {
-    return prisma.propertyValue.createMany({ data });
+  async createMany(data: Prisma.PropertyValueCreateManyInput[], transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).propertyValue.createMany({ data });
   }
 
-  async delete(id: string, tx?: Prisma.TransactionClient) {
-    return (tx ?? prisma).propertyValue.delete({ where: { id } });
+  async delete(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).propertyValue.delete({ where: { id } });
   }
 }

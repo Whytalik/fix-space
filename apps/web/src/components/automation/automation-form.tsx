@@ -1,23 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, X, Zap } from "lucide-react";
+import { Plus } from "lucide-react";
+import { PropertyIcon } from "@/app/[locale]/(dashboard)/database/[id]/_components/properties/ui/property-icon";
 import { useTranslations } from "next-intl";
 import { AutomationActionType, AutomationTrigger, PropertyType } from "@fixspace/domain";
-import type { AutomationAction, AutomationResponseDto, CreateAutomationDto } from "@fixspace/domain";
+import type { AutomationAction, AutomationResponseDto, CreateAutomationDto, PropertyResponseDto } from "@fixspace/domain";
+import type { ComboboxOption } from "@/components/ui/primitives/inputs/combobox";
 import { Button } from "@/components/ui/primitives/actions/button";
 import { FormField } from "@/components/ui/form/form-field";
 import { TextInput } from "@/components/ui/primitives/inputs/text-input";
-import { Select } from "@/components/ui/primitives/inputs/select";
+import { NumberInput } from "@/components/ui/primitives/inputs/number-input";
+import { Combobox } from "@/components/ui/primitives/inputs/combobox";
 import { Toggle } from "@/components/ui/primitives/inputs/toggle";
 import { useAppContext } from "@/context/app-context";
 import { useDatabaseContext } from "@/context/database-context";
 import { useAutomationMutations } from "@/hooks/api/use-automation-mutations";
 import { parseApiError } from "@/lib/api/client";
 
+import { ActionRow } from "./components/action-row";
+import { AutomationGallery } from "./components/automation-gallery";
+
 interface AutomationFormProps {
   databaseId: string;
   automation?: AutomationResponseDto;
+  initialMode?: "view" | "edit";
   onSuccess?: () => void;
 }
 
@@ -46,10 +53,13 @@ interface TemplateItem {
   draft: TemplateDraft;
 }
 
-export function AutomationForm({ databaseId, automation, onSuccess }: AutomationFormProps) {
+export function AutomationForm({ databaseId, automation, initialMode, onSuccess }: AutomationFormProps) {
   const t = useTranslations("Automation");
   const { properties } = useDatabaseContext();
   const { databases } = useAppContext();
+
+  const [formMode, setFormMode] = useState<"view" | "edit">(initialMode ?? (automation ? "view" : "edit"));
+  const isViewMode = formMode === "view";
 
   const [step, setStep] = useState<"gallery" | "form">(automation ? "form" : "gallery");
   const [name, setName] = useState(automation?.name ?? "");
@@ -59,7 +69,7 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
   const [scheduleInterval, setScheduleInterval] = useState("daily");
   const [scheduleTime, setScheduleTime] = useState("09:00");
   const [scheduleDow, setScheduleDow] = useState("1");
-  const [scheduleDom, setScheduleDom] = useState("1");
+  const [scheduleDom, setScheduleDom] = useState<number | null>(1);
   const [actions, setActions] = useState<ActionDraft[]>([emptyAction()]);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,17 +88,23 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
       setScheduleInterval((automationConfig.interval as string) ?? "daily");
       setScheduleTime((automationConfig.time as string) ?? "09:00");
       setScheduleDow(String(automationConfig.dayOfWeek ?? 1));
-      setScheduleDom(String(automationConfig.dayOfMonth ?? 1));
+      setScheduleDom(Number(automationConfig.dayOfMonth ?? 1));
     }
     const rawActions = (automation.actions ?? []) as Array<Record<string, unknown>>;
     if (rawActions.length > 0) {
       setActions(
-        rawActions.map((a) => ({
-          type: (a.type as ActionType) ?? AutomationActionType.SET_FIELD_VALUE,
-          propertyId: (a.propertyId as string) ?? "",
-          value: (a.value as string) ?? "",
-          databaseId: (a.databaseId as string) ?? "",
-        })),
+        rawActions.map((a) => {
+          const valueType = a.valueType as string | undefined;
+          const rawValue = a.value as string | undefined;
+          let value = rawValue ?? "";
+          if (valueType === "TODAY") value = "$today";
+          return {
+            type: (a.type as ActionType) ?? AutomationActionType.SET_FIELD_VALUE,
+            propertyId: (a.propertyId as string) ?? "",
+            value,
+            databaseId: (a.databaseId as string) ?? "",
+          };
+        }),
       );
     }
   }, [automation]);
@@ -103,13 +119,11 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
     (database, index, allDatabases) => database.id !== databaseId && allDatabases.findIndex((item) => item.id === database.id) === index,
   );
 
-  const propertyOptions = [
-    { value: "", label: t("propertyPlaceholder") },
-    ...triggerableProps.map((p) => ({ value: p.id, label: p.name })),
-  ];
-  const writableOptions = [{ value: "", label: t("propertyPlaceholder") }, ...writableProps.map((p) => ({ value: p.id, label: p.name }))];
-  const relationOptions = [{ value: "", label: t("propertyPlaceholder") }, ...relationProps.map((p) => ({ value: p.id, label: p.name }))];
-  const dbOptions = [{ value: "", label: t("databasePlaceholder") }, ...otherDatabases.map((db) => ({ value: db.id, label: db.name }))];
+  function toOption(property: PropertyResponseDto): ComboboxOption {
+    return { value: property.id, label: property.name, iconElement: <PropertyIcon type={property.type} size={14} /> };
+  }
+
+  const writableOptions = [{ value: "", label: t("propertyPlaceholder") }, ...writableProps.map(toOption)];
 
   const templates: TemplateItem[] = [
     {
@@ -271,7 +285,7 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
       setScheduleInterval((templateConfig.interval as string) ?? "daily");
       setScheduleTime((templateConfig.time as string) ?? "09:00");
       setScheduleDow(String(templateConfig.dayOfWeek ?? 1));
-      setScheduleDom(String(templateConfig.dayOfMonth ?? 1));
+      setScheduleDom(Number(templateConfig.dayOfMonth ?? 1));
     }
     setStep("form");
   }
@@ -283,7 +297,7 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
     if (trigger === AutomationTrigger.ON_SCHEDULE) {
       const scheduleConfig: Record<string, unknown> = { interval: scheduleInterval, time: scheduleTime };
       if (scheduleInterval === "weekly") scheduleConfig.dayOfWeek = parseInt(scheduleDow);
-      if (scheduleInterval === "monthly") scheduleConfig.dayOfMonth = parseInt(scheduleDom);
+      if (scheduleInterval === "monthly") scheduleConfig.dayOfMonth = scheduleDom ?? 1;
       return scheduleConfig;
     }
     return undefined;
@@ -292,6 +306,9 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
   function buildActions() {
     return actions.map((action) => {
       if (action.type === AutomationActionType.SET_FIELD_VALUE) {
+        if (action.value === "$today") {
+          return { type: action.type, propertyId: action.propertyId, valueType: "TODAY" };
+        }
         return { type: action.type, propertyId: action.propertyId, valueType: "FIXED", value: action.value };
       }
       if (action.type === AutomationActionType.CREATE_RECORD) {
@@ -301,8 +318,8 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
     });
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     setError(null);
 
     const payload = {
@@ -344,181 +361,132 @@ export function AutomationForm({ databaseId, automation, onSuccess }: Automation
 
   if (step === "gallery") {
     return (
-      <div className="flex flex-col gap-4">
-        <p className="type-hint">{t("selectTemplateHint")}</p>
-
-        <div className="flex flex-col gap-2">
-          {templates.map((template) => (
-            <button
-              key={template.id}
-              type="button"
-              onClick={() => applyTemplate(template)}
-              className="text-left p-3 border border-stroke rounded-xl bg-surface hover:bg-canvas transition-colors"
-            >
-              <p className="type-form-label">{template.name}</p>
-              <p className="type-hint mt-0.5">
-                <span className="text-ink-secondary">{t("whenSection")}</span> {template.when} →{" "}
-                <span className="text-ink-secondary">{t("thenSection")}</span> {template.then}
-              </p>
-            </button>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            setName("");
-            setStep("form");
-          }}
-          className="text-left p-3 border border-stroke border-dashed rounded-xl bg-surface hover:bg-canvas transition-colors flex items-center gap-2"
-        >
-          <Zap size={14} className="text-ink-secondary" />
-          <span className="type-form-label">{t("startFromScratch")}</span>
-        </button>
-      </div>
+      <AutomationGallery
+        templates={templates}
+        onApplyTemplate={applyTemplate}
+        onStartFromScratch={() => {
+          setName("");
+          setStep("form");
+        }}
+      />
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <span className="type-form-label text-ink-secondary">{t("state")}</span>
-        <div className="flex items-center gap-2">
-          <span className="type-hint">{active ? t("active") : t("inactive")}</span>
-          <Toggle value={active} onChange={setActive} />
+      <div className={`flex flex-col gap-4${isViewMode ? " pointer-events-none opacity-60" : ""}`}>
+        <div className="flex items-center justify-between">
+          <span className="type-form-label text-ink-secondary">{t("state")}</span>
+          <div className="flex items-center gap-2">
+            <span className="type-hint">{active ? t("active") : t("inactive")}</span>
+            <Toggle value={active} onChange={setActive} />
+          </div>
         </div>
-      </div>
 
-      <FormField
-        id="automation-name"
-        label={t("name")}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder={t("namePlaceholder")}
-      />
-
-      <div className="flex flex-col gap-2 p-3 border border-stroke rounded-xl bg-canvas">
-        <p className="type-form-label text-accent">{t("whenSection")}</p>
-
-        <Select
-          value={trigger}
-          onChange={(e) => setTrigger(e.target.value as TriggerType)}
-          options={Object.values(AutomationTrigger).map((triggerValue) => ({ value: triggerValue, label: TRIGGER_LABELS[triggerValue] }))}
+        <FormField
+          id="automation-name"
+          label={t("name")}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          placeholder={t("namePlaceholder")}
         />
 
-        {trigger === AutomationTrigger.ON_FIELD_CHANGE && (
-          <Select value={fieldChangePropertyId} onChange={(e) => setFieldChangePropertyId(e.target.value)} options={propertyOptions} />
-        )}
+        <div className="flex flex-col gap-2 p-3 border border-stroke rounded-2xl bg-canvas">
+          <p className="type-form-label text-accent">{t("whenSection")}</p>
 
-        {trigger === AutomationTrigger.ON_SCHEDULE && (
-          <div className="flex flex-col gap-2">
-            <Select value={scheduleInterval} onChange={(e) => setScheduleInterval(e.target.value)} options={INTERVAL_OPTIONS} />
-            <div className="flex gap-2">
-              <TextInput value={scheduleTime} onChange={setScheduleTime} placeholder="09:00" type="time" size="sm" />
-              {scheduleInterval === "weekly" && (
-                <Select value={scheduleDow} onChange={(e) => setScheduleDow(e.target.value)} options={DOW_OPTIONS} className="flex-1" />
-              )}
-              {scheduleInterval === "monthly" && (
-                <TextInput value={scheduleDom} onChange={setScheduleDom} placeholder="1" type="number" size="sm" />
-              )}
+          <Combobox
+            value={trigger}
+            onChange={(value) => setTrigger(value as TriggerType)}
+            options={Object.values(AutomationTrigger).map((value) => ({ value, label: TRIGGER_LABELS[value] }))}
+          />
+
+          {trigger === AutomationTrigger.ON_FIELD_CHANGE && (
+            <Combobox
+              value={fieldChangePropertyId}
+              onChange={setFieldChangePropertyId}
+              options={triggerableProps.map(toOption)}
+              placeholder={t("propertyPlaceholder")}
+              nullable
+            />
+          )}
+
+          {trigger === AutomationTrigger.ON_SCHEDULE && (
+            <div className="flex flex-col gap-2">
+              <Combobox value={scheduleInterval} onChange={setScheduleInterval} options={INTERVAL_OPTIONS} />
+              <div className="flex gap-2">
+                <TextInput value={scheduleTime} onChange={setScheduleTime} placeholder="09:00" type="time" />
+                {scheduleInterval === "weekly" && (
+                  <div className="flex-1">
+                    <Combobox value={scheduleDow} onChange={setScheduleDow} options={DOW_OPTIONS} />
+                  </div>
+                )}
+                {scheduleInterval === "monthly" && (
+                  <NumberInput value={scheduleDom} onChange={setScheduleDom} placeholder="1" min={1} max={31} />
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2 p-3 border border-stroke rounded-2xl bg-canvas">
+          <p className="type-form-label text-accent">{t("thenSection")}</p>
+
+          {actions.map((action, index) => (
+            <ActionRow
+              key={index}
+              action={action}
+              index={index}
+              onUpdateAction={updateAction}
+              onDeleteAction={(actionIndex) => setActions((prev) => prev.filter((_, idx) => idx !== actionIndex))}
+              isDeleteDisabled={actions.length <= 1}
+              actionLabels={ACTION_LABELS}
+              writableOptions={writableOptions}
+              writableProps={writableProps}
+              relationProps={relationProps}
+              otherDatabases={otherDatabases}
+            />
+          ))}
+
+          {actions.length < 5 && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setActions((prev) => [...prev, emptyAction()])}
+              leftIcon={<Plus size={14} />}
+            >
+              {t("addAction")}
+            </Button>
+          )}
+        </div>
+
+        {error && <p className="text-xs text-error">{error}</p>}
       </div>
 
-      <div className="flex flex-col gap-2 p-3 border border-stroke rounded-xl bg-canvas">
-        <p className="type-form-label text-accent">{t("thenSection")}</p>
-
-        {actions.map((action, index) => (
-          <div key={index} className="flex flex-col gap-2 p-2 border border-stroke rounded-lg bg-surface">
-            <div className="flex items-center gap-2">
-              <Select
-                value={action.type}
-                onChange={(e) => updateAction(index, { type: e.target.value as ActionType, propertyId: "", databaseId: "" })}
-                options={Object.values(AutomationActionType).map((actionValue) => ({
-                  value: actionValue,
-                  label: ACTION_LABELS[actionValue],
-                }))}
-                className="flex-1"
-              />
-              {actions.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => setActions((prev) => prev.filter((_, actionIndex) => actionIndex !== index))}
-                  className="text-ink-secondary hover:text-error shrink-0"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-
-            {action.type === AutomationActionType.SET_FIELD_VALUE && (
-              <div className="grid grid-cols-2 gap-2">
-                <Select
-                  value={action.propertyId}
-                  onChange={(e) => updateAction(index, { propertyId: e.target.value })}
-                  options={writableOptions}
-                />
-                <TextInput
-                  value={action.value}
-                  onChange={(newValue) => updateAction(index, { value: newValue })}
-                  placeholder={t("thenSection")}
-                  size="sm"
-                />
-              </div>
-            )}
-
-            {action.type === AutomationActionType.CREATE_RECORD && (
-              <Select value={action.databaseId} onChange={(e) => updateAction(index, { databaseId: e.target.value })} options={dbOptions} />
-            )}
-
-            {action.type === AutomationActionType.LINK_RECORDS && (
-              <div className="flex flex-col gap-2">
-                <Select
-                  value={action.propertyId}
-                  onChange={(e) => updateAction(index, { propertyId: e.target.value })}
-                  options={relationOptions.length > 1 ? relationOptions : [{ value: "", label: t("noRelationFields") }]}
-                />
-                <Select
-                  value={action.databaseId}
-                  onChange={(e) => updateAction(index, { databaseId: e.target.value })}
-                  options={dbOptions}
-                />
-              </div>
-            )}
-          </div>
-        ))}
-
-        {actions.length < 5 && (
+      {isViewMode ? (
+        <div className="flex justify-end">
+          <Button type="button" size="sm" onClick={() => setFormMode("edit")}>
+            {t("edit")}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex gap-2">
           <Button
             type="button"
             variant="secondary"
             size="sm"
-            onClick={() => setActions((prev) => [...prev, emptyAction()])}
-            leftIcon={<Plus size={14} />}
+            onClick={() => {
+              if (automation) setFormMode("view");
+              else setStep("gallery");
+            }}
           >
-            {t("addAction")}
+            {t("back")}
           </Button>
-        )}
-      </div>
-
-      {error && <p className="text-xs text-error">{error}</p>}
-
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          onClick={() => {
-            if (!automation) setStep("gallery");
-          }}
-        >
-          {automation ? t("save") : t("back")}
-        </Button>
-        <Button type="submit" variant="primary" size="sm" loading={create.isPending || update.isPending}>
-          {t("save")}
-        </Button>
-      </div>
+          <Button type="submit" variant="primary" size="sm" loading={create.isPending || update.isPending}>
+            {t("save")}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

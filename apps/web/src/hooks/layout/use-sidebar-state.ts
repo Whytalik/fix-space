@@ -72,12 +72,19 @@ export function useSidebarState(initialCollapsed = false, initialExpandedSection
     });
   }
 
+  function setExpandedSectionsState(sections: string[]) {
+    setExpandedSections(new Set(sections));
+    localStorage.setItem("sidebar-expanded-sections", JSON.stringify(sections));
+    setCookie("sidebar-expanded-sections", JSON.stringify(sections));
+  }
+
   return {
     collapsed,
     toggle,
     setCollapsedState,
     expandedSections,
     toggleSection,
+    setExpandedSectionsState,
     isMounted,
     width,
     changeWidth,

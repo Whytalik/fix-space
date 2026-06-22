@@ -54,7 +54,6 @@ export class TemplateService {
           isDefault,
           position: dto.position ?? 0,
           content: (dto.content as any) ?? {},
-          config: (dto.config as any) ?? {},
         },
         transaction,
       );
@@ -82,6 +81,10 @@ export class TemplateService {
 
   async findAll(databaseId: string, userId: string): Promise<TemplateResponseDto[]> {
     this.logger.debug("Finding all templates", { databaseId });
+    const database = await this.databaseRepo.findDatabaseByOwner(databaseId, userId);
+    if (!database) {
+      throw new NotFoundException(t("errors.DATABASE_NOT_FOUND"));
+    }
     const templates = await this.templateRepo.findAllByDatabase(databaseId, userId);
     return templates.map((template) => new TemplateResponseDto(template as unknown as Partial<TemplateResponseDto>));
   }
@@ -123,7 +126,6 @@ export class TemplateService {
         },
         jsonFields: {
           content: updateTemplateDto.content,
-          config: updateTemplateDto.config,
         },
       });
 
@@ -198,7 +200,7 @@ export class TemplateService {
         });
       }
 
-      const updated = await this.templateRepo.update(id, { content: {}, config: {} }, undefined, transaction);
+      const updated = await this.templateRepo.update(id, { content: {} }, undefined, transaction);
 
       this.logger.log("Template reset", { id });
       return new TemplateResponseDto(updated as unknown as Partial<TemplateResponseDto>);

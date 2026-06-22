@@ -4,7 +4,7 @@ import { NameIconColorModal } from "@/components/ui/overlays/name-icon-color-mod
 import { useAppContext } from "@/context/app-context";
 import { useSectionSettingsQuery } from "@/hooks/api/use-section-settings-query";
 import { updateSpace } from "@/lib/api/space";
-import { DEFAULT_SECTION_SETTINGS } from "@fixspace/domain/enums";
+import { DEFAULT_SECTION_SETTINGS } from "@fixspace/domain";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 

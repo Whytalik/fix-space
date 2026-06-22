@@ -53,7 +53,7 @@ export function ResendVerificationForm({ initialEmail = "" }: ResendVerification
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder={t("emailPlaceholder")}
           className="field-input"
           disabled={loading}
         />

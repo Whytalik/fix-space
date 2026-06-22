@@ -7,7 +7,14 @@ interface SelectBreakdownChartProps {
   group: BreakdownGroupDto;
 }
 
-const COLORS = ["#2563eb", "#57f287", "#fee75c", "#ed4245", "#9494a8", "#00d2ff"];
+const COLORS = [
+  "var(--color-accent)",
+  "var(--color-success)",
+  "var(--color-warning)",
+  "var(--color-error)",
+  "var(--color-ink-secondary)",
+  "var(--color-chart-cyan)",
+];
 
 export function SelectBreakdownChart({ group }: SelectBreakdownChartProps) {
   const data = group.items.map((item) => ({ name: item.label, value: item.count }));
@@ -24,8 +31,8 @@ export function SelectBreakdownChart({ group }: SelectBreakdownChartProps) {
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ backgroundColor: "#222228", border: "1px solid #2a2a35", borderRadius: 8 }}
-              itemStyle={{ color: "#e8e8f0", fontSize: 11 }}
+              contentStyle={{ backgroundColor: "var(--color-elevated)", border: "1px solid var(--color-stroke)", borderRadius: 8 }}
+              itemStyle={{ color: "var(--color-ink)", fontSize: 11 }}
             />
           </PieChart>
         </ResponsiveContainer>

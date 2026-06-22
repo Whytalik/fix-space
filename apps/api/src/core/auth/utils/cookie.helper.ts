@@ -1,8 +1,12 @@
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 export interface CookieOptions {
   domain?: string;
   secure: boolean;
+}
+
+export function readRefreshTokenCookie(req: Request): string | undefined {
+  return req.cookies?.["refresh_token"] as string | undefined;
 }
 
 export function setAccessTokenCookie(res: Response, token: string, maxAgeMs: number, options: CookieOptions): void {

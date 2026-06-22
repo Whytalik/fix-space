@@ -14,7 +14,7 @@ export class DatabaseRepository extends BaseRepository {
     return (transaction ?? prisma).database.findFirst({ where: { name, spaceId } });
   }
 
-  async findUniqueSlug(baseSlug: string, spaceId: string, transaction?: Prisma.TransactionClient): Promise<string> {
+  async findUniqueSlug(baseSlug: string, spaceId: string, transaction?: Prisma.TransactionClient) {
     let slug = `${baseSlug}_copy`;
     let exists = await this.findByNameInSpace(slug, spaceId, transaction);
     let counter = 1;
@@ -28,18 +28,18 @@ export class DatabaseRepository extends BaseRepository {
     return slug;
   }
 
-  async findUniqueTitle(baseTitle: string, spaceId: string, transaction?: Prisma.TransactionClient): Promise<string> {
-    let title = `${baseTitle} (Copy)`;
-    let exists = await (transaction ?? prisma).database.findFirst({ where: { title, spaceId } });
+  async findUniqueName(baseName: string, spaceId: string, transaction?: Prisma.TransactionClient) {
+    let name = `${baseName} (Copy)`;
+    let exists = await this.findByNameInSpace(name, spaceId, transaction);
     let counter = 1;
 
     while (exists) {
-      title = `${baseTitle} (Copy ${counter})`;
-      exists = await (transaction ?? prisma).database.findFirst({ where: { title, spaceId } });
+      name = `${baseName} (Copy ${counter})`;
+      exists = await this.findByNameInSpace(name, spaceId, transaction);
       counter++;
     }
 
-    return title;
+    return name;
   }
 
   async findById(id: string, transaction?: Prisma.TransactionClient) {
@@ -102,7 +102,7 @@ export class DatabaseRepository extends BaseRepository {
     return (transaction ?? prisma).database.delete({ where: { id } });
   }
 
-  async exists(id: string): Promise<boolean> {
+  async exists(id: string) {
     const database = await prisma.database.findUnique({ where: { id }, select: { id: true } });
     return !!database;
   }

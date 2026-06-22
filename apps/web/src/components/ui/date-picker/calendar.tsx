@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { cn } from "@/utils/ui/cn";
 
@@ -11,7 +11,16 @@ interface CalendarProps {
 }
 
 export function Calendar({ date, onChange }: CalendarProps) {
-  const [viewDate, setViewDate] = useState(date);
+  const [viewDate, setViewDate] = useState(() => {
+    const parsed = dayjs(date);
+    return parsed.isValid() ? date : new Date();
+  });
+
+  useEffect(() => {
+    if (dayjs(date).isValid()) {
+      setViewDate(date);
+    }
+  }, [date]);
   const startOfMonth = dayjs(viewDate).startOf("month");
   const endOfMonth = dayjs(viewDate).endOf("month");
   const startDate = startOfMonth.startOf("week");

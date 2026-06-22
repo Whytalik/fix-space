@@ -21,6 +21,16 @@ export function createComponent(type: ContentComponentType): ContentComponentNod
     data = { html: "", level: 1, align: "left" };
   } else if (type === ContentComponentType.DIVIDER) {
     data = { style: "solid" };
+  } else if (type === ContentComponentType.CHECKLIST) {
+    data = { items: [{ id: crypto.randomUUID(), text: "", checked: false }] };
+  } else if (type === ContentComponentType.CALLOUT) {
+    data = { title: "", html: "", type: "info", icon: "icon:Info" };
+  } else if (type === ContentComponentType.TABLE) {
+    data = { headers: ["Column 1", "Column 2"], rows: [["", ""]] };
+  } else if (type === ContentComponentType.LIST) {
+    data = { items: [{ id: crypto.randomUUID(), html: "" }], listType: "bullet" };
+  } else if (type === ContentComponentType.LINKED_DATABASE) {
+    data = { databaseId: "" };
   } else {
     data = { html: "", align: "left" };
   }
@@ -69,6 +79,10 @@ export function deleteRow(schema: ContentSchema, rowId: string): ContentSchema {
   return { rows: schema.rows.filter((row) => row.id !== rowId) };
 }
 
+export function updateRow(schema: ContentSchema, rowId: string, patch: { paddingTop?: number; paddingBottom?: number }): ContentSchema {
+  return { rows: schema.rows.map((row) => (row.id === rowId ? { ...row, ...patch } : row)) };
+}
+
 export function moveRow(schema: ContentSchema, fromIndex: number, toIndex: number): ContentSchema {
   const rows = [...schema.rows];
   const removed = rows.splice(fromIndex, 1)[0];
@@ -89,6 +103,41 @@ export function addColumn(schema: ContentSchema, rowId: string): ContentSchema {
         width: columnIndex === count - 1 ? base + remainder : base,
       }));
       return { ...row, columns: newCols };
+    }),
+  };
+}
+
+export function setColumnCount(schema: ContentSchema, rowId: string, targetCount: number): ContentSchema {
+  return {
+    rows: schema.rows.map((row) => {
+      if (row.id !== rowId) return row;
+      const current = row.columns.length;
+      if (current === targetCount || targetCount < 1 || targetCount > 5) return row;
+
+      if (targetCount > current) {
+        const count = targetCount;
+        const base = Math.floor(100 / count);
+        const remainder = 100 - base * count;
+        const padded = Array.from({ length: count - current }, () => createColumn(0));
+        const newCols = [...row.columns, ...padded].map((column, i) => ({
+          ...column,
+          width: i === count - 1 ? base + remainder : base,
+        }));
+        return { ...row, columns: newCols };
+      }
+
+      const columnsToRemove = current - targetCount;
+      const remaining = row.columns.slice(0, current - columnsToRemove);
+      const count = remaining.length;
+      const base = Math.floor(100 / count);
+      const remainder = 100 - base * count;
+      return {
+        ...row,
+        columns: remaining.map((column, i) => ({
+          ...column,
+          width: i === count - 1 ? base + remainder : base,
+        })),
+      };
     }),
   };
 }

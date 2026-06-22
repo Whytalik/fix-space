@@ -1,9 +1,16 @@
 import { prisma } from "@fixspace/database";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "@jest/globals";
 import type { INestApplication } from "@nestjs/common";
-import type { Server } from "http";
 import supertest from "supertest";
-import { cleanupIntegrationApp, mockMailService, setupIntegrationApp, uniqueEmail, uniqueUsername } from "../utils/integration-setup";
+import {
+  cleanupIntegrationApp,
+  clearSharedMailCalls,
+  getServer,
+  getSharedMailCalls,
+  setupIntegrationApp,
+  uniqueEmail,
+  uniqueUsername,
+} from "../utils/integration-setup";
 
 const INTEGRATION_AUTH_MARKER = "integration-auth-test";
 
@@ -21,8 +28,8 @@ describe("AuthController (integration)", () => {
     await cleanupIntegrationApp(app, INTEGRATION_AUTH_MARKER);
   });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    await clearSharedMailCalls();
   });
 
   async function registerAndVerify(email: string, username: string, password: string): Promise<void> {
@@ -86,7 +93,8 @@ describe("AuthController (integration)", () => {
         .post("/auth/register")
         .send({ email: uniqueEmail(INTEGRATION_AUTH_MARKER), username: uniqueUsername(), password: "Password123!" });
 
-      expect(mockMailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
+      const calls = await getSharedMailCalls("sendVerificationEmail");
+      expect(calls).toHaveLength(1);
     });
   });
 
@@ -96,7 +104,8 @@ describe("AuthController (integration)", () => {
         .post("/auth/register")
         .send({ email: uniqueEmail(INTEGRATION_AUTH_MARKER), username: uniqueUsername(), password: "Password123!" });
 
-      const rawToken = mockMailService.sendVerificationEmail.mock.calls[0]?.[2] as string;
+      const verifyCalls = await getSharedMailCalls("sendVerificationEmail");
+      const rawToken = verifyCalls[0]?.args[2] as string;
 
       const res = await agent.post("/auth/verify").send({ token: rawToken });
 
@@ -164,7 +173,7 @@ describe("AuthController (integration)", () => {
     });
 
     it("should return 401 if no refresh_token cookie is provided", async () => {
-      const res = await supertest(app.getHttpServer() as Server).post("/auth/refresh");
+      const res = await supertest(getServer(app) as Parameters<typeof supertest>[0]).post("/auth/refresh");
 
       expect(res.status).toBe(401);
     });
@@ -214,12 +223,14 @@ describe("AuthController (integration)", () => {
       await registerAndVerify(email, uniqueUsername(), "Password123!");
 
       await agent.post("/auth/forgot-password").send({ email });
-      expect(mockMailService.sendPasswordResetEmail).toHaveBeenCalledTimes(1);
+      const callsBefore = await getSharedMailCalls("sendPasswordResetEmail");
+      expect(callsBefore).toHaveLength(1);
 
-      jest.clearAllMocks();
+      await clearSharedMailCalls();
 
       await agent.post("/auth/forgot-password").send({ email: "nobody2@nowhere.example.com" });
-      expect(mockMailService.sendPasswordResetEmail).not.toHaveBeenCalled();
+      const callsAfter = await getSharedMailCalls("sendPasswordResetEmail");
+      expect(callsAfter).toHaveLength(0);
     });
   });
 
@@ -230,9 +241,10 @@ describe("AuthController (integration)", () => {
     beforeAll(async () => {
       sharedEmail = uniqueEmail(INTEGRATION_AUTH_MARKER);
       await registerAndVerify(sharedEmail, uniqueUsername(), "Password123!");
-      jest.clearAllMocks();
+      await clearSharedMailCalls();
       await agent.post("/auth/forgot-password").send({ email: sharedEmail });
-      sharedToken = mockMailService.sendPasswordResetEmail.mock.calls[0]?.[1] as string;
+      const resetCalls = await getSharedMailCalls("sendPasswordResetEmail");
+      sharedToken = resetCalls[0]?.args[1] as string;
     });
 
     it("should reset password successfully with valid token", async () => {
@@ -257,9 +269,10 @@ describe("AuthController (integration)", () => {
       const email = uniqueEmail(INTEGRATION_AUTH_MARKER);
       await registerAndVerify(email, uniqueUsername(), "Password123!");
 
-      jest.clearAllMocks();
+      await clearSharedMailCalls();
       await agent.post("/auth/forgot-password").send({ email });
-      const token = mockMailService.sendPasswordResetEmail.mock.calls[0]?.[1] as string;
+      const weakPassCalls = await getSharedMailCalls("sendPasswordResetEmail");
+      const token = weakPassCalls[0]?.args[1] as string;
 
       const res = await agent.post("/auth/reset-password").send({ token, newPassword: "weak" });
 

@@ -34,7 +34,9 @@
     "sessionIndicator": {
       "opensAt": "at"
     },
-    "at": "at"
+    "at": "at",
+    "noSpace": "No space selected",
+    "noSpaceDesc": "Please select a space from the sidebar to view your dashboard."
   },
   "Header": {
     "logIn": "Log in",
@@ -167,6 +169,12 @@
     },
     "datePlaceholder": "Select date",
     "compare": "Compare",
+    "comparePresets": {
+      "prevMonth": "Previous month",
+      "prevQuarter": "Previous quarter",
+      "prevYear": "Previous year",
+      "custom": "Custom"
+    },
     "breakdowns": "Breakdowns",
     "loadError": "Failed to load statistics. Please try again.",
     "retry": "Retry",

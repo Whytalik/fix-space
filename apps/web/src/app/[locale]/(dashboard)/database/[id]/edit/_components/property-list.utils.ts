@@ -1,5 +1,5 @@
 import type { DatabaseResponseDto, PropertyResponseDto } from "@fixspace/domain";
-import { PropertyType } from "@fixspace/domain/enums";
+import { PropertyType } from "@fixspace/domain";
 
 export type GroupItem = { kind: "group"; id: string; name: string };
 export type PropItem = { kind: "property"; id: string; prop: PropertyResponseDto };
@@ -49,7 +49,7 @@ export function getConfigSummary(prop: PropertyResponseDto, databases?: Database
     }
     case PropertyType.RELATION: {
       const db = databases?.find((database) => database.id === config.relatedEntityId);
-      const databaseName = db ? (db.title ?? db.name) : config.relatedEntityId ? "Unknown DB" : "No database";
+      const databaseName = db ? db.name : config.relatedEntityId ? "Unknown DB" : "No database";
       const mult = config.multiple !== false ? "multiple" : "single";
       return `→ ${databaseName} · ${mult}`;
     }
@@ -64,7 +64,7 @@ export function buildFlatItems(properties: PropertyResponseDto[]): FlatItem[] {
   const seen = new Set<string>();
   const groupOrder: string[] = [];
   for (const property of sorted) {
-    const group = property.group ?? "";
+    const group = property.groupName ?? "";
     if (!seen.has(group)) {
       seen.add(group);
       groupOrder.push(group);
@@ -73,7 +73,7 @@ export function buildFlatItems(properties: PropertyResponseDto[]): FlatItem[] {
 
   const groups = new Map<string, PropertyResponseDto[]>();
   for (const group of groupOrder) groups.set(group, []);
-  for (const property of sorted) groups.get(property.group ?? "")!.push(property);
+  for (const property of sorted) groups.get(property.groupName ?? "")!.push(property);
 
   const items: FlatItem[] = [];
   for (const gName of groupOrder) {
@@ -88,7 +88,7 @@ export function buildFlatItems(properties: PropertyResponseDto[]): FlatItem[] {
 export function moveGroupBlock(items: FlatItem[], groupId: string, overId: string): FlatItem[] {
   const groupName = groupId.slice("group:".length);
   const block = items.filter(
-    (item) => item.id === groupId || (item.kind === "property" && ((item as PropItem).prop.group ?? "") === groupName),
+    (item) => item.id === groupId || (item.kind === "property" && ((item as PropItem).prop.groupName ?? "") === groupName),
   );
   const rest = items.filter((item) => !block.some((blockItem) => blockItem.id === item.id));
 
@@ -121,7 +121,7 @@ export function flatItemsToProperties(items: FlatItem[]): PropertyResponseDto[] 
       result.push({
         ...item.prop,
         position: position++,
-        group: isProtected ? "General" : currentGroup,
+        groupName: isProtected ? "General" : currentGroup,
       });
     }
   }

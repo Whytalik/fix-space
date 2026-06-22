@@ -5,7 +5,10 @@ import { BaseRepository } from "@/common/utils/base.repository";
 @Injectable()
 export class PropertyRepository extends BaseRepository {
   async findById(id: string) {
-    return prisma.property.findUnique({ where: { id } });
+    return prisma.property.findUnique({
+      where: { id },
+      include: { propertyGroup: { select: { name: true } } },
+    });
   }
 
   async findByNameInDatabase(name: string, databaseId: string) {
@@ -15,6 +18,7 @@ export class PropertyRepository extends BaseRepository {
   async findByIdWithOwner(id: string, userId: string) {
     return prisma.property.findFirst({
       where: { id, database: { space: { ownerId: userId } } },
+      include: { propertyGroup: { select: { name: true } } },
     });
   }
 
@@ -28,6 +32,7 @@ export class PropertyRepository extends BaseRepository {
     return prisma.property.findMany({
       where: { databaseId, database: { space: { ownerId: userId } } },
       orderBy: { position: "asc" },
+      include: { propertyGroup: { select: { name: true } } },
     });
   }
 
@@ -43,7 +48,7 @@ export class PropertyRepository extends BaseRepository {
     return (transaction ?? prisma).property.update({ where: { id }, data });
   }
 
-  async delete(id: string) {
-    return prisma.property.delete({ where: { id } });
+  async delete(id: string, transaction?: Prisma.TransactionClient) {
+    return (transaction ?? prisma).property.delete({ where: { id } });
   }
 }

@@ -3,10 +3,11 @@
 import { routing, usePathname, useRouter } from "@/i18n/routing";
 import { DropdownMenu } from "@/components/ui/overlays/dropdown-menu";
 import { Languages } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
 export function LanguageSwitcher({ variant }: { variant?: "dropdown" | "buttons" } = {}) {
+  const t = useTranslations("LandingNav");
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -46,7 +47,7 @@ export function LanguageSwitcher({ variant }: { variant?: "dropdown" | "buttons"
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Select language"
+        aria-label={t("selectLanguage")}
         className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-ink-secondary hover:text-ink hover:bg-surface transition-all duration-150"
       >
         <Languages size={18} className="text-ink-muted" />

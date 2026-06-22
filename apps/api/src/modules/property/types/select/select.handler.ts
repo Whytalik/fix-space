@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { t } from "@/common/utils/i18n.helper";
 import {
   DEFAULT_SELECT_PROPERTY,
   FilterOperator,
@@ -100,7 +101,7 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
       if (allOptions.length > 0) {
         const invalid = labels.filter((entry) => !allOptions.includes(entry));
         if (invalid.length > 0) {
-          return [`Invalid options: ${invalid.join(", ")}. Must be one of: ${allOptions.join(", ")}`];
+          return [t("errors.SELECT_INVALID_OPTIONS_MULTI", { invalid: invalid.join(", "), options: allOptions.join(", ") })];
         }
       }
     } else {
@@ -110,7 +111,7 @@ export class SelectHandler implements PropertyConfigHandler, PropertyValueHandle
       }
 
       if (allOptions.length > 0 && !allOptions.includes(label)) {
-        return [`Value must be one of the defined options: ${allOptions.join(", ")}`];
+        return [t("errors.SELECT_INVALID_OPTION", { value: label, options: allOptions.join(", ") })];
       }
     }
 

@@ -5,11 +5,10 @@
 [![Railway Deployment](https://img.shields.io/badge/Deploy-Railway-darkviolet?logo=railway&logoColor=white)](https://fix-space-production.up.railway.app/)
 [![codecov](https://codecov.io/gh/Whytalik/fix-space/graph/badge.svg)](https://codecov.io/gh/Whytalik/fix-space)
 [![Uptime Status](https://img.shields.io/badge/Uptime-Monitor-brightgreen?logo=uptimerobot&logoColor=white)](https://stats.uptimerobot.com/hD2QZnY8tn)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Whytalik_fix-space&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Whytalik_fix-space)
 
-- **🚀 Live Web App:** [https://fix-space-web.vercel.app/uk](https://fix-space-web.vercel.app/uk)
-- **⚡ Live REST API:** [https://fix-space-production.up.railway.app/](https://fix-space-production.up.railway.app/)
-- **📖 API Documentation (Swagger):** [https://fix-space-production.up.railway.app/api/docs](https://fix-space-production.up.railway.app/api/docs)
+- **🚀 Live Web App:** [https://www.fix-space.site/](https://www.fix-space.site/)
+- **⚡ Live REST API:** [https://www.fix-space.site/api](https://fix-space-production.up.railway.app/)
+- **📖 API Documentation (Swagger):** [fix-space.site/api/docs](https://fix-space-production.up.railway.app/api/docs)
 - **📊 Service Status Page (Uptime):** [https://stats.uptimerobot.com/hD2QZnY8tn](https://stats.uptimerobot.com/hD2QZnY8tn)
 
 > A personalized web platform for professional organization of CFD trader activity.

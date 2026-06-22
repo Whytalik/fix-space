@@ -16,6 +16,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiRespons
 import { CsvPreviewResponseDto, ImportResultResponseDto, ImportValidateResponseDto } from "@fixspace/domain";
 import { memoryStorage } from "multer";
 import type { Response } from "express";
+import { t } from "@/common/utils/i18n.helper";
 import { CurrentUser } from "@/core/auth/decorators/current-user.decorator";
 import { CsvPreviewUseCase } from "./providers/csv-preview.usecase";
 import { ValidateImportUseCase } from "./providers/validate-import.usecase";
@@ -30,6 +31,9 @@ const CSV_UPLOAD_SCHEMA = {
     databaseId: { type: "string", description: "Target database ID" },
     mapping: { type: "string", description: 'JSON: Record<csvColumn, propertyId | "__name__">' },
     maxRows: { type: "number", description: "Max rows to import (limit override)" },
+    addUnknownOptionPropertyIds: { type: "string", description: "JSON: string[] of property IDs whose unknown options should be added" },
+    partialImport: { type: "boolean", description: "If true, rows with field errors are imported with invalid fields skipped" },
+    templateId: { type: "string", description: "Template ID to assign to all imported records" },
   },
 };
 
@@ -52,10 +56,11 @@ export class ImportExportController {
   @ApiBody({ schema: CSV_UPLOAD_SCHEMA })
   @ApiResponse({ status: 200, description: "Preview generated.", type: CsvPreviewResponseDto })
   @ApiResponse({ status: 400, description: "Invalid file." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Database not found." })
   preview(@UploadedFile() file: Express.Multer.File, @Body("databaseId") databaseId: string, @CurrentUser("userId") userId: string) {
-    if (!file) throw new BadRequestException("file is required");
-    if (!databaseId) throw new BadRequestException("databaseId is required");
+    if (!file) throw new BadRequestException(t("errors.FILE_REQUIRED"));
+    if (!databaseId) throw new BadRequestException(t("errors.DATABASE_ID_REQUIRED"));
     return this.csvPreviewUseCase.execute(file, databaseId, userId);
   }
 
@@ -67,6 +72,7 @@ export class ImportExportController {
   @ApiBody({ schema: CSV_UPLOAD_SCHEMA })
   @ApiResponse({ status: 200, description: "Validation summary.", type: ImportValidateResponseDto })
   @ApiResponse({ status: 400, description: "Invalid file or mapping." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Database not found." })
   validate(
     @UploadedFile() file: Express.Multer.File,
@@ -74,8 +80,8 @@ export class ImportExportController {
     @Body("mapping") mappingRaw: string,
     @CurrentUser("userId") userId: string,
   ) {
-    if (!file) throw new BadRequestException("file is required");
-    if (!databaseId) throw new BadRequestException("databaseId is required");
+    if (!file) throw new BadRequestException(t("errors.FILE_REQUIRED"));
+    if (!databaseId) throw new BadRequestException(t("errors.DATABASE_ID_REQUIRED"));
     const mapping = this.parseMapping(mappingRaw);
     return this.validateImportUseCase.execute(file, databaseId, mapping, userId);
   }
@@ -88,19 +94,30 @@ export class ImportExportController {
   @ApiBody({ schema: CSV_UPLOAD_SCHEMA })
   @ApiResponse({ status: 200, description: "Import result.", type: ImportResultResponseDto })
   @ApiResponse({ status: 400, description: "Invalid file or mapping." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Database not found." })
   import(
     @UploadedFile() file: Express.Multer.File,
     @Body("databaseId") databaseId: string,
     @Body("mapping") mappingRaw: string,
     @Body("maxRows") maxRowsRaw: string | undefined,
+    @Body("addUnknownOptionPropertyIds") addUnknownOptionPropertyIdsRaw: string | undefined,
+    @Body("partialImport") partialImportRaw: string | undefined,
+    @Body("templateId") templateId: string | undefined,
     @CurrentUser("userId") userId: string,
   ) {
-    if (!file) throw new BadRequestException("file is required");
-    if (!databaseId) throw new BadRequestException("databaseId is required");
+    if (!file) throw new BadRequestException(t("errors.FILE_REQUIRED"));
+    if (!databaseId) throw new BadRequestException(t("errors.DATABASE_ID_REQUIRED"));
     const mapping = this.parseMapping(mappingRaw);
     const maxRows = maxRowsRaw !== undefined ? parseInt(maxRowsRaw, 10) : undefined;
-    return this.executeImportUseCase.execute(file, databaseId, mapping, userId, { maxRows });
+    const addUnknownOptionPropertyIds = addUnknownOptionPropertyIdsRaw ? JSON.parse(addUnknownOptionPropertyIdsRaw) : [];
+    const partialImport = partialImportRaw === "true";
+    return this.executeImportUseCase.execute(file, databaseId, mapping, userId, {
+      maxRows,
+      addUnknownOptionPropertyIds,
+      partialImport,
+      templateId: templateId ?? undefined,
+    });
   }
 
   @Get("export")
@@ -110,6 +127,7 @@ export class ImportExportController {
   @ApiQuery({ name: "includeMetaFields", type: Boolean, required: false, description: "Include name/createdAt/updatedAt (default: true)" })
   @ApiQuery({ name: "viewId", type: String, required: false, description: "View ID to apply active filters" })
   @ApiResponse({ status: 200, description: "CSV file." })
+  @ApiResponse({ status: 401, description: "Unauthorized." })
   @ApiResponse({ status: 404, description: "Database not found." })
   async export(
     @Query("databaseId") databaseId: string,
@@ -119,7 +137,7 @@ export class ImportExportController {
     @CurrentUser("userId") userId: string,
     @Res() res: Response,
   ) {
-    if (!databaseId) throw new BadRequestException("databaseId is required");
+    if (!databaseId) throw new BadRequestException(t("errors.DATABASE_ID_REQUIRED"));
 
     const propertyIds = propertyIdsRaw ? propertyIdsRaw.split(",").filter(Boolean) : undefined;
     const includeMetaFields = includeMetaFieldsRaw !== "false";
@@ -141,7 +159,7 @@ export class ImportExportController {
       if (typeof parsed !== "object" || Array.isArray(parsed)) throw new Error();
       return parsed as Record<string, string>;
     } catch {
-      throw new BadRequestException("mapping must be a valid JSON object");
+      throw new BadRequestException(t("errors.INVALID_MAPPING_JSON"));
     }
   }
 }

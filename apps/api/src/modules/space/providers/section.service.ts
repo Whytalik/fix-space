@@ -4,7 +4,7 @@ import { CreateSectionDto, SectionOperationDto, SectionOperationType, SectionRes
 import { AppLogger } from "@/common/logger/app-logger.service";
 import { filterUndefined } from "@/common/utils/filter-undefined";
 import { t } from "@/common/utils/i18n.helper";
-import { SettingsCategory } from "@/modules/settings/constants/settings.constants";
+import { SettingsCategory } from "@fixspace/domain";
 import { SettingsService } from "@/modules/settings/settings.service";
 import { SectionRepository } from "../repositories/section.repository";
 

@@ -5,13 +5,10 @@ import { useTemplatesQuery } from "@/hooks/api/use-templates-query";
 import { useCreateTemplate, useDeleteTemplate, useDuplicateTemplate, useResetTemplate } from "@/hooks/api/use-template-mutations";
 import { useUIContext } from "@/context/ui-context";
 import { useDatabaseContext } from "@/context/database-context";
-import { Copy, Pencil, Plus, Star, Trash2, RotateCcw } from "lucide-react";
+import { Copy, Plus, Star, Trash2, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useState } from "react";
 import { IconDisplay } from "@/components/ui/icons/icon-display";
-import { TemplateFormModal } from "./template-form-modal";
-import type { TemplateResponseDto } from "@fixspace/domain";
 
 interface EditTemplatesSectionProps {
   databaseId: string;
@@ -25,12 +22,19 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
   const { showConfirm, showError } = useUIContext();
   const { views } = useDatabaseContext();
 
-  useCreateTemplate(databaseId);
+  const createTemplateMutation = useCreateTemplate(databaseId);
   const deleteTemplateMutation = useDeleteTemplate(databaseId);
   const duplicateTemplateMutation = useDuplicateTemplate(databaseId);
   const resetTemplateMutation = useResetTemplate(databaseId);
 
-  const [modal, setModal] = useState<{ mode: "create" } | { mode: "edit"; template: TemplateResponseDto } | null>(null);
+  async function handleCreate() {
+    try {
+      const newTemplate = await createTemplateMutation.mutateAsync({ name: t("createTitle") });
+      router.push(`/database/${databaseId}/template/${newTemplate.id}`);
+    } catch (error) {
+      showError(error);
+    }
+  }
 
   async function handleDuplicate(id: string) {
     try {
@@ -89,8 +93,8 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
           variant="secondary"
           size="sm"
           className="flex items-center gap-1.5"
-          onClick={() => setModal({ mode: "create" })}
-          disabled={isLocked}
+          onClick={handleCreate}
+          disabled={isLocked || createTemplateMutation.isPending}
         >
           <Plus size={13} />
           {t("addTemplate")}
@@ -100,7 +104,7 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
       {templates.length === 0 ? (
         <div className="rounded-lg border border-dashed border-stroke flex flex-col items-center justify-center py-12 gap-3 bg-canvas/50">
           <p className="text-sm text-ink-muted">{t("noTemplates")}</p>
-          <Button variant="secondary" size="sm" onClick={() => setModal({ mode: "create" })} disabled={isLocked}>
+          <Button variant="secondary" size="sm" onClick={handleCreate} disabled={isLocked || createTemplateMutation.isPending}>
             {t("createFirst")}
           </Button>
         </div>
@@ -143,16 +147,6 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setModal({ mode: "edit", template });
-                  }}
-                  className="p-2 rounded-lg text-ink-muted hover:text-ink hover:bg-surface-hover transition-colors duration-150"
-                  title={t("editMeta")}
-                >
-                  <Pencil size={14} />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
                     handleDuplicate(template.id);
                   }}
                   className="p-2 rounded-lg text-ink-muted hover:text-ink hover:bg-surface-hover transition-colors duration-150"
@@ -184,15 +178,6 @@ export function EditTemplatesSection({ databaseId, isLocked }: EditTemplatesSect
             </div>
           ))}
         </div>
-      )}
-
-      {modal && (
-        <TemplateFormModal
-          mode={modal.mode}
-          template={modal.mode === "edit" ? modal.template : undefined}
-          databaseId={databaseId}
-          onClose={() => setModal(null)}
-        />
       )}
     </section>
   );

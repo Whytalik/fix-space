@@ -19,7 +19,8 @@ export class FormulaEngine {
 
       const ast = jsep(expression);
       const result = this.evalNode(ast, context);
-      return this.formatResult(result, resultType as unknown as PropertyType);
+      const finalType = (resultType as unknown as PropertyType) || this.inferType(result);
+      return this.formatResult(result, finalType);
     } catch (error) {
       this.logger.warn("Formula evaluation failed", { error: (error as Error).message });
       return null;
@@ -30,50 +31,76 @@ export class FormulaEngine {
     jsep(expression);
   }
 
-  private evalNode(node: jsep.Expression, ctx: Record<string, unknown>): unknown {
+  private inferType(value: unknown): PropertyType {
+    if (value === null || value === undefined) return PropertyType.TEXT;
+
+    if (typeof value === "number") return PropertyType.NUMBER;
+    if (typeof value === "boolean") return PropertyType.CHECKBOX;
+
+    if (value instanceof Date && !isNaN(value.getTime())) return PropertyType.DATE;
+
+    if (typeof value === "string") {
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
+        return PropertyType.DATE;
+      }
+      return PropertyType.TEXT;
+    }
+
+    return PropertyType.TEXT;
+  }
+
+  private evalNode(node: jsep.Expression, context: Record<string, unknown>): unknown {
     switch (node.type) {
       case "Literal":
         return (node as jsep.Literal).value;
 
       case "Identifier": {
         const name = (node as jsep.Identifier).name;
-        return name in ctx ? ctx[name] : null;
+        return name in context ? context[name] : null;
       }
 
       case "BinaryExpression": {
-        const n = node as jsep.BinaryExpression;
-        const left = this.evalNode(n.left, ctx);
-        const right = this.evalNode(n.right, ctx);
-        return this.applyBinary(n.operator, left, right);
+        const binaryExpression = node as jsep.BinaryExpression;
+        const left = this.evalNode(binaryExpression.left, context);
+        const right = this.evalNode(binaryExpression.right, context);
+        return this.applyBinary(binaryExpression.operator, left, right);
       }
 
       case "UnaryExpression": {
-        const n = node as jsep.UnaryExpression;
-        return this.applyUnary(n.operator, this.evalNode(n.argument, ctx));
+        const unaryExpression = node as jsep.UnaryExpression;
+        return this.applyUnary(unaryExpression.operator, this.evalNode(unaryExpression.argument, context));
       }
 
       case "ConditionalExpression": {
-        const n = node as jsep.ConditionalExpression;
-        return this.evalNode(n.test, ctx) ? this.evalNode(n.consequent, ctx) : this.evalNode(n.alternate, ctx);
+        const conditionalExpression = node as jsep.ConditionalExpression;
+        return this.evalNode(conditionalExpression.test, context)
+          ? this.evalNode(conditionalExpression.consequent, context)
+          : this.evalNode(conditionalExpression.alternate, context);
       }
 
       case "CallExpression": {
-        const n = node as jsep.CallExpression;
-        const fnName = ((n.callee as jsep.Identifier).name ?? "").toUpperCase();
-        const args = n.arguments.map((a) => this.evalNode(a as jsep.Expression, ctx));
+        const callExpression = node as jsep.CallExpression;
+        const callee = callExpression.callee as jsep.Identifier;
+        if (!callee.name) {
+          throw new Error("Only direct function calls are supported (e.g., ABS(x)), not member expressions (e.g., Math.abs(x))");
+        }
+        const fnName = callee.name.toUpperCase();
+        const args = callExpression.arguments.map((arg) => this.evalNode(arg as jsep.Expression, context));
         return this.callBuiltin(fnName, args);
       }
 
       case "ArrayExpression": {
-        const n = node as jsep.ArrayExpression;
-        return n.elements.map((e) => (e ? this.evalNode(e, ctx) : null));
+        const arrayExpression = node as jsep.ArrayExpression;
+        return arrayExpression.elements.map((element) => (element ? this.evalNode(element, context) : null));
       }
 
       case "MemberExpression": {
-        const n = node as jsep.MemberExpression;
-        const target = this.evalNode(n.object, ctx);
+        const memberExpression = node as jsep.MemberExpression;
+        const target = this.evalNode(memberExpression.object, context);
         if (target === null || target === undefined || typeof target !== "object") return null;
-        const key = n.computed ? this.evalNode(n.property, ctx) : (n.property as jsep.Identifier).name;
+        const key = memberExpression.computed
+          ? this.evalNode(memberExpression.property, context)
+          : (memberExpression.property as jsep.Identifier).name;
         return (target as Record<string, unknown>)[key as string] ?? null;
       }
 
@@ -93,8 +120,8 @@ export class FormulaEngine {
       case "*":
         return (left as number) * (right as number);
       case "/": {
-        const r = right as number;
-        return r === 0 ? null : (left as number) / r;
+        const divisor = right as number;
+        return divisor === 0 ? null : (left as number) / divisor;
       }
       case "%":
         return (left as number) % (right as number);
@@ -149,29 +176,29 @@ export class FormulaEngine {
 
       case "SUM": {
         const items = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
-        return items.reduce<number>((acc, v) => acc + (typeof v === "number" ? v : 0), 0);
+        return items.reduce<number>((acc, value) => acc + (typeof value === "number" ? value : 0), 0);
       }
 
       case "AVG": {
         const items = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
-        const nums = items.filter((v): v is number => typeof v === "number");
-        return nums.length === 0 ? null : nums.reduce((a, b) => a + b, 0) / nums.length;
+        const nums = items.filter((value): value is number => typeof value === "number");
+        return nums.length === 0 ? null : nums.reduce((acc, value) => acc + value, 0) / nums.length;
       }
 
       case "COUNT": {
         const items = Array.isArray(args[0]) ? args[0] : [];
-        return items.filter((v) => v !== null && v !== undefined).length;
+        return items.filter((value) => value !== null && value !== undefined).length;
       }
 
       case "MIN": {
         const items = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
-        const nums = items.filter((v): v is number => typeof v === "number");
+        const nums = items.filter((value): value is number => typeof value === "number");
         return nums.length === 0 ? null : Math.min(...nums);
       }
 
       case "MAX": {
         const items = Array.isArray(args[0]) ? (args[0] as unknown[]) : [];
-        const nums = items.filter((v): v is number => typeof v === "number");
+        const nums = items.filter((value): value is number => typeof value === "number");
         return nums.length === 0 ? null : Math.max(...nums);
       }
 

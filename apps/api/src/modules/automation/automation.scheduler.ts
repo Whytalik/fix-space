@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { SchedulerRegistry } from "@nestjs/schedule";
 import { CronJob } from "cron";
@@ -19,7 +19,7 @@ export interface AutomationScheduledEvent {
 }
 
 @Injectable()
-export class AutomationScheduler implements OnModuleInit {
+export class AutomationScheduler implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly logger: AppLogger,
     private readonly schedulerRegistry: SchedulerRegistry,
@@ -40,6 +40,14 @@ export class AutomationScheduler implements OnModuleInit {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       this.logger.warn("Could not register scheduled automations on startup — DB may not be ready", { error: errorMessage });
+    }
+  }
+
+  onModuleDestroy() {
+    this.logger.debug("Stopping all scheduled automations");
+    const automationJobNames = [...this.schedulerRegistry.getCronJobs().keys()].filter((name) => name.startsWith("automation-"));
+    for (const name of automationJobNames) {
+      this.schedulerRegistry.deleteCronJob(name);
     }
   }
 

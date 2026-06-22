@@ -7,6 +7,9 @@ import { PropertyRepository } from "@/modules/property/repositories/property.rep
 import { PropertyService } from "@/modules/property/property.service";
 import { PropertyValueRepository } from "@/modules/property-value/repositories/property-value.repository";
 import { RecordRepository } from "@/modules/record/repositories/record.repository";
+import { RecordService } from "@/modules/record/record.service";
+import { AutomationRepository } from "@/modules/automation/repositories/automation.repository";
+import { TemplateRepository } from "@/modules/template/repositories/template.repository";
 import { TemplateService } from "@/modules/template/template.service";
 import { ViewService } from "@/modules/view/view.service";
 import { SpaceRepository } from "../repositories/space.repository";
@@ -94,6 +97,9 @@ function setupFullMocks() {
     viewService: {
       create: jest.fn().mockResolvedValue({ id: "view-1" }),
     },
+    recordService: {
+      applyTemplate: jest.fn().mockResolvedValue({}),
+    },
     propertyRepo: {
       findManyByDatabase: jest
         .fn()
@@ -105,9 +111,17 @@ function setupFullMocks() {
     },
     recordRepo: {
       create: jest.fn().mockResolvedValue({ id: "rec-1", name: "Sample Trade" }),
+      findManyByDatabase: jest.fn().mockResolvedValue([]),
+      update: jest.fn().mockResolvedValue({}),
     },
     spaceRepo: {
       delete: jest.fn().mockResolvedValue({ id: "space-1" }),
+    },
+    automationRepo: {
+      create: jest.fn().mockResolvedValue({ id: "auto-1" }),
+    },
+    templateRepo: {
+      findDefaultInDatabase: jest.fn().mockResolvedValue(null),
     },
   };
   return mocks;
@@ -141,12 +155,15 @@ describe("InitializeUserSpaceUseCase", () => {
         { provide: PropertyService, useValue: mocks.propertyService },
         { provide: TemplateService, useValue: mocks.templateService },
         { provide: ViewService, useValue: mocks.viewService },
+        { provide: RecordService, useValue: mocks.recordService },
         { provide: InitializationConfigService, useValue: mockInitConfig },
         { provide: AppLogger, useValue: mockLogger },
         { provide: PropertyRepository, useValue: mocks.propertyRepo },
         { provide: PropertyValueRepository, useValue: mocks.propertyValueRepo },
         { provide: RecordRepository, useValue: mocks.recordRepo },
         { provide: SpaceRepository, useValue: mocks.spaceRepo },
+        { provide: AutomationRepository, useValue: mocks.automationRepo },
+        { provide: TemplateRepository, useValue: mocks.templateRepo },
       ],
     }).compile();
 
@@ -154,7 +171,7 @@ describe("InitializeUserSpaceUseCase", () => {
   });
 
   describe("initialize", () => {
-    it("TC-WS-U-006: should create default space with user's name", async () => {
+    it("TC-WS-U-010: should create default space with user's name", async () => {
       await useCase.initialize("user-1", "testuser");
 
       expect(mocks.spaceService.create).toHaveBeenCalledWith("user-1", {
@@ -164,7 +181,7 @@ describe("InitializeUserSpaceUseCase", () => {
       });
     });
 
-    it("TC-WS-U-006: should seed sections from config", async () => {
+    it("TC-WS-U-011: should seed sections from config", async () => {
       await useCase.initialize("user-1", "testuser");
 
       expect(mocks.sectionService.create).toHaveBeenCalledTimes(2);
@@ -172,13 +189,13 @@ describe("InitializeUserSpaceUseCase", () => {
       expect(mocks.sectionService.create).toHaveBeenCalledWith("space-1", expect.objectContaining({ name: "Analytics" }));
     });
 
-    it("TC-WS-U-006: should seed databases from config", async () => {
+    it("TC-WS-U-012: should seed databases from config", async () => {
       await useCase.initialize("user-1", "testuser");
 
       expect(mocks.databaseService.create).toHaveBeenCalledTimes(2);
     });
 
-    it("TC-WS-U-006: should seed properties with resolved relation references", async () => {
+    it("TC-WS-U-013: should seed properties with resolved relation references", async () => {
       await useCase.initialize("user-1", "testuser");
 
       expect(mocks.propertyService.create).toHaveBeenCalledTimes(3);
@@ -193,7 +210,7 @@ describe("InitializeUserSpaceUseCase", () => {
       );
     });
 
-    it("TC-WS-U-006: should seed records with property values", async () => {
+    it("TC-WS-U-014: should seed records with property values", async () => {
       await useCase.initialize("user-1", "testuser");
 
       expect(mocks.recordRepo.create).toHaveBeenCalledWith({
@@ -204,13 +221,13 @@ describe("InitializeUserSpaceUseCase", () => {
       expect(mocks.propertyValueRepo.createMany).toHaveBeenCalled();
     });
 
-    it("TC-WS-U-006: should seed templates from config", async () => {
+    it("TC-WS-U-015: should seed templates from config", async () => {
       await useCase.initialize("user-1", "testuser");
 
       expect(mocks.templateService.create).toHaveBeenCalledWith("db-1", expect.objectContaining({ name: "Default Template" }), "user-1");
     });
 
-    it("TC-WS-U-006: should rollback space on seed failure", async () => {
+    it("TC-WS-U-016: should rollback space on seed failure", async () => {
       const failingSectionService = {
         create: jest.fn().mockRejectedValue(new Error("Seed error")),
         processOperations: jest.fn(),
@@ -225,12 +242,15 @@ describe("InitializeUserSpaceUseCase", () => {
           { provide: PropertyService, useValue: mocks.propertyService },
           { provide: TemplateService, useValue: mocks.templateService },
           { provide: ViewService, useValue: mocks.viewService },
+          { provide: RecordService, useValue: mocks.recordService },
           { provide: InitializationConfigService, useValue: mockInitConfig },
           { provide: AppLogger, useValue: mockLogger },
           { provide: PropertyRepository, useValue: mocks.propertyRepo },
           { provide: PropertyValueRepository, useValue: mocks.propertyValueRepo },
           { provide: RecordRepository, useValue: mocks.recordRepo },
           { provide: SpaceRepository, useValue: mocks.spaceRepo },
+          { provide: AutomationRepository, useValue: mocks.automationRepo },
+          { provide: TemplateRepository, useValue: mocks.templateRepo },
         ],
       }).compile();
 

@@ -1,4 +1,4 @@
-import { PropertyType, SummaryMetric } from "@fixspace/domain/enums";
+import { PropertyType, SummaryMetric } from "@fixspace/domain";
 import type { RecordResponseDto } from "@fixspace/domain";
 
 export function calculateSummary(
@@ -124,7 +124,7 @@ export function getAvailableMetrics(type: PropertyType): SummaryMetric[] {
     case PropertyType.DURATION:
     case PropertyType.RATING:
     case PropertyType.PROGRESS:
-    case PropertyType.FORMULA: // Assuming numeric formula for now
+    case PropertyType.FORMULA:
       return [
         ...common,
         SummaryMetric.SUM,

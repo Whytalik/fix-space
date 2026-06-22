@@ -8,27 +8,28 @@ export const routineLibraryProperties: InitPropertyDef[] = [
     type: PropertyType.TEXT,
     position: 0,
     hint: "Назва вашого чеклиста або ритуалу.",
-    group: "General",
   },
   {
     name: "Date",
     type: PropertyType.DATE,
     position: 1,
+    icon: "icon:Calendar",
     config: DATE_CONFIG,
     hint: "Дата останнього перегляду або оновлення правил рутини.",
-    group: "General",
   },
   {
     name: "Sleep Quality",
     type: PropertyType.RATING,
     position: 2,
+    icon: "icon:Moon",
+    config: { maxStars: 5, allowHalf: true },
     hint: "Якість сну критично впливає на дисципліну та тильт.",
-    group: "Metrics",
   },
   {
     name: "Pre-Market State",
     type: PropertyType.SELECT,
     position: 3,
+    icon: "icon:Sunrise",
     config: {
       isMultiSelect: true,
       categories: [
@@ -48,12 +49,12 @@ export const routineLibraryProperties: InitPropertyDef[] = [
       ],
     },
     hint: "Ваш ментальний стан перед торгівлею.",
-    group: "Psychology",
   },
   {
     name: "Post-Market State",
     type: PropertyType.SELECT,
     position: 4,
+    icon: "icon:Sunset",
     config: {
       isMultiSelect: true,
       categories: [
@@ -73,19 +74,20 @@ export const routineLibraryProperties: InitPropertyDef[] = [
       ],
     },
     hint: "Емоційний результат після сесії.",
-    group: "Psychology",
   },
   {
     name: "Plan Adherence",
     type: PropertyType.RATING,
     position: 5,
+    icon: "icon:ClipboardCheck",
+    config: { maxStars: 5, allowHalf: true },
     hint: "Ваша загальна оцінка дисципліни за день.",
-    group: "Psychology",
   },
   {
     name: "Distractions",
     type: PropertyType.SELECT,
     position: 6,
+    icon: "icon:Bell",
     config: {
       isMultiSelect: true,
       categories: [
@@ -99,7 +101,6 @@ export const routineLibraryProperties: InitPropertyDef[] = [
       ],
     },
     hint: "Фактори, що заважали концентрації (дзвінки, соцмережі).",
-    group: "Psychology",
   },
   {
     name: "Daily Routines",
@@ -107,6 +108,5 @@ export const routineLibraryProperties: InitPropertyDef[] = [
     position: 7,
     config: { sourceDatabaseType: "daily-routine", multiple: true },
     hint: "Пов'язані сесії, де використовувався цей чеклист.",
-    group: "Relations",
   },
 ];

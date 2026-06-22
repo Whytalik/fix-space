@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head><meta charset="UTF-8"><title>Artillery Load Test Report</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; background: #f8f9fa; }
+h1 { color: #1a1a2e; }
+table { border-collapse: collapse; width: 100%; margin: 20px 0; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid #dee2e6; }
+th { background: #1a1a2e; color: #fff; font-weight: 600; }
+tr:nth-child(even) { background: #f8f9fa; }
+.mono { font-family: 'SF Mono', monospace; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-ok { background: #d4edda; color: #155724; }
+.summary-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 20px 0; }
+.stat { background: #fff; border-radius: 8px; padding: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+.stat-value { font-size: 28px; font-weight: 700; color: #1a1a2e; }
+.stat-label { font-size: 13px; color: #6c757d; margin-top: 4px; }
+h2 { margin-top: 32px; }
+</style></head>
+<body>
+<h1>Artillery Load Test Report</h1>
+<div class="summary-box">
+  <div class="stat"><div class="stat-value">6090</div><div class="stat-label">Total Requests</div></div>
+  <div class="stat"><div class="stat-value">51/s</div><div class="stat-label">Request Rate</div></div>
+  <div class="stat"><div class="stat-value">1815</div><div class="stat-label">VUs Completed</div></div>
+  <div class="stat"><div class="stat-value">0</div><div class="stat-label">VUs Failed</div></div>
+</div>
+
+<h2>Overall Response Time</h2>
+<table>
+  <tr><th>Metric</th><th>Value (ms)</th></tr>
+  <tr><td>min</td><td class="mono">0</td></tr>
+  <tr><td>mean</td><td class="mono">122.9</td></tr>
+  <tr><td>median (p50)</td><td class="mono"><strong>104.6</strong></td></tr>
+  <tr><td>p75</td><td class="mono">135.7</td></tr>
+  <tr><td>p90</td><td class="mono">295.9</td></tr>
+  <tr><td>p95</td><td class="mono"><strong>432.7</strong></td></tr>
+  <tr><td>p99</td><td class="mono">757.6</td></tr>
+  <tr><td>max</td><td class="mono">963</td></tr>
+</table>
+
+<h2>By Endpoint</h2>
+<table>
+  <tr><th>Endpoint</th><th>Count</th><th>Median (ms)</th><th>p95 (ms)</th><th>Mean (ms)</th></tr>
+<tr><td>/auth/login</td><td>-</td><td class="mono">125.2</td><td class="mono">608</td><td class="mono">201.1</td></tr>
+<tr><td>/spaces</td><td>-</td><td class="mono">104.6</td><td class="mono">487.9</td><td class="mono">130.2</td></tr>
+<tr><td>/databases</td><td>-</td><td class="mono">51.9</td><td class="mono">219.2</td><td class="mono">61.2</td></tr>
+<tr><td>/records</td><td>-</td><td class="mono">54.1</td><td class="mono">376.2</td><td class="mono">83</td></tr>
+<tr><td>/health</td><td>-</td><td class="mono">22</td><td class="mono">295.9</td><td class="mono">64.9</td></tr>
+</table>
+<h2>Intermediate Intervals</h2>
+<table><tr><th>#</th><th>Requests</th><th>Rate</th><th>Median (ms)</th><th>p95 (ms)</th><th>Errors</th></tr><tr><td>1</td><td>16</td><td>9/s</td>
+  <td class="mono">4</td><td class="mono">77.5</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>2</td><td>117</td><td>19/s</td>
+  <td class="mono">3</td><td class="mono">120.3</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>3</td><td>208</td><td>31/s</td>
+  <td class="mono">51.9</td><td class="mono">130.3</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>4</td><td>303</td><td>33/s</td>
+  <td class="mono">55.2</td><td class="mono">133</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>5</td><td>316</td><td>34/s</td>
+  <td class="mono">53</td><td class="mono">117.9</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>6</td><td>322</td><td>33/s</td>
+  <td class="mono">54.1</td><td class="mono">122.7</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>7</td><td>336</td><td>36/s</td>
+  <td class="mono">54.1</td><td class="mono">125.2</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>8</td><td>346</td><td>39/s</td>
+  <td class="mono">55.2</td><td class="mono">127.8</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>9</td><td>347</td><td>38/s</td>
+  <td class="mono">55.2</td><td class="mono">125.2</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>10</td><td>339</td><td>38/s</td>
+  <td class="mono">54.1</td><td class="mono">127.8</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>11</td><td>437</td><td>45/s</td>
+  <td class="mono">56.3</td><td class="mono">156</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>12</td><td>575</td><td>60/s</td>
+  <td class="mono">77.5</td><td class="mono">198.4</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>13</td><td>628</td><td>64/s</td>
+  <td class="mono">104.6</td><td class="mono">247.2</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>14</td><td>664</td><td>70/s</td>
+  <td class="mono">159.2</td><td class="mono">361.5</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>15</td><td>668</td><td>68/s</td>
+  <td class="mono">183.1</td><td class="mono">518.1</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+<tr><td>16</td><td>468</td><td>72/s</td>
+  <td class="mono">399.5</td><td class="mono">837.3</td>
+  <td><span class="badge badge-ok">0</span></td></tr>
+</table>
+<p style="color:#6c757d;margin-top:40px;">Generated: 2026-06-18T09:13:18.748Z | <code>test/load/report.json</code></p>
+</body></html>
