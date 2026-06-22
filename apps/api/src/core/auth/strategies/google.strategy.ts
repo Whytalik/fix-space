@@ -9,6 +9,7 @@ export interface GoogleUser {
   displayName: string;
   accessToken: string;
   refreshToken?: string;
+  avatarUrl?: string;
 }
 
 @Injectable()
@@ -36,6 +37,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
       displayName: profile.displayName ?? email.split("@")[0]!,
       accessToken,
       refreshToken: refreshToken ?? undefined,
+      avatarUrl: profile.photos?.[0]?.value ?? undefined,
     };
 
     done(null, googleUser);

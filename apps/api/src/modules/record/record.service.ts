@@ -273,6 +273,11 @@ export class RecordService {
         recordName = await parseNamePattern(template.namePattern, record.databaseId, transaction);
       }
 
+      let recordIcon = record.icon;
+      if (template.icon) {
+        recordIcon = template.icon;
+      }
+
       for (const templateValue of template.values) {
         if (templateValue.value !== undefined && templateValue.value !== null) {
           await transaction.propertyValue.upsert({
@@ -299,6 +304,7 @@ export class RecordService {
         data: {
           templateId,
           name: recordName,
+          icon: recordIcon,
         },
       });
 

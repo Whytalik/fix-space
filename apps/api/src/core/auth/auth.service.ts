@@ -307,7 +307,7 @@ export class AuthService {
       include: { user: true },
     });
 
-    let user: { id: string; username: string };
+    let user: { id: string; username: string; icon?: string | null };
 
     if (existingGoogleAccount) {
       await prisma.googleAccount.update({
@@ -319,6 +319,14 @@ export class AuthService {
         },
       });
       user = existingGoogleAccount.user;
+
+      if (!user.icon && googleUser.avatarUrl) {
+        const updatedUser = await prisma.user.update({
+          where: { id: user.id },
+          data: { icon: googleUser.avatarUrl },
+        });
+        user = updatedUser;
+      }
     } else {
       const existingUserByEmail = await prisma.user.findUnique({
         where: { email: googleUser.email },
@@ -335,14 +343,18 @@ export class AuthService {
           },
         });
 
-        if (!existingUserByEmail.isVerified) {
-          await prisma.user.update({
+        let updatedUser = existingUserByEmail;
+        if (!existingUserByEmail.isVerified || (!existingUserByEmail.icon && googleUser.avatarUrl)) {
+          updatedUser = await prisma.user.update({
             where: { id: existingUserByEmail.id },
-            data: { isVerified: true },
+            data: {
+              isVerified: true,
+              ...(!existingUserByEmail.icon && googleUser.avatarUrl && { icon: googleUser.avatarUrl }),
+            },
           });
         }
 
-        user = existingUserByEmail;
+        user = updatedUser;
       } else {
         const username = await this.generateUniqueUsername(googleUser.displayName);
 
@@ -353,6 +365,7 @@ export class AuthService {
               username,
               passwordHash: null,
               isVerified: true,
+              icon: googleUser.avatarUrl ?? null,
             },
           });
 

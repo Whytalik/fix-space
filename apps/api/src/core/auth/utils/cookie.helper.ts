@@ -26,7 +26,7 @@ export function setRefreshTokenCookie(res: Response, token: string, maxAgeMs: nu
     secure: options.secure,
     sameSite: "lax",
     domain: options.domain,
-    path: "/auth",
+    path: "/",
     maxAge: maxAgeMs,
   });
 }
@@ -40,7 +40,7 @@ export function clearAuthCookies(res: Response, options: CookieOptions): void {
   };
 
   res.clearCookie("access_token", { ...shared, path: "/" });
-  res.clearCookie("refresh_token", { ...shared, path: "/auth" });
+  res.clearCookie("refresh_token", { ...shared, path: "/" });
 }
 
 export function parseDurationToMs(duration: string): number {
