@@ -1,0 +1,4 @@
+{
+  "installCommand": "cd ../.. && pnpm install --prod=false",
+  "ignoreCommand": "npx turbo-ignore"
+}

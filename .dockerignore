@@ -1,0 +1,11 @@
+node_modules
+.git
+.github
+.claude
+docs
+**/dist
+**/.next
+**/coverage
+**/*.log
+**/.env*
+!**/.env.example

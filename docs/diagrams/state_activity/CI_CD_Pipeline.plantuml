@@ -1,0 +1,72 @@
+@startuml CI_CD_Pipeline
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 12
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #2563eb
+  BarColor #2563eb
+  StartColor #000000
+  EndColor #000000
+  ArrowColor #2563eb
+}
+
+title Алгоритм роботи CI/CD пайплайну (GitHub Actions)
+
+start
+
+partition "Continuous Integration (CI)" {
+  :Push / Pull Request;
+  
+  :Linting (ESLint/Prettier);
+  :Prisma Client Generation;
+  if (Лінтування успішне?) then (так)
+  else (ні)
+    :Зупинка пайплайну;
+    stop
+  endif
+
+  fork
+    :Unit Testing (Jest);
+    :Звіт про покриття (Codecov);
+  fork again
+    :Security Audit (pnpm audit);
+  end fork
+  
+  if (Тести та аудит успішні?) then (так)
+  else (ні)
+    :Повідомлення про помилку;
+    stop
+  endif
+
+  :Integration Testing\n(Supertest + PostgreSQL Service);
+  if (Інтеграційні тести успішні?) then (так)
+  else (ні)
+    stop
+  endif
+}
+
+partition "Continuous Delivery (CD)" {
+  :Build Artifacts\n(NestJS / Next.js);
+  :Збереження артефактів збірки;
+  
+  :Docker Build (API Image);
+  
+  if (Гілка develop?) then (так)
+    :Deploy to Staging (Railway);
+    :Збереження маніфесту деплою;
+  elseif (Гілка main?) then (так)
+    :Deploy to Production (Railway);
+    :Збереження маніфесту деплою;
+    :Vercel Deployment (автоматично);
+  else (ні)
+    :Завершення без деплою;
+  endif
+}
+
+:Сповіщення про результат;
+stop
+
+@enduml

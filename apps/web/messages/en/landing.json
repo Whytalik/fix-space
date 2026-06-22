@@ -1,0 +1,265 @@
+{
+  "Metadata": {
+    "title": "FIX Space · Conscious Trader's Workspace",
+    "description": "Trading journal, session routines, mistakes log, and strategy rules — seven pre-configured databases, broker import, and analytics, ready from day one."
+  },
+  "HomePage": {
+    "title": "One workspace. Built for conscious traders.",
+    "description": "Stop switching between five apps. FIX Space centralizes your trading journal, session routines, mistakes log, and strategy rules — nine pre-configured databases, broker import, and analytics, ready from day one.",
+    "startForFree": "Start for free",
+    "signIn": "Sign in"
+  },
+  "LandingNav": {
+    "problem": "Problem",
+    "dataTypes": "Data Types",
+    "market": "Market Analysis",
+    "solution": "Solution",
+    "features": "Databases",
+    "templates": "Templates",
+    "workflow": "Process",
+    "import": "Import",
+    "selectLanguage": "Select language"
+  },
+  "Footer": {
+    "diplomaProject": "Diploma project"
+  },
+  "Landing": {
+    "hero": {
+      "title": "FIX Space",
+      "subtitle": "Your entire trading experience in one environment.",
+      "description": "Trade parameters, notes, statistics, and mistakes are scattered across different places. We united them into a single ecosystem for deep analysis and growth.",
+      "startForFree": "Start for free",
+      "logIn": "Log in"
+    },
+    "fragmentation": {
+      "eyebrow": "The Problem",
+      "title": "Information Fragmentation",
+      "description": "Crucial data is distributed across multiple disconnected environments. This directly impacts trading performance.",
+      "focus": {
+        "title": "Loss of Concentration",
+        "description": "Using multiple apps creates cognitive load right when you need to make fast decisions."
+      },
+      "analysis": {
+        "title": "Complicated Analysis",
+        "description": "Manually gathering information from several sources makes retrospective analysis incredibly tedious."
+      },
+      "patterns": {
+        "title": "Hidden Patterns",
+        "description": "Without relations between data points, it's nearly impossible to identify systematic rule deviations and cognitive biases."
+      }
+    },
+    "approaches": {
+      "eyebrow": "Current Approaches",
+      "title": "Why current solutions fall short",
+      "description": "No single approach provides data centralization, structural flexibility, and support for all aspects of a trader's activity simultaneously.",
+      "googleSheets": "Google Sheets",
+      "googleSheetsDesc": "Spreadsheet approach",
+      "googleSheetsFeatures": {
+        "freedom": "Full freedom in structure customization.",
+        "manual": "User takes full responsibility for all calculations.",
+        "fragmentation": "Doesn't solve information fragmentation.",
+        "noImport": "No automatic trade import functionality."
+      },
+      "notion": "Notion",
+      "notionDesc": "Universal system",
+      "notionFeatures": {
+        "relations": "Ability to build relations between records.",
+        "centralization": "High level of data centralization in one place.",
+        "setup": "Steep learning curve and complex initial setup.",
+        "noAnalytics": "No built-in trading metrics or analytics tools."
+      },
+      "specializedJournals": "Specialized Journals",
+      "exampleGeneric": "e.g. TraderSync",
+      "readyDataModel": "Ready data model and analytics oriented around trading.",
+      "autoImport": "Auto-import from brokers, built-in statistics.",
+      "fixedStructure": "Fixed structure — can't adapt the system to your workflow.",
+      "paidOnly": "Limited capability for free-form note-taking."
+    },
+    "solution": {
+      "title": "A Unified Workspace",
+      "description": "FIX Space combines the flexibility of universal systems with the ready-made analytics of specialized journals.",
+      "FIX SpaceDescription": "Nine pre-configured databases ready on day one.",
+      "advancedRelations": "Database relations: link insights to specific trades or sessions.",
+      "richMedia": "22 types of components: charts, screenshots, tables, and TradingView embeds.",
+      "fullyCustomizable": "Fully customizable — adapt the structure to your trading style."
+    },
+    "instrumentTypes": {
+      "subtitle": "Key Data Types",
+      "description": "Throughout the day, a trader accumulates various information. The system structures it by core areas.",
+      "trades": {
+        "title": "Trades",
+        "description": "The core of activity. Operation parameters, P&L, and commissions. The foundation for primary analysis."
+      },
+      "dayAnalysis": {
+        "title": "Day Analysis",
+        "description": "Trade context. Train of thought, emotions, and charts before/after. Building patterns."
+      },
+      "notes": {
+        "title": "Notes",
+        "description": "The qualitative component of experience. Free structure, technical aspects, and knowledge base."
+      },
+      "mistakes": {
+        "title": "Mistakes",
+        "description": "Deviations from rules. Identifying behavioral patterns for targeted correction."
+      }
+    },
+    "workspace": "Workspace",
+    "everythingTrader": {
+      "title": "9 starting databases",
+      "description": "Nine databases with trade-aware properties, formula fields, and default templates — created automatically after registration.",
+      "group1": "Core Loop",
+      "group2": "Knowledge & Discipline",
+      "group3": "Infrastructure & Finance"
+    },
+    "features": {
+      "tradingJournal": {
+        "title": "Trading Journal",
+        "description": "Log every trade with full context — instrument, direction, entry/exit, P&L, R:R, and setups. Broker imports supported."
+      },
+      "dailyRoutine": {
+        "title": "Daily Routine",
+        "description": "Structure your pre-session prep and post-session review. Build habits that compound into systemic performance."
+      },
+      "performanceReview": {
+        "title": "Performance Review",
+        "description": "Weekly, monthly, and quarterly retrospectives for deep analysis of your trading performance."
+      },
+      "mistakes": {
+        "title": "Mistakes",
+        "description": "Track recurring behavioral errors and discipline breaks. Identify psychological patterns before they affect your capital."
+      },
+      "accounts": {
+        "title": "Accounts",
+        "description": "Monitor balances, drawdowns, and leverage across all your broker accounts. A complete financial overview."
+      },
+      "operations": {
+        "title": "Operations",
+        "description": "Transaction log: deposits, withdrawals, and internal transfers between accounts."
+      },
+      "tradingSystem": {
+        "title": "Trading System",
+        "description": "Document your strategy rules, entry criteria, and risk parameters. Version and evaluate your edge."
+      },
+      "notes": {
+        "title": "Notes",
+        "description": "Capture market observations, research, and insights in categorized records. Your personal library of edge."
+      },
+      "routineLibrary": {
+        "title": "Routine Library",
+        "description": "A library of pre-built blocks and checklists for your routines. Create once, reuse everywhere."
+      }
+    },
+    "templates": "Templates",
+    "neverBlankPage": {
+      "title": "Never start from a blank page",
+      "description": "FIX Space ships with pre-built templates for trade logs, session reviews, and strategy documents. When creating a new record, a template is applied automatically — you get a ready-made page structure and can start filling it immediately. Build your own templates to match your personal workflow."
+    },
+    "newRecordTemplate": "New record from template",
+    "postTradeAnalysis": "Post-Trade Analysis",
+    "newSetupIdea": "New Setup Idea",
+    "weeklyReview": "Weekly Review",
+    "monthlyReview": "Monthly Report",
+    "mistakeLog": "Mistake Log",
+    "tradingPlan": "Trading Plan",
+    "workflow": "Workflow",
+    "howItWorks": {
+      "title": "How it works",
+      "description": "From raw trade data to structured habits and measurable improvement — in three steps."
+    },
+    "howItWorksSteps": {
+      "step1": {
+        "title": "Capture every detail",
+        "description": "Log trades manually or via broker import. Apply templates for session reviews, attach screenshots, and link records to specific setup rules."
+      },
+      "step2": {
+        "title": "Analyze with precision",
+        "description": "Filter your journal by any custom property. Use formula fields and relations to identify which setups and market conditions drive your P&L."
+      },
+      "step3": {
+        "title": "Compound your edge",
+        "description": "Follow systematic routines and track psychological errors. Refine your Trading System based on hard data rather than intuition."
+      }
+    },
+    "import": "Import",
+    "automaticImport": {
+      "title": "Automatic import in seconds",
+      "description": "Upload your export file and FIX Space maps the fields, validates the data, and populates your Trading Journal automatically — no manual entry needed."
+    },
+    "unifiedWorkspace": "Unified trading workspace",
+    "importsInto": "imports into",
+    "allTradesSynced": "All trades synced",
+    "autoPnLCalculation": "Auto P&L calculation",
+    "linkedToJournal": "Linked to journal",
+    "cta": {
+      "title": "Turn your experience into capital.",
+      "description": "Stop losing edge to chaos. Start building your trading system on the foundation of FIX Space today. Free to start.",
+      "createAccount": "Create free account",
+      "signIn": "Sign in"
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Questions & Answers",
+      "description": "Everything you need to know about the platform and how it helps your trading.",
+      "contactSupport": "Contact Support",
+      "stillHaveQuestions": "Still have questions?",
+      "supportDescription": "Our team is ready to help you with any technical or trading inquiry.",
+      "categories": [
+        {
+          "title": "The Product",
+          "items": [
+            {
+              "q": "What is FIX Space?",
+              "a": "It's a simple, all-in-one place to keep track of your trades, thoughts, and progress. Instead of using multiple apps, you have one clean space for everything."
+            },
+            {
+              "q": "How is it better than simple spreadsheets?",
+              "a": "Spreadsheets can get messy and hard to manage. FIX Space is built specifically for trading, so all the calculations and organization are done for you."
+            },
+            {
+              "q": "What if I have a unique trading style?",
+              "a": "That's fine! You can easily add your own fields or change how your lists look to fit exactly how you trade. No technical skills required."
+            }
+          ]
+        },
+        {
+          "title": "Trading Workflow",
+          "items": [
+            {
+              "q": "How exactly does the system help me find my mistakes?",
+              "a": "It links every trade to specific rules and emotions. By looking at your history, the system shows which recurring errors (like FOMO) are costing you the most."
+            },
+            {
+              "q": "Is it possible to track my trading plan adherence?",
+              "a": "Absolutely. You can add your entry criteria as a checklist. The system then calculates your 'discipline score' for each trade."
+            },
+            {
+              "q": "Can I manage multiple broker accounts in one place?",
+              "a": "Yes. You can track balances and performance across different brokers and markets simultaneously in a single workspace."
+            },
+            {
+              "q": "Can I use this for both Crypto and Forex?",
+              "a": "Yes. The platform handles various markets. You can log Bitcoin futures alongside Euro currency pairs, each with its own specific parameters."
+            }
+          ]
+        },
+        {
+          "title": "Data & Security",
+          "items": [
+            {
+              "q": "Do I have to enter every trade manually?",
+              "a": "No. You can automatically connect your exchange or broker, and your trades will show up in your journal. Manual CSV upload is also supported."
+            },
+            {
+              "q": "Is my information private?",
+              "a": "Yes. Your data is isolated at the workspace level and we use industry-standard security. Your results and notes are for your eyes only."
+            },
+            {
+              "q": "What happens if I stop using the platform?",
+              "a": "You own your data. You can export everything at any time. If you delete your account, all your data is wiped from our servers immediately."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

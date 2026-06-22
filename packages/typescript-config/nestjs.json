@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": false,
+    "module": "CommonJS",
+    "ignoreDeprecations": "6.0",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false
+  }
+}

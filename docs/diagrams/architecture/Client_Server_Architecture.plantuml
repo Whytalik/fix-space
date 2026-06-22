@@ -1,0 +1,46 @@
+@startuml Client_Server_Architecture
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam nodesep 40
+skinparam ranksep 50
+
+skinparam componentBackgroundColor #FFFFFF
+skinparam componentBorderColor #2563eb
+skinparam componentArrowColor #2563eb
+skinparam databaseBackgroundColor #FFFFFF
+skinparam databaseBorderColor #2563eb
+skinparam actorBackgroundColor #FFFFFF
+skinparam actorBorderColor #2563eb
+skinparam actorArrowColor #2563eb
+
+left to right direction
+
+title Клієнт-серверна архітектура системи FIX Space
+
+actor "Користувач" as User
+
+package "Клієнт\n(Браузер)" as Client_Box #E3F2FD {
+  component "Next.js" as NextJS
+}
+
+package "Сервер\n(Railway PaaS)" as Server_Box #E8F5E9 {
+  component "NestJS 11\nREST API" as NestJS
+}
+
+package "Сховище даних" as Data_Box #F8F9FA {
+  database "PostgreSQL 16" as PgDB
+  database "Redis 7" as Redis
+}
+
+User --> NextJS : Взаємодія\nчерез браузер
+
+NextJS ..> NestJS : HTTPS / REST\n(JSON)
+
+NestJS ..> PgDB : SQL\n(Prisma ORM)
+NestJS ..> Redis : Кешування\n(ioredis)
+
+@enduml

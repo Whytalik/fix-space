@@ -1,0 +1,254 @@
+{
+  "UI": {
+    "close": "Закрити",
+    "confirm": "Підтвердити",
+    "cancel": "Скасувати",
+    "loading": "Завантаження"
+  },
+  "Search": {
+    "placeholder": "Пошук записів...",
+    "hint": "Почніть вводити текст для пошуку по всьому простору",
+    "noResults": "Немає результатів для",
+    "error": "Пошук не вдався. Спробуйте ще раз."
+  },
+  "NameIconColorModal": {
+    "chooseIcon": "Вибрати іконку",
+    "chooseColor": "Вибрати колір",
+    "nameLabel": "Назва",
+    "descriptionLabel": "Опис"
+  },
+  "AddSection": {
+    "title": "Нова секція",
+    "chooseIcon": "Вибрати іконку",
+    "chooseColor": "Вибрати колір",
+    "placeholder": "Назва секції",
+    "creating": "Створення...",
+    "add": "Додати секцію"
+  },
+  "SectionEdit": {
+    "title": "Редагувати секцію",
+    "chooseIcon": "Вибрати іконку",
+    "chooseColor": "Вибрати колір",
+    "placeholder": "Назва секції",
+    "saving": "Збереження...",
+    "save": "Зберегти зміни"
+  },
+  "RecordModal": {
+    "editTitle": "Редагувати запис",
+    "newTitle": "Новий запис",
+    "noEditableProperties": "Немає властивостей для редагування.",
+    "cancel": "Скасувати",
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни",
+    "create": "Створити"
+  },
+  "Breadcrumbs": {
+    "database": "База даних"
+  },
+  "SortPanel": {
+    "title": "Сортування",
+    "locked": "Заблоковано",
+    "clearAll": "Очистити все",
+    "noRules": "Немає правил сортування. Додайте одне нижче.",
+    "selectField": "Вибрати поле…",
+    "addSort": "+ Додати сортування",
+    "createdAt": "Дата створення",
+    "updatedAt": "Дата оновлення",
+    "ascending": "За зростанням",
+    "descending": "За спаданням",
+    "asc": "ЗРОС",
+    "desc": "СПАД"
+  },
+  "FilterPanel": {
+    "title": "Фільтр",
+    "locked": "Заблоковано",
+    "clearAll": "Очистити все",
+    "noRules": "Немає правил фільтрації. Додайте одне нижче.",
+    "selectProperty": "Вибрати властивість…",
+    "addFilter": "+ Додати фільтр",
+    "createdAt": "Дата створення",
+    "updatedAt": "Дата оновлення",
+    "pickValues": "Вибрати значення…",
+    "pickStatus": "Вибрати статус…",
+    "pickOption": "Вибрати варіант…",
+    "value": "Значення…",
+    "operators": {
+      "equals": "дорівнює",
+      "notEquals": "не дорівнює",
+      "contains": "містить",
+      "notContains": "не містить",
+      "startsWith": "починається з",
+      "endsWith": "закінчується на",
+      "isEmpty": "порожнє",
+      "isNotEmpty": "не порожнє",
+      "greaterThan": ">",
+      "lessThan": "<",
+      "greaterThanOrEqual": "більше або дорівнює",
+      "lessThanOrEqual": "менше або дорівнює",
+      "on": "на дату",
+      "before": "до",
+      "after": "після",
+      "onOrBefore": "на дату або раніше",
+      "onOrAfter": "на дату або пізніше",
+      "isChecked": "вибрано",
+      "isUnchecked": "не вибрано",
+      "isExactly": "точно це",
+      "isNotExactly": "це не",
+      "isOneOf": "один з",
+      "isNotOneOf": "не один з"
+    }
+  },
+  "GroupPanel": {
+    "groupBy": "Групувати за",
+    "locked": "Заблоковано",
+    "noGrouping": "Без групування",
+    "selectField": "Вибрати поле…",
+    "selectProperty": "Вибрати властивість…",
+    "selectGranularity": "Вибрати гранулярність…",
+    "groups": "Групи",
+    "createdAt": "Дата створення",
+    "updatedAt": "Дата оновлення",
+    "property": "Властивість",
+    "day": "День",
+    "week": "Тиждень",
+    "month": "Місяць",
+    "year": "Рік",
+    "changeColor": "Змінити колір",
+    "showGroup": "Показати групу",
+    "hideGroup": "Сховати групу"
+  },
+  "RelationInput": {
+    "searchRecords": "Пошук записів…",
+    "loading": "Завантаження записів…",
+    "dbDeleted": "БД видалено",
+    "targetDbDeleted": "Цільову базу даних видалено",
+    "selectRecord": "Вибрати запис...",
+    "selectRecords": "Вибір записів",
+    "noRecordsFound": "Записів не знайдено",
+    "selectedCount": "{count} вибрано",
+    "applyChanges": "Застосувати зміни",
+    "untitled": "Без назви",
+    "cancel": "Cancel"
+  },
+  "IconPicker": {
+    "searchIcons": "Пошук іконок…",
+    "noIconsFound": "Іконок не знайдено",
+    "tabAll": "Усі",
+    "tabTrading": "Трейдинг"
+  },
+  "ColorPicker": {
+    "hexPlaceholder": "rrggbb",
+    "invalidHex": "Недійсний hex колір",
+    "save": "Зберегти",
+    "noColor": "Без кольору"
+  },
+  "PropertyInput": {
+    "enterText": "Введіть текст…",
+    "checked": "Відмічено",
+    "select": "Вибрати…",
+    "none": "— Немає —"
+  },
+  "Combobox": {
+    "search": "Пошук…",
+    "addMore": "Додати ще…"
+  },
+  "RecordPage": {
+    "noProperties": "Для цієї бази даних не визначено властивостей.",
+    "untitled": "Без назви",
+    "changeIcon": "Змінити іконку"
+  },
+  "EditPage": {
+    "noProperties": "Для цієї бази даних не визначено властивостей."
+  },
+  "SearchModal": {
+    "searchFailed": "Пошук не вдався. Спробуйте ще раз.",
+    "searchRecords": "Пошук записів...",
+    "startTyping": "Почніть вводити текст для пошуку по всьому простору",
+    "noResults": "Немає результатів для",
+    "recentSearches": "Нещодавні пошуки",
+    "minChars": "Введіть щонайменше 2 символи",
+    "showAllResults": "Показати всі результати в {database}"
+  },
+  "SectionItem": {
+    "options": "Опції",
+    "addDatabase": "Додати базу даних",
+    "edit": "Редагувати",
+    "duplicate": "Дублювати",
+    "delete": "Видалити",
+    "editSection": "Редагувати секцію",
+    "chooseIcon": "Вибрати іконку",
+    "chooseColor": "Вибрати колір",
+    "sectionName": "Назва секції",
+    "saving": "Збереження...",
+    "saveChanges": "Зберегти зміни",
+    "deleteSection": "Видалити секцію",
+    "deleteSectionDesc": "Секцію буде видалено. Бази даних всередині стануть без секції.",
+    "deleting": "Видалення...",
+    "sectionDuplicated": "Секцію успішно дубльовано."
+  },
+  "EditActions": {
+    "saving": "Збереження…",
+    "saveChanges": "Зберегти зміни",
+    "cancel": "Скасувати"
+  },
+  "EditTableView": {
+    "primary": "Основний",
+    "showColumn": "Показати стовпець",
+    "hideColumn": "Сховати стовпець",
+    "noPropertiesYet": "Властивостей ще немає."
+  },
+  "RecordPageComp": {
+    "recordNotFound": "Запис не знайдено.",
+    "deleteRecord": "Видалити запис",
+    "deleteRecordDesc": "Цей запис буде видалено назавжди.",
+    "deleting": "Видалення…",
+    "delete": "Видалити"
+  },
+  "RecordHeaderComp": {
+    "hideProperties": "Сховати властивості",
+    "showProperties": "Показати властивості",
+    "saving": "Збереження…",
+    "viewMode": "Режим перегляду",
+    "editMode": "Режим редагування",
+    "deleteRecord": "Видалити запис"
+  },
+  "SectionEditModal": {
+    "editSection": "Редагувати секцію",
+    "chooseIcon": "Вибрати іконку",
+    "chooseColor": "Вибрати колір",
+    "sectionName": "Назва секції",
+    "saving": "Збереження...",
+    "saveChanges": "Зберегти зміни"
+  },
+  "GlobalError": {
+    "title": "Щось пішло не так",
+    "description": "Сталася неочікувана помилка. Ви можете спробувати ще раз або повернутися до робочого простору.",
+    "error": "Помилка",
+    "tryAgain": "Спробувати ще раз",
+    "goWorkspace": "Перейти до робочого простору"
+  },
+  "CookieBanner": {
+    "title": "Ми цінуємо вашу конфіденційність",
+    "description": "Ми використовуємо файли cookie для покращення вашого досвіду перегляду та аналізу нашого трафіку. Натискаючи «Прийняти», ви погоджуєтеся на використання нами файлів cookie.",
+    "accept": "Прийняти",
+    "decline": "Відхилити"
+  },
+  "DuplicationModal": {
+    "title": "Дублювати {type}",
+    "newName": "Нова назва",
+    "includeSections": "Включити секції",
+    "includeDatabases": "Включити бази даних",
+    "includeProperties": "Включити властивості",
+    "includeTemplates": "Включити шаблони",
+    "includeAutomations": "Включити автоматизації",
+    "includeRecords": "Включити записи",
+    "duplicate": "Дублювати",
+    "duplicating": "Дублювання...",
+    "cancel": "Скасувати",
+    "types": {
+      "workspace": "робочий простір",
+      "database": "базу даних",
+      "section": "секцію"
+    }
+  }
+}

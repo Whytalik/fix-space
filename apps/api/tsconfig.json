@@ -1,0 +1,17 @@
+{
+  "extends": "@fixspace/typescript-config/nestjs.json",
+  "include": ["src/**/*"],
+  "exclude": ["src/modules/_disabled/**/*", "**/*.spec.ts"],
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "paths": {
+      "@/common/*": ["src/common/*"],
+      "@/core/*": ["src/core/*"],
+      "@/modules/*": ["src/modules/*"]
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "PrivacyPolicy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: June 4, 2026",
+    "introduction": "We value your privacy. This Policy explains how FIX Space collects, uses, and protects your data.",
+    "dataCollection": {
+      "title": "1. Data Collection",
+      "description": "We collect the following types of data:",
+      "items": [
+        "Account data: Email and name during registration or via Google OAuth.",
+        "Workspace data: Databases, records, and automation configurations created by you.",
+        "Integrations: Your API keys (Binance, Bybit, etc.) are stored exclusively in encrypted form."
+      ]
+    },
+    "security": {
+      "title": "2. Security and Protection",
+      "description": "Your data is protected using modern standards:",
+      "items": [
+        "Password hashing using the bcrypt algorithm.",
+        "Authentication via JWT (JSON Web Tokens) in secure HttpOnly cookies.",
+        "Complete data isolation between different workspaces."
+      ]
+    },
+    "rights": {
+      "title": "3. Your Rights (GDPR)",
+      "description": "You have the right to access, correct, or delete your personal data at any time through profile settings or by contacting us."
+    }
+  },
+  "TermsOfService": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: June 6, 2026",
+    "agreement": "This Terms of Use Agreement (hereinafter — the «Terms») is a legally binding document governing the relationship between the administration of the FIX Space web platform (hereinafter — the «Platform») and any individual (hereinafter — the «User») who uses the Platform's services. Please read these Terms carefully before you begin using the service. By creating an account or accessing the Platform, you confirm your full and unconditional agreement to all provisions of this Agreement.",
+    "sections": {
+      "0": {
+        "title": "1. Nature of the Service and Financial Disclaimer",
+        "description": "FIX Space is exclusively a technological and analytical tool designed for maintaining a personal trading journal and statistical analysis of financial market results. The Platform is not a financial institution, broker, dealer, or investment advisor.",
+        "items": [
+          "No information, analytical reports, charts, mathematical calculations (including but not limited to: Win Rate, Profit Factor, P&L, RR), or any other content provided by the Platform constitutes or can be considered individual investment advice, financial advice, or a call to perform any operations in the securities, currency, or derivatives markets.",
+          "The User assumes full and sole responsibility for all their trading decisions and their financial consequences. The Platform is not liable for any direct, indirect, incidental, or special damages, including loss of capital, arising from the use of the Platform's analytical data."
+        ]
+      },
+      "1": {
+        "title": "2. Registration, Security, and Age Restrictions",
+        "description": "To gain full access to the Platform's functionality, the User must complete the registration procedure. Use of the service is permitted only to persons who have reached the age of 18 and possess full legal capacity.",
+        "items": [
+          "The User is personally responsible for maintaining the confidentiality of their account credentials (login, password) and for the security of active sessions on their devices.",
+          "Any actions performed under the User's account are considered to have been performed by the User unless proven otherwise.",
+          "The Platform reserves the right to request proof of age or identity in case of suspicion of security policy violations."
+        ]
+      },
+      "2": {
+        "title": "3. Integrations and Third-Party Data",
+        "description": "FIX Space supports automatic synchronization of trades with external trading platforms and cryptocurrency exchanges (Binance, Bybit, MT5, cTrader, etc.) via Application Programming Interfaces (APIs) or OAuth authorization.",
+        "items": [
+          "When connecting third-party services, the User agrees to provide the Platform exclusively with API keys with «Read-only» permissions.",
+          "The Platform applies algorithms to block keys with trading or withdrawal permissions; however, FIX Space is not responsible for the consequences of using incorrectly configured or compromised keys provided by the User.",
+          "Data synchronization depends on the stability of third-party APIs. The Platform does not guarantee 100% accuracy or continuity of data transfer in case of technical failures on the exchange or broker side."
+        ]
+      },
+      "3": {
+        "title": "4. Acceptable Use Policy and Limits",
+        "description": "To ensure stable and fair operation of the service for all participants, technical limits and rules of ethical use apply to the Platform.",
+        "items": [
+          "Established limits: up to 5 independent Workspaces, up to 10 automations per database, and a maximum CSV import file size of 25 MB.",
+          "Strictly prohibited: reverse engineering of the Platform, use of any automated scripts for data collection (scraping), attempts to bypass the security system, or disruption of server performance.",
+          "The User may not use the Platform to facilitate any illegal financial activity, including money laundering."
+        ]
+      },
+      "4": {
+        "title": "5. Data Ownership and Retention Policy",
+        "description": "The Platform respects the User's ownership of the information provided. You remain the owner of all your trading records, notes, and analytics.",
+        "items": [
+          "Deletion of records: The Platform uses a «Soft Delete» approach. Deleted records are marked as deleted for 30 days, during which they can be restored. After this period, data is destroyed automatically and permanently.",
+          "Account deletion: The User may initiate full account deletion at any time. This will result in the immediate and permanent deletion of all information associated with the account, including all workspaces and settings."
+        ]
+      },
+      "5": {
+        "title": "6. Intellectual Property",
+        "description": "All content on the Platform, including but not limited to: source code, graphic interface, design system, logos, data processing algorithms, and preset database structures, is subject to copyright and is the property of FIX Space developers.",
+        "items": [
+          "The User is granted a personal, limited, non-exclusive license to use the Platform in accordance with its intended purpose without the right to transfer it to third parties."
+        ]
+      },
+      "6": {
+        "title": "7. Changes to Terms and Limitation of Liability",
+        "description": "The Platform is constantly evolving; therefore, these Terms may be modified or supplemented by the administration unilaterally.",
+        "items": [
+          "The Service is provided on an «as is» and «as available» basis. We provide no warranties regarding continuity, absence of technical errors, or full compliance of the service with your expectations.",
+          "We will notify you of significant changes to the Terms via internal system notifications or email at least 7 days before they take effect.",
+          "Continued use of the Platform after the Terms have been updated constitutes your automatic acceptance of the new version of the document."
+        ]
+      }
+    }
+  },
+  "Footer": {
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© {year} FIX Space. All rights reserved."
+  }
+}

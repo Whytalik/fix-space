@@ -1,0 +1,8 @@
+{
+  "extends": "@fixspace/typescript-config/base.json",
+  "compilerOptions": {
+    "rootDir": "."
+  },
+  "include": ["src/**/*.ts", "generated/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

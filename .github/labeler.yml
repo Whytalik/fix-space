@@ -1,0 +1,65 @@
+layer:api:
+  - changed-files:
+      - any-glob-to-any-file: "apps/api/**/*"
+
+layer:web:
+  - changed-files:
+      - any-glob-to-any-file: "apps/web/**/*"
+
+layer:db:
+  - changed-files:
+      - any-glob-to-any-file: "packages/database/**/*"
+
+layer:domain:
+  - changed-files:
+      - any-glob-to-any-file: "packages/domain/**/*"
+
+mod:auth:
+  - changed-files:
+      - any-glob-to-any-file: "apps/api/src/auth/**/*"
+
+mod:space:
+  - changed-files:
+      - any-glob-to-any-file: "apps/api/src/space/**/*"
+
+mod:database:
+  - changed-files:
+      - any-glob-to-any-file: "apps/api/src/database/**/*"
+
+mod:property:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "apps/api/src/property/**/*"
+          - "apps/api/src/property-value/**/*"
+
+mod:record:
+  - changed-files:
+      - any-glob-to-any-file: "apps/api/src/record/**/*"
+
+mod:template:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "apps/api/src/template/**/*"
+          - "apps/api/src/template-property-value/**/*"
+
+mod:settings:
+  - changed-files:
+      - any-glob-to-any-file: "apps/api/src/settings/**/*"
+
+mod:user:
+  - changed-files:
+      - any-glob-to-any-file: "apps/api/src/user/**/*"
+
+mod:mail:
+  - changed-files:
+      - any-glob-to-any-file: "apps/api/src/mail/**/*"
+
+chore:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**/*"
+          - "scripts/**/*"
+          - "package.json"
+          - "pnpm-lock.yaml"
+          - "turbo.json"
+          - ".env*"

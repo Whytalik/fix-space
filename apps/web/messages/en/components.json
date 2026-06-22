@@ -1,0 +1,254 @@
+{
+  "UI": {
+    "close": "Close",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "loading": "Loading"
+  },
+  "Search": {
+    "placeholder": "Search records...",
+    "hint": "Start typing to search across your space",
+    "noResults": "No results for",
+    "error": "Search failed. Please try again."
+  },
+  "NameIconColorModal": {
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "nameLabel": "Name",
+    "descriptionLabel": "Description"
+  },
+  "AddSection": {
+    "title": "New Section",
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "placeholder": "Section name",
+    "creating": "Creating...",
+    "add": "Add section"
+  },
+  "SectionEdit": {
+    "title": "Edit Section",
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "placeholder": "Section name",
+    "saving": "Saving...",
+    "save": "Save changes"
+  },
+  "RecordModal": {
+    "editTitle": "Edit record",
+    "newTitle": "New record",
+    "noEditableProperties": "No editable properties.",
+    "cancel": "Cancel",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "create": "Create"
+  },
+  "Breadcrumbs": {
+    "database": "Database"
+  },
+  "SortPanel": {
+    "title": "Sort",
+    "locked": "Locked",
+    "clearAll": "Clear all",
+    "noRules": "No sort rules. Add one below.",
+    "selectField": "Select field…",
+    "addSort": "+ Add sort",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "ascending": "Ascending",
+    "descending": "Descending",
+    "asc": "ASC",
+    "desc": "DESC"
+  },
+  "FilterPanel": {
+    "title": "Filter",
+    "locked": "Locked",
+    "clearAll": "Clear all",
+    "noRules": "No filter rules. Add one below.",
+    "selectProperty": "Select property…",
+    "addFilter": "+ Add filter",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "pickValues": "Pick values…",
+    "pickStatus": "Pick status…",
+    "pickOption": "Pick option…",
+    "value": "Value…",
+    "operators": {
+      "equals": "equals",
+      "notEquals": "not equals",
+      "contains": "contains",
+      "notContains": "does not contain",
+      "startsWith": "starts with",
+      "endsWith": "ends with",
+      "isEmpty": "is empty",
+      "isNotEmpty": "is not empty",
+      "greaterThan": ">",
+      "lessThan": "<",
+      "greaterThanOrEqual": ">=",
+      "lessThanOrEqual": "<=",
+      "on": "on",
+      "before": "before",
+      "after": "after",
+      "onOrBefore": "on or before",
+      "onOrAfter": "on or after",
+      "isChecked": "is checked",
+      "isUnchecked": "is unchecked",
+      "isExactly": "is exactly",
+      "isNotExactly": "is not exactly",
+      "isOneOf": "is one of",
+      "isNotOneOf": "is not one of"
+    }
+  },
+  "GroupPanel": {
+    "groupBy": "Group by",
+    "locked": "Locked",
+    "noGrouping": "No grouping",
+    "selectField": "Select field…",
+    "selectProperty": "Select property…",
+    "selectGranularity": "Select granularity…",
+    "groups": "Groups",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
+    "property": "Property",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "year": "Year",
+    "changeColor": "Change color",
+    "showGroup": "Show group",
+    "hideGroup": "Hide group"
+  },
+  "RelationInput": {
+    "searchRecords": "Search records…",
+    "loading": "Loading records…",
+    "dbDeleted": "DB deleted",
+    "targetDbDeleted": "Target database deleted",
+    "selectRecord": "Select record...",
+    "selectRecords": "Select records",
+    "noRecordsFound": "No records found",
+    "selectedCount": "{count} selected",
+    "applyChanges": "Apply Changes",
+    "untitled": "Untitled",
+    "cancel": "Cancel"
+  },
+  "IconPicker": {
+    "searchIcons": "Search icons…",
+    "noIconsFound": "No icons found",
+    "tabAll": "All",
+    "tabTrading": "Trading"
+  },
+  "ColorPicker": {
+    "hexPlaceholder": "rrggbb",
+    "invalidHex": "Invalid hex color",
+    "save": "Save",
+    "noColor": "No color"
+  },
+  "PropertyInput": {
+    "enterText": "Enter text…",
+    "checked": "Checked",
+    "select": "Select…",
+    "none": "— None —"
+  },
+  "Combobox": {
+    "search": "Search…",
+    "addMore": "Add more…"
+  },
+  "RecordPage": {
+    "noProperties": "No properties defined for this database.",
+    "untitled": "Untitled",
+    "changeIcon": "Change icon"
+  },
+  "EditPage": {
+    "noProperties": "No properties defined for this database."
+  },
+  "SearchModal": {
+    "searchFailed": "Search failed. Please try again.",
+    "searchRecords": "Search records...",
+    "startTyping": "Start typing to search across your space",
+    "noResults": "No results for",
+    "recentSearches": "Recent searches",
+    "minChars": "Enter at least 2 characters",
+    "showAllResults": "Show all results in {database}"
+  },
+  "SectionItem": {
+    "options": "Options",
+    "addDatabase": "Add database",
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "delete": "Delete",
+    "editSection": "Edit Section",
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "sectionName": "Section name",
+    "saving": "Saving...",
+    "saveChanges": "Save changes",
+    "deleteSection": "Delete section",
+    "deleteSectionDesc": "The section will be deleted. Databases inside will become unsectioned.",
+    "deleting": "Deleting...",
+    "sectionDuplicated": "Section duplicated successfully."
+  },
+  "EditActions": {
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel"
+  },
+  "EditTableView": {
+    "primary": "Primary",
+    "showColumn": "Show column",
+    "hideColumn": "Hide column",
+    "noPropertiesYet": "No properties yet."
+  },
+  "RecordPageComp": {
+    "recordNotFound": "Record not found.",
+    "deleteRecord": "Delete record",
+    "deleteRecordDesc": "This record will be permanently deleted.",
+    "deleting": "Deleting…",
+    "delete": "Delete"
+  },
+  "RecordHeaderComp": {
+    "hideProperties": "Hide properties",
+    "showProperties": "Show properties",
+    "saving": "Saving…",
+    "viewMode": "View mode",
+    "editMode": "Edit mode",
+    "deleteRecord": "Delete record"
+  },
+  "SectionEditModal": {
+    "editSection": "Edit Section",
+    "chooseIcon": "Choose icon",
+    "chooseColor": "Choose color",
+    "sectionName": "Section name",
+    "saving": "Saving...",
+    "saveChanges": "Save changes"
+  },
+  "GlobalError": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. You can try again or return to your workspace.",
+    "error": "Error",
+    "tryAgain": "Try again",
+    "goWorkspace": "Go to workspace"
+  },
+  "CookieBanner": {
+    "title": "We value your privacy",
+    "description": "We use cookies to enhance your browsing experience and analyze our traffic. By clicking \"Accept\", you consent to our use of cookies.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "DuplicationModal": {
+    "title": "Duplicate {type}",
+    "newName": "New name",
+    "includeSections": "Include sections",
+    "includeDatabases": "Include databases",
+    "includeProperties": "Include properties",
+    "includeTemplates": "Include templates",
+    "includeAutomations": "Include automations",
+    "includeRecords": "Include records",
+    "duplicate": "Duplicate",
+    "duplicating": "Duplicating...",
+    "cancel": "Cancel",
+    "types": {
+      "workspace": "Workspace",
+      "database": "Database",
+      "section": "Section"
+    }
+  }
+}

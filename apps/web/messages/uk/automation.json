@@ -1,0 +1,119 @@
+{
+  "Automation": {
+    "pageTitle": "Автоматизації",
+    "newAutomation": "Нова автоматизація",
+    "editAutomation": "Редагувати автоматизацію",
+    "emptyTitle": "Автоматизацій ще немає",
+    "emptyDescription": "Створіть першу автоматизацію, щоб спростити роботу з базою.",
+    "rulesTitle": "Правила автоматизації",
+    "triggers": {
+      "ON_RECORD_CREATE": "Запис створено",
+      "ON_FIELD_CHANGE": "Поле змінюється",
+      "ON_SCHEDULE": "За розкладом"
+    },
+    "actions": {
+      "SET_FIELD_VALUE": "Встановити значення поля",
+      "CREATE_RECORD": "Створити запис",
+      "LINK_RECORDS": "Зв'язати записи"
+    },
+    "details": "Деталі",
+    "delete": "Видалити",
+    "edit": "Редагувати",
+    "deleteConfirmTitle": "Видалити автоматизацію?",
+    "deleteConfirmMessage": "Це назавжди видалить автоматизацію та всі її логи. Цю дію не можна скасувати.",
+    "noLogs": "Запусків ще не було",
+    "scheduleLabel": "Розклад",
+    "actionsLabel": "Дії",
+    "lastRunsLabel": "Останні запуски",
+    "state": "Стан",
+    "active": "Активна",
+    "inactive": "Вимкнена",
+    "name": "Назва",
+    "namePlaceholder": "Моя автоматизація",
+    "whenSection": "КОЛИ",
+    "thenSection": "ТО",
+    "addAction": "Додати дію",
+    "back": "Назад",
+    "save": "Зберегти",
+    "selectTemplateHint": "Оберіть шаблон або почніть з нуля",
+    "startFromScratch": "Почати з нуля",
+    "scheduleIntervals": {
+      "daily": "Щодня",
+      "weekly": "Щотижня",
+      "monthly": "Щомісяця"
+    },
+    "daysOfWeek": {
+      "0": "Неділя",
+      "1": "Понеділок",
+      "2": "Вівторок",
+      "3": "Середа",
+      "4": "Четвер",
+      "5": "П'ятниця",
+      "6": "Субота"
+    },
+    "propertyPlaceholder": "— оберіть властивість —",
+    "databasePlaceholder": "— оберіть базу даних —",
+    "noRelationFields": "— немає RELATION-полів —",
+    "dateValue": {
+      "today": "Сьогодні",
+      "tomorrow": "Завтра",
+      "relative": "Відносно",
+      "custom": "Довільна дата",
+      "in": "через",
+      "ago": "тому",
+      "days": "дн."
+    },
+    "templates": {
+      "dateOnChange": {
+        "name": "Поставити дату при зміні",
+        "when": "Поле змінюється",
+        "then": "Заповнити DATE-поле поточною датою"
+      },
+      "fillOnCreate": {
+        "name": "Заповнити поле при створенні",
+        "when": "Запис створено",
+        "then": "Встановити поле у задане значення"
+      },
+      "scheduleCreate": {
+        "name": "Нагадати за розкладом",
+        "when": "За розкладом",
+        "then": "Створити новий запис"
+      },
+      "copyToDb": {
+        "name": "Скопіювати в іншу базу",
+        "when": "Поле змінюється",
+        "then": "Створити запис в іншій базі даних"
+      },
+      "autoLogMistake": {
+        "name": "Автологування помилки",
+        "when": "Rule Violation стає відміченим",
+        "then": "Створити запис у базі Mistakes"
+      },
+      "weeklyReview": {
+        "name": "Тижневий Performance Review",
+        "when": "Щопонеділка о вибраний час",
+        "then": "Створити запис у Performance Review"
+      },
+      "autoCategorize": {
+        "name": "Авто-категоризація результату",
+        "when": "P&L змінюється",
+        "then": "Встановити поле \"Результат\""
+      },
+      "riskLimit": {
+        "name": "Позначити перевищення ліміту",
+        "when": "Поле Risk змінюється",
+        "then": "Встановити CHECKBOX \"Перевищено ліміт\""
+      },
+      "linkTradesToReview": {
+        "name": "Авто-зв'язок угод з оглядом",
+        "when": "Запис Performance Review створено",
+        "then": "Зв'язати угоди по діапазону дат"
+      }
+    },
+    "scheduleSummary": {
+      "weekly": "Щотижня ({day})",
+      "monthly": "Щомісяця ({day}-го)",
+      "at": "о {time}"
+    }
+  }
+}

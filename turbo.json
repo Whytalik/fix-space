@@ -1,0 +1,104 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": [
+    "**/.env",
+    "**/.env.development",
+    "**/.env.production"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "JWT_ACCESS_EXPIRATION",
+    "JWT_REFRESH_EXPIRATION",
+    "PORT",
+    "CORS_ORIGIN",
+    "APP_URL",
+    "COOKIE_DOMAIN",
+    "COOKIE_SECURE",
+    "INTERNAL_API_URL",
+    "MAIL_FROM",
+    "RESEND_API_KEY",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "VERIFICATION_TOKEN_EXPIRATION_HOURS",
+    "CI",
+    "CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET",
+    "CLOUDINARY_FOLDER_PREFIX",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_APP_URL",
+    "CREDENTIALS_ENCRYPTION_KEY",
+    "INTEGRATION_SERVER_URL",
+    "REDIS_HOST",
+    "REDIS_PORT",
+    "REDIS_PASSWORD",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CALLBACK_URL",
+    "MT5_SIDECAR_URL",
+    "MT5_SIDECAR_TOKEN"
+  ],
+
+  "tasks": {
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": ["NODE_ENV"]
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".eslintrc*", "eslint.config.*"],
+      "outputs": []
+    },
+    "check-types": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "format": {
+      "inputs": ["$TURBO_DEFAULT$", ".prettierrc*"],
+      "cache": false,
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "outputs": []
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "outputs": ["coverage/**"]
+    },
+    "db:generate": {
+      "inputs": ["prisma/schema.prisma"],
+      "outputs": ["generated/**"],
+      "cache": true
+    },
+    "db:migrate:dev": {
+      "cache": false,
+      "outputs": []
+    },
+    "db:migrate:deploy": {
+      "cache": false,
+      "outputs": []
+    },
+    "db:push": {
+      "cache": false,
+      "outputs": []
+    }
+  }
+}

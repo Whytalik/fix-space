@@ -1,0 +1,19 @@
+import { SetMetadata } from "@nestjs/common";
+import { Prisma } from "@fixspace/database";
+
+export const REQUIRE_OWNERSHIP_KEY = Symbol("REQUIRE_OWNERSHIP");
+
+const toCamelCase = (input: string) => input.charAt(0).toLowerCase() + input.slice(1);
+
+export const PRISMA_MODEL_NAMES = new Set<string>(Object.values(Prisma.ModelName).map(toCamelCase));
+
+export type PrismaModelKey = Uncapitalize<keyof typeof Prisma.ModelName>;
+
+export interface RequireOwnershipOptions {
+  model: PrismaModelKey;
+  param?: string;
+  ownerField?: string;
+  ownerPath?: string[];
+}
+
+export const RequireOwnership = (options: RequireOwnershipOptions) => SetMetadata(REQUIRE_OWNERSHIP_KEY, options);

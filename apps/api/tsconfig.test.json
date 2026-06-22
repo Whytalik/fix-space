@@ -1,0 +1,13 @@
+{
+  "extends": "@fixspace/typescript-config/test.json",
+  "include": ["src/**/*", "test/**/*"],
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist",
+    "rootDir": "src",
+    "paths": {
+      "@/common/*": ["src/common/*"],
+      "@/core/*": ["src/core/*"]
+    }
+  }
+}

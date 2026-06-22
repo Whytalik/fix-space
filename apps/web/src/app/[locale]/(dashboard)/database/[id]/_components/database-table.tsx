@@ -1,0 +1,662 @@
+"use client";
+
+import { PALETTE_COLOR_VALUES, PropertyType, SummaryMetric } from "@fixspace/domain";
+import type { PropertyResponseDto, RecordResponseDto } from "@fixspace/domain";
+import { calculateSummary } from "@/utils/record/summary-calculations";
+import { useDateFormat } from "@/hooks/format/use-date-format";
+import { CellValue } from "./cell-value";
+import { PropertyHint } from "./properties/ui/property-hint";
+import { PropertyIcon } from "./properties/ui/property-icon";
+import { useDatabaseContext } from "@/context/database-context";
+import { ConfirmDialog } from "@/components/ui/overlays/confirm-dialog";
+import { CheckboxInput } from "@/components/ui/primitives/inputs/checkbox-input";
+import { Button } from "@/components/ui/primitives/actions/button";
+import { deleteRecord, duplicateRecord } from "@/lib/api/record";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { FileText, Copy, Trash2, ChevronDown, Link as LinkIcon, Plus } from "lucide-react";
+import { IconDisplay } from "@/components/ui/icons/icon-display";
+import { SummaryCell } from "./summary-cell";
+import { DatabasePagination } from "./database-pagination";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { cn } from "@/utils/ui/cn";
+
+interface DatabaseTableProps {
+  properties: PropertyResponseDto[];
+  records: RecordResponseDto[];
+  onAddRecord?: () => void;
+}
+
+export function DatabaseTable({ properties, records, onAddRecord }: DatabaseTableProps) {
+  const t = useTranslations("DatabaseTable");
+  const tSummary = useTranslations("SummaryMetrics");
+  const router = useRouter();
+  const { formatDate } = useDateFormat();
+  const {
+    relatedRecordsMap,
+    invalidateRecords,
+    activeView,
+    updateActiveView,
+    wrapCells,
+    groupedRecords,
+    groupColors,
+    hiddenGroups,
+    group,
+    allFilteredRecords,
+    columnSummaries,
+    isViewLocked,
+  } = useDatabaseContext();
+
+  const activeViewRef = useRef(activeView);
+  useEffect(() => {
+    activeViewRef.current = activeView;
+  }, [activeView]);
+
+  const visibleGroups = useMemo(() => {
+    return groupedRecords?.filter((groupEntry) => !hiddenGroups.has(groupEntry.key)) ?? null;
+  }, [groupedRecords, hiddenGroups]);
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [groupVisibleCounts, setGroupVisibleCounts] = useState<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    setGroupVisibleCounts(new Map());
+  }, [activeView?.id, group]);
+
+  const hiddenColumns = useMemo(() => new Set(activeView?.hiddenColumns || []), [activeView]);
+  const columnWidths = useMemo(() => activeView?.columnWidths || {}, [activeView]);
+
+  const [localWidths, setLocalWidths] = useState<Record<string, number>>({});
+  const resizingStateRef = useRef<{ propId: string; startX: number; startWidth: number; minWidth: number } | null>(null);
+  const currentResizedWidthRef = useRef<number>(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setLocalWidths({});
+  }, [activeView?.id]);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      if (e.deltaY === 0) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  const visibleProperties = useMemo(() => {
+    return [...properties].filter((p) => !hiddenColumns.has(p.id)).sort((a, b) => a.position - b.position);
+  }, [properties, hiddenColumns]);
+
+  const getDefaultWidth = useCallback((prop: PropertyResponseDto) => {
+    let width = 24 + 14 + 8 + prop.name.length * 7 + 16;
+    if (prop.hint) width += 20;
+    if (prop.integrationKey) width += 20;
+    width += 40;
+    return Math.max(80, width);
+  }, []);
+
+  const getPropWidth = useCallback(
+    (prop: PropertyResponseDto) => {
+      const defaultWidth = getDefaultWidth(prop);
+      if (localWidths[prop.id]) return Math.max(defaultWidth, localWidths[prop.id]!);
+      if (columnWidths && columnWidths[prop.id]) return Math.max(defaultWidth, columnWidths[prop.id]!);
+      return defaultWidth;
+    },
+    [localWidths, columnWidths, getDefaultWidth],
+  );
+
+  const totalColumnsWidth = useMemo(() => {
+    const checkboxWidth = 40;
+    const propsWidth = visibleProperties.reduce((sum, prop) => sum + getPropWidth(prop), 0);
+    return checkboxWidth + propsWidth;
+  }, [visibleProperties, getPropWidth]);
+  const getValueWidth = useCallback(
+    (value: unknown, prop: PropertyResponseDto) => {
+      if (value === null || value === undefined || value === "") return 0;
+
+      let baseWidth = 0;
+      switch (prop.type) {
+        case PropertyType.CHECKBOX:
+          baseWidth = 50;
+          break;
+        case PropertyType.RATING:
+          baseWidth = 100;
+          break;
+        case PropertyType.PROGRESS:
+          baseWidth = 152;
+          break;
+        case PropertyType.DATE:
+          baseWidth = 120;
+          break;
+        case PropertyType.RELATION: {
+          const ids = Array.isArray(value) ? (value as string[]) : [String(value)];
+          const relatedDbId = (prop.config as { relatedEntityId?: string } | null)?.relatedEntityId;
+          const relatedRecords = relatedDbId ? relatedRecordsMap[relatedDbId] : undefined;
+          if (relatedRecords) {
+            const names = ids.map((id) => relatedRecords.find((r) => r.id === id)?.name || "").filter(Boolean);
+            const totalTextLen = names.reduce((sum, n) => sum + n.length, 0);
+            baseWidth = ids.length * 32 + totalTextLen * 7 + 16;
+          } else {
+            baseWidth = ids.length * 50;
+          }
+          break;
+        }
+        case PropertyType.STATUS: {
+          const statusName = (value as { name?: string })?.name || String(value);
+          baseWidth = statusName.length * 7 + 40;
+          break;
+        }
+        case PropertyType.SELECT: {
+          const selectStr = Array.isArray(value) ? (value as string[]).join(", ") : String(value);
+          baseWidth = selectStr.length * 7 + 32;
+          break;
+        }
+        default:
+          baseWidth = String(value).length * 7 + 24;
+      }
+
+      if (prop.position === 0) {
+        baseWidth += 24;
+      }
+      return baseWidth;
+    },
+    [relatedRecordsMap],
+  );
+
+  const handleResizeDoubleClick = useCallback(
+    (e: React.MouseEvent, prop: PropertyResponseDto) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      let maxValWidth = 0;
+      records.forEach((record) => {
+        const propertyValue = record.values?.find((v) => v.propertyId === prop.id);
+        const isPrimary = prop.position === 0;
+        const rawValue = propertyValue?.value || (isPrimary ? record.name : undefined);
+        const value = isPrimary ? rawValue || t("untitled") : rawValue;
+        const width = getValueWidth(value, prop);
+        if (width > maxValWidth) {
+          maxValWidth = width;
+        }
+      });
+
+      const selectedMetric = columnSummaries[prop.id] || null;
+      let maxSummaryWidth = 0;
+      const isPrimary = prop.position === 0;
+
+      if (selectedMetric) {
+        const metricLabel = tSummary(`metrics.${selectedMetric}`);
+
+        const getFormattedSummaryValue = (val: string | number | null) => {
+          if (val === null || val === undefined) return "";
+          if (prop.type === PropertyType.DATE && (selectedMetric === SummaryMetric.EARLIEST || selectedMetric === SummaryMetric.LATEST)) {
+            return formatDate(val as string);
+          }
+          if (typeof val === "number") {
+            if (selectedMetric === SummaryMetric.PERCENT_CHECKED) return String(val);
+            return Number.isInteger(val) ? String(val) : val.toFixed(2);
+          }
+          return String(val);
+        };
+
+        const chevronWidth = isViewLocked ? 0 : 16;
+        const baseOffset = 16 + chevronWidth;
+
+        const overallVal = calculateSummary(allFilteredRecords, prop.id, prop.type as PropertyType, selectedMetric, isPrimary);
+        const overallFormatted = getFormattedSummaryValue(overallVal);
+        const overallText = `${metricLabel}: ${overallFormatted}`;
+        const overallWidth = overallText.length * 7 + baseOffset;
+        if (overallWidth > maxSummaryWidth) {
+          maxSummaryWidth = overallWidth;
+        }
+
+        if (visibleGroups) {
+          visibleGroups.forEach((groupEntry) => {
+            const groupVal = calculateSummary(groupEntry.records, prop.id, prop.type as PropertyType, selectedMetric, isPrimary);
+            const groupFormatted = getFormattedSummaryValue(groupVal);
+            const groupText = `${metricLabel}: ${groupFormatted}`;
+            const groupWidth = groupText.length * 7 + baseOffset;
+            if (groupWidth > maxSummaryWidth) {
+              maxSummaryWidth = groupWidth;
+            }
+          });
+        }
+      } else if (!isViewLocked) {
+        const calcText = tSummary("calculate");
+        maxSummaryWidth = calcText.length * 7 + 32;
+      }
+
+      const headerWidth = getDefaultWidth(prop);
+      const finalWidth = Math.max(headerWidth, maxValWidth, maxSummaryWidth);
+
+      setLocalWidths((prev) => ({ ...prev, [prop.id]: finalWidth }));
+
+      if (activeViewRef.current) {
+        const newColumnWidths = { ...(activeViewRef.current.columnWidths || {}), [prop.id]: finalWidth };
+        updateActiveView({ columnWidths: newColumnWidths }).catch(console.error);
+      }
+    },
+    [
+      records,
+      getDefaultWidth,
+      getValueWidth,
+      updateActiveView,
+      t,
+      allFilteredRecords,
+      columnSummaries,
+      isViewLocked,
+      visibleGroups,
+      tSummary,
+      formatDate,
+    ],
+  );
+  const handleResizeStart = (e: React.MouseEvent, prop: PropertyResponseDto, currentWidth: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const minWidth = getDefaultWidth(prop);
+    resizingStateRef.current = { propId: prop.id, startX: e.clientX, startWidth: currentWidth, minWidth };
+    currentResizedWidthRef.current = currentWidth;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizingStateRef.current) return;
+      const { propId, startX, startWidth, minWidth } = resizingStateRef.current;
+      const deltaX = e.clientX - startX;
+      const newWidth = Math.max(minWidth, startWidth + deltaX);
+      currentResizedWidthRef.current = newWidth;
+      setLocalWidths((prev) => ({ ...prev, [propId]: newWidth }));
+    };
+
+    const handleMouseUp = () => {
+      if (!resizingStateRef.current) return;
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+
+      const propId = resizingStateRef.current.propId;
+      const finalWidth = currentResizedWidthRef.current;
+      resizingStateRef.current = null;
+
+      if (finalWidth > 0 && activeViewRef.current) {
+        const newColumnWidths = { ...(activeViewRef.current.columnWidths || {}), [propId]: finalWidth };
+        updateActiveView({ columnWidths: newColumnWidths }).catch(console.error);
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const allSelected = records.length > 0 && records.every((r) => selectedIds.has(r.id));
+  const someSelected = selectedIds.size > 0;
+
+  function toggleAll(checked: boolean) {
+    setSelectedIds(checked ? new Set(records.map((r) => r.id)) : new Set());
+  }
+
+  function toggleOne(id: string, checked: boolean) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+
+  async function handleDuplicate() {
+    const [id] = selectedIds;
+    if (!id) return;
+    try {
+      setIsDuplicating(true);
+      await duplicateRecord(id);
+      invalidateRecords();
+      setSelectedIds(new Set());
+    } finally {
+      setIsDuplicating(false);
+    }
+  }
+
+  function toggleCollapse(key: string) {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  async function handleDeleteConfirmed() {
+    try {
+      setIsDeleting(true);
+      await Promise.all([...selectedIds].map(deleteRecord));
+      invalidateRecords();
+      setSelectedIds(new Set());
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  function renderRecordRow(record: RecordResponseDto, groupColor?: string) {
+    const rowBgStyle = groupColor ? ({ "--group-row-bg": `${groupColor}0D` } as React.CSSProperties) : undefined;
+
+    return (
+      <tr
+        key={record.id}
+        onClick={() => router.push(`/record/${record.id}`)}
+        className="border-b border-stroke-subtle last:border-b-0 transition-colors duration-150 bg-[var(--group-row-bg,transparent)] hover:bg-hover cursor-pointer group"
+        style={rowBgStyle}
+      >
+        <td
+          className="px-3 py-2 border-r border-b border-stroke-subtle bg-[var(--group-row-bg,var(--color-canvas))] group-hover:bg-hover transition-colors duration-150"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <CheckboxInput checked={selectedIds.has(record.id)} onChange={(checked) => toggleOne(record.id, checked)} />
+        </td>
+        {visibleProperties.map((prop, index) => {
+          const propertyValue = record.values?.find((recordValue) => recordValue.propertyId === prop.id);
+          const isPrimary = prop.position === 0;
+
+          const rawValue = propertyValue?.value || (isPrimary ? record.name : undefined);
+          const value = isPrimary ? rawValue || t("untitled") : rawValue;
+
+          const relatedDbId =
+            prop.type === PropertyType.RELATION ? (prop.config as { relatedEntityId?: string } | null)?.relatedEntityId : undefined;
+
+          return (
+            <td
+              key={prop.id}
+              className={cn(
+                "px-3 py-2 align-middle border-b border-stroke-subtle last:border-r-0 overflow-hidden",
+                index > 0 && "border-r border-stroke-subtle",
+                index === 0 &&
+                  "sticky left-0 z-20 bg-canvas group-hover:bg-hover transition-colors duration-150 shadow-[inset_-1px_0_0_0_var(--color-stroke-subtle)]",
+              )}
+            >
+              <div
+                className={cn(
+                  "flex items-center min-w-0 gap-2",
+                  wrapCells ? "whitespace-normal" : "whitespace-nowrap",
+                  isPrimary && "font-semibold text-ink",
+                )}
+              >
+                {isPrimary && (
+                  <span className="text-ink-muted shrink-0">
+                    {record.icon ? <IconDisplay value={record.icon} size={14} /> : <FileText size={14} />}
+                  </span>
+                )}
+                <CellValue
+                  value={value}
+                  type={prop.type}
+                  config={prop.config}
+                  relatedRecords={relatedDbId ? relatedRecordsMap[relatedDbId] : undefined}
+                  className={cn("min-w-0 flex-1", wrapCells ? "break-words" : "truncate")}
+                />
+              </div>
+            </td>
+          );
+        })}
+      </tr>
+    );
+  }
+
+  if (properties.length === 0) {
+    return <div className="flex items-center justify-center h-40 text-ink-secondary text-sm">{t("noProperties")}</div>;
+  }
+
+  const totalVisibleRecords = visibleGroups ? visibleGroups.reduce((sum, group) => sum + group.records.length, 0) : records.length;
+
+  return (
+    <div className="flex flex-col gap-3">
+      {someSelected && (
+        <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-stroke bg-surface">
+          <span className="text-sm text-ink-secondary flex-1">{t("selected", { count: selectedIds.size })}</span>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleDuplicate}
+            loading={isDuplicating}
+            disabled={selectedIds.size !== 1 || isDuplicating}
+            className="flex items-center gap-1.5"
+          >
+            <Copy size={13} />
+            {t("duplicate")}
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={isDeleting}
+            className="flex items-center gap-1.5"
+          >
+            <Trash2 size={13} />
+            {t("delete")}
+          </Button>
+        </div>
+      )}
+
+      <div className="rounded-lg border border-stroke overflow-hidden shadow-sm bg-canvas">
+        <div ref={scrollContainerRef} className="overflow-x-auto scrollbar">
+          <table className="text-sm border-separate border-spacing-0 table-fixed w-full" style={{ minWidth: `${totalColumnsWidth}px` }}>
+            <colgroup>
+              <col style={{ width: "40px" }} />
+              {visibleProperties.map((prop, index) => (
+                <col key={prop.id} style={index < visibleProperties.length - 1 ? { width: `${getPropWidth(prop)}px` } : undefined} />
+              ))}
+            </colgroup>
+            <thead>
+              <tr className="sticky top-0 z-30 bg-surface border-b border-stroke">
+                <th className="px-3 py-2.5 border-r border-b border-stroke bg-surface" onClick={(e) => e.stopPropagation()}>
+                  <CheckboxInput checked={allSelected} onChange={toggleAll} />
+                </th>
+                {visibleProperties.map((prop, index) => (
+                  <th
+                    key={prop.id}
+                    className={cn(
+                      "px-3 py-2.5 text-left whitespace-nowrap border-b border-stroke last:border-r-0 font-medium transition-colors duration-150 relative group/th",
+                      index > 0 && "border-r border-stroke",
+                      index === 0 && "sticky left-0 z-30 bg-surface shadow-[inset_-1px_0_0_0_var(--color-stroke)] bg-opacity-100",
+                    )}
+                  >
+                    <span className="flex items-center gap-2 type-field-label">
+                      <span className="text-ink-muted shrink-0">
+                        <PropertyIcon type={prop.type} />
+                      </span>
+                      <span className="truncate">{prop.name}</span>
+                      {prop.integrationKey && (
+                        <span title={t("automatedByIntegration")} className="flex items-center">
+                          <LinkIcon size={12} className="text-accent shrink-0" />
+                        </span>
+                      )}
+                      {prop.hint && <PropertyHint hint={prop.hint} />}
+                    </span>
+                    <div
+                      className={cn(
+                        "absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-accent/40 active:bg-accent z-10 transition-colors duration-150",
+                        resizingStateRef.current?.propId === prop.id ? "bg-accent opacity-100" : "opacity-0 group-hover/th:opacity-100",
+                      )}
+                      onMouseDown={(e) => handleResizeStart(e, prop, getPropWidth(prop))}
+                      onDoubleClick={(e) => handleResizeDoubleClick(e, prop)}
+                    />
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {visibleGroups ? (
+                visibleGroups.length === 0 ? (
+                  <tr>
+                    <td className="py-16 bg-canvas border-r border-stroke-subtle" />
+                    <td
+                      colSpan={visibleProperties.length}
+                      className="sticky left-0 z-20 py-16 px-3 text-sm text-ink-muted bg-canvas whitespace-nowrap"
+                    >
+                      {t("noRecords")}
+                    </td>
+                  </tr>
+                ) : (
+                  visibleGroups.flatMap((groupEntry, groupIndex) => {
+                    const color = groupColors[groupEntry.key] ?? PALETTE_COLOR_VALUES[groupIndex % PALETTE_COLOR_VALUES.length];
+                    const isCollapsed = collapsedGroups.has(groupEntry.key);
+                    const limit = activeView?.recordLimit;
+                    const groupRecords = groupEntry.records;
+                    const hasMore = limit && limit > 0 && groupRecords.length > limit;
+                    const currentVisible = hasMore ? (groupVisibleCounts.get(groupEntry.key) ?? limit!) : groupRecords.length;
+                    const visibleGroupRecords = hasMore ? groupRecords.slice(0, currentVisible) : groupRecords;
+                    const stillHasMore = hasMore && currentVisible < groupRecords.length;
+                    const nextBatch = Math.min(limit!, groupRecords.length - currentVisible);
+
+                    return [
+                      <tr key={`group-header-${groupEntry.key}`} className="border-b border-stroke bg-surface/60">
+                        <td className="px-3 py-2 border-b border-stroke bg-surface/60" />
+                        <td className="px-3 py-2 border-b border-stroke bg-surface/60 sticky left-0 z-20 shadow-[inset_-1px_0_0_0_var(--color-stroke)]">
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => toggleCollapse(groupEntry.key)}
+                              className="p-0.5 rounded hover:bg-hover transition-colors duration-150 text-ink-muted hover:text-ink shrink-0"
+                            >
+                              <ChevronDown size={14} className={cn("transition-transform duration-150", isCollapsed && "-rotate-90")} />
+                            </button>
+                            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                            <span className="text-sm font-semibold text-ink-secondary">{groupEntry.label}</span>
+                            <span className="text-xs font-medium text-ink-muted bg-surface px-1.5 py-0.5 rounded-md border border-stroke">
+                              {groupEntry.records.length}
+                            </span>
+                          </div>
+                        </td>
+                        {visibleProperties.length > 1 && (
+                          <td colSpan={visibleProperties.length - 1} className="px-3 py-2 border-b border-stroke bg-surface/60" />
+                        )}
+                      </tr>,
+                      ...(!isCollapsed ? visibleGroupRecords.map((r) => renderRecordRow(r, color)) : []),
+                      ...(!isCollapsed && stillHasMore
+                        ? [
+                            <tr
+                              key={`group-show-all-${groupEntry.key}`}
+                              className="border-b border-stroke-subtle hover:bg-hover transition-colors duration-150"
+                            >
+                              <td className="px-3 py-2 border-b border-stroke-subtle bg-canvas" />
+                              <td className="px-3 py-2 border-b border-stroke-subtle bg-canvas sticky left-0 z-20 shadow-[inset_-1px_0_0_0_var(--color-stroke-subtle)]">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setGroupVisibleCounts((prev) => {
+                                      const next = new Map(prev);
+                                      const current = next.get(groupEntry.key) ?? limit!;
+                                      next.set(groupEntry.key, current + limit!);
+                                      return next;
+                                    });
+                                  }}
+                                  className="text-sm text-accent hover:text-accent-hover font-semibold flex items-center gap-1.5 cursor-pointer transition-colors duration-150 whitespace-nowrap"
+                                >
+                                  {t("showAllRecords", { count: nextBatch })}
+                                </button>
+                              </td>
+                              {visibleProperties.length > 1 && (
+                                <td colSpan={visibleProperties.length - 1} className="px-3 py-2 border-b border-stroke-subtle bg-canvas" />
+                              )}
+                            </tr>,
+                          ]
+                        : []),
+                      ...(!isCollapsed
+                        ? [
+                            <tr key={`group-summary-${groupEntry.key}`} className="border-t border-stroke">
+                              <td className="bg-surface border-r border-stroke h-10" />
+                              {visibleProperties.map((prop, index) => (
+                                <td
+                                  key={prop.id}
+                                  className={cn(
+                                    "px-1 py-1 last:border-r-0 h-10",
+                                    index === 0 ? "bg-surface" : "bg-surface/30",
+                                    index > 0 && "border-r border-stroke",
+                                    index === 0 && "sticky left-0 z-20 shadow-[inset_-1px_0_0_0_var(--color-stroke)]",
+                                  )}
+                                >
+                                  <SummaryCell
+                                    propertyId={prop.id}
+                                    type={prop.type as PropertyType}
+                                    isPrimary={prop.position === 0}
+                                    records={groupEntry.records}
+                                  />
+                                </td>
+                              ))}
+                            </tr>,
+                          ]
+                        : []),
+                    ];
+                  })
+                )
+              ) : records.length === 0 ? (
+                <tr>
+                  <td className="py-16 bg-canvas border-r border-stroke-subtle" />
+                  <td
+                    colSpan={visibleProperties.length}
+                    className="sticky left-0 z-20 py-16 px-3 text-sm text-ink-muted bg-canvas whitespace-nowrap"
+                  >
+                    {t("noRecords")}
+                  </td>
+                </tr>
+              ) : (
+                records.map((r) => renderRecordRow(r))
+              )}
+              {!visibleGroups && onAddRecord && (
+                <tr onClick={onAddRecord} className="cursor-pointer group/add-row hover:bg-canvas-subtle transition-colors duration-150">
+                  <td className="w-9 border-r border-stroke bg-canvas group-hover/add-row:bg-canvas-subtle transition-colors duration-150" />
+                  <td
+                    colSpan={visibleProperties.length}
+                    className="px-3 py-2 sticky left-0 z-10 bg-canvas group-hover/add-row:bg-canvas-subtle transition-colors duration-150"
+                  >
+                    <span className="flex items-center gap-1.5 text-sm text-ink-muted group-hover/add-row:text-accent font-medium transition-colors duration-150">
+                      <Plus size={13} />
+                      {t("addRecord")}
+                    </span>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+            {!visibleGroups && totalVisibleRecords > 0 && (
+              <tfoot className="border-t-2 border-stroke bg-surface/30">
+                <tr>
+                  <td className="bg-surface border-r border-stroke h-10" />
+                  {visibleProperties.map((prop, index) => (
+                    <td
+                      key={prop.id}
+                      className={cn(
+                        "px-1 py-1 last:border-r-0 h-10",
+                        index > 0 && "border-r border-stroke",
+                        index === 0 && "sticky left-0 z-20 bg-surface shadow-[inset_-1px_0_0_0_var(--color-stroke)] bg-opacity-100",
+                      )}
+                    >
+                      <SummaryCell propertyId={prop.id} type={prop.type as PropertyType} isPrimary={prop.position === 0} />
+                    </td>
+                  ))}
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
+      </div>
+
+      {!group && <DatabasePagination />}
+
+      {showDeleteConfirm && (
+        <ConfirmDialog
+          title={t("deleteRecords")}
+          description={t("deleteRecordsDesc", { count: selectedIds.size })}
+          confirmLabel={isDeleting ? t("deleting") : t("delete")}
+          variant="danger"
+          onConfirm={handleDeleteConfirmed}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
+    </div>
+  );
+}

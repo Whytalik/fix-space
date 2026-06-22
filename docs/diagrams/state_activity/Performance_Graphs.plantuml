@@ -1,0 +1,29 @@
+@startuml Performance_Graphs
+title Залежність часу відгуку від кількості записів
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+
+node "Кількість записів / Час відгуку (мс)" as Graph {
+    card "100 угод" as c1
+    card "1000 угод" as c2
+    card "5000 угод" as c3
+    card "Target Limit" as target
+
+    c1 : 80 мс
+    c2 : 145 мс
+    c3 : 280 мс
+    target : 300 мс
+
+    c1 -right-> c2
+    c2 -right-> c3
+    c3 -right-> target : "Safety Margin"
+}
+
+legend right
+  Середній час відгуку (Latency)
+  при 50 паралельних користувачах
+end legend
+
+@enduml

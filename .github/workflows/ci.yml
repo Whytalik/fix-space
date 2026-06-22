@@ -1,0 +1,317 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '9.15.1'
+  DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/unused'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/turbo.json', '**/package.json', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Generate Prisma Client
+        run: pnpm turbo db:generate
+
+      - name: Lint
+        run: pnpm turbo lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/turbo.json', '**/package.json', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Generate Prisma Client
+        run: pnpm turbo db:generate
+
+      - name: Test
+        run: pnpm turbo test -- --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@75cd11691c0faa626561e295848008c8a7dddffe 
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: '**/coverage/'
+          retention-days: 7
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --prod --audit-level=high
+        continue-on-error: true
+
+  test-integration:
+    name: Test (Integration)
+    runs-on: ubuntu-latest
+    needs: [test]
+    environment:
+      name: staging
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: fixspace_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fixspace_test?schema=public
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      NODE_ENV: test
+      JWT_SECRET: super-secret-key-for-diploma-project
+      JWT_REFRESH_SECRET: super-refresh-secret-key-for-diploma-project
+      GOOGLE_CLIENT_ID: test-google-client-id
+      GOOGLE_CLIENT_SECRET: test-google-client-secret
+      GOOGLE_CALLBACK_URL: http://localhost:3000/auth/google/callback
+      CLOUDINARY_CLOUD_NAME: test-cloud
+      CLOUDINARY_API_KEY: test-key
+      CLOUDINARY_API_SECRET: test-secret
+      CLOUDINARY_FOLDER_PREFIX: fixspace-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm turbo db:generate
+
+      - name: Build domain package
+        run: pnpm --filter @fixspace/domain build
+
+      - name: Build database package
+        run: pnpm --filter @fixspace/database build
+
+      - name: Run migrations
+        run: pnpm --filter @fixspace/database exec prisma migrate deploy
+
+      - name: Integration tests
+        run: pnpm --filter @fixspace/api test:integration
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('**/turbo.json', '**/package.json', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Generate Prisma Client
+        run: pnpm turbo db:generate
+
+      - name: Build
+        run: pnpm turbo build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            apps/api/dist/
+            apps/web/.next/
+          retention-days: 1
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        run: docker build -t fixspace-api:${{ github.sha }} -f apps/api/Dockerfile .
+
+      - name: Show image info
+        run: docker images fixspace-api
+
+  deploy-staging:
+    name: Deploy (Staging)
+    runs-on: ubuntu-latest
+    needs: [docker]
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create deployment manifest
+        run: |
+          mkdir -p deployment
+          echo "Environment: staging"                          > deployment/manifest.txt
+          echo "Branch: ${{ github.ref_name }}"              >> deployment/manifest.txt
+          echo "Commit: ${{ github.sha }}"                   >> deployment/manifest.txt
+          echo "Actor: ${{ github.actor }}"                  >> deployment/manifest.txt
+          echo "Run ID: ${{ github.run_id }}"                >> deployment/manifest.txt
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"  >> deployment/manifest.txt
+          cat deployment/manifest.txt
+          echo "Deployment to staging: IN PROGRESS"
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING || secrets.RAILWAY_TOKEN }}
+        if: env.RAILWAY_TOKEN != ''
+        run: railway up --ci --service ${{ secrets.RAILWAY_SERVICE_STAGING || 'fix-space-api-staging' }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deployment-manifest
+          path: deployment/
+          retention-days: 30
+
+  deploy-production:
+    name: Deploy (Production)
+    runs-on: ubuntu-latest
+    needs: [docker]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create deployment manifest
+        run: |
+          mkdir -p deployment
+          echo "Environment: production"                      > deployment/manifest.txt
+          echo "Branch: ${{ github.ref_name }}"              >> deployment/manifest.txt
+          echo "Commit: ${{ github.sha }}"                   >> deployment/manifest.txt
+          echo "Actor: ${{ github.actor }}"                  >> deployment/manifest.txt
+          echo "Run ID: ${{ github.run_id }}"                >> deployment/manifest.txt
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"  >> deployment/manifest.txt
+          cat deployment/manifest.txt
+          echo "Deployment to production: IN PROGRESS"
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        if: env.RAILWAY_TOKEN != ''
+        run: railway up --ci --service ${{ secrets.RAILWAY_SERVICE_PRODUCTION || 'fix-space-api' }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deployment-manifest-prod
+          path: deployment/
+          retention-days: 30

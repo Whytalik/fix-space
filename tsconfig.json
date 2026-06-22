@@ -1,0 +1,3 @@
+{
+  "extends": "@fixspace/typescript-config/base.json"
+}

@@ -1,0 +1,46 @@
+import type { SeedRecord } from "./types";
+
+export const tradingSystemSeeds: SeedRecord[] = [
+  {
+    name: "Swing Strategy",
+    values: {
+      Date: "2025-01-01",
+      Status: "Active",
+      Category: "SMC/ICT",
+      "Market Type": ["Trending"],
+      Pairs: ["EURUSD", "GBPUSD", "XAUUSD"],
+      Timeframes: ["Daily", "4H", "1H"],
+      Sessions: ["London", "New York"],
+      "Risk Per Trade %": 1,
+      "Max Daily Loss %": 3,
+      "Max Simultaneous Trades": 2,
+      "Min Sample Size": 50,
+      "Profit Factor": 1.8,
+      Expectancy: 0.65,
+      "Max Consecutive Losses": 4,
+      Confidence: 4.5,
+      "Last Updated": "2025-02-01",
+    },
+  },
+  {
+    name: "Intraday Strategy",
+    values: {
+      Date: "2025-01-01",
+      Status: "Active",
+      Category: "SMC/ICT",
+      "Market Type": ["Trending", "High Volatility"],
+      Pairs: ["EURUSD", "GBPUSD"],
+      Timeframes: ["4H", "1H", "15m"],
+      Sessions: ["London", "Pre-New York"],
+      "Risk Per Trade %": 0.5,
+      "Max Daily Loss %": 2,
+      "Max Simultaneous Trades": 1,
+      "Min Sample Size": 100,
+      "Profit Factor": 2.1,
+      Expectancy: 0.42,
+      "Max Consecutive Losses": 6,
+      Confidence: 4.0,
+      "Last Updated": "2025-02-01",
+    },
+  },
+];

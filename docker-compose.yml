@@ -1,0 +1,100 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: fixspace
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d fixspace"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    command: sh -c "[ -n \"$$REDIS_PASSWORD\" ] && redis-server --requirepass $$REDIS_PASSWORD || redis-server"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli $${REDIS_PASSWORD:+-a $$REDIS_PASSWORD} ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    profiles:
+      - full
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/fixspace?schema=public
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - PORT=3000
+      - NODE_ENV=production
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    profiles:
+      - full
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=/api
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - INTERNAL_API_URL=http://api:3000
+    ports:
+      - '3001:3001'
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  db-test:
+    profiles:
+      - test
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fixspace_test
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata-test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fixspace_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  pgdata-test:

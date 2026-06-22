@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+
+# Build outputs / generated files
+.next
+out
+dist
+build
+coverage
+
+# Environment variables
+.env
+.env.*
+
+# Lock files
+pnpm-lock.yaml
+
+# System / OS files
+.DS_Store
+
+# Editor / IDE settings
+.vscode
+
+# Deployment / infrastructure
+.vercel
+docker-compose.yml

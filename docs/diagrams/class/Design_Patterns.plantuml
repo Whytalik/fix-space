@@ -1,0 +1,128 @@
+@startuml Design_Patterns
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 11
+skinparam nodesep 14
+skinparam ranksep 24
+
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #2563eb
+  ArrowColor #2563eb
+  FontSize 11
+}
+
+skinparam interface {
+  BackgroundColor #FFFFFF
+  BorderColor #2563eb
+  FontSize 11
+}
+
+top to bottom direction
+
+together {
+  package "Strategy + Registry" as P1 #E3F2FD {
+    class PropertyService
+    class PropertyTypeRegistry <<Registry>>
+    interface PropertyHandler <<Strategy>>
+
+    class TextHandler
+    class NumberHandler
+    class CheckboxHandler
+    class DateHandler
+    class DurationHandler
+    class ProgressHandler
+    class RatingHandler
+    class RelationHandler
+    class SelectHandler
+    class StatusHandler
+    class FormulaHandler
+
+    class FormulaEngine <<Interpreter>>
+    class FormulaRecalculator
+
+    PropertyService --> PropertyTypeRegistry
+    PropertyTypeRegistry o-- PropertyHandler : handlers
+    TextHandler ..|> PropertyHandler
+    NumberHandler ..|> PropertyHandler
+    CheckboxHandler ..|> PropertyHandler
+    DateHandler ..|> PropertyHandler
+    DurationHandler ..|> PropertyHandler
+    ProgressHandler ..|> PropertyHandler
+    RatingHandler ..|> PropertyHandler
+    RelationHandler ..|> PropertyHandler
+    SelectHandler ..|> PropertyHandler
+    StatusHandler ..|> PropertyHandler
+    FormulaHandler ..|> PropertyHandler
+    FormulaHandler --> FormulaEngine
+    FormulaRecalculator --> FormulaEngine
+  }
+
+  package "Factory" as P2 #E8F5E9 {
+    class IntegrationConnectionService
+    class SyncRecordService
+    class IntegrationProviderFactory <<Factory>>
+    interface IntegrationProvider <<Strategy>>
+    class BinanceProvider
+
+    IntegrationConnectionService --> IntegrationProviderFactory
+    IntegrationConnectionService --> SyncRecordService
+    IntegrationProviderFactory ..> IntegrationProvider
+    BinanceProvider ..|> IntegrationProvider
+  }
+}
+
+together {
+  package "Observer" as P3 #FFF9C4 {
+    class RecordService <<Publisher>>
+    class AutomationService <<Subscriber>>
+    class AutomationEngine
+
+    RecordService ..> AutomationService : emit()
+    AutomationService o-- AutomationEngine
+  }
+
+  package "Memento" as P4 #F5F5F5 {
+    class RecordContentService <<Originator>>
+    class RecordContentSnapshot <<Memento>>
+    class RecordContentRepository <<Caretaker>>
+
+    RecordContentService --> RecordContentRepository
+    RecordContentRepository o-- RecordContentSnapshot
+    RecordContentService ..> RecordContentSnapshot
+  }
+
+  package "Composite" as P5 #FFF9C4 {
+    class ContentSchema
+    class ContentRow
+    class ContentColumn
+    class ContentComponentNode <<Component>>
+
+    class TextComponent
+    class HeadingComponent
+    class ImageComponent
+    class TableComponent
+    class ListComponent
+    class ChecklistComponent
+    class CalloutComponent
+
+    ContentSchema o-- ContentRow
+    ContentRow o-- ContentColumn
+    ContentColumn o-- ContentComponentNode : children
+    TextComponent ..|> ContentComponentNode
+    HeadingComponent ..|> ContentComponentNode
+    ImageComponent ..|> ContentComponentNode
+    TableComponent ..|> ContentComponentNode
+    ListComponent ..|> ContentComponentNode
+    ChecklistComponent ..|> ContentComponentNode
+    CalloutComponent ..|> ContentComponentNode
+  }
+}
+
+P1 -[hidden]down-> P3
+P2 -[hidden]down-> P4
+
+@enduml

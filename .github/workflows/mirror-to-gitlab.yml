@@ -1,0 +1,24 @@
+name: Mirror to GitLab
+
+on:
+  push:
+    branches: ["**"]
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push mirror to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_REPO: ${{ secrets.GITLAB_REPO }}
+        run: |
+          git remote remove gitlab 2>/dev/null || true
+          GITLAB_HOST=$(echo "${GITLAB_REPO}" | sed 's|^https\?://||' | sed 's|^git@||' | sed 's|:|/|')
+          git remote add gitlab https://oauth2:${GITLAB_TOKEN}@${GITLAB_HOST}
+          git push -f gitlab HEAD:${{ github.ref }}

@@ -1,0 +1,8 @@
+{
+  "extends": "./nestjs.json",
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "strictNullChecks": true
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "**/*.spec.ts"]
+}

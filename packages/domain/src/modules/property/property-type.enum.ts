@@ -1,0 +1,13 @@
+export enum PropertyType {
+  TEXT = "TEXT",
+  NUMBER = "NUMBER",
+  DATE = "DATE",
+  CHECKBOX = "CHECKBOX",
+  DURATION = "DURATION",
+  SELECT = "SELECT",
+  STATUS = "STATUS",
+  RELATION = "RELATION",
+  FORMULA = "FORMULA",
+  RATING = "RATING",
+  PROGRESS = "PROGRESS",
+}

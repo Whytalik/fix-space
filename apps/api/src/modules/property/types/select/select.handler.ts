@@ -1,0 +1,158 @@
+import { Injectable } from "@nestjs/common";
+import { t } from "@/common/utils/i18n.helper";
+import {
+  DEFAULT_SELECT_PROPERTY,
+  FilterOperator,
+  isSelectPropertyConfig,
+  OPERATORS_BY_PROPERTY_TYPE,
+  PropertyType,
+  SelectCategory,
+  SelectOption,
+  SelectPropertyConfig,
+} from "@fixspace/domain";
+import { PropertyConfigHandler, PropertyQueryHandler, PropertyValueHandler } from "../interfaces";
+
+@Injectable()
+export class SelectHandler implements PropertyConfigHandler, PropertyValueHandler, PropertyQueryHandler {
+  readonly type = PropertyType.SELECT;
+
+  private parseConfig(config: Record<string, unknown>): SelectPropertyConfig {
+    if (!isSelectPropertyConfig(config)) {
+      throw new Error(`Invariant: expected SelectPropertyConfig, got ${JSON.stringify(config)}`);
+    }
+    return config;
+  }
+
+  getDefaultConfig(): Record<string, unknown> {
+    return { ...DEFAULT_SELECT_PROPERTY };
+  }
+
+  validateConfig(config: Record<string, unknown>): string[] | null {
+    const errors: string[] = [];
+
+    if (config.isMultiSelect !== undefined && typeof config.isMultiSelect !== "boolean") {
+      errors.push("isMultiSelect must be a boolean");
+    }
+
+    if (config.categories !== undefined) {
+      if (!Array.isArray(config.categories)) {
+        errors.push("categories must be an array");
+      } else {
+        for (const rawCategory of config.categories as unknown[]) {
+          const category = rawCategory as SelectCategory;
+          if (typeof category.label !== "string") {
+            errors.push("each category must have a string label");
+          }
+          if (!Array.isArray(category.options)) {
+            errors.push("each category must have an options array");
+          } else {
+            for (const rawOption of category.options as unknown[]) {
+              if (typeof rawOption === "string") continue;
+              if (typeof rawOption !== "object" || rawOption === null || typeof (rawOption as SelectOption).value !== "string") {
+                errors.push("each option must be an object with a string value");
+              } else {
+                if ((rawOption as SelectOption).color !== undefined && typeof (rawOption as SelectOption).color !== "string") {
+                  errors.push("option color must be a string");
+                }
+                if ((rawOption as SelectOption).icon !== undefined && typeof (rawOption as SelectOption).icon !== "string") {
+                  errors.push("option icon must be a string");
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return errors.length > 0 ? errors : null;
+  }
+
+  validateValue(value: unknown, config: Record<string, unknown>): string[] | null {
+    if (value === null) return null;
+
+    const { categories, isMultiSelect } = this.parseConfig(config);
+
+    const allOptions = categories
+      ? categories.flatMap((category) => category.options.map((option) => (typeof option === "string" ? option : option.value)))
+      : [];
+
+    function extractLabel(value: unknown): string | null {
+      if (typeof value === "string") return value;
+      if (typeof value === "object" && value !== null && typeof (value as Record<string, unknown>).label === "string") {
+        return (value as Record<string, unknown>).label as string;
+      }
+      return null;
+    }
+
+    if (isMultiSelect) {
+      if (!Array.isArray(value)) {
+        return ["Multi-select value must be an array or null"];
+      }
+
+      const labels: string[] = [];
+      for (const item of value as unknown[]) {
+        const label = extractLabel(item);
+        if (label === null) {
+          return ["Multi-select values must be strings or { label, color? } objects"];
+        }
+        labels.push(label);
+      }
+
+      if (allOptions.length > 0) {
+        const invalid = labels.filter((entry) => !allOptions.includes(entry));
+        if (invalid.length > 0) {
+          return [t("errors.SELECT_INVALID_OPTIONS_MULTI", { invalid: invalid.join(", "), options: allOptions.join(", ") })];
+        }
+      }
+    } else {
+      const label = extractLabel(value);
+      if (label === null) {
+        return ["Select value must be a string, { label, color? } object, or null"];
+      }
+
+      if (allOptions.length > 0 && !allOptions.includes(label)) {
+        return [t("errors.SELECT_INVALID_OPTION", { value: label, options: allOptions.join(", ") })];
+      }
+    }
+
+    return null;
+  }
+
+  formatValue(value: unknown, config: Record<string, unknown>): unknown {
+    if (value === null || value === undefined) {
+      return this.parseConfig(config).isMultiSelect ? [] : null;
+    }
+    return value;
+  }
+
+  getDefaultValue(config: Record<string, unknown>): unknown {
+    return this.parseConfig(config).isMultiSelect ? [] : null;
+  }
+
+  isEmpty(value: unknown): boolean {
+    return value === null || value === undefined || (Array.isArray(value) && value.length === 0);
+  }
+
+  convertFrom(value: unknown, fromType: PropertyType, fromConfig: Record<string, unknown>, targetConfig: Record<string, unknown>): unknown {
+    const { isMultiSelect, categories } = this.parseConfig(targetConfig);
+    const allOptions = categories
+      ? categories.flatMap((category) => category.options.map((option) => (typeof option === "string" ? option : option.value)))
+      : [];
+    const rawValue = Array.isArray(value) ? (value as unknown[])[0] : value;
+    let label: string | null = null;
+    if (typeof rawValue === "string") label = rawValue;
+    else if (typeof rawValue === "object" && rawValue !== null && typeof (rawValue as Record<string, unknown>).label === "string") {
+      label = (rawValue as Record<string, unknown>).label as string;
+    } else if (rawValue !== null && rawValue !== undefined) {
+      label = String(rawValue);
+    }
+    if (label === null || (allOptions.length > 0 && !allOptions.includes(label))) {
+      return this.getDefaultValue(targetConfig);
+    }
+    return isMultiSelect ? [label] : label;
+  }
+
+  getFilterOperators(): FilterOperator[] {
+    return OPERATORS_BY_PROPERTY_TYPE[this.type];
+  }
+}

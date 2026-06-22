@@ -1,0 +1,53 @@
+{
+  "name": "@fixspace/jest-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/entry.js",
+  "types": "./dist/entry.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/entry.js",
+      "require": "./dist/entry.js",
+      "types": "./dist/entry.d.ts"
+    },
+    "./base": {
+      "import": "./dist/base.js",
+      "require": "./dist/base.js",
+      "types": "./dist/base.d.ts"
+    },
+    "./nest": {
+      "import": "./dist/nest.js",
+      "require": "./dist/nest.js",
+      "types": "./dist/nest.d.ts"
+    },
+    "./next": {
+      "import": "./dist/next.js",
+      "require": "./dist/next.js",
+      "types": "./dist/next.d.ts"
+    },
+    "./e2e": {
+      "import": "./dist/e2e.js",
+      "require": "./dist/e2e.js",
+      "types": "./dist/e2e.d.ts"
+    },
+    "./domain": {
+      "import": "./dist/domain.js",
+      "require": "./dist/domain.js",
+      "types": "./dist/domain.d.ts"
+    }
+  },
+  "peerDependencies": {},
+  "peerDependenciesMeta": {},
+  "devDependencies": {
+    "@jest/types": "^29.6.3",
+    "jest": "^29.7.0",
+    "typescript": "6.0.2"
+  },
+  "scripts": {
+    "build": "pnpm exec tsc"
+  }
+}

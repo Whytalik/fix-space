@@ -1,0 +1,19 @@
+{
+  "extends": "@fixspace/typescript-config/base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "incremental": false,
+    "module": "commonjs",
+    "moduleResolution": "Node10",
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": ".",
+    "target": "ES2022",
+    "lib": ["es2022"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}

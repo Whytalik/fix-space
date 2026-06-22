@@ -1,0 +1,54 @@
+@startuml System_Context
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontSize 14
+skinparam nodesep 50
+skinparam ranksep 60
+
+skinparam actorBackgroundColor #FFFFFF
+skinparam actorBorderColor #2563eb
+skinparam actorArrowColor #2563eb
+skinparam componentBackgroundColor #FFFFFF
+skinparam componentBorderColor #2563eb
+skinparam componentArrowColor #2563eb
+skinparam rectangleBackgroundColor #FFFFFF
+skinparam rectangleBorderColor #2563eb
+
+top to bottom direction
+
+title Контекстна діаграма системи
+
+actor "Трейдер" as User
+
+User -[hidden]down-> System_Box
+System_Box -[hidden]down-> External_Box
+
+rectangle "FIX Space" as System_Box #E3F2FD {
+  component "FIX Space\nWeb Application" as System
+}
+
+rectangle "Зовнішні системи" as External_Box #FFF9C4 {
+  component "Google OAuth 2.0" as Google
+  component "Resend API\n(Email Service)" as Resend
+  component "Cloudinary API\n(Storage Service)" as Cloudinary
+  component "Binance API" as Binance
+  component "MT5 Server" as MT5
+}
+
+User --> System : Реєстрація, вхід,\nуправління просторами,\nробота з базами даних,\nаналітика трейдингу
+
+User ..> Google : Авторизація через\nGoogle-акаунт
+
+Google ..> System : OAuth callback:\ntoken, email, profile
+
+System ..> Resend : Email-розсилка:\nверифікація, скидання пароля,\nнотифікації
+
+System ..> Cloudinary : Збереження медіафайлів\nта аватарів користувача
+
+System ..> Binance : Імпорт даних\nпро торгівлю
+System ..> MT5 : Синхронізація\nугод та історії
+
+@enduml

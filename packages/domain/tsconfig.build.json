@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@fixspace/domain": ["./entry.ts"],
+      "@/*": ["./*"]
+    }
+  },
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}

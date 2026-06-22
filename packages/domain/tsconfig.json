@@ -1,0 +1,17 @@
+{
+  "extends": "@fixspace/typescript-config/nestjs.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "rootDir": "src",
+    "baseUrl": "src",
+    "esModuleInterop": true,
+    "incremental": false,
+    "outDir": "dist",
+    "types": ["node", "jest"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "test", "dist"]
+}

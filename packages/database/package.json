@@ -1,0 +1,42 @@
+{
+  "name": "@fixspace/database",
+  "version": "1.0.0",
+  "main": "./dist/src/client.js",
+  "types": "./dist/src/client.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/client.d.ts",
+      "default": "./dist/src/client.js"
+    }
+  },
+  "scripts": {
+    "build": "pnpm exec tsc -p tsconfig.build.json && node -e \"const fs = require('fs'); const dir = './dist/generated/client'; if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true }); fs.writeFileSync(dir + '/client.js', '\\\"use strict\\\";\\nmodule.exports = require(\\\"../../../generated/client/client.js\\\");\\n'); fs.writeFileSync(dir + '/index.js', '\\\"use strict\\\";\\nmodule.exports = require(\\\"../../../generated/client/index.js\\\");\\n'); fs.writeFileSync(dir + '/index.d.ts', 'export * from \\\"../../../generated/client/index\\\";\\n'); fs.writeFileSync(dir + '/client.d.ts', 'export * from \\\"../../../generated/client/client\\\";\\n');\"",
+    "check-types": "tsc --noEmit",
+    "db:migrate:deploy": "dotenv -e ../../.env.production -e ../../.env -- prisma migrate deploy",
+    "db:migrate:dev": "dotenv -e ../../.env.development -e ../../.env -- prisma migrate dev",
+    "db:push": "dotenv -e ../../.env.development -e ../../.env -- prisma db push",
+    "db:seed": "dotenv -e ../../.env.development -e ../../.env -- tsx src/seed.ts",
+    "db:generate": "dotenv -e ../../.env.development -e ../../.env -- prisma generate",
+    "format": "dotenv -e ../../.env.development -e ../../.env -- prisma format",
+    "lint": "eslint . --max-warnings 0",
+    "studio": "dotenv -e ../../.env.development -e ../../.env -- prisma studio"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@prisma/client-runtime-utils": "^7.8.0",
+    "dotenv": "^17.2.3",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@fixspace/eslint-config": "workspace:*",
+    "@fixspace/typescript-config": "workspace:*",
+    "@types/pg": "8.11.11",
+    "eslint": "^9.39.2",
+    "prisma": "^7.8.0",
+    "rimraf": "^5.0.5",
+    "tsup": "^8.0.2",
+    "tsx": "4.19.1",
+    "typescript": "6.0.2"
+  }
+}

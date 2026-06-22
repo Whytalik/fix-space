@@ -1,0 +1,26 @@
+{
+  "extends": "@fixspace/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@fixspace/domain": ["../../packages/domain/dist/entry"],
+      "@fixspace/domain/enums": ["../../packages/domain/dist/enums"]
+    },
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    "next.config.js",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
