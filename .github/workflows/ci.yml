@@ -164,6 +164,9 @@ jobs:
       - name: Build domain package
         run: pnpm --filter @fixspace/domain build
 
+      - name: Build database package
+        run: pnpm --filter @fixspace/database build
+
       - name: Run migrations
         run: pnpm --filter @fixspace/database exec prisma migrate deploy
 
