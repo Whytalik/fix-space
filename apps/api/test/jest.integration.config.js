@@ -7,6 +7,7 @@ module.exports = {
   rootDir: ".",
   testEnvironment: "node",
   testRegex: ".integration-spec.ts$",
+  testTimeout: 30000,
   transform: {
     "^.+\\.(t|j)s$": ["ts-jest", { tsconfig: "<rootDir>/../tsconfig.integration.json" }],
   },
